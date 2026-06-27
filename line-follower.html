@@ -14,7 +14,7 @@
   body{margin:0;background:radial-gradient(1200px 800px at 70% -10%,#13233f 0%,var(--bg) 55%);
     color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
   .mono{font-family:'Courier New',monospace}
-  header.topbar{display:flex;align-items:center;gap:18px;padding:12px 20px;
+  header.topbar{display:flex;align-items:center;gap:14px;padding:12px 20px;
     border-bottom:1px solid var(--line);background:rgba(10,16,30,.7);backdrop-filter:blur(8px);
     position:sticky;top:0;z-index:50;flex-wrap:wrap}
   .brand{display:flex;flex-direction:column;line-height:1.1}
@@ -37,6 +37,9 @@
   .btn.ghost{background:transparent}
   .speedwrap{display:flex;align-items:center;gap:8px;font-size:.7rem;color:var(--muted2)}
   input[type=range]{accent-color:var(--sky)}
+  .helpbtn{width:36px;height:36px;border-radius:9px;border:1px solid var(--line);background:var(--panel);
+    color:var(--muted2);cursor:pointer;font-weight:800;font-size:.95rem}
+  .helpbtn:hover{border-color:var(--sky);color:var(--sky)}
 
   .layout{display:grid;grid-template-columns:1fr 430px;gap:16px;padding:16px 20px;max-width:1280px;margin:0 auto}
   @media(max-width:1040px){.layout{grid-template-columns:1fr}}
@@ -119,6 +122,21 @@
   .param label b{color:var(--sky)}
   .param input[type=range]{width:100%}
 
+  /* mode toggle + pid */
+  .modetoggle{display:flex;gap:6px;margin-bottom:12px}
+  .modebtn{flex:1;padding:9px;border:1px solid var(--line);background:var(--panel2);color:var(--muted2);
+    border-radius:9px;cursor:pointer;font-weight:700;font-size:.78rem}
+  .modebtn.active{border-color:var(--sky);color:var(--sky);background:#0c1a30;box-shadow:0 0 14px rgba(56,189,248,.15)}
+  .pidrow{margin:14px 0}
+  .pidrow label{display:flex;justify-content:space-between;font-size:.76rem;color:var(--muted2);margin-bottom:5px}
+  .pidrow label b{color:var(--sky);font-family:'Courier New',monospace}
+  .pidrow input[type=range]{width:100%}
+  .piderr{margin-top:10px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .piderr .lab{font-size:.6rem;letter-spacing:1px;color:var(--muted);font-weight:700}
+  .errtrack{height:12px;background:#0b1220;border-radius:6px;position:relative;margin-top:7px;border:1px solid #1e293b;overflow:hidden}
+  .errmid{position:absolute;left:50%;top:0;bottom:0;width:1px;background:#334155}
+  .errfill{position:absolute;top:1px;bottom:1px;left:50%;width:4px;margin-left:-2px;background:var(--amber);border-radius:2px;transition:.05s}
+
   /* rules */
   .rule{border:1px solid var(--line);border-radius:11px;background:var(--panel2);padding:11px;margin-bottom:10px}
   .rule.def{border-style:dashed;border-color:#3b3450;background:#161325}
@@ -147,6 +165,24 @@
   .legend b{color:var(--muted2)}
   .backlink{color:var(--muted2);text-decoration:none;font-size:.78rem;font-weight:700;border:1px solid var(--line);padding:8px 12px;border-radius:9px;white-space:nowrap;transition:.15s}
   .backlink:hover{border-color:var(--sky);color:var(--sky)}
+
+  /* tutorial overlay */
+  .tutwrap{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;
+    background:rgba(2,6,23,.72);backdrop-filter:blur(3px)}
+  .tutcard{max-width:430px;margin:20px;background:var(--panel);border:1px solid var(--sky);border-radius:16px;
+    padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+  .tutcard .step{font-size:.6rem;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase}
+  .tutcard h3{margin:8px 0 8px;font-size:1.3rem;color:var(--sky)}
+  .tutcard p{margin:0 0 18px;color:var(--muted2);line-height:1.6;font-size:.95rem}
+  .tutnav{display:flex;justify-content:space-between;align-items:center}
+  .tutdots{display:flex;gap:6px}
+  .tutdot{width:7px;height:7px;border-radius:50%;background:#334155}
+  .tutdot.on{background:var(--sky)}
+
+  #toast{position:fixed;left:50%;bottom:32px;transform:translateX(-50%) translateY(20px);background:rgba(8,12,24,.96);
+    border:1px solid var(--line);color:var(--txt);padding:12px 20px;border-radius:12px;font-size:.84rem;font-weight:600;
+    opacity:0;pointer-events:none;transition:.25s;box-shadow:0 12px 40px rgba(0,0,0,.5);backdrop-filter:blur(8px);z-index:300}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
@@ -154,7 +190,7 @@
   <a href="./" class="backlink" title="Simülasyon kataloğuna dön">← Katalog</a>
   <div class="brand">
     <b>Robo<span>Forge</span> · Çizgi Takip Laboratuvarı</b>
-    <small>Line Follower Lab — Prototype</small>
+    <small>Line Follower Lab</small>
   </div>
   <div class="tracktabs" id="tracktabs"></div>
   <div class="grow"></div>
@@ -165,6 +201,8 @@
   </div>
   <button class="btn run" id="runbtn">▶ ÇALIŞTIR</button>
   <button class="btn ghost" id="resetbtn">⟲ Sıfırla</button>
+  <button class="btn ghost" id="shareBtn" title="Robotunu paylaş">🔗 Paylaş</button>
+  <button class="helpbtn" id="helpBtn" title="Nasıl oynanır?">?</button>
 </header>
 
 <div class="layout">
@@ -228,23 +266,67 @@
 
       <!-- KOD TAB -->
       <div id="panel-kod" style="display:none">
-        <div class="sectlabel">Kurallar · sensör → motor</div>
-        <div class="hintbox">
-          Her an robot, <b>yukarıdan aşağıya</b> ilk uyan kurala göre motorlarını sürer. Sensör rozetine
-          tıklayarak koşulu değiştir: <b style="color:var(--green)">AÇIK</b> (çizgiyi görüyor),
-          <b style="color:var(--red)">KAPALI</b> (görmüyor), <b style="color:var(--muted2)">FARK ETMEZ</b>.
+        <div class="sectlabel">Kontrol Yöntemi</div>
+        <div class="modetoggle">
+          <button class="modebtn active" id="mode-rules">🧩 Kural Modu</button>
+          <button class="modebtn" id="mode-pid">📈 PID Modu</button>
         </div>
-        <div id="rules"></div>
-        <button class="addrule" id="addRule">＋ Yeni Kural Ekle</button>
-        <div class="rule def" id="defRuleBox" style="margin-top:12px"></div>
-        <div class="legend">
-          <b>İpucu:</b> "Hiçbiri eşleşmezse" kuralı, hiçbir kural uymadığında çalışır — robot çizgiyi
-          kaybettiğinde ne yapsın? (dur / ara / geri dön)
+
+        <!-- RULES SUB-PANEL -->
+        <div id="kod-rules">
+          <div class="hintbox">
+            Her an robot, <b>yukarıdan aşağıya</b> ilk uyan kurala göre motorlarını sürer. Sensör rozetine
+            tıklayarak koşulu değiştir: <b style="color:var(--green)">AÇIK</b> (çizgiyi görüyor),
+            <b style="color:var(--red)">KAPALI</b> (görmüyor), <b style="color:var(--muted2)">FARK ETMEZ</b>.
+          </div>
+          <div id="rules"></div>
+          <button class="addrule" id="addRule">＋ Yeni Kural Ekle</button>
+          <div class="rule def" id="defRuleBox" style="margin-top:12px"></div>
+          <div class="legend">
+            <b>İpucu:</b> "Hiçbiri eşleşmezse" kuralı, hiçbir kural uymadığında çalışır — robot çizgiyi
+            kaybettiğinde ne yapsın? (dur / ara / geri dön)
+          </div>
+        </div>
+
+        <!-- PID SUB-PANEL -->
+        <div id="kod-pid" style="display:none">
+          <div class="hintbox">
+            PID modunda robot, çizgiye olan <b>hatayı</b> analog sensörlerle ölçer ve dümeni orantılı düzeltir.
+            <b style="color:var(--sky)">Kp</b> ne kadar sert düzelteceğini,
+            <b style="color:var(--sky)">Kd</b> savrulmayı (zikzak) ne kadar bastıracağını belirler.
+          </div>
+          <div class="pidrow"><label>Temel Hız <b id="pidBaseV">60%</b></label>
+            <input type="range" id="pidBase" min="20" max="100" step="5" value="60" /></div>
+          <div class="pidrow"><label>Kp — Orantı (sertlik) <b id="pidKpV">1.4</b></label>
+            <input type="range" id="pidKp" min="0" max="4" step="0.1" value="1.4" /></div>
+          <div class="pidrow"><label>Kd — Sönümleme (sakinlik) <b id="pidKdV">0.5</b></label>
+            <input type="range" id="pidKd" min="0" max="2" step="0.1" value="0.5" /></div>
+          <div class="piderr">
+            <div class="lab">ÇİZGİ HATASI&nbsp;&nbsp;sol ◄ ─────── ► sağ</div>
+            <div class="errtrack"><div class="errmid"></div><div class="errfill" id="errFill"></div></div>
+          </div>
+          <div class="legend"><b>İpucu:</b> Kp çok yüksek → zikzak ve savrulma; çok düşük → keskin virajı dönemez. Kd artırınca robot sakinleşir.</div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Tutorial overlay -->
+<div class="tutwrap" id="tutwrap">
+  <div class="tutcard">
+    <div class="step" id="tutStep">Adım 1 / 4</div>
+    <h3 id="tutTitle">Çizgi Takip Lab</h3>
+    <p id="tutText">…</p>
+    <div class="tutnav">
+      <button class="btn ghost" id="tutSkip">Geç</button>
+      <div class="tutdots" id="tutDots"></div>
+      <button class="btn run" id="tutNext">İleri →</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
 
 <script src="sim-core.js"></script>
 <script>
@@ -261,6 +343,8 @@
     rules: S.starterRules(),
     defaultRule: S.starterDefault(),
     params: S.defaultParams(),
+    mode: 'rules',
+    pid: S.starterPID(),
     sim: null, running:false, raf:null, acc:0, lastTs:0, simSpeed:1,
     selected:null, countdown:0,
   };
@@ -275,14 +359,11 @@
 
   function drawScene(){
     ctx.clearRect(0,0,600,600);
-    // ground
     ctx.fillStyle = '#f1f5f9'; ctx.fillRect(0,0,600,600);
-    // faint grid
     ctx.strokeStyle = '#dbe3ec'; ctx.lineWidth = 1;
     for(let g=-10; g<=10; g+=2){ const [sx]=w2s(g,0),[,sy]=w2s(0,g);
       ctx.beginPath();ctx.moveTo(sx,0);ctx.lineTo(sx,600);ctx.stroke();
       ctx.beginPath();ctx.moveTo(0,sy);ctx.lineTo(600,sy);ctx.stroke(); }
-    // line
     const sm = LAB.track.samples;
     ctx.strokeStyle = '#0b1220';
     ctx.lineWidth = S.LINE_HALF_WIDTH*2*view.scale;
@@ -291,7 +372,6 @@
     sm.forEach((p,i)=>{ const [x,y]=w2s(p[0],p[1]); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
     if(LAB.track.closed) ctx.closePath();
     ctx.stroke();
-    // start marker
     const a=sm[0]; const [ax,ay]=w2s(a[0],a[1]);
     ctx.fillStyle='#22c55e'; ctx.beginPath(); ctx.arc(ax,ay,7,0,7); ctx.fill();
     ctx.strokeStyle='#16a34a'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(ax,ay,11,0,7); ctx.stroke();
@@ -310,43 +390,46 @@
     return [ robot.x + fwd*c + right*s, robot.y + fwd*s + right*(-c) ];
   }
 
-  function drawRobot(robot, states){
+  function drawRobot(robot, last){
     const HL=0.95, HW=0.62;
     const corners=[[HL,-HW],[HL,HW],[-HL,HW],[-HL,-HW]].map(([f,r])=>{
       const [wx,wy]=localToWorld(robot,f,r); return w2s(wx,wy);
     });
-    // body
     ctx.fillStyle='rgba(30,41,59,.92)'; ctx.strokeStyle='#38bdf8'; ctx.lineWidth=2;
     ctx.beginPath(); corners.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])); ctx.closePath();
     ctx.fill(); ctx.stroke();
-    // wheels
     ctx.fillStyle='#0b1220';
     [[0,HW+0.08],[0,-HW-0.08]].forEach(([f,r])=>{
       const w=[[0.3,0.06],[0.3,-0.06],[-0.3,-0.06],[-0.3,0.06]].map(([df,dr])=>{
         const [wx,wy]=localToWorld(robot,f+df,r+dr); return w2s(wx,wy); });
       ctx.beginPath(); w.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])); ctx.closePath(); ctx.fill();
     });
-    // front arrow
     const tip=localToWorld(robot,HL+0.5,0), bl=localToWorld(robot,HL+0.05,-0.22), br=localToWorld(robot,HL+0.05,0.22);
     const [tx,ty]=w2s(...tip),[blx,bly]=w2s(...bl),[brx,bry]=w2s(...br);
     ctx.fillStyle='#22c55e'; ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(blx,bly); ctx.lineTo(brx,bry); ctx.closePath(); ctx.fill();
-    // sensors
+    // sensors — analog intensity in PID mode, on/off otherwise
+    const states = last ? last.states : null;
+    const readings = last ? last.readings : null;
     LAB.sensors.forEach((sen,i)=>{
       const [wx,wy]=localToWorld(robot,sen.fwd,sen.right); const [sx,sy]=w2s(wx,wy);
-      const on = states ? states[i] : false;
+      let lit = states ? states[i] : false;
+      let intensity = readings ? readings[i] : (lit?1:0);
       ctx.beginPath(); ctx.arc(sx,sy,6,0,7);
-      ctx.fillStyle = on ? '#22c55e' : '#475569';
-      ctx.shadowColor = on ? '#22c55e' : 'transparent'; ctx.shadowBlur = on?12:0;
+      if(intensity>0){
+        const g=Math.round(80+175*Math.min(1,intensity));
+        ctx.fillStyle = 'rgb(34,'+g+',94)';
+        ctx.shadowColor='#22c55e'; ctx.shadowBlur=4+10*Math.min(1,intensity);
+      } else { ctx.fillStyle='#475569'; ctx.shadowBlur=0; }
       ctx.fill(); ctx.shadowBlur=0;
       ctx.lineWidth=2; ctx.strokeStyle=sen.color; ctx.stroke();
     });
   }
 
-  function render(states){
+  function render(last){
     drawScene();
     drawTrail();
     const robot = LAB.sim ? LAB.sim.robot : S.makeRobot(LAB.track);
-    drawRobot(robot, states);
+    drawRobot(robot, last);
   }
 
   // ---------- HUD ----------
@@ -369,13 +452,14 @@
     else if(LAB.sim.status==='failed'){ lock.textContent='ÇİZGİ DIŞI ✕'; lockChip.className='chip warn'; }
     else if(last && last.anyOn){ lock.textContent='TAKİPTE'; lockChip.className='chip ok'; }
     else { lock.textContent='ÇİZGİ YOK!'; lockChip.className='chip warn'; }
-    // sensor dots
     const dots=document.querySelectorAll('#hudSensors .sdot');
     dots.forEach((d,i)=>{ const on=last&&last.states&&last.states[i];
       d.classList.toggle('on',!!on); d.style.background=on?d.style.color:'#0b1220'; });
-    // motor bars
     const mL=last?last.cmd.mL:0, mR=last?last.cmd.mR:0;
     setBar('mfL',mL); setBar('mfR',mR);
+    const ef=document.getElementById('errFill');
+    if(ef){ let e = (LAB.mode==='pid' && last && last.error!=null) ? Math.max(-1,Math.min(1,last.error)) : 0;
+      ef.style.left=(50+e*48)+'%'; }
   }
   function setBar(id,frac){
     const el=document.getElementById(id); const pct=Math.max(-1,Math.min(1,frac))*50;
@@ -384,16 +468,19 @@
   }
 
   // ---------- run loop ----------
+  function buildConfig(){
+    return {
+      track:LAB.track, sensors:LAB.sensors, rules:LAB.rules,
+      defaultRule:LAB.defaultRule, params:LAB.params,
+      mode:LAB.mode, pid:LAB.pid,
+    };
+  }
   function startRun(){
     if(LAB.running) return;
     stopLoop();
     rebuildTrack();
-    LAB.sim = S.createSim({
-      track:LAB.track, sensors:LAB.sensors, rules:LAB.rules,
-      defaultRule:LAB.defaultRule, params:LAB.params,
-    });
+    LAB.sim = S.createSim(buildConfig());
     setResultIdle();
-    // countdown
     let n=3; const cd=document.getElementById('countdown'); cd.style.display='flex'; cd.textContent=n;
     const iv=setInterval(()=>{ n--; if(n>0){cd.textContent=n;} else { clearInterval(iv); cd.style.display='none'; beginMotion(); } },550);
   }
@@ -412,7 +499,7 @@
     while(LAB.acc>=FIXED && LAB.sim.status==='running' && steps<8){
       last=S.tickSim(LAB.sim,FIXED); LAB.acc-=FIXED; steps++;
     }
-    render(last?last.states:null);
+    render(last);
     updateHud(last);
     if(LAB.sim.status!=='running'){ finishRun(); return; }
     LAB.raf=requestAnimationFrame(loop);
@@ -480,7 +567,7 @@
 
   // ---------- chassis editor ----------
   const ED={w:240,h:300,scale:96, fwdMin:-0.6,fwdMax:1.6, rightMin:-1.0,rightMax:1.0};
-  function edPos(sen){ // local -> editor px
+  function edPos(sen){
     const cx=ED.w/2, cy=ED.h*0.62;
     return { x: cx + sen.right*ED.scale, y: cy - sen.fwd*ED.scale };
   }
@@ -493,7 +580,6 @@
   }
   function buildChassis(){
     const ch=document.getElementById('chassis'); ch.innerHTML='';
-    // body rect
     const body=document.createElement('div'); body.className='chbody';
     const HL=0.95*ED.scale, HW=0.62*ED.scale; const cx=ED.w/2, cy=ED.h*0.62;
     body.style.left=(cx-HW)+'px'; body.style.top=(cy-HL)+'px';
@@ -503,7 +589,6 @@
     fl.style.left=(cx-16)+'px'; fl.style.top=(cy-HL-16)+'px'; ch.appendChild(fl);
     [[-HW-6],[HW-6]].forEach(([wx])=>{ const w=document.createElement('div'); w.className='wheel';
       w.style.left=(cx+wx)+'px'; w.style.top=(cy-17)+'px'; ch.appendChild(w); });
-    // sensors
     LAB.sensors.forEach(sen=>{
       const el=document.createElement('div'); el.className='sensor'+(LAB.selected===sen.id?' sel':'');
       el.style.background=sen.color; el.dataset.id=sen.id; el.textContent=sen.label.slice(0,1);
@@ -513,22 +598,21 @@
     });
   }
   function makeDraggable(el,sen){
-    let dragging=false, moved=false, startX,startY;
+    let dragging=false, startX,startY;
     el.addEventListener('pointerdown',e=>{
       if(LAB.running) stopRun();
-      dragging=true; moved=false; startX=e.clientX; startY=e.clientY;
+      dragging=true; startX=e.clientX; startY=e.clientY;
       el.setPointerCapture(e.pointerId); e.preventDefault();
     });
     el.addEventListener('pointermove',e=>{
       if(!dragging) return;
-      if(Math.abs(e.clientX-startX)+Math.abs(e.clientY-startY)>3) moved=true;
       const rect=document.getElementById('chassis').getBoundingClientRect();
       const px=e.clientX-rect.left, py=e.clientY-rect.top;
       const loc=edToLocal(px,py); sen.fwd=+loc.fwd.toFixed(3); sen.right=+loc.right.toFixed(3);
       const p=edPos(sen); el.style.left=p.x+'px'; el.style.top=p.y+'px';
       if(!LAB.running){ render(null); }
     });
-    el.addEventListener('pointerup',e=>{
+    el.addEventListener('pointerup',()=>{
       dragging=false;
       LAB.selected=sen.id;
       document.getElementById('delSensor').disabled = LAB.sensors.length<=1;
@@ -619,16 +703,102 @@
   function moveRule(ri,d){ const ni=ri+d; if(ni<0||ni>=LAB.rules.length)return; const t=LAB.rules[ri];LAB.rules[ri]=LAB.rules[ni];LAB.rules[ni]=t;buildRules(); }
   function addRule(){ const pat=LAB.sensors.map(()=>'any'); LAB.rules.push({pattern:pat,left:{dir:'fwd',speed:60},right:{dir:'fwd',speed:60}}); buildRules(); }
 
+  // ---------- mode toggle ----------
+  function setMode(m){
+    LAB.mode=m;
+    document.getElementById('mode-rules').classList.toggle('active',m==='rules');
+    document.getElementById('mode-pid').classList.toggle('active',m==='pid');
+    document.getElementById('kod-rules').style.display = m==='rules'?'block':'none';
+    document.getElementById('kod-pid').style.display = m==='pid'?'block':'none';
+    if(LAB.running) stopRun();
+    resetSim();
+  }
+  function bindPid(){
+    const b=document.getElementById('pidBase'),kp=document.getElementById('pidKp'),kd=document.getElementById('pidKd');
+    b.value=LAB.pid.base; kp.value=LAB.pid.kp; kd.value=LAB.pid.kd;
+    document.getElementById('pidBaseV').textContent=LAB.pid.base+'%';
+    document.getElementById('pidKpV').textContent=(+LAB.pid.kp).toFixed(1);
+    document.getElementById('pidKdV').textContent=(+LAB.pid.kd).toFixed(1);
+    b.oninput=()=>{ LAB.pid.base=+b.value; document.getElementById('pidBaseV').textContent=b.value+'%'; };
+    kp.oninput=()=>{ LAB.pid.kp=+kp.value; document.getElementById('pidKpV').textContent=(+kp.value).toFixed(1); };
+    kd.oninput=()=>{ LAB.pid.kd=+kd.value; document.getElementById('pidKdV').textContent=(+kd.value).toFixed(1); };
+  }
+
   // ---------- params ----------
   function vLabel(v){ return v<3?'Yavaş':v<4.3?'Orta':'Hızlı'; }
   function gLabel(g){ return g<1?'Kaygan':g<1.25?'Normal':'Yapışkan'; }
   function bindParams(){
     const vm=document.getElementById('vmax'), gr=document.getElementById('grip');
+    vm.value=LAB.params.vMax; gr.value=LAB.params.turnGain;
     vm.oninput=()=>{ LAB.params.vMax=+vm.value; document.getElementById('vLabel').textContent=vLabel(+vm.value); };
     gr.oninput=()=>{ LAB.params.turnGain=+gr.value; document.getElementById('gLabel').textContent=gLabel(+gr.value); };
     document.getElementById('vLabel').textContent=vLabel(LAB.params.vMax);
     document.getElementById('gLabel').textContent=gLabel(LAB.params.turnGain);
   }
+
+  // ---------- save / share ----------
+  function encodeState(){
+    const st={t:LAB.trackIdx,s:LAB.sensors,r:LAB.rules,d:LAB.defaultRule,
+      p:{vMax:LAB.params.vMax,turnGain:LAB.params.turnGain,wheelBase:LAB.params.wheelBase},
+      m:LAB.mode,pid:LAB.pid};
+    return btoa(unescape(encodeURIComponent(JSON.stringify(st))));
+  }
+  function applyState(st){
+    if(!st) return;
+    if(typeof st.t==='number' && st.t>=0 && st.t<S.TRACKS.length) LAB.trackIdx=st.t;
+    if(Array.isArray(st.s)&&st.s.length) LAB.sensors=st.s;
+    if(Array.isArray(st.r)) LAB.rules=st.r;
+    if(st.d) LAB.defaultRule=st.d;
+    LAB.params={...S.defaultParams(),...(st.p||{})};
+    LAB.mode = st.m==='pid'?'pid':'rules';
+    LAB.pid={...S.starterPID(),...(st.pid||{})};
+  }
+  function loadFromHash(){
+    if(location.hash && location.hash.indexOf('r=')>=0){
+      try{ const raw=location.hash.split('r=')[1];
+        applyState(JSON.parse(decodeURIComponent(escape(atob(raw))))); return true; }catch(e){}
+    }
+    return false;
+  }
+  function shareRobot(){
+    const code=encodeState();
+    const link=location.origin+location.pathname+'#r='+code;
+    history.replaceState(null,'','#r='+code);
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(link).then(()=>toast('🔗 Bağlantı kopyalandı — robotunu paylaşabilirsin!'),
+        ()=>toast('🔗 Bağlantı adres çubuğunda hazır — kopyalayabilirsin.'));
+    } else { toast('🔗 Bağlantı adres çubuğunda hazır — kopyalayabilirsin.'); }
+  }
+  let toastT=null;
+  function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show');
+    clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2600); }
+
+  // ---------- tutorial ----------
+  const TUT=[
+    {tab:null, t:'Çizgi Takip Lab’a hoş geldin! 🤖', p:'Kendi robotunu kuracak, kodlayacak ve çizgiyi takip ettireceksin. 4 adımda gösterelim.'},
+    {tab:'robot', t:'1) Sensörleri yerleştir', p:'🤖 Robot sekmesinde sensörleri sürükleyerek şasiye koy. Önde ve geniş yerleştirmek virajları erken görmeni sağlar.'},
+    {tab:'kod', t:'2) Davranışı kodla', p:'🧩 Kod sekmesinde sensör→motor kurallarını ayarla — ya da 📈 PID moduna geçip Kp/Kd ile orantılı kontrol dene.'},
+    {tab:null, t:'3) Çalıştır ve öğren', p:'▶ ÇALIŞTIR’a bas, robotunu izle. Çizgiden çıkarsa ipuçları çıkar — düzelt ve tekrar dene. 🔗 Paylaş ile robotunu arkadaşına gönder!'},
+  ];
+  let tutI=0;
+  function switchTab(name){
+    document.querySelectorAll('.sidetab').forEach(x=>x.classList.toggle('active',x.dataset.tab===name));
+    document.getElementById('panel-robot').style.display=name==='robot'?'block':'none';
+    document.getElementById('panel-kod').style.display=name==='kod'?'block':'none';
+  }
+  function showTut(i){
+    tutI=i; const s=TUT[i];
+    if(s.tab) switchTab(s.tab);
+    document.getElementById('tutStep').textContent='Adım '+(i+1)+' / '+TUT.length;
+    document.getElementById('tutTitle').textContent=s.t;
+    document.getElementById('tutText').textContent=s.p;
+    document.getElementById('tutNext').textContent = i===TUT.length-1?'Başla! 🚀':'İleri →';
+    const dots=document.getElementById('tutDots'); dots.innerHTML='';
+    TUT.forEach((_,k)=>{const d=document.createElement('div');d.className='tutdot'+(k===i?' on':'');dots.appendChild(d);});
+    document.getElementById('tutwrap').style.display='flex';
+  }
+  function nextTut(){ if(tutI<TUT.length-1) showTut(tutI+1); else endTut(); }
+  function endTut(){ document.getElementById('tutwrap').style.display='none'; try{localStorage.setItem('rf_lf_tut','1');}catch(e){} }
 
   // ---------- refresh ----------
   function refreshAll(){ buildChassis(); buildRules(); buildSensorHud();
@@ -638,31 +808,35 @@
 
   // ---------- tabs ----------
   function bindTabs(){
-    document.querySelectorAll('.sidetab').forEach(t=>t.onclick=()=>{
-      document.querySelectorAll('.sidetab').forEach(x=>x.classList.remove('active'));
-      t.classList.add('active');
-      document.getElementById('panel-robot').style.display = t.dataset.tab==='robot'?'block':'none';
-      document.getElementById('panel-kod').style.display = t.dataset.tab==='kod'?'block':'none';
-    });
+    document.querySelectorAll('.sidetab').forEach(t=>t.onclick=()=>switchTab(t.dataset.tab));
   }
 
   // ---------- init ----------
   function init(){
+    loadFromHash();
     rebuildTrack();
-    buildTrackTabs(); bindTabs(); bindParams();
+    buildTrackTabs(); bindTabs(); bindParams(); bindPid();
     buildChassis(); buildRules(); buildSensorHud();
+    setMode(LAB.mode);
     document.getElementById('addSensor').onclick=addSensor;
     document.getElementById('delSensor').onclick=()=>removeSensor(LAB.selected);
     document.getElementById('addRule').onclick=addRule;
+    document.getElementById('mode-rules').onclick=()=>setMode('rules');
+    document.getElementById('mode-pid').onclick=()=>setMode('pid');
     document.getElementById('runbtn').onclick=()=>{ LAB.running?stopRun():startRun(); };
     document.getElementById('resetbtn').onclick=resetSim;
+    document.getElementById('shareBtn').onclick=shareRobot;
+    document.getElementById('helpBtn').onclick=()=>showTut(0);
+    document.getElementById('tutNext').onclick=nextTut;
+    document.getElementById('tutSkip').onclick=endTut;
     const ss=document.getElementById('simspeed');
     ss.oninput=()=>{ LAB.simSpeed=+ss.value; document.getElementById('simspeedval').textContent=(+ss.value).toFixed(1)+'x'; };
-    // chassis click-empty deselects
     document.getElementById('chassis').addEventListener('pointerdown',e=>{
       if(e.target.id==='chassis'){ LAB.selected=null; document.getElementById('delSensor').disabled=true; buildChassis(); }
     });
     render(null); updateHud(null);
+    let seen=false; try{ seen=!!localStorage.getItem('rf_lf_tut'); }catch(e){}
+    if(!seen) setTimeout(()=>showTut(0),400);
   }
   init();
 })();

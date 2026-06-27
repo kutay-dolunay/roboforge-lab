@@ -20,6 +20,7 @@
   const LINE_LOST_GRACE = 1.6;    // seconds with no sensor on line => lost
   const STALL_GRACE = 3.5;        // seconds at ~0 speed => stalled
   const ON_LINE_TIGHT = 0.55;     // center within this => "tracking well" (accuracy)
+  const ANALOG_FALLOFF = 0.40;    // analog reflectance fades from 1 to 0 this far past the line edge
 
   // ---- Tracks (mirrors RobotArena.jsx TRACKS, x/z -> x/y) --------------------
   const TRACKS = [
@@ -41,7 +42,6 @@
   ];
 
   // ---- Cardinal / Catmull-Rom spline ---------------------------------------
-  // tension s: 0.5 = smooth Catmull-Rom, 0 = straight polygon (sharp corners).
   function cardinalPoint(p0, p1, p2, p3, t, s) {
     const t2 = t * t, t3 = t2 * t;
     const h00 = 2 * t3 - 3 * t2 + 1;
@@ -56,7 +56,6 @@
     ];
   }
 
-  // Build a dense sampled polyline + cumulative arc length for a track.
   function buildTrack(track, subdiv) {
     subdiv = subdiv || 40;
     const P = track.points;
@@ -71,25 +70,19 @@
       const p2 = P[(i + 1) % n];
       const p3 = P[(i + 2) % n];
       for (let j = 0; j < subdiv; j++) {
-        const t = j / subdiv;
-        samples.push(cardinalPoint(p0, p1, p2, p3, t, s));
+        samples.push(cardinalPoint(p0, p1, p2, p3, j / subdiv, s));
       }
     }
     if (!closed) samples.push(P[n - 1].slice());
-    // cumulative length
     let len = 0;
     const cum = [0];
-    for (let i = 1; i < samples.length; i++) {
-      len += dist(samples[i - 1], samples[i]);
-      cum.push(len);
-    }
+    for (let i = 1; i < samples.length; i++) { len += dist(samples[i - 1], samples[i]); cum.push(len); }
     if (closed) len += dist(samples[samples.length - 1], samples[0]);
     return { samples, cum, length: len, closed, meta: track };
   }
 
   function dist(a, b) { const dx = a[0] - b[0], dy = a[1] - b[1]; return Math.hypot(dx, dy); }
 
-  // Nearest point on the sampled polyline. Returns { dist, index, progress(0..1) }.
   function nearestOnTrack(track, x, y) {
     const s = track.samples;
     const N = s.length;
@@ -106,19 +99,15 @@
       const d = Math.hypot(x - cx, y - cy);
       if (d < best) { best = d; bestI = i; bestT = t; }
     }
-    const progress = ((bestI + bestT) / segN);
-    return { dist: best, index: bestI, progress };
+    return { dist: best, index: bestI, progress: (bestI + bestT) / segN };
   }
 
   // ---- Sensors --------------------------------------------------------------
-  // sensor.fwd, sensor.right are local offsets. Returns world {x,y}.
   function sensorWorld(robot, sensor) {
     const c = Math.cos(robot.th), sn = Math.sin(robot.th);
-    const fx = c, fy = sn;            // forward
-    const rx = sn, ry = -c;           // right
     return {
-      x: robot.x + sensor.fwd * fx + sensor.right * rx,
-      y: robot.y + sensor.fwd * fy + sensor.right * ry,
+      x: robot.x + sensor.fwd * c + sensor.right * sn,
+      y: robot.y + sensor.fwd * sn + sensor.right * (-c),
     };
   }
 
@@ -130,9 +119,26 @@
     });
   }
 
+  // Analog reflectance: 1 = fully on the line, fading to 0 past the edge.
+  function readSensorsAnalog(robot, sensors, track) {
+    return sensors.map((s) => {
+      const w = sensorWorld(robot, s);
+      const d = nearestOnTrack(track, w.x, w.y).dist;
+      if (d <= LINE_HALF_WIDTH) return 1;
+      if (d >= LINE_HALF_WIDTH + ANALOG_FALLOFF) return 0;
+      return 1 - (d - LINE_HALF_WIDTH) / ANALOG_FALLOFF;
+    });
+  }
+
+  // Weighted line-position error (+ = line is to the right). null when no line seen.
+  function lineError(sensors, readings) {
+    let num = 0, den = 0;
+    for (let i = 0; i < sensors.length; i++) { num += readings[i] * sensors[i].right; den += readings[i]; }
+    if (den < 0.05) return null;
+    return num / den;
+  }
+
   // ---- Rule evaluation ------------------------------------------------------
-  // rule.pattern: array per sensor of 'on' | 'off' | 'any'
-  // rule.left / rule.right: { dir: 'fwd'|'rev'|'stop', speed: 0..100 }
   function motorFraction(m) {
     if (!m || m.dir === 'stop') return 0;
     const f = (m.speed || 0) / 100;
@@ -149,7 +155,6 @@
     return true;
   }
 
-  // Returns { mL, mR, ruleIndex } — ruleIndex = -1 means default rule used.
   function evalRules(rules, defaultRule, states) {
     for (let i = 0; i < rules.length; i++) {
       if (ruleMatches(rules[i], states)) {
@@ -167,12 +172,11 @@
     return { x: a[0], y: a[1], th };
   }
 
-  // Differential drive. params: { vMax, wheelBase, turnGain }
   function stepRobot(robot, mL, mR, params, dt) {
     const vMax = params.vMax;
     const vL = mL * vMax, vR = mR * vMax;
     const v = (vL + vR) / 2;
-    let om = ((vR - vL) / params.wheelBase) * (params.turnGain || 1);
+    const om = ((vR - vL) / params.wheelBase) * (params.turnGain || 1);
     robot.th += om * dt;
     robot.x += v * Math.cos(robot.th) * dt;
     robot.y += v * Math.sin(robot.th) * dt;
@@ -181,7 +185,6 @@
 
   // ---- Full simulation state machine ---------------------------------------
   function createSim(config) {
-    // config: { track, sensors, rules, defaultRule, params }
     const robot = makeRobot(config.track);
     return {
       cfg: config,
@@ -196,8 +199,11 @@
       totalTicks: 0,
       maxDeviation: 0,
       sumDeviation: 0,
-      status: 'running', // 'running' | 'success' | 'failed'
+      status: 'running',
       reason: null,
+      pidPrev: 0,
+      pidInt: 0,
+      lastErrSign: 1,
       last: null,
       trail: [],
     };
@@ -206,9 +212,34 @@
   function tickSim(sim, dt) {
     if (sim.status !== 'running') return sim.last;
     const { track, sensors, rules, defaultRule, params } = sim.cfg;
+    const mode = sim.cfg.mode || 'rules';
 
-    const states = readSensors(sim.robot, sensors, track);
-    const cmd = evalRules(rules, defaultRule, states);
+    let states, cmd, readings = null, error = null;
+    if (mode === 'pid') {
+      readings = readSensorsAnalog(sim.robot, sensors, track);
+      const pid = sim.cfg.pid || { base: 60, kp: 1.4, kd: 0.5, ki: 0 };
+      let e = lineError(sensors, readings);
+      if (e === null) {
+        e = sim.lastErrSign * 0.9;            // line not seen → steer toward last side (recover)
+      } else {
+        sim.lastErrSign = e >= 0 ? 1 : -1;
+      }
+      const dErr = (e - sim.pidPrev) / dt;
+      sim.pidInt += e * dt;
+      if (sim.pidInt > 2) sim.pidInt = 2; else if (sim.pidInt < -2) sim.pidInt = -2;
+      sim.pidPrev = e;
+      const base = (pid.base || 0) / 100;
+      let turn = (pid.kp || 0) * e + (pid.kd || 0) * dErr + (pid.ki || 0) * sim.pidInt;
+      if (turn > 1) turn = 1; else if (turn < -1) turn = -1;
+      let mL = base + turn, mR = base - turn;
+      mL = Math.max(-1, Math.min(1, mL)); mR = Math.max(-1, Math.min(1, mR));
+      cmd = { mL, mR, ruleIndex: null };
+      error = e;
+      states = readings.map((r) => r > 0.3);
+    } else {
+      states = readSensors(sim.robot, sensors, track);
+      cmd = evalRules(rules, defaultRule, states);
+    }
     const v = stepRobot(sim.robot, cmd.mL, cmd.mR, params, dt);
 
     const near = nearestOnTrack(track, sim.robot.x, sim.robot.y);
@@ -222,33 +253,24 @@
     sim.timeOffLine = anyOn ? 0 : sim.timeOffLine + dt;
     sim.timeStalled = Math.abs(v) < 0.05 ? sim.timeStalled + dt : 0;
 
-    // Lap detection: wrap-around in the forward direction past the half mark.
     const prog = near.progress;
     if (prog > 0.5) sim.passedHalf = true;
     if (sim.passedHalf && sim.prevProg > 0.75 && prog < 0.2 && v > 0) {
-      sim.laps++;
-      sim.passedHalf = false;
+      sim.laps++; sim.passedHalf = false;
     }
     sim.prevProg = prog;
 
-    // Trail (sampled)
     if (sim.totalTicks % 3 === 0) {
       sim.trail.push([sim.robot.x, sim.robot.y]);
       if (sim.trail.length > 400) sim.trail.shift();
     }
 
-    // Failure / success checks
-    if (near.dist > OFF_TRACK_DIST) {
-      sim.status = 'failed'; sim.reason = 'off_track';
-    } else if (sim.timeOffLine > LINE_LOST_GRACE) {
-      sim.status = 'failed'; sim.reason = 'line_lost';
-    } else if (sim.timeStalled > STALL_GRACE) {
-      sim.status = 'failed'; sim.reason = 'stalled';
-    } else if (sim.laps >= 1) {
-      sim.status = 'success'; sim.reason = 'lap_complete';
-    }
+    if (near.dist > OFF_TRACK_DIST) { sim.status = 'failed'; sim.reason = 'off_track'; }
+    else if (sim.timeOffLine > LINE_LOST_GRACE) { sim.status = 'failed'; sim.reason = 'line_lost'; }
+    else if (sim.timeStalled > STALL_GRACE) { sim.status = 'failed'; sim.reason = 'stalled'; }
+    else if (sim.laps >= 1) { sim.status = 'success'; sim.reason = 'lap_complete'; }
 
-    sim.last = { states, cmd, near, v, anyOn };
+    sim.last = { states, cmd, near, v, anyOn, readings, error };
     return sim.last;
   }
 
@@ -271,29 +293,35 @@
   function coach(sim) {
     const tips = [];
     const cfg = sim.cfg;
+    const mode = cfg.mode || 'rules';
     const spread = lateralSpread(cfg.sensors);
     const acc = accuracy(sim);
 
     if (sim.reason === 'line_lost' || sim.reason === 'off_track') {
-      // Did any rule cover the "all off" case?
-      const allOff = cfg.sensors.map(() => 'off');
-      const covered = cfg.rules.some((r) => r.pattern.every((p, i) => p === 'off' || p === 'any') &&
-        r.pattern.some((p) => p === 'off'));
-      if (!covered && !defaultRuleMoves(cfg.defaultRule)) {
-        tips.push('Hiçbir sensör çizgiyi görmediğinde robot durdu/sürüklendi. "Hepsi KAPALI" durumu için bir kurtarma kuralı ekle (ör. yavaşça dönerek çizgiyi ara).');
+      if (mode === 'pid') {
+        tips.push('PID robotun çizgiden çıktı. Kp çok düşükse virajı dönemez, çok yüksekse zikzak yapıp savrulur — Kp ve Kd değerlerini ince ayarla.');
+        if (spread < 0.5 && cfg.sensors.length >= 2) {
+          tips.push('Sensörlerin birbirine çok yakın (' + spread.toFixed(2) + ' birim). Daha geniş diziye yayarsan hata ölçümü daha hassas olur.');
+        }
       } else {
-        tips.push('Robot çizgiden çıktı. Sensörlerini biraz daha öne ya da yana taşıyıp köşeyi daha erken yakalamayı dene.');
-      }
-      if (spread < 0.5 && cfg.sensors.length >= 2) {
-        tips.push('Sensörlerin birbirine çok yakın (' + spread.toFixed(2) + ' birim). Daha geniş yerleştirirsen keskin virajları daha erken fark eder.');
-      }
-      if (cfg.params.vMax >= 4.5) {
-        tips.push('Motor hızın yüksek; köşelerde aşıp çıkmış olabilir. Viraj kurallarında hızı düşürmeyi dene.');
+        const covered = cfg.rules.some((r) => r.pattern.every((p) => p === 'off' || p === 'any') &&
+          r.pattern.some((p) => p === 'off'));
+        if (!covered && !defaultRuleMoves(cfg.defaultRule)) {
+          tips.push('Hiçbir sensör çizgiyi görmediğinde robot durdu/sürüklendi. "Hepsi KAPALI" durumu için bir kurtarma kuralı ekle (ör. yavaşça dönerek çizgiyi ara).');
+        } else {
+          tips.push('Robot çizgiden çıktı. Sensörlerini biraz daha öne ya da yana taşıyıp köşeyi daha erken yakalamayı dene.');
+        }
+        if (spread < 0.5 && cfg.sensors.length >= 2) {
+          tips.push('Sensörlerin birbirine çok yakın (' + spread.toFixed(2) + ' birim). Daha geniş yerleştirirsen keskin virajları daha erken fark eder.');
+        }
+        if (cfg.params.vMax >= 4.5) {
+          tips.push('Motor hızın yüksek; köşelerde aşıp çıkmış olabilir. Viraj kurallarında hızı düşürmeyi dene.');
+        }
       }
     } else if (sim.status === 'success') {
       if (acc >= 95) tips.push('Mükemmel takip! Çizgi üzerinde neredeyse hiç sapma yok.');
-      else if (acc >= 85) tips.push('Temiz bir tur. Viraj kurallarında hızları biraz dengeleyerek daha da düzgün hale getirebilirsin.');
-      else tips.push('Turu tamamladın ama robot zikzak yaptı. Sensör yerleşimini ve viraj hızlarını ince ayarla.');
+      else if (acc >= 85) tips.push(mode === 'pid' ? 'Temiz bir tur. Kd değerini biraz artırırsan zikzakları daha da yumuşatabilirsin.' : 'Temiz bir tur. Viraj kurallarında hızları biraz dengeleyerek daha da düzgün hale getirebilirsin.');
+      else tips.push('Turu tamamladın ama robot zikzak yaptı. ' + (mode === 'pid' ? 'Kp\'yi biraz düşür, Kd\'yi artır.' : 'Sensör yerleşimini ve viraj hızlarını ince ayarla.'));
     }
     if (cfg.sensors.length === 1) {
       tips.push('Tek sensörle çizgi takibi çok zordur — yönü ayırt edemez. 3 sensör (sol-orta-sağ) klasik başlangıçtır.');
@@ -305,6 +333,8 @@
     if (sim.status !== 'success') return null;
     const acc = accuracy(sim);
     const t = sim.t;
+    const pid = (sim.cfg.mode || 'rules') === 'pid';
+    if (pid && acc >= 96 && t < 16) return { key: 'pid_avcisi', name: '🏆 PID Avcısı' };
     if (acc >= 96 && t < 16) return { key: 'pist_hakimi', name: '🏆 Pist Hâkimi' };
     if (acc >= 92) return { key: 'viraj_ustasi', name: '🥇 Viraj Ustası' };
     if (acc >= 82) return { key: 'cizgi_kasifi', name: '🧭 Çizgi Kâşifi' };
@@ -334,7 +364,6 @@
 
   // ---- Default kit / starter program ---------------------------------------
   function starterSensors() {
-    // classic 3-sensor array near the front
     return [
       { id: 's1', label: 'SOL', color: '#22c55e', fwd: 0.9, right: -0.45 },
       { id: 's2', label: 'ORTA', color: '#38bdf8', fwd: 1.0, right: 0.0 },
@@ -343,16 +372,14 @@
   }
 
   function starterRules() {
-    // pattern order matches starterSensors: [SOL, ORTA, SAĞ]
     return [
-      { pattern: ['any', 'on', 'any'], left: { dir: 'fwd', speed: 85 }, right: { dir: 'fwd', speed: 85 } }, // center => straight
-      { pattern: ['on', 'off', 'off'], left: { dir: 'fwd', speed: 35 }, right: { dir: 'fwd', speed: 90 } }, // left only => steer left
-      { pattern: ['off', 'off', 'on'], left: { dir: 'fwd', speed: 90 }, right: { dir: 'fwd', speed: 35 } }, // right only => steer right
+      { pattern: ['any', 'on', 'any'], left: { dir: 'fwd', speed: 85 }, right: { dir: 'fwd', speed: 85 } },
+      { pattern: ['on', 'off', 'off'], left: { dir: 'fwd', speed: 35 }, right: { dir: 'fwd', speed: 90 } },
+      { pattern: ['off', 'off', 'on'], left: { dir: 'fwd', speed: 90 }, right: { dir: 'fwd', speed: 35 } },
     ];
   }
 
   function starterDefault() {
-    // "nothing matched" — gently creep forward (intentionally imperfect)
     return { left: { dir: 'fwd', speed: 40 }, right: { dir: 'fwd', speed: 40 } };
   }
 
@@ -360,12 +387,16 @@
     return { vMax: 3.6, wheelBase: 1.1, turnGain: 1.0 };
   }
 
+  function starterPID() {
+    return { base: 60, kp: 1.4, kd: 0.5, ki: 0 };
+  }
+
   const API = {
-    LINE_HALF_WIDTH, OFF_TRACK_DIST, LINE_LOST_GRACE,
-    TRACKS, buildTrack, nearestOnTrack, sensorWorld, readSensors,
+    LINE_HALF_WIDTH, OFF_TRACK_DIST, LINE_LOST_GRACE, ANALOG_FALLOFF,
+    TRACKS, buildTrack, nearestOnTrack, sensorWorld, readSensors, readSensorsAnalog, lineError,
     evalRules, ruleMatches, motorFraction, makeRobot, stepRobot,
     createSim, tickSim, accuracy, coach, robotClass, runHeadless,
-    starterSensors, starterRules, starterDefault, defaultParams,
+    starterSensors, starterRules, starterDefault, defaultParams, starterPID,
   };
 
   global.SimCore = API;
