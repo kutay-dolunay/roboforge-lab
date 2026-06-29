@@ -346,7 +346,7 @@
     mode: 'rules',
     pid: S.starterPID(),
     sim: null, running:false, raf:null, acc:0, lastTs:0, simSpeed:1,
-    selected:null, countdown:0,
+    selected:null, countdown:0, frames:[], replaying:false,
   };
   LAB.params.turnGain = 1.0;
 
@@ -368,9 +368,12 @@
     ctx.strokeStyle = '#0b1220';
     ctx.lineWidth = S.LINE_HALF_WIDTH*2*view.scale;
     ctx.lineJoin='round'; ctx.lineCap='round';
-    ctx.beginPath();
-    sm.forEach((p,i)=>{ const [x,y]=w2s(p[0],p[1]); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
-    if(LAB.track.closed) ctx.closePath();
+    // gap-aware: lift the pen over absent (gap / dashed) stretches
+    const N=sm.length; ctx.beginPath(); let pen=false;
+    for(let i=0;i<=N;i++){ const idx=i%N;
+      if(S.inGap(LAB.track, idx/N)){ pen=false; continue; }
+      const [x,y]=w2s(sm[idx][0],sm[idx][1]);
+      if(!pen){ ctx.moveTo(x,y); pen=true; } else ctx.lineTo(x,y); }
     ctx.stroke();
     const a=sm[0]; const [ax,ay]=w2s(a[0],a[1]);
     ctx.fillStyle='#22c55e'; ctx.beginPath(); ctx.arc(ax,ay,7,0,7); ctx.fill();
@@ -480,6 +483,7 @@
     stopLoop();
     rebuildTrack();
     LAB.sim = S.createSim(buildConfig());
+    LAB.frames = [];
     setResultIdle();
     let n=3; const cd=document.getElementById('countdown'); cd.style.display='flex'; cd.textContent=n;
     const iv=setInterval(()=>{ n--; if(n>0){cd.textContent=n;} else { clearInterval(iv); cd.style.display='none'; beginMotion(); } },550);
@@ -498,6 +502,8 @@
     let steps=0;
     while(LAB.acc>=FIXED && LAB.sim.status==='running' && steps<8){
       last=S.tickSim(LAB.sim,FIXED); LAB.acc-=FIXED; steps++;
+      if(last && LAB.frames.length<4000){ const rb=LAB.sim.robot;
+        LAB.frames.push({x:rb.x,y:rb.y,th:rb.th,states:last.states,dev:last.near?last.near.dist:0}); }
     }
     render(last);
     updateHud(last);
@@ -538,12 +544,59 @@
         <div><small>TUR</small><b>${sim.laps}</b></div>
       </div>`+
       tips.map(t=>`<div class="tip"><span class="ic">💡</span><span>${t}</span></div>`).join('')+
-      `<button class="btn run" style="margin-top:10px" id="retry">⟲ Tekrar Dene</button>`;
+      `<div style="font-size:.6rem;letter-spacing:1px;color:var(--muted);font-weight:700;margin:12px 0 6px">📈 ÇİZGİDEN SAPMA — ZAMAN <span style="color:#475569;font-weight:400">(yeşil bant = çizgide · kırmızı çizgi = pist dışı eşiği)</span></div>
+       <canvas id="errChart" width="372" height="84" style="width:100%;border-radius:8px;border:1px solid var(--line);background:#0b1220;display:block"></canvas>
+       <div style="display:flex;gap:10px;margin-top:12px">
+         <button class="btn run" id="retry">⟲ Tekrar Dene</button>
+         <button class="btn ghost" id="replayBtn">▶ Tekrar İzle</button>
+       </div>`;
     document.getElementById('retry').onclick=()=>{ resetSim(); };
+    document.getElementById('replayBtn').onclick=replayRun;
+    drawErrChart();
+    if(LAB.frames.length) drawAnalysisFrame(LAB.frames.length-1);
+  }
+
+  // ---------- run analysis & replay ----------
+  function drawAnalysisFrame(fi){
+    drawScene();
+    const fr=LAB.frames; if(!fr.length) return;
+    ctx.strokeStyle='rgba(56,189,248,.75)'; ctx.lineWidth=3; ctx.lineJoin='round'; ctx.lineCap='round';
+    ctx.beginPath();
+    for(let i=0;i<=fi && i<fr.length;i++){ const [x,y]=w2s(fr[i].x,fr[i].y); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }
+    ctx.stroke();
+    const f=fr[Math.min(fi,fr.length-1)];
+    drawRobot({x:f.x,y:f.y,th:f.th}, {states:f.states, readings:null});
+  }
+  function replayRun(){
+    if(!LAB.frames.length || LAB.running) return;
+    stopLoop(); LAB.replaying=true;
+    let i=0;
+    const stepR=()=>{
+      if(!LAB.replaying){ return; }
+      drawAnalysisFrame(i);
+      i += 2;
+      if(i < LAB.frames.length){ LAB.raf=requestAnimationFrame(stepR); }
+      else { LAB.replaying=false; drawAnalysisFrame(LAB.frames.length-1); }
+    };
+    stepR();
+  }
+  function drawErrChart(){
+    const c=document.getElementById('errChart'); if(!c) return;
+    const x=c.getContext('2d'); const W=c.width, H=c.height;
+    x.clearRect(0,0,W,H); x.fillStyle='#0b1220'; x.fillRect(0,0,W,H);
+    const fr=LAB.frames; if(fr.length<2) return;
+    const MAXD=1.6;
+    const yBand=H-(S.ON_LINE_TIGHT/MAXD)*H;
+    x.fillStyle='rgba(34,197,94,.12)'; x.fillRect(0,yBand,W,H-yBand);
+    const yOff=H-(S.OFF_TRACK_DIST/MAXD)*H;
+    x.strokeStyle='rgba(239,68,68,.55)'; x.lineWidth=1; x.beginPath(); x.moveTo(0,yOff); x.lineTo(W,yOff); x.stroke();
+    x.strokeStyle='#38bdf8'; x.lineWidth=1.5; x.beginPath();
+    for(let i=0;i<fr.length;i++){ const px=(i/(fr.length-1))*W; const d=Math.min(MAXD,fr[i].dev||0); const py=H-(d/MAXD)*H; i?x.lineTo(px,py):x.moveTo(px,py); }
+    x.stroke();
   }
 
   function resetSim(){
-    stopRun(); LAB.sim=null; LAB.acc=0;
+    stopRun(); LAB.replaying=false; LAB.sim=null; LAB.acc=0; LAB.frames=[];
     rebuildTrack();
     setResultReady();
     render(null); updateHud(null);
