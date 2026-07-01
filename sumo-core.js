@@ -23,13 +23,22 @@
   const MATCH_TIME = 20;    // seconds -> draw if nobody out
   const MAX_OM = 3.4;
 
+  // 7-level ladder: Başlangıç ×2, Orta ×2, İleri ×2, Uzman ×1
   const OPPONENTS = [
-    { id: 'novice', name: 'Acemi', difficulty: 'Kolay', blurb: 'Yavaş ve temkinli. İyi bir ilk rakip.',
-      aggr: 0.55, steer: 1.6, speed: 2.2, edgeMargin: 1.4, retreat: true, wander: 0.35 },
+    { id: 'novice', name: 'Acemi', difficulty: 'Başlangıç', blurb: 'Yavaş ve temkinli. İyi bir ilk rakip.',
+      aggr: 0.5, steer: 1.4, speed: 2.0, edgeMargin: 1.5, retreat: true, wander: 0.4 },
+    { id: 'rookie', name: 'Çaylak', difficulty: 'Başlangıç', blurb: 'Biraz daha atak ama hâlâ acemi.',
+      aggr: 0.62, steer: 1.7, speed: 2.3, edgeMargin: 1.4, retreat: true, wander: 0.28 },
     { id: 'balanced', name: 'Dengeli', difficulty: 'Orta', blurb: 'Dengeli hız ve saldırı. Ciddi bir rakip.',
-      aggr: 0.8, steer: 2.2, speed: 2.9, edgeMargin: 1.1, retreat: true, wander: 0.12 },
-    { id: 'champ', name: 'Şampiyon', difficulty: 'Zor', blurb: 'Hızlı, agresif ve kenarı iyi tanır. İyi bir robot ister.',
-      aggr: 1.0, steer: 2.8, speed: 3.6, edgeMargin: 0.9, retreat: true, wander: 0.03 },
+      aggr: 0.75, steer: 2.1, speed: 2.8, edgeMargin: 1.2, retreat: true, wander: 0.15 },
+    { id: 'bold', name: 'Atılgan', difficulty: 'Orta', blurb: 'Cesur ve hızlı saldırır. Savunmanı test eder.',
+      aggr: 0.85, steer: 2.3, speed: 3.1, edgeMargin: 1.1, retreat: true, wander: 0.1 },
+    { id: 'master', name: 'Usta', difficulty: 'İleri', blurb: 'Hızlı, isabetli ve kenarı iyi tanır. İyi bir robot ister.',
+      aggr: 0.93, steer: 2.6, speed: 3.5, edgeMargin: 1.0, retreat: true, wander: 0.05 },
+    { id: 'gladiator', name: 'Gladyatör', difficulty: 'İleri', blurb: 'Amansız bir saldırgan. Güçlü motor şart.',
+      aggr: 1.0, steer: 2.8, speed: 3.8, edgeMargin: 0.95, retreat: true, wander: 0.03 },
+    { id: 'champ', name: 'Şampiyon', difficulty: 'Uzman', blurb: 'En hızlı, en agresif. Ancak en güçlü robotla yenilir.',
+      aggr: 1.0, steer: 3.1, speed: 4.3, edgeMargin: 0.85, retreat: true, wander: 0.01 },
   ];
 
   function norm(a) { while (a > Math.PI) a -= 2 * Math.PI; while (a < -Math.PI) a += 2 * Math.PI; return a; }
@@ -122,18 +131,32 @@
 
   function createSim(cfg) {
     return { cfg, player: makePlayer(), opp: makeOpp(), t: 0, status: 'running', reason: null,
-      contact: false, lastStates: null, ptrail: [], otrail: [] };
+      contact: false, lastStates: null, prevError: 0, lastError: 0, ptrail: [], otrail: [] };
   }
 
   function tickSim(sim, dt) {
     if (sim.status !== 'running') return;
-    const { sensors, rules, defaultRule, params, opponent } = sim.cfg;
-    const states = readSensors(sim.player, sim.opp, sensors);
-    const cmd = evalRules(rules, defaultRule, states);
-    stepDiff(sim.player, cmd.mL, cmd.mR, params, dt);
+    const { sensors, rules, defaultRule, params, opponent, mode, pid } = sim.cfg;
+    if (mode === 'pid') {
+      // PID: aim at the opponent and charge; back off the edge (safety reflex)
+      const p = sim.player, o = sim.opp;
+      const rel = norm(Math.atan2(o.y - p.y, o.x - p.x) - p.th);
+      const [fx, fy] = localToWorld(p, 0.8, 0);
+      const edge = Math.hypot(fx, fy) > R - EDGE_BAND;
+      let om, v;
+      if (edge) { const inward = Math.atan2(-p.y, -p.x); om = clamp(norm(inward - p.th) * 3, -MAX_OM, MAX_OM); v = -0.5 * params.vMax; }
+      else { om = clamp((pid.kp || 0) * rel + (pid.kd || 0) * (rel - sim.prevError), -MAX_OM, MAX_OM); sim.prevError = rel; v = ((pid.base || 100) / 100) * params.vMax; }
+      p.th += om * dt; p.x += v * Math.cos(p.th) * dt; p.y += v * Math.sin(p.th) * dt; p.v = v;
+      sim.lastError = rel; sim.lastStates = readSensors(p, o, sensors);
+    } else {
+      const states = readSensors(sim.player, sim.opp, sensors);
+      const cmd = evalRules(rules, defaultRule, states);
+      stepDiff(sim.player, cmd.mL, cmd.mR, params, dt);
+      sim.lastStates = states; sim.lastCmd = cmd;
+    }
     oppAI(sim.opp, sim.player, opponent, dt, sim.contact);
     sim.contact = collide(sim.player, sim.opp, dt);
-    sim.t += dt; sim.lastStates = states; sim.lastCmd = cmd;
+    sim.t += dt;
 
     if (Math.round(sim.t * 60) % 3 === 0) {
       sim.ptrail.push([sim.player.x, sim.player.y]); sim.otrail.push([sim.opp.x, sim.opp.y]);
@@ -187,13 +210,14 @@
     ];
   }
   function starterDefault() { return { left: { dir: 'fwd', speed: 60 }, right: { dir: 'rev', speed: 20 } }; } // no enemy -> search-spin
+  function starterPID() { return { kp: 2.4, kd: 0.5, base: 100 }; } // aim at opponent + charge
   function defaultParams() { return { vMax: 3.4, wheelBase: 1.1, turnGain: 1.0 }; }
 
   const API = {
     R, RR, EDGE_BAND, DETECT, MATCH_TIME, OPPONENTS,
     motorFraction, ruleMatches, evalRules, readSensors, localToWorld,
     stepDiff, oppAI, collide, makePlayer, makeOpp, createSim, tickSim, coach, runHeadless,
-    starterSensors, starterRules, starterDefault, defaultParams,
+    starterSensors, starterRules, starterDefault, starterPID, defaultParams,
   };
   global.SumoCore = API;
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
