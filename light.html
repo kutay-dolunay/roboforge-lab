@@ -21,7 +21,20 @@
   .brand b{font-size:1.05rem;letter-spacing:.5px}
   .brand b span{color:var(--sky)}
   .brand small{color:var(--muted);font-size:.62rem;letter-spacing:2px;text-transform:uppercase}
-  .tracktabs{display:flex;gap:6px;margin-left:8px}
+  .tracktabs{display:flex;gap:6px;margin-left:8px;flex-wrap:wrap;max-width:640px}
+  .modetoggle{display:flex;gap:6px;margin-bottom:12px}
+  .modebtn{flex:1;padding:9px;border:1px solid var(--line);background:var(--panel2);color:var(--muted2);
+    border-radius:9px;cursor:pointer;font-weight:700;font-size:.78rem}
+  .modebtn.active{border-color:var(--sky);color:var(--sky);background:#0c1a30;box-shadow:0 0 14px rgba(56,189,248,.15)}
+  .pidrow{margin:14px 0}
+  .pidrow label{display:flex;justify-content:space-between;font-size:.76rem;color:var(--muted2);margin-bottom:5px}
+  .pidrow label b{color:var(--sky);font-family:'Courier New',monospace}
+  .pidrow input[type=range]{width:100%}
+  .piderr{margin-top:10px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .piderr .lab{font-size:.6rem;letter-spacing:1px;color:var(--muted);font-weight:700}
+  .errtrack{height:12px;background:#0b1220;border-radius:6px;position:relative;margin-top:7px;border:1px solid #1e293b;overflow:hidden}
+  .errmid{position:absolute;left:50%;top:0;bottom:0;width:1px;background:#334155}
+  .errfill{position:absolute;top:1px;bottom:1px;left:50%;width:4px;margin-left:-2px;background:var(--amber);border-radius:2px;transition:.05s}
   .ttab{padding:7px 12px;border:1px solid var(--line);background:var(--panel);color:var(--muted2);
     border-radius:9px;cursor:pointer;font-size:.74rem;font-weight:600;transition:.15s;white-space:nowrap}
   .ttab small{display:block;font-size:.56rem;color:var(--muted);font-weight:400}
@@ -269,20 +282,44 @@
 
       <!-- KOD TAB -->
       <div id="panel-kod" style="display:none">
-        <div class="sectlabel">Takip Kuralları</div>
-        <div class="hintbox">
-          Robot her an sensörlerini okur ve <b>yukarıdan aşağıya</b> ilk uyan kurala göre hareket eder.
-          Rozete tıklayarak koşulu değiştir: <b style="color:var(--amber)">IŞIK</b> (parlak görüyor),
-          <b style="color:var(--muted2)">KARANLIK</b> (görmüyor), <b style="color:var(--muted2)">FARK ETMEZ</b>.
+        <div class="sectlabel">Kontrol Yöntemi</div>
+        <div class="modetoggle">
+          <button class="modebtn active" id="mode-rules">🧩 Kural Modu</button>
+          <button class="modebtn" id="mode-pid">📈 PID Modu</button>
         </div>
-        <div id="rules"></div>
-        <button class="addrule" id="addRule">＋ Yeni Kural Ekle</button>
-        <div class="rule def" id="defRuleBox" style="margin-top:12px"></div>
-        <div class="legend">
-          <b>Motorlar → hareket:</b> iki motor İleri = ışığa doğru git · bir motor daha hızlı = o yöne kır ·
-          iki motor Geri = geri çekil. <br/>
-          <b>İpucu:</b> Klasik ışık takibi: ışık soldaysa sola kır, sağdaysa sağa kır, tam öndeyse düz git,
-          hiç ışık yoksa yerinde dönüp <b>ışığı ara</b>.
+
+        <div id="kod-rules">
+          <div class="hintbox">
+            Robot her an sensörlerini okur ve <b>yukarıdan aşağıya</b> ilk uyan kurala göre hareket eder.
+            Rozete tıklayarak koşulu değiştir: <b style="color:var(--amber)">IŞIK</b> (parlak görüyor),
+            <b style="color:var(--muted2)">KARANLIK</b> (görmüyor), <b style="color:var(--muted2)">FARK ETMEZ</b>.
+          </div>
+          <div id="rules"></div>
+          <button class="addrule" id="addRule">＋ Yeni Kural Ekle</button>
+          <div class="rule def" id="defRuleBox" style="margin-top:12px"></div>
+          <div class="legend">
+            <b>Motorlar → hareket:</b> iki motor İleri = ışığa doğru git · bir motor daha hızlı = o yöne kır ·
+            iki motor Geri = geri çekil. <br/>
+            <b>İpucu:</b> Işık soldaysa sola kır, sağdaysa sağa kır, tam öndeyse düz git, hiç ışık yoksa <b>ışığı ara</b>.
+          </div>
+        </div>
+
+        <div id="kod-pid" style="display:none">
+          <div class="hintbox">
+            PID modunda robot, <b>sol ve sağ parlaklığın farkına</b> göre orantılı döner — ışığa doğru yumuşakça süzülür.
+            <b style="color:var(--sky)">Kp</b> dönüşün sertliğini, <b style="color:var(--sky)">Kd</b> savrulmayı bastırmayı belirler.
+          </div>
+          <div class="pidrow"><label>Kp — Dönüş Sertliği <b id="pidKpV">2.6</b></label>
+            <input type="range" id="pidKp" min="0" max="6" step="0.1" value="2.6" /></div>
+          <div class="pidrow"><label>Kd — Sönümleme (sakinlik) <b id="pidKdV">0.8</b></label>
+            <input type="range" id="pidKd" min="0" max="3" step="0.1" value="0.8" /></div>
+          <div class="pidrow"><label>Taban Hız <b id="pidBaseV">70%</b></label>
+            <input type="range" id="pidBase" min="20" max="100" step="5" value="70" /></div>
+          <div class="piderr">
+            <div class="lab">IŞIK FARKI&nbsp;&nbsp;sol ◄ ─────── ► sağ</div>
+            <div class="errtrack"><div class="errmid"></div><div class="errfill" id="errFill"></div></div>
+          </div>
+          <div class="legend"><b>İpucu:</b> PID, zayıf/uzak ve hızlı gezen ışıklarda kurallardan daha iyi iş görür. Kp yüksek → keskin ama zikzaklı; Kd artınca sakinleşir.</div>
         </div>
       </div>
     </div>
@@ -320,6 +357,7 @@
     defaultRule: M.starterDefault(),
     params: M.defaultParams(),
     threshold: M.defaultThreshold(),
+    mode: 'rules', pid: M.starterPID(),
     sim: null, running:false, raf:null, acc:0, lastTs:0, simSpeed:1,
     frames:[], replaying:false,
   };
@@ -408,10 +446,17 @@
     const states = bright ? bright.map(b=>b>=LAB.threshold) : null;
     const dots=document.querySelectorAll('#hudSensors .sdot');
     dots.forEach((d,i)=>{ const on=states&&states[i]; d.classList.toggle('on',!!on); d.style.background=on?d.style.color:'#0b1220'; });
-    let mL=0,mR=0;
-    if(states){ const cmd=M.evalRules(LAB.rules,LAB.defaultRule,states); mL=cmd.mL; mR=cmd.mR; }
-    document.getElementById('hudAction').textContent = states ? moveLabel(mL,mR) : '—';
-    setBar('mfL',mL); setBar('mfR',mR);
+    if(LAB.mode==='pid'){
+      const e = LAB.sim ? (LAB.sim.lastError||0) : 0;
+      document.getElementById('hudAction').textContent = LAB.sim ? (e>0.04?'◄ SOL':e<-0.04?'SAĞ ►':'İLERİ') : '—';
+      const base=LAB.pid.base/100, turn=Math.max(-0.6,Math.min(0.6,e*LAB.pid.kp*0.4));
+      setBar('mfL', base-turn); setBar('mfR', base+turn);
+      const ef=document.getElementById('errFill'); if(ef){ const ee=Math.max(-1,Math.min(1,e/0.4)); ef.style.left=(50 - ee*48)+'%'; }
+    } else {
+      let mL=0,mR=0; if(states){ const cmd=M.evalRules(LAB.rules,LAB.defaultRule,states); mL=cmd.mL; mR=cmd.mR; }
+      document.getElementById('hudAction').textContent = states ? moveLabel(mL,mR) : '—';
+      setBar('mfL',mL); setBar('mfR',mR);
+    }
   }
   function setBar(id,frac){
     const el=document.getElementById(id); const pct=Math.max(-1,Math.min(1,frac))*50;
@@ -421,7 +466,27 @@
 
   // ---------- run loop ----------
   function buildConfig(){
-    return { scene:LAB.scene, sensors:LAB.sensors, rules:LAB.rules, defaultRule:LAB.defaultRule, params:LAB.params, threshold:LAB.threshold };
+    return { scene:LAB.scene, sensors:LAB.sensors, rules:LAB.rules, defaultRule:LAB.defaultRule,
+      params:LAB.params, threshold:LAB.threshold, mode:LAB.mode, pid:LAB.pid };
+  }
+  function setMode(m){
+    LAB.mode=m;
+    document.getElementById('mode-rules').classList.toggle('active',m==='rules');
+    document.getElementById('mode-pid').classList.toggle('active',m==='pid');
+    document.getElementById('kod-rules').style.display = m==='rules'?'block':'none';
+    document.getElementById('kod-pid').style.display = m==='pid'?'block':'none';
+    if(LAB.running) stopRun();
+    resetSim();
+  }
+  function bindPid(){
+    const kp=document.getElementById('pidKp'), kd=document.getElementById('pidKd'), b=document.getElementById('pidBase');
+    kp.value=LAB.pid.kp; kd.value=LAB.pid.kd; b.value=LAB.pid.base;
+    document.getElementById('pidKpV').textContent=(+LAB.pid.kp).toFixed(1);
+    document.getElementById('pidKdV').textContent=(+LAB.pid.kd).toFixed(1);
+    document.getElementById('pidBaseV').textContent=LAB.pid.base+'%';
+    kp.oninput=()=>{ LAB.pid.kp=+kp.value; document.getElementById('pidKpV').textContent=(+kp.value).toFixed(1); };
+    kd.oninput=()=>{ LAB.pid.kd=+kd.value; document.getElementById('pidKdV').textContent=(+kd.value).toFixed(1); };
+    b.oninput=()=>{ LAB.pid.base=+b.value; document.getElementById('pidBaseV').textContent=b.value+'%'; };
   }
   function startRun(){
     if(LAB.running) return; stopLoop(); rebuildScene();
@@ -684,7 +749,7 @@
 
   // ---------- share ----------
   function encodeState(){
-    const st={s:LAB.sceneIdx,r:LAB.rules,d:LAB.defaultRule,th:LAB.threshold,p:{vMax:LAB.params.vMax,turnGain:LAB.params.turnGain,wheelBase:LAB.params.wheelBase}};
+    const st={s:LAB.sceneIdx,r:LAB.rules,d:LAB.defaultRule,th:LAB.threshold,m:LAB.mode,pid:LAB.pid,p:{vMax:LAB.params.vMax,turnGain:LAB.params.turnGain,wheelBase:LAB.params.wheelBase}};
     return btoa(unescape(encodeURIComponent(JSON.stringify(st))));
   }
   function applyState(st){
@@ -693,6 +758,8 @@
     if(Array.isArray(st.r)) LAB.rules=st.r;
     if(st.d) LAB.defaultRule=st.d;
     if(typeof st.th==='number') LAB.threshold=st.th;
+    if(st.m==='pid'||st.m==='rules') LAB.mode=st.m;
+    if(st.pid) LAB.pid={...M.starterPID(),...st.pid};
     LAB.params={...M.defaultParams(),...(st.p||{})};
   }
   function loadFromHash(){
@@ -777,9 +844,12 @@
 
   function init(){
     applyRobotBuild(); fillRobotCard(); loadFromHash();
-    rebuildScene(); buildSceneTabs(); bindTabs(); bindParams();
+    rebuildScene(); buildSceneTabs(); bindTabs(); bindParams(); bindPid();
     buildChassis(); buildRules(); buildSensorHud();
+    setMode(LAB.mode);
     document.getElementById('addRule').onclick=addRule;
+    document.getElementById('mode-rules').onclick=()=>setMode('rules');
+    document.getElementById('mode-pid').onclick=()=>setMode('pid');
     document.getElementById('runbtn').onclick=()=>{ LAB.running?stopRun():startRun(); };
     document.getElementById('resetbtn').onclick=resetSim;
     document.getElementById('shareBtn').onclick=shareRobot;
