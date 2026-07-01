@@ -183,6 +183,28 @@
     border:1px solid var(--line);color:var(--txt);padding:12px 20px;border-radius:12px;font-size:.84rem;font-weight:600;
     opacity:0;pointer-events:none;transition:.25s;box-shadow:0 12px 40px rgba(0,0,0,.5);backdrop-filter:blur(8px);z-index:300}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* full report modal */
+  .reportModal{position:fixed;inset:0;z-index:400;display:none;align-items:center;justify-content:center}
+  .rm-back{position:absolute;inset:0;background:rgba(2,6,23,.78);backdrop-filter:blur(4px)}
+  .rm-sheet{position:relative;width:600px;max-width:94vw;max-height:88vh;display:flex;flex-direction:column;
+    background:var(--panel);border:1px solid var(--sky);border-radius:16px;box-shadow:0 24px 70px rgba(0,0,0,.6);overflow:hidden}
+  .rm-h{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--line);font-weight:800;font-size:1.05rem}
+  .rm-h span{color:var(--sky)}
+  .rm-x{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--muted2);cursor:pointer;font-size:.9rem}
+  .rm-scroll{overflow-y:auto;padding:18px 20px}
+  .rm-sec{margin-bottom:18px}
+  .rm-sec h4{margin:0 0 10px;font-size:.7rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+  .rm-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+  .rm-chip{border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:5px 10px;font-size:.75rem;color:var(--txt)}
+  .rm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
+  .rm-stat{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:9px 6px;text-align:center}
+  .rm-stat .rl{font-size:.5rem;letter-spacing:.5px;color:var(--muted);text-transform:uppercase}
+  .rm-stat .rv{font-size:1.15rem;font-weight:800;margin-top:3px}
+  .rm-line{font-size:.84rem;color:var(--muted2);margin:5px 0}
+  .rm-line b{color:var(--txt)}
+  .rm-note{font-size:.84rem;color:var(--muted2);line-height:1.5}
+  .rm-foot{padding:13px 20px;border-top:1px solid var(--line);text-align:right}
 </style>
 </head>
 <body>
@@ -327,6 +349,7 @@
 </div>
 
 <div id="toast"></div>
+<div class="reportModal" id="reportModal"></div>
 
 <script src="robot-data.js"></script>
 <script src="sim-core.js"></script>
@@ -547,14 +570,17 @@
       tips.map(t=>`<div class="tip"><span class="ic">💡</span><span>${t}</span></div>`).join('')+
       `<div style="font-size:.6rem;letter-spacing:1px;color:var(--muted);font-weight:700;margin:12px 0 6px">📈 ÇİZGİDEN SAPMA — ZAMAN <span style="color:#475569;font-weight:400">(yeşil bant = çizgide · kırmızı çizgi = pist dışı eşiği)</span></div>
        <canvas id="errChart" width="372" height="84" style="width:100%;border-radius:8px;border:1px solid var(--line);background:#0b1220;display:block"></canvas>
-       <div style="display:flex;gap:10px;margin-top:12px">
+       <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
          <button class="btn run" id="retry">⟲ Tekrar Dene</button>
          <button class="btn ghost" id="replayBtn">▶ Tekrar İzle</button>
+         ${win?'<button class="btn" id="reportBtn" style="border-color:#38bdf8;color:#38bdf8">📄 Raporu Önizle</button>':''}
        </div>`;
     document.getElementById('retry').onclick=()=>{ resetSim(); };
     document.getElementById('replayBtn').onclick=replayRun;
+    if(win){ const rb=document.getElementById('reportBtn'); if(rb) rb.onclick=openReport; }
     drawErrChart();
     if(LAB.frames.length) drawAnalysisFrame(LAB.frames.length-1);
+    setTimeout(()=>{ const rEl=document.getElementById('result'); if(rEl) rEl.scrollIntoView({behavior:'smooth',block:'center'}); },130);
   }
 
   // ---------- run analysis & replay ----------
@@ -594,6 +620,55 @@
     x.strokeStyle='#38bdf8'; x.lineWidth=1.5; x.beginPath();
     for(let i=0;i<fr.length;i++){ const px=(i/(fr.length-1))*W; const d=Math.min(MAXD,fr[i].dev||0); const py=H-(d/MAXD)*H; i?x.lineTo(px,py):x.moveTo(px,py); }
     x.stroke();
+  }
+
+  // ---- full build report ----
+  function rmStat(l,v,u){ return '<div class="rm-stat"><div class="rl">'+l+'</div><div class="rv">'+v+'<span style="font-size:.5rem;color:var(--muted2)">'+(u||'')+'</span></div></div>'; }
+  function closeReport(){ document.getElementById('reportModal').style.display='none'; }
+  function drawReportChart(){
+    const c=document.getElementById('rmChart'); if(!c) return; const x=c.getContext('2d'); const W=c.width,H=c.height;
+    x.clearRect(0,0,W,H); x.fillStyle='#0b1220'; x.fillRect(0,0,W,H);
+    const fr=LAB.frames; if(fr.length<2) return;
+    const MAXD=1.6; const yB=H-(S.ON_LINE_TIGHT/MAXD)*H; x.fillStyle='rgba(34,197,94,.12)'; x.fillRect(0,yB,W,H-yB);
+    const yO=H-(S.OFF_TRACK_DIST/MAXD)*H; x.strokeStyle='rgba(239,68,68,.5)'; x.lineWidth=1; x.beginPath(); x.moveTo(0,yO); x.lineTo(W,yO); x.stroke();
+    x.strokeStyle='#38bdf8'; x.lineWidth=1.5; x.beginPath();
+    for(let i=0;i<fr.length;i++){ const px=(i/(fr.length-1))*W; const d=Math.min(MAXD,fr[i].dev||0); const py=H-(d/MAXD)*H; i?x.lineTo(px,py):x.moveTo(px,py); }
+    x.stroke();
+  }
+  function openReport(){
+    const sim=LAB.sim; if(!sim) return;
+    let build=null; try{ build=JSON.parse(localStorage.getItem('rf_robot')); }catch(e){}
+    const RD=window.RobotData; const track=LAB.track.meta; const cls=S.robotClass(sim); const acc=S.accuracy(sim);
+    let buildHtml='';
+    if(build && RD){
+      const chips=RD.ORDER.map(c=>{ const o=RD.opt(c,build[c]); return o?('<span class="rm-chip">'+RD.COMPONENTS[c].icon+' '+o.name+'</span>'):''; }).join('');
+      const shp=(build.chassis&&build.chassis.shape)||'rect';
+      const r=RD.computeReport(build);
+      buildHtml='<div class="rm-chips">'+chips+'<span class="rm-chip">🧩 Şasi: '+shp+'</span></div>'+
+        '<div class="rm-grid">'+rmStat('Ağırlık',r.weightG,'g')+rmStat('En Yüksek Hız',r.topSpeedKmh,'km/s')+rmStat('Güç',r.powerRating,'/100')+
+        rmStat('Tork',r.torque,'/10')+rmStat('Tutuş',r.grip,'')+rmStat('Batarya',r.batteryMin,'dk')+'</div>';
+    } else { buildHtml='<div class="rm-note">Bu tur hazır bir robotla yapıldı. Kendi robotunu kurmak için katalogdan başlayabilirsin.</div>'; }
+    const modeTxt = LAB.mode==='pid' ? ('PID · Kp '+LAB.pid.kp+' · Kd '+LAB.pid.kd+' · taban %'+LAB.pid.base) : ('Kural modu · '+LAB.rules.length+' kural');
+    const sensHtml='<div class="rm-line"><b>Çizgi sensörü:</b> '+LAB.sensors.length+' adet</div><div class="rm-line"><b>Kontrol yöntemi:</b> '+modeTxt+'</div>';
+    const perfHtml='<div class="rm-line"><b>Pist:</b> '+track.name+' · '+track.difficulty+'</div>'+
+      (cls?'<div class="rm-line"><b>Robot sınıfı:</b> '+cls.name+'</div>':'')+
+      '<div class="rm-grid">'+rmStat('Süre',sim.t.toFixed(1),'s')+rmStat('Çizgide',acc,'%')+rmStat('Max Sapma',sim.maxDeviation.toFixed(2),'')+rmStat('Tur',sim.laps,'')+'</div>'+
+      '<canvas id="rmChart" width="520" height="90" style="width:100%;margin-top:12px;border-radius:8px;border:1px solid var(--line);background:#0b1220;display:block"></canvas>';
+    const modal=document.getElementById('reportModal');
+    modal.innerHTML='<div class="rm-back" id="rmBack"></div><div class="rm-sheet">'+
+      '<div class="rm-h"><span>🏁 Robot Yapım Raporu</span><button class="rm-x" id="rmClose">✕</button></div>'+
+      '<div class="rm-scroll">'+
+        '<div class="rm-sec"><h4>🤖 Robot</h4>'+buildHtml+'</div>'+
+        '<div class="rm-sec"><h4>👁️ Sensörler &amp; Kod</h4>'+sensHtml+'</div>'+
+        '<div class="rm-sec"><h4>🏁 Sürüş Performansı</h4>'+perfHtml+'</div>'+
+      '</div>'+
+      '<div class="rm-foot"><button class="btn run" id="rmClose2">Kapat</button></div>'+
+    '</div>';
+    modal.style.display='flex';
+    document.getElementById('rmClose').onclick=closeReport;
+    document.getElementById('rmClose2').onclick=closeReport;
+    document.getElementById('rmBack').onclick=closeReport;
+    drawReportChart();
   }
 
   function resetSim(){

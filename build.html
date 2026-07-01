@@ -86,7 +86,7 @@
     padding:8px 4px 6px;display:flex;flex-direction:column;align-items:center;gap:5px;transition:.14s}
   .shapebtn:hover{border-color:#2a4a73}
   .shapebtn.on{border-color:var(--sky);background:#0c1a30;box-shadow:0 0 12px rgba(56,189,248,.18)}
-  .shapebtn .pv{width:26px;height:30px;background:linear-gradient(180deg,#2a4368,#1b2942);border:1px solid #38557f}
+  .shapebtn .pv{width:30px;height:34px;background:linear-gradient(180deg,#43628d,#26405f)}
   .shapebtn .pn{font-size:.6rem;color:var(--muted2);text-align:center;line-height:1.1}
   .shapebtn.on .pn{color:var(--sky)}
   .stage{position:relative;width:440px;height:330px;border-radius:14px;border:1px dashed #25406b;
@@ -288,11 +288,11 @@
 
   // chassis shapes — many figures
   const SHAPES=[
-    {id:'rect',name:'Dikdörtgen',br:'16px'},
+    {id:'rect',name:'Dikdörtgen',br:'9%'},
     {id:'round',name:'Elips',br:'50%'},
     {id:'capsule',name:'Kapsül',br:'999px'},
-    {id:'bullet',name:'Mermi',br:'50% 50% 14px 14px'},
-    {id:'teardrop',name:'Damla',br:'50% 50% 50% 14px'},
+    {id:'bullet',name:'Mermi',br:'46% 46% 12% 12%'},
+    {id:'teardrop',name:'Damla',br:'50% 50% 50% 8%'},
     {id:'hex',name:'Altıgen',cp:'polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)'},
     {id:'octagon',name:'Sekizgen',cp:'polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%)'},
     {id:'pentagon',name:'Beşgen',cp:'polygon(50% 0,100% 38%,82% 100%,18% 100%,0 38%)'},
@@ -306,9 +306,9 @@
 
   // ---- state ----
   let step=1, phase=0;
-  const B = load() || { brain:null,driver:null,motor:null,wheel:null,battery:null,
+  // Always start a FRESH build when the page opens (do not resume the saved one).
+  const B = { brain:null,driver:null,motor:null,wheel:null,battery:null,
     chassis:{ shape:'rect', len:1, wid:1, place:{} } };
-  if(!B.chassis) B.chassis={shape:'rect',len:1,wid:1,place:{}};
   function save(){ try{ localStorage.setItem('rf_robot', JSON.stringify(B)); }catch(e){} }
   function load(){ try{ return JSON.parse(localStorage.getItem('rf_robot')); }catch(e){ return null; } }
   function selectedCount(){ return ORDER.filter(c=>B[c]).length; }
