@@ -328,6 +328,7 @@
 
 <div id="toast"></div>
 
+<script src="robot-data.js"></script>
 <script src="sim-core.js"></script>
 <script>
 (function(){
@@ -865,7 +866,19 @@
   }
 
   // ---------- init ----------
+  function applyRobotBuild(){
+    try{
+      const raw=localStorage.getItem('rf_robot'); if(!raw || !window.RobotData) return;
+      const b=JSON.parse(raw); const sp=window.RobotData.toSimParams(b);
+      if(sp && sp.vMax){ LAB.params.vMax=sp.vMax; LAB.params.turnGain=sp.turnGain;
+        if(sp.wheelBase) LAB.params.wheelBase=sp.wheelBase; }
+      const m=window.RobotData.opt('motor',b.motor), w=window.RobotData.opt('wheel',b.wheel);
+      const small=document.querySelector('.brand small');
+      if(small && (m||w)) small.textContent='🔧 '+(m?m.name:'?')+' · '+(w?w.name:'?');
+    }catch(e){}
+  }
   function init(){
+    applyRobotBuild();
     loadFromHash();
     rebuildTrack();
     buildTrackTabs(); bindTabs(); bindParams(); bindPid();
