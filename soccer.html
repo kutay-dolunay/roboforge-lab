@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RoboForge · Robot Futbolu Laboratuvarı</title>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#0f172a; --panel2:#111c33; --line:#1e3a5f;
+    --sky:#38bdf8; --green:#22c55e; --amber:#f59e0b; --red:#ef4444; --purple:#a855f7;
+    --txt:#e2e8f0; --muted:#64748b; --muted2:#94a3b8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif;
+    background:radial-gradient(1100px 700px at 75% -15%,#15294a 0%,var(--bg) 55%)}
+  a{color:inherit;text-decoration:none}
+  .mono{font-family:'Courier New',monospace}
+  header.bar{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);
+    background:rgba(10,16,30,.85);backdrop-filter:blur(8px);position:sticky;top:0;z-index:40;flex-wrap:wrap}
+  .back{color:var(--muted2);font-size:.74rem;font-weight:700;border:1px solid var(--line);padding:7px 11px;border-radius:9px;white-space:nowrap}
+  .back:hover{border-color:var(--sky);color:var(--sky)}
+  .ttl b span{color:var(--sky)}
+  .ttl small{display:block;color:var(--muted);font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase}
+  .tabsTrack{display:flex;gap:6px;flex-wrap:wrap;max-width:640px}
+  .ttab{border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:5px 10px;cursor:pointer;
+    font-size:.72rem;font-weight:700;color:var(--muted2);transition:.14s;line-height:1.15;text-align:left}
+  .ttab small{display:block;font-size:.54rem;color:var(--muted);letter-spacing:.5px}
+  .ttab.on{border-color:var(--sky);color:var(--sky);background:#0c1a30}
+  .grow{flex:1}
+  .simspeed{display:flex;align-items:center;gap:7px;font-size:.68rem;color:var(--muted2)}
+  .simspeed input{width:90px;accent-color:var(--sky)}
+  .btn{padding:9px 16px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--txt);
+    font-weight:800;cursor:pointer;font-size:.8rem;letter-spacing:.4px;transition:.14s}
+  .btn:hover{border-color:var(--sky)}
+  .btn.run{background:linear-gradient(180deg,#16a34a,#15803d);border-color:#22c55e;color:#eafff0;box-shadow:0 0 16px rgba(34,197,94,.25)}
+  .btn.stop{background:linear-gradient(180deg,#dc2626,#b91c1c);border-color:#ef4444;color:#fff}
+  .btn.ghost{background:transparent;color:var(--muted2)}
+  .btn.outline{background:transparent;border-color:var(--sky);color:var(--sky)}
+
+  .layout{display:grid;grid-template-columns:1fr 380px;gap:14px;padding:14px 16px;max-width:1500px;margin:0 auto}
+  @media(max-width:1040px){.layout{grid-template-columns:1fr}}
+
+  .stageWrap{position:relative}
+  canvas#arena{width:100%;border-radius:14px;border:1px solid #16202e;background:#0a0d12;display:block}
+  .hud{position:absolute;top:12px;left:12px;display:flex;gap:8px;flex-wrap:wrap}
+  .hudbox{background:rgba(8,12,24,.88);border:1px solid var(--line);border-radius:10px;padding:7px 12px;min-width:70px}
+  .hudbox .l{font-size:.54rem;color:var(--muted);letter-spacing:1.5px;font-weight:700}
+  .hudbox .v{font-size:1rem;font-weight:800;margin-top:1px}
+  .hudbox .v.ok{color:var(--green)} .hudbox .v.bad{color:#fca5a5}
+  .hint{margin-top:10px;background:var(--panel2);border:1px solid var(--line);border-radius:11px;
+    padding:11px 15px;font-size:.85rem;color:var(--muted2)}
+  .hint b{color:var(--green)}
+
+  .rdock{margin-top:10px;border:1px solid rgba(34,197,94,.45);border-radius:13px;overflow:hidden;
+    background:linear-gradient(180deg,#0e1a2e,#0b1220)}
+  .rdock.lose{border-color:rgba(239,68,68,.45)}
+  .rdock .rd-head{padding:10px 16px;font-weight:800;font-size:.95rem;color:var(--green);
+    background:rgba(34,197,94,.08);border-bottom:1px solid rgba(34,197,94,.25)}
+  .rdock.lose .rd-head{color:#fca5a5;background:rgba(239,68,68,.07);border-bottom-color:rgba(239,68,68,.25)}
+  .rdock .rd-body{padding:14px 16px}
+  .rdock .rd-medal{font-size:1.15rem;font-weight:800;color:var(--amber);margin-bottom:2px}
+  .rdock .rd-cmt{font-size:.78rem;color:var(--muted2);margin-bottom:12px}
+  .rdock .rd-stats{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:12px}
+  .rdock .rd-stat .l{font-size:.56rem;letter-spacing:1.5px;color:var(--muted);font-weight:700}
+  .rdock .rd-stat .v{font-size:1.25rem;font-weight:800;margin-top:2px}
+  .rdock .rd-stat .v.ok{color:var(--green)} .rdock .rd-stat .v.bad{color:#fca5a5}
+  .rdock .rd-tip{background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.3);border-radius:10px;
+    padding:9px 13px;font-size:.8rem;color:var(--muted2);margin-bottom:13px}
+  .rdock .rd-btns{display:flex;gap:9px;flex-wrap:wrap}
+
+  .side .tabbar{display:flex;gap:6px;margin-bottom:12px}
+  .stab{flex:1;text-align:center;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--panel);
+    cursor:pointer;font-weight:800;font-size:.8rem;color:var(--muted2)}
+  .stab.on{border-color:var(--sky);color:var(--sky);background:#0c1a30}
+  .card{border:1px solid var(--line);border-radius:13px;background:var(--panel);padding:14px;margin-bottom:12px}
+  .card h4{margin:0 0 8px;font-size:.66rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+  .card p.exp{font-size:.76rem;color:var(--muted2);line-height:1.5;margin:0 0 10px}
+
+  .modeRow{display:flex;gap:6px;margin-bottom:12px}
+  .modeBtn{flex:1;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel);cursor:pointer;
+    font-weight:800;font-size:.76rem;color:var(--muted2)}
+  .modeBtn.on{border-color:var(--purple);color:#d8b4fe;background:#160f2b}
+
+  .rule{border:1px solid var(--line);border-radius:11px;background:var(--panel2);padding:9px;margin-bottom:8px}
+  .rule.active{border-color:var(--green);box-shadow:0 0 10px rgba(34,197,94,.25)}
+  .rule .chips{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:7px}
+  .chip{border:1px solid #26364e;border-radius:7px;padding:3px 6px;font-size:.58rem;font-weight:800;cursor:pointer;
+    background:#0d1524;color:var(--muted);min-width:38px;text-align:center;line-height:1.25}
+  .chip small{display:block;font-size:.44rem;color:var(--muted);letter-spacing:.5px;font-weight:700}
+  .chip.on{border-color:var(--green);color:#4ade80}
+  .chip.off{border-color:var(--red);color:#fca5a5}
+  .motors{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .mot{display:flex;gap:4px;align-items:center;background:#0d1524;border:1px solid #26364e;border-radius:8px;padding:4px 6px}
+  .mot b{font-size:.6rem;color:var(--muted2)}
+  .mot select,.mot input{background:#0b1220;border:1px solid #26364e;color:var(--txt);border-radius:6px;font-size:.66rem;padding:2px 3px}
+  .mot input{width:44px}
+  .rtools{display:flex;gap:5px;margin-left:auto}
+  .iconbtn{border:1px solid var(--line);background:var(--panel);color:var(--muted2);border-radius:7px;
+    width:24px;height:24px;cursor:pointer;font-size:.7rem;line-height:1}
+  .iconbtn:hover{border-color:var(--sky);color:var(--sky)}
+  .iconbtn.del:hover{border-color:var(--red);color:#fca5a5}
+  .addRule{width:100%;padding:9px;border:1px dashed var(--line);border-radius:10px;background:transparent;
+    color:var(--muted2);font-weight:700;cursor:pointer;font-size:.78rem}
+  .addRule:hover{border-color:var(--sky);color:var(--sky)}
+  .defTag{font-size:.58rem;letter-spacing:1px;color:var(--amber);font-weight:800;margin-bottom:5px}
+
+  .sliderRow{margin:10px 0}
+  .sliderRow label{display:flex;justify-content:space-between;font-size:.74rem;color:var(--muted2);margin-bottom:4px}
+  .sliderRow label b{color:var(--sky)}
+  input[type=range]{width:100%;accent-color:var(--sky)}
+
+  .kunye .chipsRow{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px}
+  .kunye .kchip{border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:4px 8px;font-size:.66rem;color:var(--muted2)}
+  .kunye .kchip b{color:var(--txt)}
+  .kstats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+  .kstat{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 4px;text-align:center}
+  .kstat .l{font-size:.5rem;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
+  .kstat .v{font-size:.95rem;font-weight:800}
+  .kstat .v small{font-size:.5rem;color:var(--muted2)}
+  .bchipR{display:inline-block;border:1px solid var(--line);background:var(--panel2);border-radius:7px;
+    padding:3px 8px;font-size:.7rem;color:var(--muted2);margin:2px 2px 2px 0}
+
+  #resultWrap{position:fixed;inset:0;background:rgba(5,8,16,.7);backdrop-filter:blur(4px);display:none;
+    align-items:center;justify-content:center;z-index:80;padding:18px}
+  #resultWrap.show{display:flex}
+  .result{max-width:520px;width:100%;border:1px solid var(--line);border-radius:18px;padding:24px;
+    background:linear-gradient(180deg,#101b31,#0b1220);box-shadow:0 30px 80px rgba(0,0,0,.6);max-height:92vh;overflow:auto}
+  .result h3{margin:0 0 4px;font-size:1.2rem}
+  .result h3.win{color:var(--green)} .result h3.lose{color:#fca5a5}
+  .rstats{display:flex;gap:8px;margin:12px 0}
+  .rstat{flex:1;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px;text-align:center}
+  .rstat .l{font-size:.54rem;color:var(--muted);letter-spacing:1px}
+  .rstat .v{font-size:1.05rem;font-weight:800;margin-top:2px}
+  .rbtns{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+
+  #tutwrap{position:fixed;inset:0;background:rgba(5,8,16,.75);display:none;align-items:center;justify-content:center;z-index:90;padding:18px}
+  .tut{max-width:460px;border:1px solid var(--sky);border-radius:16px;background:#0d1830;padding:22px;box-shadow:0 0 60px rgba(56,189,248,.2)}
+  .tut h3{margin:0 0 8px;color:var(--sky);font-size:1.1rem}
+  .tut p{font-size:.86rem;color:var(--muted2);line-height:1.6;margin:0 0 14px}
+  .tut .dots{display:flex;gap:5px;margin-bottom:12px}
+  .tut .dots i{width:8px;height:8px;border-radius:50%;background:#1e293b}
+  .tut .dots i.on{background:var(--sky)}
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:rgba(8,12,24,.95);
+    border:1px solid var(--line);padding:10px 18px;border-radius:11px;font-size:.8rem;font-weight:700;opacity:0;
+    transition:.25s;pointer-events:none;z-index:99}
+  #toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header class="bar">
+  <a class="back" href="./">← Katalog</a>
+  <div class="ttl"><b>Robo<span>Forge</span> · Robot Futbolu</b><small id="buildLine">VARSAYILAN ROBOT</small></div>
+  <div class="tabsTrack" id="trackTabs"></div>
+  <div class="grow"></div>
+  <div class="simspeed">Sim Hızı <input type="range" id="simSpeed" min="0.5" max="3" step="0.5" value="1"><span id="simSpeedV" class="mono">1.0x</span></div>
+  <button class="btn run" id="runBtn">▶ MAÇI BAŞLAT</button>
+  <button class="btn ghost" id="resetBtn">⟲ Sıfırla</button>
+  <button class="btn ghost" id="shareBtn">🔗 Paylaş</button>
+  <button class="btn ghost" id="helpBtn">?</button>
+</header>
+
+<div class="layout">
+  <div class="stageWrap">
+    <canvas id="arena" width="920" height="620"></canvas>
+    <div class="hud">
+      <div class="hudbox"><div class="l">SÜRE</div><div class="v mono" id="hudT">0.0s</div></div>
+      <div class="hudbox"><div class="l">SKOR</div><div class="v mono" id="hudSc">0</div></div>
+      <div class="hudbox"><div class="l">HEDEF</div><div class="v mono" id="hudG">1 GOL</div></div>
+      <div class="hudbox"><div class="l">DURUM</div><div class="v" id="hudS">HAZIR</div></div>
+    </div>
+    <div class="hint" id="hint">⚽ Hücum antrenmanı: savunmacıyı geç, <b>sağdaki kaleye</b> gol at! Başlama vuruşu hep senin. Top kilitlenirse hakem ortaya alır.</div>
+    <div class="rdock" id="resultDock" style="display:none"></div>
+  </div>
+
+  <div class="side">
+    <div class="tabbar">
+      <div class="stab on" data-tab="robot">🤖 Robot</div>
+      <div class="stab" data-tab="kod">⚽ Kod</div>
+    </div>
+
+    <div id="tab-robot">
+      <div class="card">
+        <h4>Forvet Robotu</h4>
+        <p class="exp">Robot topu ve kaleleri <b>yön sensörleriyle</b> görür: TOP (solda/önde/sağda),
+          KALE (hücum kalen), YAKIN (top yakın mı) ve KENDİ-KALE (kendi kalen önünde mi — sakın o yöne sürme!).
+          Analog PID forvet varsayılandır; Kural modu da denenebilir.</p>
+      </div>
+      <div class="card">
+        <h4>Sürüş (robotundan gelir)</h4>
+        <div class="sliderRow"><label>Motor Hızı <b id="vLabel">Orta</b></label>
+          <input type="range" id="vMax" min="2.2" max="6" step="0.1" value="3.6"></div>
+        <div class="sliderRow"><label>Teker Tutuşu <b id="gLabel">Normal</b></label>
+          <input type="range" id="turnGain" min="0.8" max="1.55" step="0.05" value="1.0"></div>
+      </div>
+      <div class="card kunye" id="kunye"></div>
+    </div>
+
+    <div id="tab-kod" style="display:none">
+      <div class="modeRow">
+        <button class="modeBtn on" id="modePid">📈 PID Forvet</button>
+        <button class="modeBtn" id="modeRules">🧩 Kural Modu</button>
+      </div>
+      <div id="pidPanel">
+        <div class="card">
+          <h4>PID Forvet Ayarı</h4>
+          <p class="exp">Robot topa arkadan yaklaşır, topu alınca kaleye sürer. Sen dengeyi ayarla:
+            hız mı, kontrol mü?</p>
+          <div class="sliderRow"><label>Temel Hız <b id="pBaseV">78</b></label>
+            <input type="range" id="pBase" min="30" max="100" step="1" value="78"></div>
+          <div class="sliderRow"><label>Kp (yönelme) <b id="pKpV">1.6</b></label>
+            <input type="range" id="pKp" min="0.3" max="3" step="0.05" value="1.6"></div>
+          <div class="sliderRow"><label>Kd (savrulma sönümü) <b id="pKdV">0.35</b></label>
+            <input type="range" id="pKd" min="0" max="1.2" step="0.05" value="0.35"></div>
+        </div>
+      </div>
+      <div id="rulesPanel" style="display:none">
+        <div class="card">
+          <h4>Kurallar (ilk eşleşen kazanır)</h4>
+          <p class="exp">Açık sahada kesikli kurallarla top sürmek zordur — bu da dersin kendisi!
+            Dene, gözle, PID ile karşılaştır.</p>
+          <div id="rulesList"></div>
+          <button class="addRule" id="addRule">+ Yeni Kural</button>
+          <div style="margin-top:12px">
+            <div class="defTag">VARSAYILAN (hiçbiri eşleşmezse)</div>
+            <div id="defRule"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="resultWrap"><div class="result" id="resultBox"></div></div>
+<div id="tutwrap"><div class="tut" id="tutBox"></div></div>
+<div id="toast"></div>
+
+<script src="robot-data.js?v=2"></script>
+<script src="soccer-core.js?v=1"></script>
+<script>
+(function(){
+  const SC = window.SoccerCore;
+  const CVS = document.getElementById('arena'), CTX = CVS.getContext('2d');
+
+  const LAB = {
+    oppIdx: 0, mode: 'pid',
+    rules: SC.starterRules(), defaultRule: SC.starterDefault(),
+    pid: SC.defaultPID(), params: SC.defaultParams(),
+    sim: null, raf: null, lastTs: 0, simSpeed: 1, replay: null, lastScore: 0,
+    view: { ox: 0, oy: 0, scale: 30 },
+  };
+
+  function fitView(){
+    const pad=1.6;
+    const sc = Math.min(CVS.width/(SC.PITCH_W+pad*2), CVS.height/(SC.PITCH_H+pad*2));
+    LAB.view = { scale: sc, ox: CVS.width/2, oy: CVS.height/2 };
+  }
+  function W2S(x,y){ return [LAB.view.ox + x*LAB.view.scale, LAB.view.oy - y*LAB.view.scale]; }
+
+  function drawScene(last){
+    const sc=LAB.view.scale;
+    CTX.fillStyle='#0a1210'; CTX.fillRect(0,0,CVS.width,CVS.height);
+    const tl=W2S(-SC.PITCH_W/2,SC.PITCH_H/2), br=W2S(SC.PITCH_W/2,-SC.PITCH_H/2);
+    // pitch stripes
+    for(let i=0;i<8;i++){
+      CTX.fillStyle = i%2 ? '#0c1713' : '#0a1410';
+      CTX.fillRect(tl[0]+(br[0]-tl[0])*i/8, tl[1], (br[0]-tl[0])/8, br[1]-tl[1]);
+    }
+    // lines
+    CTX.strokeStyle='rgba(226,232,240,.5)'; CTX.lineWidth=2;
+    CTX.strokeRect(tl[0],tl[1],br[0]-tl[0],br[1]-tl[1]);
+    const c0=W2S(0,0);
+    CTX.beginPath(); CTX.moveTo(c0[0],tl[1]); CTX.lineTo(c0[0],br[1]); CTX.stroke();
+    CTX.beginPath(); CTX.arc(c0[0],c0[1],1.8*sc,0,7); CTX.stroke();
+    // goals
+    const gy=SC.GOAL_W/2;
+    const gR1=W2S(SC.PITCH_W/2,gy), gR2=W2S(SC.PITCH_W/2+0.7,-gy);
+    CTX.fillStyle='rgba(34,197,94,.18)'; CTX.strokeStyle='#22c55e'; CTX.lineWidth=2.5;
+    CTX.fillRect(gR1[0],gR1[1],gR2[0]-gR1[0],gR2[1]-gR1[1]); CTX.strokeRect(gR1[0],gR1[1],gR2[0]-gR1[0],gR2[1]-gR1[1]);
+    const gL1=W2S(-SC.PITCH_W/2-0.7,gy), gL2=W2S(-SC.PITCH_W/2,-gy);
+    CTX.fillStyle='rgba(239,68,68,.14)'; CTX.strokeStyle='rgba(239,68,68,.7)';
+    CTX.fillRect(gL1[0],gL1[1],gL2[0]-gL1[0],gL2[1]-gL1[1]); CTX.strokeRect(gL1[0],gL1[1],gL2[0]-gL1[0],gL2[1]-gL1[1]);
+    CTX.font='700 11px Segoe UI'; CTX.textAlign='center';
+    CTX.fillStyle='#4ade80'; CTX.fillText('HEDEF KALE', gR1[0]+8, gR1[1]-8);
+    CTX.fillStyle='#fca5a5'; CTX.fillText('SENİN KALEN', gL2[0]-8, gL1[1]-8);
+    // trails
+    if(LAB.sim&&LAB.sim.trail.length>1){
+      CTX.strokeStyle='rgba(56,189,248,.4)'; CTX.lineWidth=2; CTX.beginPath();
+      LAB.sim.trail.forEach((p,i)=>{ const q=W2S(p[0],p[1]); i?CTX.lineTo(q[0],q[1]):CTX.moveTo(q[0],q[1]); });
+      CTX.stroke();
+      CTX.strokeStyle='rgba(226,232,240,.35)'; CTX.beginPath();
+      LAB.sim.ballTrail.forEach((p,i)=>{ const q=W2S(p[0],p[1]); i?CTX.lineTo(q[0],q[1]):CTX.moveTo(q[0],q[1]); });
+      CTX.stroke();
+    }
+    // bodies
+    const P = LAB.sim?LAB.sim.player:{x:-3.2,y:0,th:0};
+    const E = LAB.sim?LAB.sim.enemy:{x:5.4,y:0,th:Math.PI};
+    const B = LAB.sim?LAB.sim.ball:{x:0,y:0};
+    drawBot(P,'#1c2c49','#38bdf8',true);
+    drawBot(E,'#3b1219','#ef4444',false);
+    // ball
+    const bq=W2S(B.x,B.y);
+    const grd=CTX.createRadialGradient(bq[0]-2,bq[1]-2,1,bq[0],bq[1],SC.BALL_R*sc);
+    grd.addColorStop(0,'#ffffff'); grd.addColorStop(1,'#94a3b8');
+    CTX.fillStyle=grd; CTX.beginPath(); CTX.arc(bq[0],bq[1],SC.BALL_R*sc,0,7); CTX.fill();
+    CTX.strokeStyle='#475569'; CTX.lineWidth=1; CTX.stroke();
+  }
+  function drawBot(r,fill,accent,isPlayer){
+    const q=W2S(r.x,r.y), sc=LAB.view.scale;
+    CTX.save(); CTX.translate(q[0],q[1]); CTX.rotate(-r.th);
+    CTX.fillStyle=fill; CTX.strokeStyle=accent; CTX.lineWidth=2;
+    CTX.beginPath(); CTX.arc(0,0,SC.ROBOT_R*sc,0,7); CTX.fill(); CTX.stroke();
+    CTX.fillStyle=accent; CTX.beginPath();
+    CTX.moveTo(SC.ROBOT_R*sc*0.95,0); CTX.lineTo(SC.ROBOT_R*sc*0.3,-SC.ROBOT_R*sc*0.45);
+    CTX.lineTo(SC.ROBOT_R*sc*0.3,SC.ROBOT_R*sc*0.45); CTX.closePath(); CTX.fill();
+    CTX.restore();
+    CTX.fillStyle=accent; CTX.font='700 10px Segoe UI'; CTX.textAlign='center';
+    CTX.fillText(isPlayer?'SEN':'RAKİP', q[0], q[1]+SC.ROBOT_R*sc+12);
+  }
+
+  function updateHud(){
+    document.getElementById('hudT').textContent=(LAB.sim?LAB.sim.t:0).toFixed(1)+'s';
+    const opp=SC.OPPONENTS[LAB.oppIdx];
+    document.getElementById('hudSc').textContent=LAB.sim?LAB.sim.score.p:0;
+    document.getElementById('hudG').textContent=(opp.goals||1)+' GOL';
+    const s=document.getElementById('hudS');
+    if(!LAB.sim){ s.textContent='HAZIR'; s.className='v'; }
+    else if(LAB.sim.status==='running'){ s.textContent='MAÇTA'; s.className='v ok'; }
+    else if(LAB.sim.status==='success'){ s.textContent='KAZANDIN!'; s.className='v ok'; }
+    else { s.textContent='SÜRE DOLDU'; s.className='v bad'; }
+    if(LAB.sim && LAB.sim.score.p>LAB.lastScore){ LAB.lastScore=LAB.sim.score.p; toast('⚽ GOOOL! '+LAB.sim.score.p+'. gol!'); }
+  }
+
+  function buildConfig(){
+    return { opponent: SC.OPPONENTS[LAB.oppIdx], mode: LAB.mode, rules: LAB.rules,
+      defaultRule: LAB.defaultRule, pid: LAB.pid, params: LAB.params };
+  }
+  function startRun(){
+    stopLoop(); LAB.replay=null; hideResult(); LAB.lastScore=0;
+    LAB.sim = SC.createSim(buildConfig());
+    document.getElementById('runBtn').textContent='■ DURDUR';
+    document.getElementById('runBtn').className='btn stop';
+    LAB.lastTs=0; LAB.raf=requestAnimationFrame(loop);
+  }
+  function loop(ts){
+    if(!LAB.lastTs) LAB.lastTs=ts;
+    let dt=(ts-LAB.lastTs)/1000; LAB.lastTs=ts;
+    if(dt>0.1) dt=0.1;
+    let last=null;
+    const steps=Math.max(1,Math.round(dt*60*LAB.simSpeed));
+    for(let i=0;i<steps;i++){ last=SC.tickSim(LAB.sim,1/60); if(LAB.sim.status!=='running') break; }
+    drawScene(last); updateHud();
+    if(LAB.sim.status==='running') LAB.raf=requestAnimationFrame(loop);
+    else { stopRunUi(); setTimeout(showResult,450); }
+  }
+  function stopLoop(){ if(LAB.raf) cancelAnimationFrame(LAB.raf); LAB.raf=null; }
+  function stopRunUi(){
+    document.getElementById('runBtn').textContent='▶ MAÇI BAŞLAT';
+    document.getElementById('runBtn').className='btn run';
+  }
+  function resetSim(){ stopLoop(); stopRunUi(); LAB.sim=null; LAB.replay=null; LAB.lastScore=0; drawScene(null); updateHud(); hideResult(); }
+  function hideResult(){
+    document.getElementById('resultDock').style.display='none';
+    document.getElementById('hint').style.display='block';
+    document.getElementById('resultWrap').classList.remove('show');
+  }
+
+  function showResult(){
+    const sim=LAB.sim; if(!sim) return;
+    const win=sim.status==='success';
+    const cls=SC.robotClass(sim);
+    const tips=SC.coach(sim);
+    const opp=SC.OPPONENTS[LAB.oppIdx];
+    const dock=document.getElementById('resultDock');
+    dock.className='rdock'+(win?'':' lose');
+    dock.innerHTML =
+      '<div class="rd-head">'+(win?'⚽ Antrenman Tamamlandı!':'⏱️ Süre Doldu')+'</div>'+
+      '<div class="rd-body">'+
+        (cls?'<div class="rd-medal">'+cls.name+'</div><div class="rd-cmt">'+(cls.cmt||'')+'</div>'
+            :'<div class="rd-cmt">Hedef '+(opp.goals||1)+' goldü, '+sim.score.p+' gol attın. Taktiği geliştir ve tekrar dene!</div>')+
+        '<div class="rd-stats">'+
+          '<div class="rd-stat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
+          '<div class="rd-stat"><div class="l">GOL</div><div class="v mono">'+sim.score.p+'/'+(opp.goals||1)+'</div></div>'+
+          '<div class="rd-stat"><div class="l">TOPLA BULUŞMA</div><div class="v mono">'+sim.touches+'</div></div>'+
+          '<div class="rd-stat"><div class="l">DURUM</div><div class="v '+(win?'ok':'bad')+'">'+(win?'KAZANDIN':'BAŞARISIZ')+'</div></div>'+
+        '</div>'+
+        (tips.length?'<div class="rd-tip">💡 '+tips[0]+'</div>':'')+
+        '<div class="rd-btns">'+
+          '<button class="btn run" id="againBtn">⟲ Tekrar Dene</button>'+
+          '<button class="btn outline" id="replayBtn">▶ Maçı İzle</button>'+
+          '<button class="btn outline" id="reportBtn">📄 Raporu Önizle</button>'+
+        '</div>'+
+      '</div>';
+    document.getElementById('hint').style.display='none';
+    dock.style.display='block';
+    document.getElementById('againBtn').onclick=()=>{ hideResult(); startRun(); };
+    document.getElementById('replayBtn').onclick=replayRun;
+    document.getElementById('reportBtn').onclick=openReport;
+  }
+
+  function replayRun(){
+    if(!LAB.sim || LAB.sim.trail.length<2 || LAB.replay) return;
+    const trail=LAB.sim.trail.slice(), ballTrail=LAB.sim.ballTrail.slice();
+    LAB.replay={ i:2 };
+    const step=()=>{
+      if(!LAB.replay) return;
+      const R=LAB.replay;
+      const sp={...LAB.sim.player}, sb={...LAB.sim.ball};
+      const st=LAB.sim.trail, sbt=LAB.sim.ballTrail;
+      LAB.sim.trail=trail.slice(0,R.i); LAB.sim.ballTrail=ballTrail.slice(0,R.i);
+      const p=trail[Math.min(R.i-1,trail.length-1)], q=trail[Math.max(0,R.i-2)];
+      LAB.sim.player.x=p[0]; LAB.sim.player.y=p[1]; LAB.sim.player.th=Math.atan2(p[1]-q[1],p[0]-q[0]);
+      const bp=ballTrail[Math.min(R.i-1,ballTrail.length-1)];
+      LAB.sim.ball.x=bp[0]; LAB.sim.ball.y=bp[1];
+      drawScene(null);
+      LAB.sim.trail=st; LAB.sim.ballTrail=sbt;
+      Object.assign(LAB.sim.player,sp); Object.assign(LAB.sim.ball,sb);
+      R.i+=3;
+      if(R.i<trail.length) requestAnimationFrame(step);
+      else { LAB.replay=null; drawScene(LAB.sim.last); }
+    };
+    requestAnimationFrame(step);
+  }
+
+  function openReport(){
+    const sim=LAB.sim; if(!sim) return;
+    let build=null; try{ build=JSON.parse(localStorage.getItem('rf_robot')); }catch(e){}
+    const RD=window.RobotData;
+    let chips='<span class="bchipR">Varsayılan robot</span>';
+    if(build&&build.motor&&RD){
+      chips=RD.ORDER.map(cat=>{ const o=RD.opt(cat,build[cat]);
+        return o?'<span class="bchipR">'+o.icon+' '+o.name+'</span>':''; }).join(' ');
+    }
+    const win=sim.status==='success';
+    const opp=SC.OPPONENTS[LAB.oppIdx];
+    const box=document.getElementById('resultBox');
+    box.innerHTML =
+      '<h3 class="'+(win?'win':'lose')+'">📄 Maç Raporu — vs '+opp.name+'</h3>'+
+      '<div style="margin:8px 0;font-size:.8rem;color:var(--muted2)">'+chips+'</div>'+
+      '<div style="font-size:.76rem;color:var(--sky);margin-bottom:8px">'+
+        (LAB.mode==='pid'?'📈 PID Forvet — Temel '+LAB.pid.base+' · Kp '+LAB.pid.kp.toFixed(2)+' · Kd '+LAB.pid.kd.toFixed(2):'🧩 Kural Modu — '+LAB.rules.length+' kural')+'</div>'+
+      '<div class="rstats">'+
+        '<div class="rstat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
+        '<div class="rstat"><div class="l">GOL</div><div class="v mono">'+sim.score.p+'/'+(opp.goals||1)+'</div></div>'+
+        '<div class="rstat"><div class="l">BULUŞMA</div><div class="v mono">'+sim.touches+'</div></div>'+
+        '<div class="rstat"><div class="l">DURUM</div><div class="v" style="color:'+(win?'var(--green)':'#fca5a5')+'">'+(win?'KAZANDIN':'BAŞARISIZ')+'</div></div>'+
+      '</div>'+
+      '<canvas id="repMap" width="460" height="300" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#0a0d12"></canvas>'+
+      '<div class="rbtns"><button class="btn ghost" id="repClose">Kapat</button></div>';
+    document.getElementById('resultWrap').classList.add('show');
+    document.getElementById('repClose').onclick=()=>document.getElementById('resultWrap').classList.remove('show');
+    // mini pitch
+    const cv=document.getElementById('repMap'), x=cv.getContext('2d');
+    const sc=Math.min(cv.width/(SC.PITCH_W+2), cv.height/(SC.PITCH_H+2));
+    const w2=p=>[cv.width/2+p[0]*sc, cv.height/2-p[1]*sc];
+    x.fillStyle='#0a1210'; x.fillRect(0,0,cv.width,cv.height);
+    const a=w2([-SC.PITCH_W/2,SC.PITCH_H/2]), b=w2([SC.PITCH_W/2,-SC.PITCH_H/2]);
+    x.strokeStyle='rgba(226,232,240,.4)'; x.strokeRect(a[0],a[1],b[0]-a[0],b[1]-a[1]);
+    if(sim.trail.length>1){
+      x.strokeStyle='rgba(56,189,248,.8)'; x.lineWidth=1.5; x.beginPath();
+      sim.trail.forEach((p,i)=>{ const q=w2(p); i?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]); }); x.stroke();
+      x.strokeStyle='rgba(226,232,240,.5)'; x.beginPath();
+      sim.ballTrail.forEach((p,i)=>{ const q=w2(p); i?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]); }); x.stroke();
+    }
+  }
+
+  // ---- rules editor ----
+  const CHIP_DEFS=[
+    { key:0, name:'TOP', sub:'solda' }, { key:1, name:'TOP', sub:'önde' }, { key:2, name:'TOP', sub:'sağda' },
+    { key:3, name:'KALE', sub:'solda' }, { key:4, name:'KALE', sub:'önde' }, { key:5, name:'KALE', sub:'sağda' },
+    { key:6, name:'YAKIN', sub:'top' }, { key:7, name:'KENDİ K.', sub:'önde' },
+  ];
+  function ruleEl(rule,ri,isDef){
+    const el=document.createElement('div'); el.className='rule'; el.id=isDef?'ruleDef':'rule'+ri;
+    if(!isDef){
+      const chips=document.createElement('div'); chips.className='chips';
+      CHIP_DEFS.forEach(def=>{
+        const val=rule.pattern[def.key]||'any';
+        const ch=document.createElement('div');
+        ch.className='chip'+(val==='on'?' on':val==='off'?' off':'');
+        ch.innerHTML=def.name+'<small>'+def.sub+(val==='any'?' · fark etmez':val==='on'?' · VAR':' · YOK')+'</small>';
+        ch.onclick=()=>{ rule.pattern[def.key]=val==='any'?'on':val==='on'?'off':'any'; buildRules(); };
+        chips.appendChild(ch);
+      });
+      el.appendChild(chips);
+    }
+    const mot=document.createElement('div'); mot.className='motors';
+    ['left','right'].forEach(side=>{
+      const m=rule[side];
+      const wrap=document.createElement('div'); wrap.className='mot';
+      wrap.innerHTML='<b>'+(side==='left'?'SOL':'SAĞ')+'</b>';
+      const sel=document.createElement('select');
+      [['fwd','İleri'],['stop','Dur'],['rev','Geri']].forEach(([v,l])=>{
+        const o=document.createElement('option'); o.value=v; o.textContent=l; if(m.dir===v)o.selected=true; sel.appendChild(o); });
+      sel.onchange=()=>{ m.dir=sel.value; };
+      const inp=document.createElement('input'); inp.type='number'; inp.min=0; inp.max=100; inp.value=m.speed;
+      inp.onchange=()=>{ m.speed=Math.max(0,Math.min(100,+inp.value||0)); };
+      wrap.appendChild(sel); wrap.appendChild(inp);
+      mot.appendChild(wrap);
+    });
+    if(!isDef){
+      const tools=document.createElement('div'); tools.className='rtools';
+      const mk=(t,f,c)=>{ const b=document.createElement('button'); b.className='iconbtn'+(c?' '+c:''); b.textContent=t; b.onclick=f; return b; };
+      tools.appendChild(mk('↑',()=>{ if(ri>0){ const t=LAB.rules[ri]; LAB.rules[ri]=LAB.rules[ri-1]; LAB.rules[ri-1]=t; buildRules(); } }));
+      tools.appendChild(mk('↓',()=>{ if(ri<LAB.rules.length-1){ const t=LAB.rules[ri]; LAB.rules[ri]=LAB.rules[ri+1]; LAB.rules[ri+1]=t; buildRules(); } }));
+      tools.appendChild(mk('✕',()=>{ LAB.rules.splice(ri,1); buildRules(); },'del'));
+      mot.appendChild(tools);
+    }
+    el.appendChild(mot);
+    return el;
+  }
+  function buildRules(){
+    const list=document.getElementById('rulesList'); list.innerHTML='';
+    LAB.rules.forEach((r,i)=>list.appendChild(ruleEl(r,i,false)));
+    const def=document.getElementById('defRule'); def.innerHTML='';
+    def.appendChild(ruleEl(LAB.defaultRule,-1,true));
+  }
+  document.getElementById('addRule').onclick=()=>{
+    LAB.rules.push({ pattern:['any','any','any','any','any','any','any','any'],
+      left:{dir:'fwd',speed:60}, right:{dir:'fwd',speed:60} });
+    buildRules();
+  };
+
+  // ---- mode / pid / params ----
+  function setMode(m){
+    LAB.mode=m;
+    document.getElementById('modePid').classList.toggle('on',m==='pid');
+    document.getElementById('modeRules').classList.toggle('on',m==='rules');
+    document.getElementById('pidPanel').style.display=m==='pid'?'block':'none';
+    document.getElementById('rulesPanel').style.display=m==='rules'?'block':'none';
+  }
+  document.getElementById('modePid').onclick=()=>setMode('pid');
+  document.getElementById('modeRules').onclick=()=>setMode('rules');
+  function bindPid(){
+    const b=document.getElementById('pBase'), kp=document.getElementById('pKp'), kd=document.getElementById('pKd');
+    b.value=LAB.pid.base; kp.value=LAB.pid.kp; kd.value=LAB.pid.kd;
+    const sync=()=>{ document.getElementById('pBaseV').textContent=b.value;
+      document.getElementById('pKpV').textContent=(+kp.value).toFixed(2);
+      document.getElementById('pKdV').textContent=(+kd.value).toFixed(2); };
+    b.oninput=()=>{ LAB.pid.base=+b.value; sync(); };
+    kp.oninput=()=>{ LAB.pid.kp=+kp.value; sync(); };
+    kd.oninput=()=>{ LAB.pid.kd=+kd.value; sync(); };
+    sync();
+  }
+  function vLabel(v){ return v<3?'Yavaş':v<4.3?'Orta':'Hızlı'; }
+  function gLabel(g){ return g<1?'Kaygan':g<1.25?'Normal':'Yapışkan'; }
+  function bindParams(){
+    const v=document.getElementById('vMax'), g=document.getElementById('turnGain');
+    v.value=LAB.params.vMax; g.value=LAB.params.turnGain;
+    const sync=()=>{ document.getElementById('vLabel').textContent=vLabel(+v.value);
+      document.getElementById('gLabel').textContent=gLabel(+g.value); };
+    v.oninput=()=>{ LAB.params.vMax=+v.value; sync(); };
+    g.oninput=()=>{ LAB.params.turnGain=+g.value; sync(); };
+    sync();
+  }
+  function applyRobotBuild(){
+    try{
+      const raw=localStorage.getItem('rf_robot'); if(!raw||!window.RobotData) return;
+      const build=JSON.parse(raw); if(!build||!build.motor) return;
+      const sp=window.RobotData.toSimParams(build);
+      LAB.params.vMax=sp.vMax; LAB.params.turnGain=sp.turnGain; LAB.params.wheelBase=sp.wheelBase;
+      const m=window.RobotData.opt('motor',build.motor), w=window.RobotData.opt('wheel',build.wheel);
+      document.getElementById('buildLine').textContent=((m?m.name:'')+' · '+(w?w.name:'')).toUpperCase();
+    }catch(e){}
+  }
+  function fillKunye(){
+    const el=document.getElementById('kunye');
+    let build=null; try{ build=JSON.parse(localStorage.getItem('rf_robot')); }catch(e){}
+    if(!build||!build.motor||!window.RobotData){
+      el.innerHTML='<h4>🤖 Robotun Künyesi</h4><p class="exp">Henüz robot kurmadın. Hızlı robot topa önce ulaşır — katalogdan robotunu kur!</p><a class="btn ghost" href="build.html?sim=soccer">Robotunu kur →</a>';
+      return;
+    }
+    const RD=window.RobotData, r=RD.computeReport(build);
+    const chips=RD.ORDER.map(cat=>{ const o=RD.opt(cat,build[cat]);
+      return o?'<div class="kchip">'+o.icon+' <b>'+o.name+'</b></div>':''; }).join('');
+    el.innerHTML='<h4>🤖 Robotun Künyesi</h4><div class="chipsRow">'+chips+'</div>'+
+      '<div class="kstats">'+
+      '<div class="kstat"><div class="l">Ağırlık</div><div class="v">'+r.weightG+'<small>g</small></div></div>'+
+      '<div class="kstat"><div class="l">Hız</div><div class="v">'+r.topSpeedKmh+'<small>km/s</small></div></div>'+
+      '<div class="kstat"><div class="l">Güç</div><div class="v">'+r.powerRating+'</div></div>'+
+      '</div>'+
+      '<p class="exp" style="margin-top:9px">Topa rakipten önce ulaşan maçı kontrol eder.</p>';
+  }
+
+  // ---- opponents ----
+  function buildTrackTabs(){
+    const el=document.getElementById('trackTabs'); el.innerHTML='';
+    SC.OPPONENTS.forEach((o,i)=>{
+      const b=document.createElement('button'); b.className='ttab'+(i===LAB.oppIdx?' on':'');
+      b.innerHTML=o.name+'<small>'+o.difficulty+' · '+(o.goals||1)+' gol</small>';
+      b.onclick=()=>{ LAB.oppIdx=i; resetSim(); buildTrackTabs(); updateHud(); };
+      el.appendChild(b);
+    });
+  }
+
+  // ---- share ----
+  function shareRobot(){
+    try{
+      const st={ o:LAB.oppIdx, m:LAB.mode, r:LAB.rules, d:LAB.defaultRule, p:LAB.pid };
+      location.hash='r='+btoa(unescape(encodeURIComponent(JSON.stringify(st))));
+      navigator.clipboard && navigator.clipboard.writeText(location.href);
+      toast('Bağlantı kopyalandı! Arkadaşına gönder.');
+    }catch(e){ toast('Paylaşım hazırlanamadı.'); }
+  }
+  function loadFromHash(){
+    try{
+      if(!location.hash.startsWith('#r=')) return;
+      const st=JSON.parse(decodeURIComponent(escape(atob(location.hash.slice(3)))));
+      if(typeof st.o==='number'&&SC.OPPONENTS[st.o]) LAB.oppIdx=st.o;
+      if(st.m) LAB.mode=st.m;
+      if(st.r) LAB.rules=st.r; if(st.d) LAB.defaultRule=st.d; if(st.p) LAB.pid=st.p;
+      toast('Paylaşılan taktik yüklendi!');
+    }catch(e){}
+  }
+  let toastTimer=null;
+  function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2400); }
+
+  // ---- tutorial ----
+  const TUT=[
+    ['⚽ Hücum Antrenmanı','Karşında bir savunma robotu var. Görev: topu kap, rakibi geç, SAĞDAKİ kaleye gol at! Her seviye daha iyi savunan bir rakip — ve daha çok gol ister.'],
+    ['🏁 Başlama Vuruşu','Top ortada, sen daha yakınsın — ilk hamle hep senin! Gol olursa ya da top kilitlenirse hakem topu ortaya koyar, yine önce sen davranırsın.'],
+    ['📈 PID Forvet','Varsayılan mod: robot topa arkadan dolaşarak yaklaşır, topu alınca kaleye sürer. Temel Hız / Kp / Kd ile forvet karakterini sen belirlersin: hızlı ama savruk mu, kontrollü mü?'],
+    ['🧩 Kural Modu','Bir de kesikli kurallarla dene! TOP/KALE yön çipleriyle kendi taktiğini yaz. Açık sahada bunun ne kadar zor olduğunu görmek dersin ta kendisi. Önemli: KENDİ KALE çipli koruma kuralı topu kendi kalene sürmeni engeller.'],
+    ['🏆 Madalyalar','Ne kadar erken golü tamamlarsan madalyan o kadar parlak. Hızlı bir robot kur, taktiği ayarla — Gol Makinesi ol!'],
+  ];
+  let tutI=0;
+  function showTut(i){
+    tutI=i; const [h,p]=TUT[i];
+    const dots=TUT.map((_,j)=>'<i class="'+(j<=i?'on':'')+'"></i>').join('');
+    document.getElementById('tutBox').innerHTML='<div class="dots">'+dots+'</div><h3>'+h+'</h3><p>'+p+'</p>'+
+      '<div style="display:flex;gap:8px"><button class="btn run" id="tutN">'+(i<TUT.length-1?'Devam →':'Başla! 🚀')+'</button>'+
+      (i<TUT.length-1?'<button class="btn ghost" id="tutS">Atla</button>':'')+'</div>';
+    document.getElementById('tutwrap').style.display='flex';
+    document.getElementById('tutN').onclick=()=>{ tutI<TUT.length-1?showTut(tutI+1):endTut(); };
+    const s=document.getElementById('tutS'); if(s) s.onclick=endTut;
+  }
+  function endTut(){ document.getElementById('tutwrap').style.display='none';
+    try{ localStorage.setItem('rf_soccer_tut','1'); }catch(e){} }
+
+  // ---- wire ----
+  document.getElementById('runBtn').onclick=()=>{
+    if(LAB.sim&&LAB.sim.status==='running'){ stopLoop(); LAB.sim.status='failed'; LAB.sim.reason='timeout'; stopRunUi(); updateHud(); return; }
+    startRun();
+  };
+  document.getElementById('resetBtn').onclick=resetSim;
+  document.getElementById('shareBtn').onclick=shareRobot;
+  document.getElementById('helpBtn').onclick=()=>showTut(0);
+  document.getElementById('simSpeed').oninput=e=>{ LAB.simSpeed=+e.target.value;
+    document.getElementById('simSpeedV').textContent=(+e.target.value).toFixed(1)+'x'; };
+  document.querySelectorAll('.stab').forEach(t=>{
+    t.onclick=()=>{ document.querySelectorAll('.stab').forEach(x=>x.classList.remove('on')); t.classList.add('on');
+      document.getElementById('tab-robot').style.display=t.dataset.tab==='robot'?'block':'none';
+      document.getElementById('tab-kod').style.display=t.dataset.tab==='kod'?'block':'none'; };
+  });
+
+  // ---- init ----
+  loadFromHash();
+  applyRobotBuild();
+  fitView(); buildTrackTabs(); buildRules(); bindPid(); bindParams(); fillKunye(); setMode(LAB.mode);
+  drawScene(null); updateHud();
+  let seen=false; try{ seen=!!localStorage.getItem('rf_soccer_tut'); }catch(e){}
+  if(!seen) showTut(0);
+})();
+</script>
+</body>
+</html>
