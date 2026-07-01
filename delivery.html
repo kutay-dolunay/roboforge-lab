@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RoboForge · Teslimat Robotu Laboratuvarı</title>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#0f172a; --panel2:#111c33; --line:#1e3a5f;
+    --sky:#38bdf8; --green:#22c55e; --amber:#f59e0b; --red:#ef4444; --purple:#a855f7;
+    --txt:#e2e8f0; --muted:#64748b; --muted2:#94a3b8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif;
+    background:radial-gradient(1100px 700px at 75% -15%,#15294a 0%,var(--bg) 55%)}
+  a{color:inherit;text-decoration:none}
+  .mono{font-family:'Courier New',monospace}
+  header.bar{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);
+    background:rgba(10,16,30,.85);backdrop-filter:blur(8px);position:sticky;top:0;z-index:40;flex-wrap:wrap}
+  .back{color:var(--muted2);font-size:.74rem;font-weight:700;border:1px solid var(--line);padding:7px 11px;border-radius:9px;white-space:nowrap}
+  .back:hover{border-color:var(--sky);color:var(--sky)}
+  .ttl b span{color:var(--sky)}
+  .ttl small{display:block;color:var(--muted);font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase}
+  .tabsTrack{display:flex;gap:6px;flex-wrap:wrap;max-width:640px}
+  .ttab{border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:5px 10px;cursor:pointer;
+    font-size:.72rem;font-weight:700;color:var(--muted2);transition:.14s;line-height:1.15;text-align:left}
+  .ttab small{display:block;font-size:.54rem;color:var(--muted);letter-spacing:.5px}
+  .ttab.on{border-color:var(--sky);color:var(--sky);background:#0c1a30}
+  .grow{flex:1}
+  .simspeed{display:flex;align-items:center;gap:7px;font-size:.68rem;color:var(--muted2)}
+  .simspeed input{width:90px;accent-color:var(--sky)}
+  .btn{padding:9px 16px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--txt);
+    font-weight:800;cursor:pointer;font-size:.8rem;letter-spacing:.4px;transition:.14s}
+  .btn:hover{border-color:var(--sky)}
+  .btn.run{background:linear-gradient(180deg,#16a34a,#15803d);border-color:#22c55e;color:#eafff0;box-shadow:0 0 16px rgba(34,197,94,.25)}
+  .btn.stop{background:linear-gradient(180deg,#dc2626,#b91c1c);border-color:#ef4444;color:#fff}
+  .btn.ghost{background:transparent;color:var(--muted2)}
+  .btn.outline{background:transparent;border-color:var(--sky);color:var(--sky)}
+
+  .layout{display:grid;grid-template-columns:1fr 380px;gap:14px;padding:14px 16px;max-width:1500px;margin:0 auto}
+  @media(max-width:1040px){.layout{grid-template-columns:1fr}}
+
+  .stageWrap{position:relative}
+  canvas#arena{width:100%;border-radius:14px;border:1px solid #16202e;background:#0a0d12;display:block}
+  .hud{position:absolute;top:12px;left:12px;display:flex;gap:8px;flex-wrap:wrap}
+  .hudbox{background:rgba(8,12,24,.88);border:1px solid var(--line);border-radius:10px;padding:7px 12px;min-width:70px}
+  .hudbox .l{font-size:.54rem;color:var(--muted);letter-spacing:1.5px;font-weight:700}
+  .hudbox .v{font-size:1rem;font-weight:800;margin-top:1px}
+  .hudbox .v.ok{color:var(--green)} .hudbox .v.bad{color:#fca5a5}
+  .nextDir{position:absolute;top:12px;right:12px;background:rgba(8,12,24,.88);border:1px solid var(--line);
+    border-radius:10px;padding:8px 13px;font-size:.78rem;font-weight:700;color:var(--sky)}
+  .hint{margin-top:10px;background:var(--panel2);border:1px solid var(--line);border-radius:11px;
+    padding:11px 15px;font-size:.85rem;color:var(--muted2)}
+  .hint b{color:var(--green)}
+
+  .rdock{margin-top:10px;border:1px solid rgba(34,197,94,.45);border-radius:13px;overflow:hidden;
+    background:linear-gradient(180deg,#0e1a2e,#0b1220)}
+  .rdock.lose{border-color:rgba(239,68,68,.45)}
+  .rdock .rd-head{padding:10px 16px;font-weight:800;font-size:.95rem;color:var(--green);
+    background:rgba(34,197,94,.08);border-bottom:1px solid rgba(34,197,94,.25)}
+  .rdock.lose .rd-head{color:#fca5a5;background:rgba(239,68,68,.07);border-bottom-color:rgba(239,68,68,.25)}
+  .rdock .rd-body{padding:14px 16px}
+  .rdock .rd-medal{font-size:1.15rem;font-weight:800;color:var(--amber);margin-bottom:2px}
+  .rdock .rd-cmt{font-size:.78rem;color:var(--muted2);margin-bottom:12px}
+  .rdock .rd-stats{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:12px}
+  .rdock .rd-stat .l{font-size:.56rem;letter-spacing:1.5px;color:var(--muted);font-weight:700}
+  .rdock .rd-stat .v{font-size:1.25rem;font-weight:800;margin-top:2px}
+  .rdock .rd-stat .v.ok{color:var(--green)} .rdock .rd-stat .v.bad{color:#fca5a5}
+  .rdock .rd-tip{background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.3);border-radius:10px;
+    padding:9px 13px;font-size:.8rem;color:var(--muted2);margin-bottom:13px}
+  .rdock .rd-btns{display:flex;gap:9px;flex-wrap:wrap}
+
+  .side .tabbar{display:flex;gap:6px;margin-bottom:12px}
+  .stab{flex:1;text-align:center;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--panel);
+    cursor:pointer;font-weight:800;font-size:.8rem;color:var(--muted2)}
+  .stab.on{border-color:var(--sky);color:var(--sky);background:#0c1a30}
+  .card{border:1px solid var(--line);border-radius:13px;background:var(--panel);padding:14px;margin-bottom:12px}
+  .card h4{margin:0 0 8px;font-size:.66rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+  .card p.exp{font-size:.76rem;color:var(--muted2);line-height:1.5;margin:0 0 10px}
+
+  .modeRow{display:flex;gap:6px;margin-bottom:12px}
+  .modeBtn{flex:1;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel);cursor:pointer;
+    font-weight:800;font-size:.76rem;color:var(--muted2)}
+  .modeBtn.on{border-color:var(--purple);color:#d8b4fe;background:#160f2b}
+
+  .step{display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:11px;
+    background:var(--panel2);padding:8px 10px;margin-bottom:7px}
+  .step.active{border-color:var(--green);box-shadow:0 0 10px rgba(34,197,94,.25)}
+  .step.done{opacity:.45}
+  .step .num{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;
+    justify-content:center;font-size:.72rem;font-weight:800;color:var(--sky);flex:none;background:var(--panel)}
+  .dirPick{display:flex;gap:4px;flex:1}
+  .dirOpt{flex:1;text-align:center;padding:6px 4px;border:1px solid #26364e;border-radius:8px;background:#0d1524;
+    cursor:pointer;font-size:.7rem;font-weight:800;color:var(--muted)}
+  .dirOpt.on{border-color:var(--amber);color:#fcd34d;background:#1c1608}
+  .iconbtn{border:1px solid var(--line);background:var(--panel);color:var(--muted2);border-radius:7px;
+    width:24px;height:24px;cursor:pointer;font-size:.7rem;line-height:1;flex:none}
+  .iconbtn:hover{border-color:var(--sky);color:var(--sky)}
+  .iconbtn.del:hover{border-color:var(--red);color:#fca5a5}
+  .addRule{width:100%;padding:9px;border:1px dashed var(--line);border-radius:10px;background:transparent;
+    color:var(--muted2);font-weight:700;cursor:pointer;font-size:.78rem}
+  .addRule:hover{border-color:var(--sky);color:var(--sky)}
+
+  .sliderRow{margin:10px 0}
+  .sliderRow label{display:flex;justify-content:space-between;font-size:.74rem;color:var(--muted2);margin-bottom:4px}
+  .sliderRow label b{color:var(--sky)}
+  input[type=range]{width:100%;accent-color:var(--sky)}
+
+  .minirobot{position:relative;width:150px;height:170px;margin:0 auto 6px}
+  .mr-body{position:absolute;inset:16px 26px 12px;background:linear-gradient(180deg,#22334f,#152036);border:2px solid #3b5a82;border-radius:14px}
+  .mr-s{position:absolute;width:15px;height:15px;border-radius:50%;border:2px solid #111}
+  .mr-lab{position:absolute;font-size:.5rem;color:var(--muted2);white-space:nowrap}
+
+  .kunye .chipsRow{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px}
+  .kunye .kchip{border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:4px 8px;font-size:.66rem;color:var(--muted2)}
+  .kunye .kchip b{color:var(--txt)}
+  .kstats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+  .kstat{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 4px;text-align:center}
+  .kstat .l{font-size:.5rem;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
+  .kstat .v{font-size:.95rem;font-weight:800}
+  .kstat .v small{font-size:.5rem;color:var(--muted2)}
+  .bchipR{display:inline-block;border:1px solid var(--line);background:var(--panel2);border-radius:7px;
+    padding:3px 8px;font-size:.7rem;color:var(--muted2);margin:2px 2px 2px 0}
+
+  #resultWrap{position:fixed;inset:0;background:rgba(5,8,16,.7);backdrop-filter:blur(4px);display:none;
+    align-items:center;justify-content:center;z-index:80;padding:18px}
+  #resultWrap.show{display:flex}
+  .result{max-width:520px;width:100%;border:1px solid var(--line);border-radius:18px;padding:24px;
+    background:linear-gradient(180deg,#101b31,#0b1220);box-shadow:0 30px 80px rgba(0,0,0,.6);max-height:92vh;overflow:auto}
+  .result h3{margin:0 0 4px;font-size:1.2rem}
+  .result h3.win{color:var(--green)} .result h3.lose{color:#fca5a5}
+  .rstats{display:flex;gap:8px;margin:12px 0}
+  .rstat{flex:1;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px;text-align:center}
+  .rstat .l{font-size:.54rem;color:var(--muted);letter-spacing:1px}
+  .rstat .v{font-size:1.05rem;font-weight:800;margin-top:2px}
+  .rbtns{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+
+  #tutwrap{position:fixed;inset:0;background:rgba(5,8,16,.75);display:none;align-items:center;justify-content:center;z-index:90;padding:18px}
+  .tut{max-width:460px;border:1px solid var(--sky);border-radius:16px;background:#0d1830;padding:22px;box-shadow:0 0 60px rgba(56,189,248,.2)}
+  .tut h3{margin:0 0 8px;color:var(--sky);font-size:1.1rem}
+  .tut p{font-size:.86rem;color:var(--muted2);line-height:1.6;margin:0 0 14px}
+  .tut .dots{display:flex;gap:5px;margin-bottom:12px}
+  .tut .dots i{width:8px;height:8px;border-radius:50%;background:#1e293b}
+  .tut .dots i.on{background:var(--sky)}
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:rgba(8,12,24,.95);
+    border:1px solid var(--line);padding:10px 18px;border-radius:11px;font-size:.8rem;font-weight:700;opacity:0;
+    transition:.25s;pointer-events:none;z-index:99}
+  #toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header class="bar">
+  <a class="back" href="./">← Katalog</a>
+  <div class="ttl"><b>Robo<span>Forge</span> · Teslimat Robotu</b><small id="buildLine">VARSAYILAN ROBOT</small></div>
+  <div class="tabsTrack" id="trackTabs"></div>
+  <div class="grow"></div>
+  <div class="simspeed">Sim Hızı <input type="range" id="simSpeed" min="0.5" max="3" step="0.5" value="1"><span id="simSpeedV" class="mono">1.0x</span></div>
+  <button class="btn run" id="runBtn">▶ ÇALIŞTIR</button>
+  <button class="btn ghost" id="resetBtn">⟲ Sıfırla</button>
+  <button class="btn ghost" id="shareBtn">🔗 Paylaş</button>
+  <button class="btn ghost" id="helpBtn">?</button>
+</header>
+
+<div class="layout">
+  <div class="stageWrap">
+    <canvas id="arena" width="920" height="660"></canvas>
+    <div class="hud">
+      <div class="hudbox"><div class="l">SÜRE</div><div class="v mono" id="hudT">0.0s</div></div>
+      <div class="hudbox"><div class="l">KAVŞAK</div><div class="v mono" id="hudK">0</div></div>
+      <div class="hudbox"><div class="l">PAKET</div><div class="v mono" id="hudP">0/0</div></div>
+      <div class="hudbox"><div class="l">DURUM</div><div class="v" id="hudS">HAZIR</div></div>
+    </div>
+    <div class="nextDir" id="nextDir">Sıradaki: —</div>
+    <div class="hint" id="hint">📦 Görev: rota planını yaz — robot çizgiyi kendisi izler, <b>her kavşakta planındaki yönü uygular.</b> Paketleri adreslere ulaştır!</div>
+    <div class="rdock" id="resultDock" style="display:none"></div>
+  </div>
+
+  <div class="side">
+    <div class="tabbar">
+      <div class="stab on" data-tab="robot">🤖 Robot</div>
+      <div class="stab" data-tab="kod">🗺️ Rota</div>
+    </div>
+
+    <div id="tab-robot">
+      <div class="card">
+        <h4>Kurye Robotu</h4>
+        <p class="exp">3 çizgi sensörü sokak çizgisini izler. Robot kavşakları <b>kendisi sayar</b> —
+          senin işin her kavşakta hangi yöne gideceğini <b>önceden planlamak</b>. Gerçek kurye robotları böyle çalışır!</p>
+        <div class="minirobot" id="miniRobot"></div>
+      </div>
+      <div class="card">
+        <h4>Sürüş (robotundan gelir)</h4>
+        <div class="sliderRow"><label>Motor Hızı <b id="vLabel">Orta</b></label>
+          <input type="range" id="vMax" min="2.2" max="6" step="0.1" value="3.6"></div>
+        <div class="sliderRow"><label>Teker Tutuşu <b id="gLabel">Normal</b></label>
+          <input type="range" id="turnGain" min="0.8" max="1.55" step="0.05" value="1.0"></div>
+      </div>
+      <div class="card kunye" id="kunye"></div>
+    </div>
+
+    <div id="tab-kod" style="display:none">
+      <div class="modeRow">
+        <button class="modeBtn on" id="modeRules">🧩 Kural Sürüş</button>
+        <button class="modeBtn" id="modePid">📈 PID Sürüş</button>
+      </div>
+      <div class="card">
+        <h4>Rota Planı (her kavşakta bir adım)</h4>
+        <p class="exp">Robot bir kavşağa gelince plandan <b>sıradaki adımı</b> uygular. Plan biterse
+          kavşaklardan <b>düz</b> geçer. Köşeleri (dönüşü zorunlu virajlar) kendisi döner — onlar sayılmaz.</p>
+        <div id="planList"></div>
+        <button class="addRule" id="addStep">+ Adım Ekle</button>
+      </div>
+      <div id="pidPanel" style="display:none">
+        <div class="card">
+          <h4>PID Sürüş Ayarı</h4>
+          <p class="exp">Analog çizgi takibi — daha akıcı viraj, daha hızlı teslimat. Kp/Kd dengesini bul.</p>
+          <div class="sliderRow"><label>Temel Hız <b id="pBaseV">62</b></label>
+            <input type="range" id="pBase" min="20" max="90" step="1" value="62"></div>
+          <div class="sliderRow"><label>Kp (dönüş tepkisi) <b id="pKpV">1.4</b></label>
+            <input type="range" id="pKp" min="0.2" max="3" step="0.05" value="1.4"></div>
+          <div class="sliderRow"><label>Kd (titreme sönümü) <b id="pKdV">0.5</b></label>
+            <input type="range" id="pKd" min="0" max="1.5" step="0.05" value="0.5"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="resultWrap"><div class="result" id="resultBox"></div></div>
+<div id="tutwrap"><div class="tut" id="tutBox"></div></div>
+<div id="toast"></div>
+
+<script src="robot-data.js?v=2"></script>
+<script src="delivery-core.js?v=1"></script>
+<script>
+(function(){
+  const DC = window.DeliveryCore;
+  const CVS = document.getElementById('arena'), CTX = CVS.getContext('2d');
+
+  const LAB = {
+    cityIdx: 0, city: null, mode: 'rules',
+    plan: [], pid: DC.defaultPID(), params: DC.defaultParams(),
+    sim: null, raf: null, lastTs: 0, simSpeed: 1, replay: null,
+    view: { ox: 0, oy: 0, scale: 30 },
+  };
+
+  const DIRNAME = { L: '◀ SOL', F: '▲ DÜZ', R: 'SAĞ ▶' };
+
+  // ---- view ----
+  function fitView(){
+    const bb = LAB.city.bbox, pad = 2.6;
+    const sc = Math.min(CVS.width/(bb.mxx-bb.mnx+pad*2), CVS.height/(bb.mxy-bb.mny+pad*2));
+    LAB.view = { scale: sc, ox: CVS.width/2-(bb.mnx+bb.mxx)/2*sc, oy: CVS.height/2+(bb.mny+bb.mxy)/2*sc };
+  }
+  function W2S(x,y){ return [LAB.view.ox + x*LAB.view.scale, LAB.view.oy - y*LAB.view.scale]; }
+
+  // ---- draw ----
+  function drawScene(last){
+    const sc = LAB.view.scale, city = LAB.city;
+    CTX.fillStyle = '#0a0d12'; CTX.fillRect(0,0,CVS.width,CVS.height);
+    // city blocks (buildings) behind streets
+    const g = city.meta.grid;
+    for(let r=0;r<g.H-1;r++) for(let c=0;c<g.W-1;c++){
+      const p = W2S((c-(g.W-1)/2)*g.S+g.S/2, (r-(g.H-1)/2)*g.S+g.S/2);
+      const s = (g.S-1.6)*sc;
+      CTX.fillStyle='#101826'; CTX.strokeStyle='#182338'; CTX.lineWidth=1;
+      CTX.beginPath(); CTX.roundRect(p[0]-s/2,p[1]-s/2,s,s,5); CTX.fill(); CTX.stroke();
+      // windows
+      CTX.fillStyle='rgba(56,189,248,.08)';
+      for(let wy=-1;wy<=1;wy++) for(let wx=-1;wx<=1;wx++)
+        CTX.fillRect(p[0]+wx*s*0.24-2, p[1]+wy*s*0.24-2, 4, 4);
+    }
+    // streets
+    CTX.strokeStyle='#e8edf5'; CTX.lineWidth=DC.LINE_HALF_WIDTH*2*sc; CTX.lineCap='round';
+    city.segs.forEach(s0=>{
+      const a=W2S(s0.a[0],s0.a[1]), b=W2S(s0.b[0],s0.b[1]);
+      CTX.beginPath(); CTX.moveTo(a[0],a[1]); CTX.lineTo(b[0],b[1]); CTX.stroke();
+    });
+    // barriers
+    city.barriers.forEach(b=>{
+      const q=W2S(b.x,b.y); const r=DC.BARRIER_R*sc;
+      CTX.save(); CTX.translate(q[0],q[1]);
+      CTX.fillStyle='#7c2d12'; CTX.strokeStyle='#f59e0b'; CTX.lineWidth=2.5;
+      CTX.beginPath(); CTX.roundRect(-r,-r*0.6,r*2,r*1.2,3); CTX.fill(); CTX.stroke();
+      CTX.strokeStyle='rgba(245,158,11,.8)'; CTX.lineWidth=3;
+      CTX.beginPath(); CTX.moveTo(-r*.55,r*.3); CTX.lineTo(r*.55,-r*.3); CTX.stroke();
+      CTX.restore();
+    });
+    // depot (start)
+    const st=W2S(city.start.p[0],city.start.p[1]);
+    CTX.fillStyle='rgba(56,189,248,.13)'; CTX.beginPath(); CTX.arc(st[0],st[1],0.85*sc,0,7); CTX.fill();
+    CTX.font=(0.8*sc)+'px Segoe UI'; CTX.textAlign='center'; CTX.textBaseline='middle';
+    CTX.fillText('📦', st[0], st[1]-0.95*sc);
+    // deliveries
+    const pend = LAB.sim ? LAB.sim.pending : city.deliveries;
+    const done = LAB.sim ? LAB.sim.delivered : [];
+    city.deliveries.forEach(id=>{
+      const p=W2S(city.nodes[id].p[0], city.nodes[id].p[1]);
+      const isDone = done.indexOf(id)>=0;
+      CTX.fillStyle=isDone?'rgba(34,197,94,.25)':'rgba(34,197,94,.12)';
+      CTX.strokeStyle=isDone?'#22c55e':'rgba(34,197,94,.55)'; CTX.lineWidth=2;
+      CTX.beginPath(); CTX.arc(p[0],p[1],0.8*sc,0,7); CTX.fill(); CTX.stroke();
+      CTX.fillText(isDone?'✅':'🏠', p[0], p[1]-0.95*sc);
+    });
+    // trail
+    if(LAB.sim && LAB.sim.trail.length>1){
+      CTX.strokeStyle='rgba(56,189,248,.55)'; CTX.lineWidth=2; CTX.beginPath();
+      LAB.sim.trail.forEach((p,i)=>{ const q=W2S(p[0],p[1]); i?CTX.lineTo(q[0],q[1]):CTX.moveTo(q[0],q[1]); });
+      CTX.stroke();
+    }
+    drawRobot(last);
+  }
+  function drawRobot(last){
+    const r = LAB.sim ? LAB.sim.robot : DC.makeRobot(LAB.city);
+    const q = W2S(r.x,r.y), sc = LAB.view.scale;
+    CTX.save(); CTX.translate(q[0],q[1]); CTX.rotate(-r.th);
+    CTX.fillStyle='#1c2c49'; CTX.strokeStyle='#3b6ea8'; CTX.lineWidth=2;
+    CTX.beginPath(); CTX.roundRect(-0.58*sc,-0.46*sc,1.1*sc,0.92*sc,6); CTX.fill(); CTX.stroke();
+    // package on top
+    CTX.fillStyle='#b45309'; CTX.fillRect(-0.28*sc,-0.2*sc,0.4*sc,0.4*sc);
+    CTX.strokeStyle='#fcd34d'; CTX.lineWidth=1.5;
+    CTX.beginPath(); CTX.moveTo(-0.28*sc,0); CTX.lineTo(0.12*sc,0); CTX.moveTo(-0.08*sc,-0.2*sc); CTX.lineTo(-0.08*sc,0.2*sc); CTX.stroke();
+    CTX.fillStyle='#38bdf8'; CTX.beginPath();
+    CTX.moveTo(0.52*sc,0); CTX.lineTo(0.32*sc,-0.15*sc); CTX.lineTo(0.32*sc,0.15*sc); CTX.closePath(); CTX.fill();
+    CTX.fillStyle='#0b1220';
+    CTX.fillRect(-0.22*sc,-0.58*sc,0.44*sc,0.13*sc); CTX.fillRect(-0.22*sc,0.45*sc,0.44*sc,0.13*sc);
+    const cols=['#22c55e','#38bdf8','#f59e0b'];
+    DC.LINE_SENSORS.forEach((s,i)=>{
+      CTX.fillStyle = (last&&last.lineB&&last.lineB[i]) ? cols[i] : '#22304a';
+      CTX.strokeStyle=cols[i]; CTX.lineWidth=1.5;
+      CTX.beginPath(); CTX.arc(s.fwd*sc, s.right*sc, 0.12*sc, 0, 7); CTX.fill(); CTX.stroke();
+    });
+    CTX.restore();
+  }
+
+  // ---- HUD ----
+  function updateHud(last){
+    document.getElementById('hudT').textContent=(LAB.sim?LAB.sim.t:0).toFixed(1)+'s';
+    document.getElementById('hudK').textContent=LAB.sim?LAB.sim.kavsak:0;
+    const tot=LAB.city.deliveries.length;
+    document.getElementById('hudP').textContent=(LAB.sim?LAB.sim.delivered.length:0)+'/'+tot;
+    const s=document.getElementById('hudS');
+    if(!LAB.sim){ s.textContent='HAZIR'; s.className='v'; }
+    else if(LAB.sim.status==='running'){ s.textContent='YOLDA'; s.className='v ok'; }
+    else if(LAB.sim.status==='success'){ s.textContent='TESLİM!'; s.className='v ok'; }
+    else { s.textContent='BAŞARISIZ'; s.className='v bad'; }
+    const nd=document.getElementById('nextDir');
+    const idx=LAB.sim?LAB.sim.planIdx:0;
+    nd.textContent = idx<LAB.plan.length ? ('Sıradaki: '+(idx+1)+'. kavşak → '+DIRNAME[LAB.plan[idx]]) : 'Plan bitti → hep DÜZ';
+    // highlight current plan step
+    document.querySelectorAll('.step').forEach((el,i)=>{
+      el.classList.toggle('done', i<idx);
+      el.classList.toggle('active', i===idx && LAB.sim && LAB.sim.status==='running');
+    });
+  }
+
+  // ---- run ----
+  function buildConfig(){
+    return { city: LAB.city, mode: LAB.mode, plan: LAB.plan.slice(), pid: LAB.pid, params: LAB.params };
+  }
+  function startRun(){
+    stopLoop(); LAB.replay=null; hideResult();
+    LAB.sim = DC.createSim(buildConfig());
+    document.getElementById('runBtn').textContent='■ DURDUR';
+    document.getElementById('runBtn').className='btn stop';
+    LAB.lastTs=0; LAB.raf=requestAnimationFrame(loop);
+  }
+  function loop(ts){
+    if(!LAB.lastTs) LAB.lastTs=ts;
+    let dt=(ts-LAB.lastTs)/1000; LAB.lastTs=ts;
+    if(dt>0.1) dt=0.1;
+    let last=null;
+    const steps=Math.max(1,Math.round(dt*60*LAB.simSpeed));
+    for(let i=0;i<steps;i++){ last=DC.tickSim(LAB.sim,1/60); if(LAB.sim.status!=='running') break; }
+    drawScene(last); updateHud(last);
+    if(LAB.sim.status==='running') LAB.raf=requestAnimationFrame(loop);
+    else { stopRunUi(); setTimeout(showResult,450); }
+  }
+  function stopLoop(){ if(LAB.raf) cancelAnimationFrame(LAB.raf); LAB.raf=null; }
+  function stopRunUi(){
+    document.getElementById('runBtn').textContent='▶ ÇALIŞTIR';
+    document.getElementById('runBtn').className='btn run';
+  }
+  function resetSim(){ stopLoop(); stopRunUi(); LAB.sim=null; LAB.replay=null; drawScene(null); updateHud(null); hideResult(); }
+  function hideResult(){
+    document.getElementById('resultDock').style.display='none';
+    document.getElementById('hint').style.display='block';
+    document.getElementById('resultWrap').classList.remove('show');
+  }
+
+  // ---- result ----
+  const REASONS={ delivered:'Bütün paketler sahibinde!', crash:'Yol bariyerine çarptın! 💥',
+    off_city:'Robot şehir dışına çıktı! 🏙️', line_lost:'Robot sokak çizgisini kaybetti.',
+    stalled:'Robot durup kaldı.', timeout:'Süre doldu — teslimat gecikti.' };
+  function showResult(){
+    const sim=LAB.sim; if(!sim) return;
+    const win=sim.status==='success';
+    const cls=DC.robotClass(sim);
+    const tips=DC.coach(sim);
+    const dock=document.getElementById('resultDock');
+    dock.className='rdock'+(win?'':' lose');
+    dock.innerHTML =
+      '<div class="rd-head">'+(win?'📦 Teslimat Tamamlandı!':'❌ Teslimat Başarısız')+'</div>'+
+      '<div class="rd-body">'+
+        (cls?'<div class="rd-medal">'+cls.name+'</div><div class="rd-cmt">'+(cls.cmt||'')+'</div>'
+            :'<div class="rd-cmt">'+(REASONS[sim.reason]||'')+'</div>')+
+        '<div class="rd-stats">'+
+          '<div class="rd-stat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
+          '<div class="rd-stat"><div class="l">KAVŞAK</div><div class="v mono">'+sim.kavsak+'</div></div>'+
+          '<div class="rd-stat"><div class="l">PAKET</div><div class="v mono">'+sim.delivered.length+'/'+LAB.city.deliveries.length+'</div></div>'+
+          '<div class="rd-stat"><div class="l">DURUM</div><div class="v '+(win?'ok':'bad')+'">'+(win?'TESLİM EDİLDİ':'BAŞARISIZ')+'</div></div>'+
+        '</div>'+
+        (tips.length?'<div class="rd-tip">💡 '+tips[0]+'</div>':'')+
+        '<div class="rd-btns">'+
+          '<button class="btn run" id="againBtn">⟲ Tekrar Dene</button>'+
+          '<button class="btn outline" id="replayBtn">▶ Yolu İzle</button>'+
+          '<button class="btn outline" id="reportBtn">📄 Raporu Önizle</button>'+
+        '</div>'+
+      '</div>';
+    document.getElementById('hint').style.display='none';
+    dock.style.display='block';
+    document.getElementById('againBtn').onclick=()=>{ hideResult(); startRun(); };
+    document.getElementById('replayBtn').onclick=replayRun;
+    document.getElementById('reportBtn').onclick=openReport;
+  }
+
+  // ---- replay ----
+  function replayRun(){
+    if(!LAB.sim || LAB.sim.trail.length<2 || LAB.replay) return;
+    const trail=LAB.sim.trail.slice();
+    LAB.replay={ trail, i:2 };
+    const step=()=>{
+      if(!LAB.replay) return;
+      const R=LAB.replay;
+      const part=R.trail.slice(0,R.i);
+      const p=R.trail[R.i-1], q=R.trail[R.i-2];
+      const th=Math.atan2(p[1]-q[1],p[0]-q[0]);
+      const savedTrail=LAB.sim.trail, sr={...LAB.sim.robot};
+      LAB.sim.trail=part;
+      LAB.sim.robot.x=p[0]; LAB.sim.robot.y=p[1]; LAB.sim.robot.th=th;
+      drawScene(null);
+      LAB.sim.trail=savedTrail;
+      LAB.sim.robot.x=sr.x; LAB.sim.robot.y=sr.y; LAB.sim.robot.th=sr.th;
+      R.i+=2;
+      if(R.i<R.trail.length) requestAnimationFrame(step);
+      else { LAB.replay=null; drawScene(LAB.sim.last); }
+    };
+    requestAnimationFrame(step);
+  }
+
+  // ---- report ----
+  function openReport(){
+    const sim=LAB.sim; if(!sim) return;
+    let build=null; try{ build=JSON.parse(localStorage.getItem('rf_robot')); }catch(e){}
+    const RD=window.RobotData;
+    let chips='<span class="bchipR">Varsayılan robot</span>';
+    if(build&&build.motor&&RD){
+      chips=RD.ORDER.map(cat=>{ const o=RD.opt(cat,build[cat]);
+        return o?'<span class="bchipR">'+o.icon+' '+o.name+'</span>':''; }).join(' ');
+    }
+    const planTxt=LAB.plan.map((d,i)=>(i+1)+'.'+DIRNAME[d].replace('◀ ','').replace(' ▶','').replace('▲ ','')).join(' → ')||'(boş)';
+    const win=sim.status==='success';
+    const box=document.getElementById('resultBox');
+    box.innerHTML =
+      '<h3 class="'+(win?'win':'lose')+'">📄 Teslimat Raporu — '+DC.CITIES[LAB.cityIdx].name+'</h3>'+
+      '<div style="margin:8px 0;font-size:.8rem;color:var(--muted2)">'+chips+'</div>'+
+      '<div style="font-size:.76rem;color:var(--sky);margin-bottom:4px">'+(LAB.mode==='pid'?'📈 PID Sürüş — Temel '+LAB.pid.base+' · Kp '+LAB.pid.kp.toFixed(2)+' · Kd '+LAB.pid.kd.toFixed(2):'🧩 Kural Sürüş')+'</div>'+
+      '<div style="font-size:.76rem;color:var(--muted2);margin-bottom:8px">🗺️ Rota: '+planTxt+'</div>'+
+      '<div class="rstats">'+
+        '<div class="rstat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
+        '<div class="rstat"><div class="l">KAVŞAK</div><div class="v mono">'+sim.kavsak+'</div></div>'+
+        '<div class="rstat"><div class="l">PAKET</div><div class="v mono">'+sim.delivered.length+'/'+LAB.city.deliveries.length+'</div></div>'+
+        '<div class="rstat"><div class="l">DURUM</div><div class="v" style="color:'+(win?'var(--green)':'#fca5a5')+'">'+(win?'TESLİM':'BAŞARISIZ')+'</div></div>'+
+      '</div>'+
+      '<canvas id="repMap" width="460" height="330" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#0a0d12"></canvas>'+
+      '<div class="rbtns"><button class="btn ghost" id="repClose">Kapat</button></div>';
+    document.getElementById('resultWrap').classList.add('show');
+    document.getElementById('repClose').onclick=()=>document.getElementById('resultWrap').classList.remove('show');
+    drawMiniMap(document.getElementById('repMap'));
+  }
+  function drawMiniMap(cv){
+    const x=cv.getContext('2d'), city=LAB.city, bb=city.bbox;
+    const sc=Math.min(cv.width/(bb.mxx-bb.mnx+4), cv.height/(bb.mxy-bb.mny+4));
+    const ox=cv.width/2-(bb.mnx+bb.mxx)/2*sc, oy=cv.height/2+(bb.mny+bb.mxy)/2*sc;
+    const w2=p=>[ox+p[0]*sc, oy-p[1]*sc];
+    x.fillStyle='#0a0d12'; x.fillRect(0,0,cv.width,cv.height);
+    x.strokeStyle='#cbd5e1'; x.lineWidth=DC.LINE_HALF_WIDTH*2*sc; x.lineCap='round';
+    city.segs.forEach(s0=>{ const a=w2(s0.a),b=w2(s0.b); x.beginPath(); x.moveTo(a[0],a[1]); x.lineTo(b[0],b[1]); x.stroke(); });
+    city.barriers.forEach(b=>{ const q=w2([b.x,b.y]); x.fillStyle='#f59e0b'; x.fillRect(q[0]-5,q[1]-4,10,8); });
+    city.deliveries.forEach(id=>{ const q=w2(city.nodes[id].p); x.fillStyle='#4ade80'; x.beginPath(); x.arc(q[0],q[1],5,0,7); x.fill(); });
+    if(LAB.sim&&LAB.sim.trail.length>1){
+      x.strokeStyle='rgba(56,189,248,.9)'; x.lineWidth=2; x.beginPath();
+      LAB.sim.trail.forEach((p,i)=>{ const q=w2(p); i?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]); });
+      x.stroke();
+    }
+  }
+
+  // ---- plan editor ----
+  function buildPlan(){
+    const list=document.getElementById('planList'); list.innerHTML='';
+    LAB.plan.forEach((d,i)=>{
+      const el=document.createElement('div'); el.className='step';
+      const num=document.createElement('div'); num.className='num'; num.textContent=i+1; el.appendChild(num);
+      const pick=document.createElement('div'); pick.className='dirPick';
+      [['L','◀ SOL'],['F','▲ DÜZ'],['R','SAĞ ▶']].forEach(([v,l])=>{
+        const b=document.createElement('div'); b.className='dirOpt'+(d===v?' on':''); b.textContent=l;
+        b.onclick=()=>{ LAB.plan[i]=v; buildPlan(); updateHud(null); };
+        pick.appendChild(b);
+      });
+      el.appendChild(pick);
+      const mk=(t,f,c)=>{ const b=document.createElement('button'); b.className='iconbtn'+(c?' '+c:''); b.textContent=t; b.onclick=f; return b; };
+      el.appendChild(mk('↑',()=>{ if(i>0){ const t=LAB.plan[i]; LAB.plan[i]=LAB.plan[i-1]; LAB.plan[i-1]=t; buildPlan(); } }));
+      el.appendChild(mk('↓',()=>{ if(i<LAB.plan.length-1){ const t=LAB.plan[i]; LAB.plan[i]=LAB.plan[i+1]; LAB.plan[i+1]=t; buildPlan(); } }));
+      el.appendChild(mk('✕',()=>{ LAB.plan.splice(i,1); buildPlan(); updateHud(null); },'del'));
+      list.appendChild(el);
+    });
+  }
+  document.getElementById('addStep').onclick=()=>{ LAB.plan.push('F'); buildPlan(); updateHud(null); };
+
+  // ---- mode & pid ----
+  function setMode(m){
+    LAB.mode=m;
+    document.getElementById('modeRules').classList.toggle('on',m==='rules');
+    document.getElementById('modePid').classList.toggle('on',m==='pid');
+    document.getElementById('pidPanel').style.display=m==='pid'?'block':'none';
+  }
+  document.getElementById('modeRules').onclick=()=>setMode('rules');
+  document.getElementById('modePid').onclick=()=>setMode('pid');
+  function bindPid(){
+    const b=document.getElementById('pBase'), kp=document.getElementById('pKp'), kd=document.getElementById('pKd');
+    b.value=LAB.pid.base; kp.value=LAB.pid.kp; kd.value=LAB.pid.kd;
+    const sync=()=>{ document.getElementById('pBaseV').textContent=b.value;
+      document.getElementById('pKpV').textContent=(+kp.value).toFixed(2);
+      document.getElementById('pKdV').textContent=(+kd.value).toFixed(2); };
+    b.oninput=()=>{ LAB.pid.base=+b.value; sync(); };
+    kp.oninput=()=>{ LAB.pid.kp=+kp.value; sync(); };
+    kd.oninput=()=>{ LAB.pid.kd=+kd.value; sync(); };
+    sync();
+  }
+
+  // ---- params / continuity / künye ----
+  function vLabel(v){ return v<3?'Yavaş':v<4.3?'Orta':'Hızlı'; }
+  function gLabel(g){ return g<1?'Kaygan':g<1.25?'Normal':'Yapışkan'; }
+  function bindParams(){
+    const v=document.getElementById('vMax'), g=document.getElementById('turnGain');
+    v.value=LAB.params.vMax; g.value=LAB.params.turnGain;
+    const sync=()=>{ document.getElementById('vLabel').textContent=vLabel(+v.value);
+      document.getElementById('gLabel').textContent=gLabel(+g.value); };
+    v.oninput=()=>{ LAB.params.vMax=+v.value; sync(); };
+    g.oninput=()=>{ LAB.params.turnGain=+g.value; sync(); };
+    sync();
+  }
+  function applyRobotBuild(){
+    try{
+      const raw=localStorage.getItem('rf_robot'); if(!raw||!window.RobotData) return;
+      const build=JSON.parse(raw); if(!build||!build.motor) return;
+      const sp=window.RobotData.toSimParams(build);
+      LAB.params.vMax=sp.vMax; LAB.params.turnGain=sp.turnGain; LAB.params.wheelBase=sp.wheelBase;
+      const m=window.RobotData.opt('motor',build.motor), w=window.RobotData.opt('wheel',build.wheel);
+      document.getElementById('buildLine').textContent=((m?m.name:'')+' · '+(w?w.name:'')).toUpperCase();
+    }catch(e){}
+  }
+  function fillKunye(){
+    const el=document.getElementById('kunye');
+    let build=null; try{ build=JSON.parse(localStorage.getItem('rf_robot')); }catch(e){}
+    if(!build||!build.motor||!window.RobotData){
+      el.innerHTML='<h4>🤖 Robotun Künyesi</h4><p class="exp">Henüz robot kurmadın. Katalogdan robotunu kur; hızı ve çevikliği teslimat süresine yansır.</p><a class="btn ghost" href="build.html?sim=delivery">Robotunu kur →</a>';
+      return;
+    }
+    const RD=window.RobotData, r=RD.computeReport(build);
+    const chips=RD.ORDER.map(cat=>{ const o=RD.opt(cat,build[cat]);
+      return o?'<div class="kchip">'+o.icon+' <b>'+o.name+'</b></div>':''; }).join('');
+    el.innerHTML='<h4>🤖 Robotun Künyesi</h4><div class="chipsRow">'+chips+'</div>'+
+      '<div class="kstats">'+
+      '<div class="kstat"><div class="l">Ağırlık</div><div class="v">'+r.weightG+'<small>g</small></div></div>'+
+      '<div class="kstat"><div class="l">Hız</div><div class="v">'+r.topSpeedKmh+'<small>km/s</small></div></div>'+
+      '<div class="kstat"><div class="l">Güç</div><div class="v">'+r.powerRating+'</div></div>'+
+      '</div>'+
+      '<p class="exp" style="margin-top:9px">Hızlı robot = erken teslimat. Ama viraja dikkat!</p>';
+  }
+
+  // ---- mini robot ----
+  function buildMiniRobot(){
+    const el=document.getElementById('miniRobot');
+    el.innerHTML='<div class="mr-body"></div>';
+    const put=(x,y,color,label)=>{
+      const d=document.createElement('div'); d.className='mr-s';
+      d.style.left=x+'px'; d.style.top=y+'px'; d.style.background=color;
+      el.appendChild(d);
+      const l=document.createElement('div'); l.className='mr-lab'; l.style.left=(x-6)+'px'; l.style.top=(y+17)+'px'; l.textContent=label;
+      el.appendChild(l);
+    };
+    put(34,6,'#22c55e','SOL'); put(68,0,'#38bdf8','ORTA'); put(102,6,'#f59e0b','SAĞ');
+  }
+
+  // ---- cities ----
+  function buildTrackTabs(){
+    const el=document.getElementById('trackTabs'); el.innerHTML='';
+    DC.CITIES.forEach((c,i)=>{
+      const b=document.createElement('button'); b.className='ttab'+(i===LAB.cityIdx?' on':'');
+      b.innerHTML=c.name+'<small>'+c.difficulty+'</small>';
+      b.onclick=()=>{ LAB.cityIdx=i; rebuild(true); };
+      el.appendChild(b);
+    });
+  }
+  function rebuild(loadPlan){
+    LAB.city=DC.buildCity(DC.CITIES[LAB.cityIdx]);
+    if(loadPlan!==false) LAB.plan=DC.shippedPlan(LAB.city);
+    fitView(); resetSim(); buildTrackTabs(); buildPlan(); updateHud(null);
+  }
+
+  // ---- share ----
+  function shareRobot(){
+    try{
+      const st={ c:LAB.cityIdx, m:LAB.mode, pl:LAB.plan, p:LAB.pid };
+      location.hash='r='+btoa(unescape(encodeURIComponent(JSON.stringify(st))));
+      navigator.clipboard && navigator.clipboard.writeText(location.href);
+      toast('Bağlantı kopyalandı! Arkadaşına gönder.');
+    }catch(e){ toast('Paylaşım hazırlanamadı.'); }
+  }
+  function loadFromHash(){
+    try{
+      if(!location.hash.startsWith('#r=')) return false;
+      const st=JSON.parse(decodeURIComponent(escape(atob(location.hash.slice(3)))));
+      if(typeof st.c==='number'&&DC.CITIES[st.c]) LAB.cityIdx=st.c;
+      if(st.m) LAB.mode=st.m;
+      if(st.p) LAB.pid=st.p;
+      if(st.pl){ LAB.plan=st.pl; toast('Paylaşılan rota yüklendi!'); return true; }
+    }catch(e){}
+    return false;
+  }
+  let toastTimer=null;
+  function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2400); }
+
+  // ---- tutorial ----
+  const TUT=[
+    ['📦 Kurye Görevi','Paketleri adreslere ulaştırman gerekiyor! Robotun sokak çizgilerini kendi başına izler — ama hangi kavşakta nereye döneceğini bilemez. Rota planı senin işin.'],
+    ['🗺️ Rota Planı','Kod sekmesindeki plan, kavşak kavşak talimat listendir: "1. kavşakta SOL, 2. kavşakta DÜZ…" Robot her kavşakta plandan sıradaki adımı uygular. Plan biterse hep DÜZ gider!'],
+    ['🚧 Dikkat','Bazı sokaklar bariyerle kapalı — çarparsan görev biter. Haritaya bakıp rotayı kapalı yolun etrafından planla. Bazı görevlerde birden fazla paket var; sırayla en kısa rotayı kur.'],
+    ['🧩 / 📈 Sürüş','Kural sürüş sağlam ve basittir. PID sürüş daha akıcı ve hızlıdır — Temel Hız/Kp/Kd ayarlarıyla teslimat süresini kısalt. Madalyalar süreye göre verilir!'],
+    ['🏁 Başla!','Haritada 📦 depo, 🏠 adres demektir. Planı incele, ÇALIŞTIR ile izle, süreyi kısaltmak için rotayı ve sürüşü geliştir!'],
+  ];
+  let tutI=0;
+  function showTut(i){
+    tutI=i; const [h,p]=TUT[i];
+    const dots=TUT.map((_,j)=>'<i class="'+(j<=i?'on':'')+'"></i>').join('');
+    document.getElementById('tutBox').innerHTML='<div class="dots">'+dots+'</div><h3>'+h+'</h3><p>'+p+'</p>'+
+      '<div style="display:flex;gap:8px"><button class="btn run" id="tutN">'+(i<TUT.length-1?'Devam →':'Başla! 🚀')+'</button>'+
+      (i<TUT.length-1?'<button class="btn ghost" id="tutS">Atla</button>':'')+'</div>';
+    document.getElementById('tutwrap').style.display='flex';
+    document.getElementById('tutN').onclick=()=>{ tutI<TUT.length-1?showTut(tutI+1):endTut(); };
+    const s=document.getElementById('tutS'); if(s) s.onclick=endTut;
+  }
+  function endTut(){ document.getElementById('tutwrap').style.display='none';
+    try{ localStorage.setItem('rf_delivery_tut','1'); }catch(e){} }
+
+  // ---- wire ----
+  document.getElementById('runBtn').onclick=()=>{
+    if(LAB.sim&&LAB.sim.status==='running'){ stopLoop(); LAB.sim.status='failed'; LAB.sim.reason='stalled'; stopRunUi(); updateHud(null); return; }
+    startRun();
+  };
+  document.getElementById('resetBtn').onclick=()=>{ LAB.plan=DC.shippedPlan(LAB.city); buildPlan(); resetSim(); };
+  document.getElementById('shareBtn').onclick=shareRobot;
+  document.getElementById('helpBtn').onclick=()=>showTut(0);
+  document.getElementById('simSpeed').oninput=e=>{ LAB.simSpeed=+e.target.value;
+    document.getElementById('simSpeedV').textContent=(+e.target.value).toFixed(1)+'x'; };
+  document.querySelectorAll('.stab').forEach(t=>{
+    t.onclick=()=>{ document.querySelectorAll('.stab').forEach(x=>x.classList.remove('on')); t.classList.add('on');
+      document.getElementById('tab-robot').style.display=t.dataset.tab==='robot'?'block':'none';
+      document.getElementById('tab-kod').style.display=t.dataset.tab==='kod'?'block':'none'; };
+  });
+
+  // ---- init ----
+  const hadShared=loadFromHash();
+  applyRobotBuild();
+  LAB.city=DC.buildCity(DC.CITIES[LAB.cityIdx]);
+  if(!hadShared) LAB.plan=DC.shippedPlan(LAB.city);
+  fitView(); buildTrackTabs(); buildMiniRobot();
+  buildPlan(); bindPid(); bindParams(); fillKunye(); setMode(LAB.mode);
+  drawScene(null); updateHud(null);
+  let seen=false; try{ seen=!!localStorage.getItem('rf_delivery_tut'); }catch(e){}
+  if(!seen) showTut(0);
+})();
+</script>
+</body>
+</html>
