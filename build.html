@@ -71,7 +71,7 @@
   .bar{display:flex;align-items:center;gap:8px;margin:5px 0}
   .bar .bl{font-size:.6rem;color:var(--muted);width:56px;letter-spacing:.5px}
   .bar .bt{flex:1;height:6px;background:#0b1220;border-radius:4px;overflow:hidden;border:1px solid #1e293b}
-  .bar .bf{height:100%;border-radius:4px;background:linear-gradient(90deg,#0ea5e9,#38bdf8)}
+  .bar .bf{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#0ea5e9,#38bdf8)}
 
   .confirm{margin-top:16px;border:1px solid rgba(34,197,94,.4);background:linear-gradient(90deg,rgba(34,197,94,.1),transparent);
     border-radius:11px;padding:12px 15px;display:none;align-items:center;gap:10px;font-size:.86rem}
@@ -305,7 +305,7 @@
   ];
 
   // ---- scenario routing ----
-  const LABS = { line:'line-follower.html', maze:'maze.html', sumo:'sumo.html', light:'light.html', obstacle:'obstacle.html', pid:'pid.html' };
+  const LABS = { line:'line-follower.html', maze:'maze.html', sumo:'sumo.html', light:'light.html', obstacle:'obstacle.html', pid:'pid.html', rescue:'rescue.html' };
   const SIM = (function(){ try{ const q=new URLSearchParams(location.search).get('sim'); return LABS[q]?q:'line'; }catch(e){ return 'line'; } })();
   const LAB_HREF = LABS[SIM];
 
@@ -391,8 +391,9 @@
     ft.style.top=(cy-h/2-16)+'px'; stage.appendChild(ft);
     [[-w/2-6],[w/2-6]].forEach(([wx])=>{ const wm=document.createElement('div'); wm.className='wheelmark';
       wm.style.left=(cx+wx)+'px'; wm.style.top=(cy-20)+'px'; stage.appendChild(wm); });
+    const DEFPOS={brain:{x:0.5,y:0.16},driver:{x:0.5,y:0.42},motor:{x:0.24,y:0.62},wheel:{x:0.76,y:0.62},battery:{x:0.5,y:0.85}};
     ORDER.forEach((cat,i)=>{ if(!B[cat])return; const o=RD.opt(cat,B[cat]);
-      if(!B.chassis.place[cat]) B.chassis.place[cat]={x:0.5,y:0.22+0.56*(i/Math.max(1,ORDER.length-1))};
+      if(!B.chassis.place[cat]) B.chassis.place[cat]=Object.assign({},DEFPOS[cat]||{x:0.5,y:0.5});
       const p=B.chassis.place[cat];
       const el=document.createElement('div'); el.className='pmark';
       el.innerHTML=`<span class="plab">${RD.COMPONENTS[cat].label}</span>${o.icon}`;
