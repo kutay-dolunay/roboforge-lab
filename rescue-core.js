@@ -112,10 +112,10 @@
       stubs: [[[-2, -6], [1.2, -6]], [[-2, 0], [-2, 3.2]]],
       gaps: [[0.50, 0.525]],
       obstacles: [{ prog: 0.72 }] },
-    { id: 'kabus', name: 'Kâbus Kurtarma', difficulty: 'Uzman', time: 90, tension: 0.1,
-      points: [[-8, -7], [-3, -7], [-3, -2], [2, -2], [2, -7], [7, -7], [7, -1], [3, 2], [3, 4.5], [-4, 4.5], [-4, 8], [8, 8]],
-      junctions: [{ pt: [-3, -7], side: 'L' }, { pt: [-3, -2], side: 'R' }, { pt: [2, -2], side: 'R' }, { pt: [3, 4.5], side: 'L' }],
-      stubs: [[[-3, -7], [0.2, -7]], [[-3, -2], [-3, 1.2]], [[2, -2], [5.2, -2]], [[3, 4.5], [3, 7.5]]],
+    { id: 'kabus', name: 'Kâbus Kurtarma', difficulty: 'Uzman', time: 90, tension: 0.2,
+      points: [[-8, -7], [-3, -7], [-3, -2], [2, -2], [2, -7], [7, -7], [7, -1], [3, 2], [3, 4], [-5, 4], [-5, 9], [8, 9]],
+      junctions: [{ pt: [-3, -7], side: 'L' }, { pt: [-3, -2], side: 'R' }, { pt: [2, -2], side: 'R' }, { pt: [3, 4], side: 'L' }],
+      stubs: [[[-3, -7], [0.2, -7]], [[-3, -2], [-3, 1.2]], [[2, -2], [5.2, -2]], [[3, 4], [3, 7]]],
       gaps: [[0.04, 0.06]],
       obstacles: [{ prog: 0.55 }, { prog: 0.90 }] },
   ];
@@ -293,10 +293,32 @@
     const obstD = readObstacle(robot, course);
     const engel = obstD < OBST_SENSE;
 
-    // lastSeen memory
+    // lastSeen memory (sensor-based; geometric fallback when line is out of view)
     if (lineB[0] && !lineB[2]) sim.lastSeen = 'L';
     else if (lineB[2] && !lineB[0]) sim.lastSeen = 'R';
     else if (lineB[1]) sim.lastSeen = 'C';
+    else {
+      const nrv = nearestOnPath(course.path, robot.x, robot.y);
+      let bd = (!inGap(course, nrv.progress)) ? nrv.dist : Infinity;
+      let bp = pointAt(course.path, nrv.progress);
+      for (let i = 0; i < course.stubs.length; i++) {
+        const ns = nearestOnPath(course.stubs[i], robot.x, robot.y);
+        if (ns.dist < bd) { bd = ns.dist; bp = pointAt(course.stubs[i], ns.progress); }
+      }
+      let hidden = false;
+      for (let i = 0; i < course.obstacles.length; i++) {
+        if (Math.hypot(bp[0] - course.obstacles[i].x, bp[1] - course.obstacles[i].y) < OBST_HIDE) { hidden = true; break; }
+      }
+      if (bd < 3.0 && !hidden) {
+        const c2 = Math.cos(robot.th), s2 = Math.sin(robot.th);
+        const rx = bp[0] - robot.x, ry = bp[1] - robot.y;
+        const rightC = rx * s2 - ry * c2;
+        // only override sensor memory when the line is CLEARLY to one side;
+        // right after crossing over the line, the sensors' last word stands
+        if (rightC > 0.45) sim.lastSeen = 'R';
+        else if (rightC < -0.45) sim.lastSeen = 'L';
+      }
+    }
 
     let cmd, error = null, readings = null;
     if (mode === 'pid') {
@@ -382,12 +404,13 @@
       else if (sim.timeStalled > STALL_GRACE) { sim.status = 'failed'; sim.reason = 'stalled'; }
       else if (sim.backT > 2.5) { sim.status = 'failed'; sim.reason = 'wrong_way'; }
       else if (sim.maxProg >= END_PROG) { sim.status = 'success'; sim.reason = 'rescued'; }
+      else if (sim.maxProg > 0.8 && Math.hypot(robot.x - course.end[0], robot.y - course.end[1]) < 1.7) { sim.status = 'success'; sim.reason = 'rescued'; }
       else if (sim.t > (course.meta.time || 60)) { sim.status = 'failed'; sim.reason = 'timeout'; }
     }
 
     if (sim.totalTicks % 3 === 0) {
       sim.trail.push([robot.x, robot.y]);
-      if (sim.trail.length > 500) sim.trail.shift();
+      if (sim.trail.length > 2600) sim.trail.shift();
     }
 
     sim.last = { lineB, green, engel, obstD, cmd, v, error, readings, progress: nr.progress, lastSeen: sim.lastSeen };
@@ -423,10 +446,10 @@
   function robotClass(sim) {
     if (sim.status !== 'success') return null;
     const acc = accuracy(sim), t = sim.t, T = sim.course.meta.time || 60;
-    if (acc >= 90 && t < T * 0.55) return { key: 'kurtarma_kahramani', name: '🏆 Kurtarma Kahramanı' };
-    if (t < T * 0.7) return { key: 'saha_uzmani', name: '🥇 Saha Uzmanı' };
-    if (acc >= 80) return { key: 'gorev_eri', name: '🧭 Görev Eri' };
-    return { key: 'caylak_kurtarici', name: '🎓 Çaylak Kurtarıcı' };
+    if (acc >= 90 && t < T * 0.55) return { key: 'kurtarma_kahramani', name: '🏆 Kurtarma Kahramanı', cmt: 'Kusursuz operasyon — hız ve hassasiyet bir arada.' };
+    if (t < T * 0.7) return { key: 'saha_uzmani', name: '🥇 Saha Uzmanı', cmt: 'Hızlı ve kararlı bir kurtarma. Rota biraz daha temizlenebilir.' };
+    if (acc >= 80) return { key: 'gorev_eri', name: '🧭 Görev Eri', cmt: 'Görev tamam! Çizgide kalma oranını artırarak yükselebilirsin.' };
+    return { key: 'caylak_kurtarici', name: '🎓 Çaylak Kurtarıcı', cmt: 'Kazazedeye ulaştın — şimdi süreyi kısaltma zamanı.' };
   }
 
   function runHeadless(cfg, maxTime, dt) {

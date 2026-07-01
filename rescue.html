@@ -115,7 +115,26 @@
   .kstat .v{font-size:.95rem;font-weight:800}
   .kstat .v small{font-size:.5rem;color:var(--muted2)}
 
-  /* result overlay */
+  /* docked result panel (standard structure) */
+  .rdock{margin-top:10px;border:1px solid rgba(34,197,94,.45);border-radius:13px;overflow:hidden;
+    background:linear-gradient(180deg,#0e1a2e,#0b1220)}
+  .rdock.lose{border-color:rgba(239,68,68,.45)}
+  .rdock .rd-head{padding:10px 16px;font-weight:800;font-size:.95rem;color:var(--green);
+    background:rgba(34,197,94,.08);border-bottom:1px solid rgba(34,197,94,.25)}
+  .rdock.lose .rd-head{color:#fca5a5;background:rgba(239,68,68,.07);border-bottom-color:rgba(239,68,68,.25)}
+  .rdock .rd-body{padding:14px 16px}
+  .rdock .rd-medal{font-size:1.15rem;font-weight:800;color:var(--amber);margin-bottom:2px}
+  .rdock .rd-cmt{font-size:.78rem;color:var(--muted2);margin-bottom:12px}
+  .rdock .rd-stats{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:12px}
+  .rdock .rd-stat .l{font-size:.56rem;letter-spacing:1.5px;color:var(--muted);font-weight:700}
+  .rdock .rd-stat .v{font-size:1.25rem;font-weight:800;margin-top:2px}
+  .rdock .rd-stat .v.ok{color:var(--green)} .rdock .rd-stat .v.bad{color:#fca5a5}
+  .rdock .rd-tip{background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.3);border-radius:10px;
+    padding:9px 13px;font-size:.8rem;color:var(--muted2);margin-bottom:13px}
+  .rdock .rd-btns{display:flex;gap:9px;flex-wrap:wrap}
+  .btn.outline{background:transparent;border-color:var(--sky);color:var(--sky)}
+
+  /* modal overlay (report) */
   #resultWrap{position:fixed;inset:0;background:rgba(5,8,16,.7);backdrop-filter:blur(4px);display:none;
     align-items:center;justify-content:center;z-index:80;padding:18px}
   #resultWrap.show{display:flex}
@@ -132,6 +151,8 @@
   .tip{display:flex;gap:8px;font-size:.8rem;color:var(--muted2);line-height:1.5;margin-bottom:8px;
     background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--amber);border-radius:8px;padding:8px 10px}
   .rbtns{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+  .bchipR{display:inline-block;border:1px solid var(--line);background:var(--panel2);border-radius:7px;
+    padding:3px 8px;font-size:.7rem;color:var(--muted2);margin:2px 2px 2px 0}
 
   /* tutorial */
   #tutwrap{position:fixed;inset:0;background:rgba(5,8,16,.75);display:none;align-items:center;justify-content:center;z-index:90;padding:18px}
@@ -170,6 +191,7 @@
     </div>
     <div class="sensorHud" id="sensorHud"></div>
     <div class="hint" id="hint">🧑‍🚒 Görev: çizgiyi izle, <b>yeşil işaretlerde doğru yöne dön</b>, engellerin etrafından dolan ve kazazedeye ulaş!</div>
+    <div class="rdock" id="resultDock" style="display:none"></div>
   </div>
 
   <div class="side">
@@ -241,7 +263,7 @@
 <div id="toast"></div>
 
 <script src="robot-data.js?v=2"></script>
-<script src="rescue-core.js?v=1"></script>
+<script src="rescue-core.js?v=2"></script>
 <script>
 (function(){
   const RC = window.RescueCore;
@@ -249,7 +271,7 @@
 
   const LAB = {
     courseIdx: 0, course: null, mode: 'rules',
-    rules: RC.starterRules(), defaultRule: RC.starterDefault(),
+    rules: RC.fullRules(), defaultRule: RC.starterDefault(),
     pid: RC.defaultPID(),
     params: RC.defaultParams(),
     sim: null, raf: null, lastTs: 0, simSpeed: 1,
@@ -405,7 +427,7 @@
       pid: LAB.pid, params: LAB.params };
   }
   function startRun(){
-    stopLoop(); LAB.sim = RC.createSim(buildConfig());
+    stopLoop(); LAB.replay=null; hideResult(); LAB.sim = RC.createSim(buildConfig());
     document.getElementById('runBtn').textContent='■ DURDUR';
     document.getElementById('runBtn').className='btn stop';
     LAB.lastTs=0; LAB.raf=requestAnimationFrame(loop);
@@ -426,11 +448,16 @@
     document.getElementById('runBtn').textContent='▶ ÇALIŞTIR';
     document.getElementById('runBtn').className='btn run';
   }
-  function resetSim(){ stopLoop(); stopRunUi(); LAB.sim=null; drawScene(null); updateHud(null);
-    document.getElementById('resultWrap').classList.remove('show'); }
+  function resetSim(){ stopLoop(); stopRunUi(); LAB.sim=null; LAB.replay=null; drawScene(null); updateHud(null);
+    hideResult(); }
+  function hideResult(){
+    document.getElementById('resultDock').style.display='none';
+    document.getElementById('hint').style.display='block';
+    document.getElementById('resultWrap').classList.remove('show');
+  }
 
-  // ---- result ----
-  const REASONS={ rescued:'Kazazedeye ulaştın — görev tamam! 🧑‍🚒', crash:'Robot engele çarptı! 💥',
+  // ---- result (standard docked panel) ----
+  const REASONS={ rescued:'Kazazedeye ulaştın — görev tamam!', crash:'Robot engele çarptı! 💥',
     line_lost:'Çizgi kaybedildi — robot yolu bulamadı.', off_track:'Robot parkurdan tamamen çıktı.',
     stalled:'Robot durup kaldı.', timeout:'Süre doldu — görev tamamlanamadı.', wrong_way:'Robot ters yöne döndü! 🔄' };
   function showResult(){
@@ -438,24 +465,119 @@
     const win=sim.status==='success';
     const cls=RC.robotClass(sim);
     const tips=RC.coach(sim);
+    const dock=document.getElementById('resultDock');
+    dock.className='rdock'+(win?'':' lose');
+    dock.innerHTML =
+      '<div class="rd-head">'+(win?'🚑 Kazazedeye Ulaştın!':'❌ Görev Başarısız')+'</div>'+
+      '<div class="rd-body">'+
+        (cls?'<div class="rd-medal">'+cls.name+'</div><div class="rd-cmt">'+(cls.cmt||'')+'</div>'
+            :'<div class="rd-cmt">'+(REASONS[sim.reason]||'')+'</div>')+
+        '<div class="rd-stats">'+
+          '<div class="rd-stat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
+          '<div class="rd-stat"><div class="l">İLERLEME</div><div class="v mono">%'+Math.round(sim.maxProg*100)+'</div></div>'+
+          '<div class="rd-stat"><div class="l">ÇİZGİDE</div><div class="v mono">%'+RC.accuracy(sim)+'</div></div>'+
+          '<div class="rd-stat"><div class="l">DURUM</div><div class="v '+(win?'ok':'bad')+'">'+(win?'KURTARILDI':'BAŞARISIZ')+'</div></div>'+
+        '</div>'+
+        (tips.length?'<div class="rd-tip">💡 '+tips[0]+'</div>':'')+
+        '<div class="rd-btns">'+
+          '<button class="btn run" id="againBtn">⟲ Tekrar Dene</button>'+
+          '<button class="btn outline" id="replayBtn">▶ Yolu İzle</button>'+
+          '<button class="btn outline" id="reportBtn">📄 Raporu Önizle</button>'+
+        '</div>'+
+      '</div>';
+    document.getElementById('hint').style.display='none';
+    dock.style.display='block';
+    document.getElementById('againBtn').onclick=()=>{ hideResult(); startRun(); };
+    document.getElementById('replayBtn').onclick=replayRun;
+    document.getElementById('reportBtn').onclick=openReport;
+  }
+
+  // ---- replay (Yolu İzle) ----
+  function replayRun(){
+    if(!LAB.sim || LAB.sim.trail.length<2 || LAB.replay) return;
+    const trail=LAB.sim.trail.slice();
+    LAB.replay={ trail, i:2 };
+    const step=()=>{
+      if(!LAB.replay) return;
+      const R=LAB.replay;
+      const part=R.trail.slice(0,R.i);
+      const p=R.trail[R.i-1], q=R.trail[R.i-2];
+      const th=Math.atan2(p[1]-q[1],p[0]-q[0]);
+      drawSceneReplay(part,{x:p[0],y:p[1],th});
+      R.i+=2;
+      if(R.i<R.trail.length) requestAnimationFrame(step);
+      else { LAB.replay=null; drawScene(LAB.sim.last); }
+    };
+    requestAnimationFrame(step);
+  }
+  function drawSceneReplay(part,robot){
+    const savedTrail=LAB.sim.trail, savedRobot={...LAB.sim.robot};
+    LAB.sim.trail=part;
+    LAB.sim.robot.x=robot.x; LAB.sim.robot.y=robot.y; LAB.sim.robot.th=robot.th;
+    drawScene(null);
+    LAB.sim.trail=savedTrail;
+    LAB.sim.robot.x=savedRobot.x; LAB.sim.robot.y=savedRobot.y; LAB.sim.robot.th=savedRobot.th;
+  }
+
+  // ---- report modal (Raporu Önizle) ----
+  function openReport(){
+    const sim=LAB.sim; if(!sim) return;
+    let build=null; try{ build=JSON.parse(localStorage.getItem('rf_robot')); }catch(e){}
+    const RD=window.RobotData;
+    let chips='<div class="bchipR">Varsayılan robot</div>';
+    if(build&&build.motor&&RD){
+      chips=RD.ORDER.map(cat=>{ const o=RD.opt(cat,build[cat]);
+        return o?'<span class="bchipR">'+o.icon+' '+o.name+'</span>':''; }).join(' ');
+    }
+    const modeTxt = LAB.mode==='pid'
+      ? '📈 PID — Temel '+LAB.pid.base+' · Kp '+LAB.pid.kp.toFixed(2)+' · Kd '+LAB.pid.kd.toFixed(2)+' · Engel: '+(LAB.pid.avoidDir==='L'?'Soldan':'Sağdan')
+      : '🧩 Kural — '+LAB.rules.length+' kural + varsayılan';
+    const win=sim.status==='success';
     const box=document.getElementById('resultBox');
     box.innerHTML =
-      '<h3 class="'+(win?'win':'lose')+'">'+(win?'✅ KURTARMA BAŞARILI!':'❌ Görev Başarısız')+'</h3>'+
-      '<div style="color:var(--muted2);font-size:.85rem">'+(REASONS[sim.reason]||'')+'</div>'+
-      (cls?'<div class="medal">'+cls.name+'</div>':'')+
+      '<h3 class="'+(win?'win':'lose')+'">📄 Görev Raporu — '+RC.COURSES[LAB.courseIdx].name+'</h3>'+
+      '<div style="margin:8px 0;font-size:.8rem;color:var(--muted2)">'+chips+'</div>'+
+      '<div style="font-size:.78rem;color:var(--sky);margin-bottom:8px">'+modeTxt+'</div>'+
       '<div class="rstats">'+
         '<div class="rstat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
         '<div class="rstat"><div class="l">İLERLEME</div><div class="v mono">%'+Math.round(sim.maxProg*100)+'</div></div>'+
         '<div class="rstat"><div class="l">ÇİZGİDE</div><div class="v mono">%'+RC.accuracy(sim)+'</div></div>'+
+        '<div class="rstat"><div class="l">DURUM</div><div class="v" style="color:'+(win?'var(--green)':'#fca5a5')+'">'+(win?'KURTARILDI':'BAŞARISIZ')+'</div></div>'+
       '</div>'+
-      (tips.length?'<div class="tips">'+tips.map(t=>'<div class="tip">💡 '+t+'</div>').join('')+'</div>':'')+
-      '<div class="rbtns">'+
-        '<button class="btn run" id="againBtn">↻ Tekrar Dene</button>'+
-        '<button class="btn ghost" id="closeBtn">Kapat</button>'+
-      '</div>';
+      '<canvas id="repMap" width="460" height="330" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#0a0d12"></canvas>'+
+      '<div class="rbtns"><button class="btn ghost" id="repClose">Kapat</button></div>';
     document.getElementById('resultWrap').classList.add('show');
-    document.getElementById('againBtn').onclick=()=>{ document.getElementById('resultWrap').classList.remove('show'); startRun(); };
-    document.getElementById('closeBtn').onclick=()=>{ document.getElementById('resultWrap').classList.remove('show'); };
+    document.getElementById('repClose').onclick=()=>document.getElementById('resultWrap').classList.remove('show');
+    drawMiniMap(document.getElementById('repMap'));
+  }
+  function drawMiniMap(cv){
+    const x=cv.getContext('2d');
+    const c=LAB.course, S=c.path.samples;
+    let mnx=1e9,mny=1e9,mxx=-1e9,mxy=-1e9;
+    S.forEach(p=>{ mnx=Math.min(mnx,p[0]); mxx=Math.max(mxx,p[0]); mny=Math.min(mny,p[1]); mxy=Math.max(mxy,p[1]); });
+    const sc=Math.min(cv.width/(mxx-mnx+3), cv.height/(mxy-mny+3));
+    const ox=cv.width/2-(mnx+mxx)/2*sc, oy=cv.height/2+(mny+mxy)/2*sc;
+    const w2=(p)=>[ox+p[0]*sc, oy-p[1]*sc];
+    x.fillStyle='#0a0d12'; x.fillRect(0,0,cv.width,cv.height);
+    x.strokeStyle='#cbd5e1'; x.lineWidth=RC.LINE_HALF_WIDTH*2*sc; x.lineCap='round'; x.lineJoin='round';
+    c.stubs.forEach(st=>{ x.beginPath(); st.samples.forEach((p,i)=>{ const q=w2(p); i?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]); }); x.stroke(); });
+    x.beginPath(); let pen=false;
+    for(let i=0;i<S.length;i++){
+      const vis=!RC.inGap(c,i/(S.length-1));
+      const q=w2(S[i]);
+      if(vis){ if(!pen){x.moveTo(q[0],q[1]);pen=true;} else x.lineTo(q[0],q[1]); }
+      else if(pen){ x.stroke(); x.beginPath(); pen=false; }
+    }
+    if(pen)x.stroke();
+    c.junctions.forEach(j=>{ const q=w2(j.marker); x.fillStyle='#16a34a'; x.fillRect(q[0]-4,q[1]-4,8,8); });
+    c.obstacles.forEach(o=>{ const q=w2([o.x,o.y]); x.fillStyle='#f59e0b'; x.fillRect(q[0]-5,q[1]-5,10,10); });
+    if(LAB.sim&&LAB.sim.trail.length>1){
+      x.strokeStyle='rgba(56,189,248,.85)'; x.lineWidth=2; x.beginPath();
+      LAB.sim.trail.forEach((p,i)=>{ const q=w2(p); i?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]); });
+      x.stroke();
+    }
+    const en=w2(c.end);
+    x.fillStyle='#4ade80'; x.beginPath(); x.arc(en[0],en[1],5,0,7); x.fill();
   }
 
   // ---- rules editor ----
@@ -678,7 +800,6 @@
   // ---- wire up ----
   document.getElementById('runBtn').onclick=()=>{
     if(LAB.sim&&LAB.sim.status==='running'){ stopLoop(); LAB.sim.status='failed'; LAB.sim.reason='stalled'; stopRunUi(); updateHud(null); return; }
-    document.getElementById('resultWrap').classList.remove('show');
     startRun();
   };
   document.getElementById('resetBtn').onclick=resetSim;
