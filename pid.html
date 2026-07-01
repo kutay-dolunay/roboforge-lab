@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RoboForge · PID Çizgi Yarışı</title>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#0f172a; --panel2:#111c33; --line:#1e3a5f;
+    --sky:#38bdf8; --sky2:#0ea5e9; --green:#22c55e; --amber:#f59e0b;
+    --red:#ef4444; --purple:#a855f7; --txt:#e2e8f0; --muted:#64748b; --muted2:#94a3b8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1200px 800px at 70% -10%,#13233f 0%,var(--bg) 55%);
+    color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+  .mono{font-family:'Courier New',monospace}
+  header.topbar{display:flex;align-items:center;gap:14px;padding:12px 20px;
+    border-bottom:1px solid var(--line);background:rgba(10,16,30,.7);backdrop-filter:blur(8px);
+    position:sticky;top:0;z-index:50;flex-wrap:wrap}
+  .brand{display:flex;flex-direction:column;line-height:1.1}
+  .brand b{font-size:1.05rem;letter-spacing:.5px}
+  .brand b span{color:var(--sky)}
+  .brand small{color:var(--muted);font-size:.62rem;letter-spacing:2px;text-transform:uppercase}
+  .tracktabs{display:flex;gap:6px;margin-left:8px;flex-wrap:wrap;max-width:640px}
+  .ttab{padding:7px 12px;border:1px solid var(--line);background:var(--panel);color:var(--muted2);
+    border-radius:9px;cursor:pointer;font-size:.74rem;font-weight:600;transition:.15s;white-space:nowrap}
+  .ttab small{display:block;font-size:.56rem;color:var(--muted);font-weight:400}
+  .ttab.active{border-color:var(--sky);color:var(--sky);box-shadow:0 0 16px rgba(56,189,248,.18);background:#0c1a30}
+  .grow{flex:1}
+  .btn{padding:9px 16px;border-radius:10px;border:1px solid var(--line);background:var(--panel);
+    color:var(--txt);font-weight:700;cursor:pointer;font-size:.8rem;letter-spacing:.5px;transition:.15s}
+  .btn:hover{border-color:var(--sky)}
+  .btn.run{background:linear-gradient(180deg,#16a34a,#15803d);border-color:#22c55e;color:#eafff0;box-shadow:0 0 18px rgba(34,197,94,.25)}
+  .btn.run:hover{filter:brightness(1.08)}
+  .btn.stop{background:linear-gradient(180deg,#dc2626,#b91c1c);border-color:#ef4444;color:#fff}
+  .btn.ghost{background:transparent}
+  .speedwrap{display:flex;align-items:center;gap:8px;font-size:.7rem;color:var(--muted2)}
+  input[type=range]{accent-color:var(--sky)}
+  .helpbtn{width:36px;height:36px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--muted2);cursor:pointer;font-weight:800;font-size:.95rem}
+  .helpbtn:hover{border-color:var(--sky);color:var(--sky)}
+
+  .layout{display:grid;grid-template-columns:1fr 430px;gap:16px;padding:16px 20px;max-width:1280px;margin:0 auto}
+  @media(max-width:1040px){.layout{grid-template-columns:1fr}}
+  .simwrap{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+  canvas#sim{display:block;width:100%;height:auto;background:#0a0d12}
+  .hud{position:absolute;inset:0;pointer-events:none}
+  .hud .tl{position:absolute;top:12px;left:12px;display:flex;gap:8px;flex-wrap:wrap}
+  .chip{background:rgba(8,12,24,.82);border:1px solid var(--line);border-radius:10px;padding:7px 11px;font-size:.62rem;letter-spacing:1px;color:var(--muted2);backdrop-filter:blur(6px)}
+  .chip b{color:var(--sky);font-size:.95rem;display:block;margin-top:2px;letter-spacing:0}
+  .chip.ok b{color:var(--green)} .chip.warn b{color:var(--amber)} .chip.best b{color:#fbbf24}
+  .hud .tr{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+  .sensbar{display:flex;gap:6px;align-items:center;background:rgba(8,12,24,.82);border:1px solid var(--line);border-radius:10px;padding:7px 10px;backdrop-filter:blur(6px)}
+  .sdot{width:14px;height:14px;border-radius:50%;border:2px solid #334155;background:#0b1220;transition:.08s}
+  .sdot.on{box-shadow:0 0 10px currentColor}
+  .motorbars{background:rgba(8,12,24,.82);border:1px solid var(--line);border-radius:10px;padding:8px 10px;backdrop-filter:blur(6px);width:170px}
+  .mrow{display:flex;align-items:center;gap:8px;font-size:.58rem;color:var(--muted2);margin:3px 0}
+  .mrow span{width:26px}
+  .mtrack{flex:1;height:9px;background:#0b1220;border-radius:6px;position:relative;overflow:hidden;border:1px solid #1e293b}
+  .mfill{position:absolute;top:0;bottom:0;left:50%;background:var(--sky);transition:.06s}
+  .countdown{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-size:6rem;font-weight:800;color:#fff;text-shadow:0 0 30px rgba(56,189,248,.8);background:rgba(2,6,23,.35);font-family:'Courier New',monospace}
+
+  .result{margin-top:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .result .rhead{padding:14px 18px;font-weight:800;letter-spacing:.5px;display:flex;align-items:center;gap:10px;font-size:1rem}
+  .result.win .rhead{background:linear-gradient(90deg,rgba(34,197,94,.18),transparent);color:var(--green)}
+  .result.rec .rhead{background:linear-gradient(90deg,rgba(245,158,11,.22),transparent);color:#fbbf24}
+  .result.lose .rhead{background:linear-gradient(90deg,rgba(239,68,68,.16),transparent);color:#fca5a5}
+  .result.idle .rhead{color:var(--muted2)}
+  .rbody{padding:6px 18px 16px}
+  .rstats{display:flex;gap:22px;margin:6px 0 12px;flex-wrap:wrap}
+  .rstats div small{display:block;color:var(--muted);font-size:.6rem;letter-spacing:1px}
+  .rstats div b{font-size:1.3rem;color:var(--txt)}
+  .rstats div.big b{font-size:1.9rem;color:var(--sky)}
+  .tip{display:flex;gap:9px;align-items:flex-start;font-size:.82rem;color:var(--muted2);background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:9px 11px;margin:7px 0;line-height:1.45}
+  .tip .ic{color:var(--amber)}
+
+  .side{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;align-self:start}
+  .sidetabs{display:flex;border-bottom:1px solid var(--line)}
+  .sidetab{flex:1;padding:13px;text-align:center;cursor:pointer;font-weight:700;font-size:.82rem;color:var(--muted);background:var(--panel2);transition:.15s;letter-spacing:.5px}
+  .sidetab.active{color:var(--sky);background:var(--panel);box-shadow:inset 0 -2px 0 var(--sky)}
+  .sidebody{padding:16px}
+  .sectlabel{font-size:.66rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin:4px 0 10px;font-weight:700}
+  .editorwrap{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+  .chassis{position:relative;width:230px;height:290px;border-radius:14px;flex:none;
+    background:repeating-linear-gradient(0deg,#0c1426 0 19px,#0e1830 19px 20px),repeating-linear-gradient(90deg,#0c1426 0 19px,#0e1830 19px 20px);border:1px dashed #25406b}
+  .chbody{position:absolute;border:2px solid #345b8c;border-radius:16px;background:linear-gradient(180deg,#1b2942,#141f36);box-shadow:inset 0 0 0 1px rgba(56,189,248,.08)}
+  .chfront{position:absolute;color:var(--sky);font-size:.56rem;letter-spacing:3px;font-weight:700}
+  .wheel{position:absolute;width:12px;height:34px;background:#0b1220;border:1px solid #334155;border-radius:4px}
+  .sensor{position:absolute;width:22px;height:22px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid #fff;cursor:grab;display:flex;align-items:center;justify-content:center;font-size:.44rem;font-weight:800;color:#06121f;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,.4);user-select:none}
+  .ed-side{flex:1;min-width:150px}
+  .hintbox{font-size:.72rem;color:var(--muted2);line-height:1.5;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px}
+  .param{margin:14px 0}
+  .param label{display:flex;justify-content:space-between;font-size:.74rem;color:var(--muted2);margin-bottom:5px}
+  .param label b{color:var(--sky)}
+  .param input[type=range]{width:100%}
+
+  .modetoggle{display:flex;gap:6px;margin-bottom:12px}
+  .modebtn{flex:1;padding:9px;border:1px solid var(--line);background:var(--panel2);color:var(--muted2);border-radius:9px;cursor:pointer;font-weight:700;font-size:.78rem}
+  .modebtn.active{border-color:var(--sky);color:var(--sky);background:#0c1a30;box-shadow:0 0 14px rgba(56,189,248,.15)}
+  .pidrow{margin:14px 0}
+  .pidrow label{display:flex;justify-content:space-between;font-size:.76rem;color:var(--muted2);margin-bottom:5px}
+  .pidrow label b{color:var(--sky);font-family:'Courier New',monospace}
+  .pidrow input[type=range]{width:100%}
+  .piderr{margin-top:10px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .piderr .lab{font-size:.6rem;letter-spacing:1px;color:var(--muted);font-weight:700}
+  .errtrack{height:12px;background:#0b1220;border-radius:6px;position:relative;margin-top:7px;border:1px solid #1e293b;overflow:hidden}
+  .errmid{position:absolute;left:50%;top:0;bottom:0;width:1px;background:#334155}
+  .errfill{position:absolute;top:1px;bottom:1px;left:50%;width:4px;margin-left:-2px;background:var(--amber);border-radius:2px;transition:.05s}
+  .rule{border:1px solid var(--line);border-radius:11px;background:var(--panel2);padding:11px;margin-bottom:10px}
+  .rule.def{border-style:dashed;border-color:#3b3450;background:#161325}
+  .rulehead{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+  .rulehead .when{font-size:.6rem;letter-spacing:2px;color:var(--muted);font-weight:700}
+  .ruleord{display:flex;gap:4px}
+  .iconbtn{width:24px;height:24px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--muted2);cursor:pointer;font-size:.7rem;line-height:1;display:flex;align-items:center;justify-content:center}
+  .iconbtn:hover{border-color:var(--sky);color:var(--sky)}
+  .iconbtn.x:hover{border-color:var(--red);color:var(--red)}
+  .chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px}
+  .schip{padding:4px 7px;border-radius:8px;font-size:.6rem;font-weight:700;cursor:pointer;border:2px solid;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:44px;user-select:none;transition:.1s}
+  .schip small{font-size:.48rem;font-weight:600}
+  .arrow{color:var(--muted);font-weight:700;text-align:center;margin:2px 0;font-size:.7rem;letter-spacing:2px}
+  .motors{display:flex;gap:8px}
+  .motorctl{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:8px}
+  .motorctl .ml{font-size:.6rem;color:var(--muted);letter-spacing:1px;margin-bottom:5px;font-weight:700}
+  .motorctl select,.motorctl input{width:100%;background:#0b1220;border:1px solid var(--line);color:var(--txt);border-radius:6px;padding:5px;font-size:.74rem;margin-bottom:5px}
+  .motorctl input{appearance:auto}
+  .actlabel{font-size:.58rem;color:var(--amber);text-align:center;font-weight:700;letter-spacing:1px;margin-top:3px}
+  .addrule{width:100%;padding:10px;border:1px dashed var(--line);background:transparent;color:var(--sky);border-radius:10px;cursor:pointer;font-weight:700;font-size:.78rem}
+  .addrule:hover{background:#0c1a30}
+  .legend{font-size:.62rem;color:var(--muted);margin-top:8px;line-height:1.6}
+  .legend b{color:var(--muted2)}
+  .backlink{color:var(--muted2);text-decoration:none;font-size:.78rem;font-weight:700;border:1px solid var(--line);padding:8px 12px;border-radius:9px;white-space:nowrap}
+  .backlink:hover{border-color:var(--sky);color:var(--sky)}
+  .tutwrap{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,.72);backdrop-filter:blur(3px)}
+  .tutcard{max-width:430px;margin:20px;background:var(--panel);border:1px solid var(--sky);border-radius:16px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+  .tutcard h3{margin:0 0 8px;font-size:1.3rem;color:var(--sky)}
+  .tutcard p{margin:0 0 18px;color:var(--muted2);line-height:1.6;font-size:.95rem}
+  #toast{position:fixed;left:50%;bottom:32px;transform:translateX(-50%) translateY(20px);background:rgba(8,12,24,.96);border:1px solid var(--line);color:var(--txt);padding:12px 20px;border-radius:12px;font-size:.84rem;font-weight:600;opacity:0;pointer-events:none;transition:.25s;box-shadow:0 12px 40px rgba(0,0,0,.5);backdrop-filter:blur(8px);z-index:300}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a href="./" class="backlink" title="Kataloğa dön">← Katalog</a>
+  <div class="brand"><b>Robo<span>Forge</span> · PID Çizgi Yarışı</b><small>PID Racing</small></div>
+  <div class="tracktabs" id="tracktabs"></div>
+  <div class="grow"></div>
+  <div class="speedwrap"><span>Sim Hızı</span><input type="range" id="simspeed" min="0.5" max="3" step="0.5" value="1" /><span id="simspeedval" class="mono">1.0x</span></div>
+  <button class="btn run" id="runbtn">▶ YARIŞ</button>
+  <button class="btn ghost" id="resetbtn">⟲ Sıfırla</button>
+  <button class="btn ghost" id="shareBtn" title="Paylaş">🔗 Paylaş</button>
+  <button class="helpbtn" id="helpBtn" title="Nasıl?">?</button>
+</header>
+
+<div class="layout">
+  <div>
+    <div class="simwrap">
+      <canvas id="sim" width="600" height="600"></canvas>
+      <div class="hud">
+        <div class="tl">
+          <div class="chip">SÜRE<b id="hudTime" class="mono">0.0s</b></div>
+          <div class="chip best">EN İYİ<b id="hudBest" class="mono">—</b></div>
+          <div class="chip" id="hudAccChip">ÇİZGİDE<b id="hudAcc" class="mono">—</b></div>
+          <div class="chip" id="hudLockChip">DURUM<b id="hudLock">HAZIR</b></div>
+        </div>
+        <div class="tr">
+          <div class="sensbar" id="hudSensors"></div>
+          <div class="motorbars">
+            <div class="mrow"><span>SOL</span><div class="mtrack"><div class="mfill" id="mfL"></div></div></div>
+            <div class="mrow"><span>SAĞ</span><div class="mtrack"><div class="mfill" id="mfR"></div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="countdown" id="countdown"></div>
+    </div>
+    <div class="result idle" id="result">
+      <div class="rhead" id="rhead">🏁 Robotunu ayarla ve <b style="color:var(--green);margin:0 4px">YARIŞ</b> — en hızlı temiz turu at.</div>
+      <div class="rbody" id="rbody" style="display:none"></div>
+    </div>
+  </div>
+
+  <div class="side">
+    <div class="sidetabs">
+      <div class="sidetab active" data-tab="robot" id="tab-robot">🤖 Robot</div>
+      <div class="sidetab" data-tab="kod" id="tab-kod">🧩 Kod</div>
+    </div>
+    <div class="sidebody">
+      <div id="panel-robot">
+        <div class="sectlabel">Sensör Dizisi (5'li) · sürükle-bırak</div>
+        <div class="hintbox">Yarış robotu <b>5 sensörlük sık bir dizi</b> kullanır — çizgiyi daha hassas ölçer, PID daha yumuşak sürer. Sürükleyerek yerlerini değiştirebilirsin.</div>
+        <div class="editorwrap">
+          <div class="chassis" id="chassis"></div>
+          <div class="ed-side">
+            <div class="param"><label>Sürüş Hızı <b id="vLabel">Orta</b></label><input type="range" id="vmax" min="2.4" max="5.4" step="0.2" value="3.8" /></div>
+            <div class="param"><label>Dönüş Çevikliği <b id="gLabel">Normal</b></label><input type="range" id="grip" min="0.7" max="1.6" step="0.1" value="1.0" /></div>
+            <div class="hintbox" style="margin:6px 0 0">Daha hızlı motor = daha hızlı tur, ama virajda savrulma riski. Denge senin işin.</div>
+          </div>
+        </div>
+      </div>
+      <div id="panel-kod" style="display:none">
+        <div class="sectlabel">Kontrol Yöntemi</div>
+        <div class="modetoggle">
+          <button class="modebtn" id="mode-rules">🧩 Kural Modu</button>
+          <button class="modebtn active" id="mode-pid">📈 PID Modu</button>
+        </div>
+        <div id="kod-pid">
+          <div class="hintbox">PID modu yarışın kalbidir: robot çizgiye olan <b>hatayı</b> ölçüp orantılı düzeltir. <b style="color:var(--sky)">Kp</b> sertlik, <b style="color:var(--sky)">Kd</b> savrulmayı bastırır. Hızlı + temiz tur için ikisini dengele.</div>
+          <div class="pidrow"><label>Temel Hız <b id="pidBaseV">70%</b></label><input type="range" id="pidBase" min="20" max="100" step="5" value="70" /></div>
+          <div class="pidrow"><label>Kp — Orantı (sertlik) <b id="pidKpV">1.6</b></label><input type="range" id="pidKp" min="0" max="4" step="0.1" value="1.6" /></div>
+          <div class="pidrow"><label>Kd — Sönümleme (sakinlik) <b id="pidKdV">0.6</b></label><input type="range" id="pidKd" min="0" max="2" step="0.1" value="0.6" /></div>
+          <div class="piderr"><div class="lab">ÇİZGİ HATASI&nbsp;&nbsp;sol ◄ ─── ► sağ</div><div class="errtrack"><div class="errmid"></div><div class="errfill" id="errFill"></div></div></div>
+          <div class="legend"><b>Yarış ipucu:</b> Düz pistte Temel Hız'ı artır; virajlı pistte Kp/Kd'yi ince ayarla. Çok hızlı + çok sert = savrulup pistten çıkarsın.</div>
+        </div>
+        <div id="kod-rules" style="display:none">
+          <div class="hintbox">Kural modu 5 sensörle basit aç-kapa kontroldür. Yarışta PID kadar akıcı olmaz ama denemesi öğreticidir. Rozete tıkla: <b style="color:var(--green)">AÇIK</b> / <b style="color:var(--red)">KAPALI</b> / <b style="color:var(--muted2)">FARK ETMEZ</b>.</div>
+          <div id="rules"></div>
+          <button class="addrule" id="addRule">＋ Yeni Kural Ekle</button>
+          <div class="rule def" id="defRuleBox" style="margin-top:12px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tutwrap" id="tutwrap">
+  <div class="tutcard">
+    <h3>🏁 PID Çizgi Yarışı</h3>
+    <p>Amacın <b>en hızlı temiz turu</b> atmak. 5 sensörlü diziyle çizgiyi takip et, <b>PID Modu</b>'nda Kp/Kd ve Temel Hız'ı ayarla. Hızlı git — ama virajda savrulup pistten çıkma! Her pistin en iyi süren <b>rekor</b> olarak kaydedilir; hayaletin (soluk çizgi) seni kovalar.</p>
+    <div style="text-align:right"><button class="btn run" id="tutClose">Başla! 🚀</button></div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script src="robot-data.js?v=2"></script>
+<script src="sim-core.js?v=2"></script>
+<script src="pid-core.js?v=2"></script>
+<script>
+(function(){
+  const S=window.SimCore, P=window.PidCore;
+  const DIRS=[['fwd','İleri'],['stop','Dur'],['rev','Geri']];
+  const LAB={ trackIdx:0, track:null, sensors:P.starterSensors(), rules:P.starterRules(),
+    defaultRule:P.starterDefault(), params:P.defaultParams(), mode:'pid', pid:P.starterPID(),
+    sim:null, running:false, raf:null, acc:0, lastTs:0, simSpeed:1, selected:null, frames:[], ghost:{}, best:{} };
+  try{ LAB.best=JSON.parse(localStorage.getItem('rf_pid_best'))||{}; }catch(e){ LAB.best={}; }
+
+  const cv=document.getElementById('sim'), ctx=cv.getContext('2d');
+  const view={cx:300,cy:300,scale:25};
+  function w2s(x,y){ return [view.cx+x*view.scale, view.cy-y*view.scale]; }
+  function trackId(){ return P.RACING_TRACKS[LAB.trackIdx].id; }
+  function rebuildTrack(){ LAB.track=S.buildTrack(P.RACING_TRACKS[LAB.trackIdx],40); }
+
+  function drawScene(){
+    ctx.clearRect(0,0,600,600); ctx.fillStyle='#0a0d12'; ctx.fillRect(0,0,600,600);
+    ctx.strokeStyle='#161c25'; ctx.lineWidth=1;
+    for(let g=-10;g<=10;g+=2){ const [sx]=w2s(g,0),[,sy]=w2s(0,g);
+      ctx.beginPath();ctx.moveTo(sx,0);ctx.lineTo(sx,600);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(0,sy);ctx.lineTo(600,sy);ctx.stroke(); }
+    const sm=LAB.track.samples;
+    ctx.strokeStyle='#f6f8fb'; ctx.lineWidth=S.LINE_HALF_WIDTH*2*view.scale; ctx.lineJoin='round'; ctx.lineCap='round';
+    const N=sm.length; ctx.beginPath();
+    for(let i=0;i<=N;i++){ const idx=i%N; const [x,y]=w2s(sm[idx][0],sm[idx][1]); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }
+    ctx.stroke();
+    // start marker (checkered)
+    const a=sm[0]; const [ax,ay]=w2s(a[0],a[1]);
+    ctx.fillStyle='#fbbf24'; ctx.beginPath(); ctx.arc(ax,ay,7,0,7); ctx.fill();
+    ctx.strokeStyle='#f59e0b'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(ax,ay,11,0,7); ctx.stroke();
+    // ghost of best run
+    const gh=LAB.ghost[trackId()];
+    if(gh && gh.length>2){ ctx.strokeStyle='rgba(251,191,36,.4)'; ctx.lineWidth=2.5; ctx.setLineDash([6,5]); ctx.beginPath();
+      gh.forEach((p,i)=>{ const [x,y]=w2s(p[0],p[1]); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }); ctx.stroke(); ctx.setLineDash([]); }
+  }
+  function drawTrail(){
+    if(!LAB.sim || LAB.sim.trail.length<2) return;
+    ctx.strokeStyle='rgba(56,189,248,.6)'; ctx.lineWidth=3; ctx.lineCap='round';
+    ctx.beginPath(); LAB.sim.trail.forEach((p,i)=>{ const [x,y]=w2s(p[0],p[1]); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }); ctx.stroke();
+  }
+  function localToWorld(rb,fwd,right){ const c=Math.cos(rb.th),s=Math.sin(rb.th); return [rb.x+fwd*c+right*s, rb.y+fwd*s+right*(-c)]; }
+  function drawRobot(rb,last){
+    const HL=0.95,HW=0.62;
+    const corners=[[HL,-HW],[HL,HW],[-HL,HW],[-HL,-HW]].map(([f,r])=>{ const [wx,wy]=localToWorld(rb,f,r); return w2s(wx,wy); });
+    ctx.fillStyle='rgba(51,65,85,.96)'; ctx.strokeStyle='#38bdf8'; ctx.lineWidth=2;
+    ctx.beginPath(); corners.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])); ctx.closePath(); ctx.fill(); ctx.stroke();
+    const tip=localToWorld(rb,HL+0.5,0), bl=localToWorld(rb,HL+0.05,-0.22), br=localToWorld(rb,HL+0.05,0.22);
+    const [tx,ty]=w2s(...tip),[blx,bly]=w2s(...bl),[brx,bry]=w2s(...br);
+    ctx.fillStyle='#22c55e'; ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(blx,bly); ctx.lineTo(brx,bry); ctx.closePath(); ctx.fill();
+    const states=last?last.states:null, readings=last?last.readings:null;
+    LAB.sensors.forEach((sen,i)=>{ const [wx,wy]=localToWorld(rb,sen.fwd,sen.right); const [sx,sy]=w2s(wx,wy);
+      const inten=readings?readings[i]:(states&&states[i]?1:0);
+      ctx.beginPath(); ctx.arc(sx,sy,5,0,7);
+      if(inten>0.05){ const g=Math.round(80+175*Math.min(1,inten)); ctx.fillStyle='rgb(34,'+g+',94)'; ctx.shadowColor='#22c55e'; ctx.shadowBlur=4+8*inten; }
+      else { ctx.fillStyle='#475569'; ctx.shadowBlur=0; } ctx.fill(); ctx.shadowBlur=0;
+      ctx.lineWidth=1.6; ctx.strokeStyle=sen.color; ctx.stroke(); });
+  }
+  function render(last){ drawScene(); drawTrail(); const rb=LAB.sim?LAB.sim.robot:S.makeRobot(LAB.track); drawRobot(rb,last); }
+
+  // ---------- HUD ----------
+  function buildSensorHud(){ const wrap=document.getElementById('hudSensors'); wrap.innerHTML='';
+    LAB.sensors.forEach(sen=>{ const d=document.createElement('div'); d.className='sdot'; d.style.color=sen.color; wrap.appendChild(d); }); }
+  function fmt(t){ return t==null?'—':t.toFixed(1)+'s'; }
+  function updateHud(last){
+    document.getElementById('hudTime').textContent=(LAB.sim?LAB.sim.t:0).toFixed(1)+'s';
+    document.getElementById('hudBest').textContent=fmt(LAB.best[trackId()]);
+    const acc=LAB.sim?S.accuracy(LAB.sim):null;
+    document.getElementById('hudAcc').textContent=acc==null?'—':acc+'%';
+    const lock=document.getElementById('hudLock'), lc=document.getElementById('hudLockChip');
+    if(!LAB.sim){ lock.textContent='HAZIR'; lc.className='chip'; }
+    else if(LAB.sim.status==='success'){ lock.textContent='TUR TAMAM ✓'; lc.className='chip ok'; }
+    else if(LAB.sim.status==='failed'){ lock.textContent='PİST DIŞI ✕'; lc.className='chip warn'; }
+    else { lock.textContent='YARIŞTA'; lc.className='chip ok'; }
+    const dots=document.querySelectorAll('#hudSensors .sdot');
+    dots.forEach((d,i)=>{ const on=last&&last.states&&last.states[i]; d.classList.toggle('on',!!on); d.style.background=on?d.style.color:'#0b1220'; });
+    const mL=last?last.cmd.mL:0, mR=last?last.cmd.mR:0; setBar('mfL',mL); setBar('mfR',mR);
+    const ef=document.getElementById('errFill'); if(ef){ let e=(LAB.mode==='pid'&&last&&last.error!=null)?Math.max(-1,Math.min(1,last.error)):0; ef.style.left=(50+e*48)+'%'; }
+  }
+  function setBar(id,frac){ const el=document.getElementById(id); const pct=Math.max(-1,Math.min(1,frac))*50;
+    if(frac>=0){ el.style.left='50%'; el.style.width=pct+'%'; el.style.background='var(--sky)'; }
+    else { el.style.left=(50+pct)+'%'; el.style.width=(-pct)+'%'; el.style.background='var(--amber)'; } }
+
+  // ---------- run ----------
+  function buildConfig(){ return { track:LAB.track, sensors:LAB.sensors, rules:LAB.rules, defaultRule:LAB.defaultRule, params:LAB.params, mode:LAB.mode, pid:LAB.pid }; }
+  function startRun(){
+    if(LAB.running) return; stopLoop(); rebuildTrack();
+    LAB.sim=S.createSim(buildConfig()); LAB.frames=[]; setResultRunning();
+    let n=3; const cd=document.getElementById('countdown'); cd.style.display='flex'; cd.textContent=n;
+    const iv=setInterval(()=>{ n--; if(n>0){cd.textContent=n;} else if(n===0){cd.textContent='GİT!';} else { clearInterval(iv); cd.style.display='none'; beginMotion(); } },520);
+  }
+  function beginMotion(){ LAB.running=true; LAB.acc=0; LAB.lastTs=performance.now();
+    const b=document.getElementById('runbtn'); b.textContent='■ DURDUR'; b.classList.remove('run'); b.classList.add('stop'); LAB.raf=requestAnimationFrame(loop); }
+  function loop(ts){ const FIXED=1/60; let real=(ts-LAB.lastTs)/1000; LAB.lastTs=ts; if(real>0.1)real=0.1;
+    LAB.acc+=real*LAB.simSpeed; let last=LAB.sim.last, steps=0;
+    while(LAB.acc>=FIXED && LAB.sim.status==='running' && steps<8){ last=S.tickSim(LAB.sim,FIXED); LAB.acc-=FIXED; steps++;
+      if(LAB.frames.length<4000){ const rb=LAB.sim.robot; LAB.frames.push([rb.x,rb.y]); } }
+    render(last); updateHud(last);
+    if(LAB.sim.status!=='running'){ finishRun(); return; } LAB.raf=requestAnimationFrame(loop); }
+  function stopLoop(){ if(LAB.raf) cancelAnimationFrame(LAB.raf); LAB.raf=null; }
+  function stopRun(){ LAB.running=false; stopLoop(); const b=document.getElementById('runbtn'); b.textContent='▶ YARIŞ'; b.classList.add('run'); b.classList.remove('stop'); }
+  function finishRun(){ stopRun(); showResult(); }
+
+  const REASONS={off_track:'Pistten çıktı',line_lost:'Çizgiyi kaybetti',stalled:'Robot durdu'};
+  function setResultRunning(){ const r=document.getElementById('result'); r.className='result idle';
+    document.getElementById('rhead').innerHTML='🏁 Robot pistte… tur atıyor.'; document.getElementById('rbody').style.display='none'; }
+  function setResultReady(){ const r=document.getElementById('result'); r.className='result idle';
+    document.getElementById('rhead').innerHTML='🏁 Robotunu ayarla ve <b style="color:var(--green);margin:0 4px">YARIŞ</b> — en hızlı temiz turu at.'; document.getElementById('rbody').style.display='none'; }
+  function showResult(){
+    const sim=LAB.sim, r=document.getElementById('result'); const win=sim.status==='success';
+    let record=false;
+    if(win){ const id=trackId(), prev=LAB.best[id];
+      if(prev==null || sim.t<prev){ LAB.best[id]=+sim.t.toFixed(2); record=true; LAB.ghost[id]=LAB.frames.slice(); try{localStorage.setItem('rf_pid_best',JSON.stringify(LAB.best));}catch(e){} } }
+    r.className='result '+(record?'rec':win?'win':'lose');
+    document.getElementById('rhead').innerHTML= record?'🏆 YENİ REKOR!' : win?'🏁 Tur Tamamlandı!' : '💥 '+(REASONS[sim.reason]||'Başarısız');
+    const acc=S.accuracy(sim), best=LAB.best[trackId()];
+    const tips=[];
+    if(win){ if(acc>=95) tips.push('Kusursuz çizgi! Şimdi Temel Hız\'ı biraz artırıp süreyi düşürmeyi dene.');
+      else tips.push('Temiz bitirdin ama zikzak var. Kd\'yi biraz artır, Kp\'yi hafif düşür — daha stabil ve hızlı olur.'); }
+    else { if(LAB.mode==='pid') tips.push('Pistten çıktın. Kp çok yüksekse savrulursun, Temel Hız virajlar için çok yüksek olabilir — ikisini de biraz düşür.');
+      else tips.push('Kural modu yarışta zorlanır — 📈 PID Modu\'na geçip Kp/Kd ile daha akıcı sür.');
+      if(LAB.params.vMax>=4.6) tips.push('Motor hızın çok yüksek; teknik virajda aşıp çıkmış olabilir. Ya hızı düşür ya da çevikliği artır.'); }
+    const body=document.getElementById('rbody'); body.style.display='block';
+    body.innerHTML=`<div class="rstats">
+        <div class="big"><small>TUR SÜRESİ</small><b>${sim.status==='success'?sim.t.toFixed(1)+'s':'—'}</b></div>
+        <div><small>EN İYİ (REKOR)</small><b style="color:#fbbf24">${fmt(best)}</b></div>
+        <div><small>ÇİZGİDE KALMA</small><b>${acc}%</b></div>
+      </div>`+
+      tips.map(t=>`<div class="tip"><span class="ic">💡</span><span>${t}</span></div>`).join('')+
+      `<div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+        <button class="btn run" id="retry">⟲ Tekrar Yarış</button>
+        <button class="btn ghost" id="replayBtn">▶ Turu İzle</button></div>`;
+    document.getElementById('retry').onclick=resetSim;
+    document.getElementById('replayBtn').onclick=replayRun;
+    setTimeout(()=>{ const el=document.getElementById('result'); if(el) el.scrollIntoView({behavior:'smooth',block:'center'}); },130);
+  }
+  function replayRun(){ if(!LAB.frames.length||LAB.running) return; stopLoop(); let i=0;
+    const stepR=()=>{ drawScene(); ctx.strokeStyle='rgba(56,189,248,.8)'; ctx.lineWidth=3; ctx.beginPath();
+      for(let j=0;j<=i&&j<LAB.frames.length;j++){ const [x,y]=w2s(LAB.frames[j][0],LAB.frames[j][1]); j?ctx.lineTo(x,y):ctx.moveTo(x,y); } ctx.stroke();
+      const f=LAB.frames[Math.min(i,LAB.frames.length-1)]; drawRobot({x:f[0],y:f[1],th:0},null);
+      i+=3; if(i<LAB.frames.length) LAB.raf=requestAnimationFrame(stepR); }; stepR(); }
+  function resetSim(){ stopRun(); LAB.sim=null; LAB.acc=0; LAB.frames=[]; rebuildTrack(); setResultReady(); render(null); updateHud(null); }
+
+  // ---------- track tabs ----------
+  function buildTrackTabs(){ const wrap=document.getElementById('tracktabs'); wrap.innerHTML='';
+    P.RACING_TRACKS.forEach((t,i)=>{ const d=document.createElement('div'); d.className='ttab'+(i===LAB.trackIdx?' active':'');
+      d.innerHTML=`${t.name}<small>${t.difficulty}</small>`; d.onclick=()=>{ if(LAB.running) stopRun(); LAB.trackIdx=i; buildTrackTabs(); resetSim(); }; wrap.appendChild(d); }); }
+
+  // ---------- chassis (5 draggable sensors) ----------
+  const ED={w:230,h:290,scale:96,fwdMin:-0.6,fwdMax:1.6,rightMin:-1.0,rightMax:1.0};
+  function edPos(sen){ const cx=ED.w/2, cy=ED.h*0.62; return { x:cx+sen.right*ED.scale, y:cy-sen.fwd*ED.scale }; }
+  function edToLocal(px,py){ const cx=ED.w/2, cy=ED.h*0.62; let right=(px-cx)/ED.scale, fwd=(cy-py)/ED.scale;
+    right=Math.max(ED.rightMin,Math.min(ED.rightMax,right)); fwd=Math.max(ED.fwdMin,Math.min(ED.fwdMax,fwd)); return {right,fwd}; }
+  function buildChassis(){ const ch=document.getElementById('chassis'); ch.innerHTML='';
+    const body=document.createElement('div'); body.className='chbody'; const HL=0.95*ED.scale,HW=0.62*ED.scale,cx=ED.w/2,cy=ED.h*0.62;
+    body.style.left=(cx-HW)+'px'; body.style.top=(cy-HL)+'px'; body.style.width=(HW*2)+'px'; body.style.height=(HL*2)+'px'; ch.appendChild(body);
+    const fl=document.createElement('div'); fl.className='chfront'; fl.textContent='▲ ÖN'; fl.style.left=(cx-16)+'px'; fl.style.top=(cy-HL-16)+'px'; ch.appendChild(fl);
+    [[-HW-6],[HW-6]].forEach(([wx])=>{ const w=document.createElement('div'); w.className='wheel'; w.style.left=(cx+wx)+'px'; w.style.top=(cy-17)+'px'; ch.appendChild(w); });
+    LAB.sensors.forEach(sen=>{ const el=document.createElement('div'); el.className='sensor'; el.style.background=sen.color; el.textContent=sen.label.replace('SOL','S').replace('SAĞ','S').replace('ORTA','O');
+      const p=edPos(sen); el.style.left=p.x+'px'; el.style.top=p.y+'px'; makeDraggable(el,sen); ch.appendChild(el); }); }
+  function makeDraggable(el,sen){ let dragging=false;
+    el.addEventListener('pointerdown',e=>{ if(LAB.running) stopRun(); dragging=true; el.setPointerCapture(e.pointerId); e.preventDefault(); });
+    el.addEventListener('pointermove',e=>{ if(!dragging) return; const rect=document.getElementById('chassis').getBoundingClientRect();
+      const loc=edToLocal(e.clientX-rect.left,e.clientY-rect.top); sen.fwd=+loc.fwd.toFixed(3); sen.right=+loc.right.toFixed(3);
+      const p=edPos(sen); el.style.left=p.x+'px'; el.style.top=p.y+'px'; if(!LAB.running) render(null); });
+    el.addEventListener('pointerup',()=>{ dragging=false; }); }
+
+  // ---------- rules editor (Kural) ----------
+  const PAT_CYCLE={any:'on',on:'off',off:'any'};
+  const PAT_STYLE={ on:{bg:'#0b2e16',tx:'#4ade80',label:'AÇIK'}, off:{bg:'#2e0b0b',tx:'#fca5a5',label:'KAPALI'}, any:{bg:'#13203a',tx:'#94a3b8',label:'FARK'} };
+  function buildRules(){ const wrap=document.getElementById('rules'); if(!wrap) return; wrap.innerHTML='';
+    LAB.rules.forEach((rule,ri)=>wrap.appendChild(ruleEl(rule,ri))); document.getElementById('defRuleBox').replaceWith(defRuleEl()); }
+  function chipEl(rule,sen,si){ const st=rule.pattern[si]||'any', sty=PAT_STYLE[st]; const c=document.createElement('div'); c.className='schip';
+    c.style.background=sty.bg; c.style.borderColor=sen.color; c.style.color=sty.tx; c.innerHTML=`${sen.label}<small style="color:${sty.tx}">${sty.label}</small>`;
+    c.onclick=()=>{ rule.pattern[si]=PAT_CYCLE[st]; buildRules(); }; return c; }
+  function motorEl(rule,side){ const m=rule[side]; const box=document.createElement('div'); box.className='motorctl';
+    box.innerHTML=`<div class="ml">${side==='left'?'SOL':'SAĞ'}</div>`;
+    const sel=document.createElement('select'); DIRS.forEach(([v,t])=>{ const o=document.createElement('option'); o.value=v; o.textContent=t; if(m.dir===v)o.selected=true; sel.appendChild(o); }); sel.onchange=()=>{ m.dir=sel.value; };
+    const sp=document.createElement('input'); sp.type='number'; sp.min=0; sp.max=100; sp.step=5; sp.value=m.speed; sp.oninput=()=>{ m.speed=Math.max(0,Math.min(100,+sp.value||0)); };
+    box.appendChild(sel); box.appendChild(sp); return box; }
+  function ruleEl(rule,ri){ const el=document.createElement('div'); el.className='rule';
+    const head=document.createElement('div'); head.className='rulehead'; head.innerHTML=`<span class="when">EĞER ↓</span>`;
+    const ord=document.createElement('div'); ord.className='ruleord'; const up=ib('▲',()=>moveRule(ri,-1)),dn=ib('▼',()=>moveRule(ri,1)),rm=ib('✕',()=>{LAB.rules.splice(ri,1);buildRules();},'x');
+    if(ri===0) up.style.visibility='hidden'; if(ri===LAB.rules.length-1) dn.style.visibility='hidden'; ord.append(up,dn,rm); head.appendChild(ord); el.appendChild(head);
+    const chips=document.createElement('div'); chips.className='chips'; LAB.sensors.forEach((sen,si)=>chips.appendChild(chipEl(rule,sen,si))); el.appendChild(chips);
+    el.insertAdjacentHTML('beforeend','<div class="arrow">▼ O ZAMAN ▼</div>');
+    const motors=document.createElement('div'); motors.className='motors'; motors.append(motorEl(rule,'left'),motorEl(rule,'right')); el.appendChild(motors); return el; }
+  function defRuleEl(){ const el=document.createElement('div'); el.className='rule def'; el.id='defRuleBox';
+    el.innerHTML=`<div class="rulehead"><span class="when" style="color:#a78bfa">HİÇBİRİ EŞLEŞMEZSE ↓</span></div>`;
+    const motors=document.createElement('div'); motors.className='motors'; motors.append(motorEl(LAB.defaultRule,'left'),motorEl(LAB.defaultRule,'right')); el.appendChild(motors); return el; }
+  function ib(txt,fn,cls){ const b=document.createElement('button'); b.className='iconbtn'+(cls?' '+cls:''); b.textContent=txt; b.onclick=fn; return b; }
+  function moveRule(ri,d){ const ni=ri+d; if(ni<0||ni>=LAB.rules.length)return; const t=LAB.rules[ri];LAB.rules[ri]=LAB.rules[ni];LAB.rules[ni]=t;buildRules(); }
+  function addRule(){ const pat=LAB.sensors.map(()=>'any'); LAB.rules.push({pattern:pat,left:{dir:'fwd',speed:80},right:{dir:'fwd',speed:80}}); buildRules(); }
+
+  // ---------- mode + pid + params ----------
+  function setMode(m){ LAB.mode=m;
+    document.getElementById('mode-rules').classList.toggle('active',m==='rules');
+    document.getElementById('mode-pid').classList.toggle('active',m==='pid');
+    document.getElementById('kod-rules').style.display=m==='rules'?'block':'none';
+    document.getElementById('kod-pid').style.display=m==='pid'?'block':'none';
+    if(LAB.running) stopRun(); resetSim(); }
+  function bindPid(){ const b=document.getElementById('pidBase'),kp=document.getElementById('pidKp'),kd=document.getElementById('pidKd');
+    b.value=LAB.pid.base; kp.value=LAB.pid.kp; kd.value=LAB.pid.kd;
+    document.getElementById('pidBaseV').textContent=LAB.pid.base+'%'; document.getElementById('pidKpV').textContent=(+LAB.pid.kp).toFixed(1); document.getElementById('pidKdV').textContent=(+LAB.pid.kd).toFixed(1);
+    b.oninput=()=>{ LAB.pid.base=+b.value; document.getElementById('pidBaseV').textContent=b.value+'%'; };
+    kp.oninput=()=>{ LAB.pid.kp=+kp.value; document.getElementById('pidKpV').textContent=(+kp.value).toFixed(1); };
+    kd.oninput=()=>{ LAB.pid.kd=+kd.value; document.getElementById('pidKdV').textContent=(+kd.value).toFixed(1); }; }
+  function vLabel(v){ return v<3?'Yavaş':v<4.3?'Orta':'Hızlı'; }
+  function gLabel(g){ return g<0.9?'Hantal':g<1.25?'Normal':'Çevik'; }
+  function bindParams(){ const vm=document.getElementById('vmax'), gr=document.getElementById('grip');
+    vm.value=LAB.params.vMax; gr.value=LAB.params.turnGain;
+    vm.oninput=()=>{ LAB.params.vMax=+vm.value; document.getElementById('vLabel').textContent=vLabel(+vm.value); };
+    gr.oninput=()=>{ LAB.params.turnGain=+gr.value; document.getElementById('gLabel').textContent=gLabel(+gr.value); };
+    document.getElementById('vLabel').textContent=vLabel(LAB.params.vMax); document.getElementById('gLabel').textContent=gLabel(LAB.params.turnGain); }
+
+  // ---------- share ----------
+  function encodeState(){ const st={t:LAB.trackIdx,s:LAB.sensors,r:LAB.rules,d:LAB.defaultRule,m:LAB.mode,pid:LAB.pid,p:{vMax:LAB.params.vMax,turnGain:LAB.params.turnGain,wheelBase:LAB.params.wheelBase}};
+    return btoa(unescape(encodeURIComponent(JSON.stringify(st)))); }
+  function applyState(st){ if(!st) return; if(typeof st.t==='number'&&st.t>=0&&st.t<P.RACING_TRACKS.length) LAB.trackIdx=st.t;
+    if(Array.isArray(st.s)&&st.s.length) LAB.sensors=st.s; if(Array.isArray(st.r)) LAB.rules=st.r; if(st.d) LAB.defaultRule=st.d;
+    if(st.m==='pid'||st.m==='rules') LAB.mode=st.m; if(st.pid) LAB.pid={...P.starterPID(),...st.pid}; LAB.params={...P.defaultParams(),...(st.p||{})}; }
+  function loadFromHash(){ if(location.hash&&location.hash.indexOf('r=')>=0){ try{ applyState(JSON.parse(decodeURIComponent(escape(atob(location.hash.split('r=')[1]))))); return true; }catch(e){} } return false; }
+  function shareRobot(){ const link=location.origin+location.pathname+'#r='+encodeState(); history.replaceState(null,'','#r='+encodeState());
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(link).then(()=>toast('🔗 Bağlantı kopyalandı!'),()=>toast('🔗 Bağlantı adres çubuğunda hazır.')); } else toast('🔗 Bağlantı adres çubuğunda hazır.'); }
+  let toastT=null; function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2600); }
+
+  // ---------- tabs / card / init ----------
+  function switchTab(name){ document.querySelectorAll('.sidetab').forEach(x=>x.classList.toggle('active',x.dataset.tab===name));
+    document.getElementById('panel-robot').style.display=name==='robot'?'block':'none'; document.getElementById('panel-kod').style.display=name==='kod'?'block':'none'; }
+  function bindTabs(){ document.querySelectorAll('.sidetab').forEach(t=>t.onclick=()=>switchTab(t.dataset.tab)); }
+  function applyRobotBuild(){ try{ const raw=localStorage.getItem('rf_robot'); if(!raw||!window.RobotData) return; const b=JSON.parse(raw); const sp=window.RobotData.toSimParams(b);
+    if(sp&&sp.vMax){ LAB.params.vMax=Math.max(2.4,Math.min(5.4,sp.vMax)); LAB.params.turnGain=sp.turnGain; if(sp.wheelBase) LAB.params.wheelBase=sp.wheelBase; }
+    const m=window.RobotData.opt('motor',b.motor), w=window.RobotData.opt('wheel',b.wheel); const small=document.querySelector('.brand small');
+    if(small&&(m||w)) small.textContent='🔧 '+(m?m.name:'?')+' · '+(w?w.name:'?'); }catch(e){} }
+  function fillRobotCard(){ const side=document.querySelector('.side'); if(!side) return; let build=null; try{ build=JSON.parse(localStorage.getItem('rf_robot')); }catch(e){}
+    const RD=window.RobotData; const card=document.createElement('div'); card.style.cssText='border-top:1px solid var(--line);padding:16px;background:#0c1526';
+    if(build&&RD){ const chips=RD.ORDER.map(cat=>{ const o=RD.opt(cat,build[cat]); return '<span style="border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:4px 8px;font-size:.68rem;color:var(--muted2)">'+RD.COMPONENTS[cat].icon+' <b style="color:var(--txt)">'+(o?o.name:'—')+'</b></span>'; }).join('');
+      const r=RD.computeReport(build); const stat=(l,v,u)=>'<div style="background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:8px 6px;text-align:center"><div style="font-size:.52rem;letter-spacing:1px;color:var(--muted);text-transform:uppercase">'+l+'</div><div style="font-size:1.1rem;font-weight:800;margin-top:2px">'+v+'</div><div style="font-size:.55rem;color:var(--muted2)">'+u+'</div></div>';
+      card.innerHTML='<div style="font-size:.62rem;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:10px">🔧 Robotun Künyesi</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">'+chips+'</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">'+stat('Ağırlık',r.weightG,'g')+stat('Hız',r.topSpeedKmh,'km/s')+stat('Güç',r.powerRating,'/100')+'</div><div style="font-size:.7rem;color:var(--muted2);line-height:1.5;margin-bottom:10px">Güçlü motor = daha hızlı tur; çevik tekerlek = virajda tutunma.</div><a href="build.html?sim=pid" style="display:inline-block;border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:.74rem;font-weight:700;color:var(--muted2)">← Robotu yeniden kur</a>';
+    } else { card.innerHTML='<div style="font-size:.62rem;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:8px">🤖 Kendi robotun</div><div style="font-size:.8rem;color:var(--muted2);line-height:1.55;margin-bottom:12px">Parçalarını seçip robotunu kurarsan, motorun ve tekerleğin tur süreni belirler — yarışta fark yaratır.</div><a href="build.html?sim=pid" style="display:inline-block;background:linear-gradient(180deg,#0ea5e9,#0369a1);border:1px solid #38bdf8;border-radius:9px;padding:9px 14px;font-size:.8rem;font-weight:700;color:#eaf6ff">Robotunu kur →</a>'; }
+    side.appendChild(card); }
+
+  function init(){
+    applyRobotBuild(); fillRobotCard(); loadFromHash();
+    rebuildTrack(); buildTrackTabs(); bindTabs(); bindParams(); bindPid();
+    buildChassis(); buildRules(); buildSensorHud(); setMode(LAB.mode);
+    document.getElementById('addRule').onclick=addRule;
+    document.getElementById('mode-rules').onclick=()=>setMode('rules');
+    document.getElementById('mode-pid').onclick=()=>setMode('pid');
+    document.getElementById('runbtn').onclick=()=>{ LAB.running?stopRun():startRun(); };
+    document.getElementById('resetbtn').onclick=resetSim;
+    document.getElementById('shareBtn').onclick=shareRobot;
+    const ss=document.getElementById('simspeed'); ss.oninput=()=>{ LAB.simSpeed=+ss.value; document.getElementById('simspeedval').textContent=(+ss.value).toFixed(1)+'x'; };
+    document.getElementById('helpBtn').onclick=()=>document.getElementById('tutwrap').style.display='flex';
+    document.getElementById('tutClose').onclick=()=>{ document.getElementById('tutwrap').style.display='none'; try{localStorage.setItem('rf_pid_tut','1');}catch(e){} };
+    render(null); updateHud(null);
+    let seen=false; try{ seen=!!localStorage.getItem('rf_pid_tut'); }catch(e){} if(!seen) setTimeout(()=>document.getElementById('tutwrap').style.display='flex',400);
+  }
+  init();
+})();
+</script>
+</body>
+</html>
