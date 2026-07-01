@@ -117,7 +117,7 @@
       junctions: [{ pt: [-3, -7], side: 'L' }, { pt: [-3, -2], side: 'R' }, { pt: [2, -2], side: 'R' }, { pt: [3, 4], side: 'L' }],
       stubs: [[[-3, -7], [0.2, -7]], [[-3, -2], [-3, 1.2]], [[2, -2], [5.2, -2]], [[3, 4], [3, 7]]],
       gaps: [[0.04, 0.06]],
-      obstacles: [{ prog: 0.55 }, { prog: 0.90 }] },
+      obstacles: [{ prog: 0.55, side: 'R' }, { prog: 0.90, side: 'R' }] },
   ];
 
   // ---- world build ------------------------------------------------------------
@@ -134,10 +134,13 @@
     });
     const obstacles = (meta.obstacles || []).map((o) => {
       const p = pointAt(path, o.prog);
-      return { prog: o.prog, x: p[0], y: p[1] };
+      return { prog: o.prog, x: p[0], y: p[1], side: o.side || null };
     });
+    let cx = 0, cy = 0;
+    meta.points.forEach((p) => { cx += p[0]; cy += p[1]; });
     return { meta, path, stubs, junctions, obstacles,
       gaps: (meta.gaps || []).map((g) => g.slice()),
+      centroid: [cx / meta.points.length, cy / meta.points.length],
       start: pointAt(path, 0), end: pointAt(path, 1) };
   }
   function inGap(course, progress) {
@@ -277,7 +280,7 @@
       timeOffLine: 0, timeStalled: 0, onLineTicks: 0, totalTicks: 0, backT: 0,
       maxProg: 0, curProg: 0, lastSeen: 'C',
       pidPrev: 0, pidInt: 0, eF: 0, assistT: 0, assistDir: 0, assistCool: 0, assistTh: 0,
-      avoidPhase: 0, avoidT: 0, avoidDir: (cfg.pid && cfg.pid.avoidDir === 'L') ? 1 : -1,
+      avoidPhase: 0, avoidT: 0, avoidDir: -1, avoidAt: null, avoidTh0: 0,
       trail: [], last: null,
     };
   }
@@ -325,17 +328,39 @@
       const pid = sim.cfg.pid || defaultPID();
       readings = readLineAnalog(robot, course);
       // obstacle maneuver state machine (built-in for PID mode; direction = student's pick)
-      if (sim.avoidPhase === 0 && engel) { sim.avoidPhase = 1; sim.avoidT = 0; }
-      if (sim.avoidPhase === 1) { // rotate away
+      if (sim.avoidPhase === 0 && engel) {
+        sim.avoidPhase = 1; sim.avoidT = 0;
+        const ad = (sim.cfg.pid && sim.cfg.pid.avoidDir) || 'AUTO';
+        if (ad === 'L') sim.avoidDir = 1;
+        else if (ad === 'R') sim.avoidDir = -1;
+        else if (sim.avoidAt && Math.hypot(robot.x - sim.avoidAt[0], robot.y - sim.avoidAt[1]) < 3.0) {
+          // same obstacle encounter: keep the earlier decision (no flip-flop)
+        } else { // AUTO: decide once per encounter — detour toward the course interior
+          const c3 = Math.cos(robot.th), s3 = Math.sin(robot.th);
+          const rightC = (course.centroid[0] - robot.x) * s3 - (course.centroid[1] - robot.y) * c3;
+          sim.avoidDir = rightC < 0 ? 1 : -1;
+        }
+        sim.avoidAt = [robot.x, robot.y];
+        sim.avoidTh0 = robot.th;
+      }
+      if (sim.avoidPhase === 1) { // rotate away (~85 deg, build-independent)
         sim.avoidT += dt;
         cmd = { mL: -0.55 * sim.avoidDir, mR: 0.55 * sim.avoidDir };
-        if (sim.avoidT > 0.5) { sim.avoidPhase = 2; sim.avoidT = 0; }
-      } else if (sim.avoidPhase === 2) { // wide arc back toward the line
+        if (Math.abs(robot.th - sim.avoidTh0) >= 1.85 || sim.avoidT > 1.2) { sim.avoidPhase = 2; sim.avoidT = 0; }
+      } else if (sim.avoidPhase === 2) { // closed-loop: orbit the obstacle at a standoff distance
         sim.avoidT += dt;
-        const inner = 0.42, outer = 0.75;
-        cmd = sim.avoidDir < 0 ? { mL: inner, mR: outer } : { mL: outer, mR: inner };
+        let no = null, nd = Infinity;
+        for (let i = 0; i < course.obstacles.length; i++) {
+          const d = Math.hypot(robot.x - course.obstacles[i].x, robot.y - course.obstacles[i].y);
+          if (d < nd) { nd = d; no = course.obstacles[i]; }
+        }
+        const err = (nd - OBST_R) - 1.15;                 // + = too far from box
+        let steer = Math.max(-0.45, Math.min(0.45, err * 0.9));
+        const turnCmd = (sim.avoidDir > 0 ? 1 : -1) * steer; // obstacle sits opposite the turn-away side
+        cmd = { mL: 0.52 + turnCmd, mR: 0.52 - turnCmd };
         const anyOn = lineB.some(Boolean);
-        if ((sim.avoidT > 0.6 && anyOn) || sim.avoidT > 3.4) sim.avoidPhase = 0;
+        const notReversed = Math.cos(robot.th - sim.avoidTh0) > -0.2; // still roughly the original travel direction
+        if ((sim.avoidT > 0.6 && anyOn && notReversed) || sim.avoidT > 4.2) sim.avoidPhase = 0;
       }
       if (!cmd) {
         // green assist: strong committed turn toward the marker side
@@ -491,7 +516,7 @@
   }
   function starterDefault() { return { left: { dir: 'fwd', speed: 45 }, right: { dir: 'fwd', speed: 45 } }; }
   function defaultParams() { return { vMax: 3.6, wheelBase: 1.1, turnGain: 1.0 }; }
-  function defaultPID() { return { base: 55, kp: 1.5, kd: 0.55, avoidDir: 'R' }; }
+  function defaultPID() { return { base: 55, kp: 1.5, kd: 0.55, avoidDir: 'AUTO' }; }
 
   const API = {
     LINE_HALF_WIDTH, OFF_TRACK_DIST, OBST_R, GREEN_R, END_PROG,

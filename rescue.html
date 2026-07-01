@@ -249,8 +249,9 @@
             <input type="range" id="pKd" min="0" max="1.5" step="0.05" value="0.55"></div>
           <h4 style="margin-top:14px">Engel Manevra Yönü</h4>
           <div class="dirRow">
-            <button class="dirBtn" id="avoidL">↰ Soldan Dolan</button>
-            <button class="dirBtn on" id="avoidR">Sağdan Dolan ↱</button>
+            <button class="dirBtn on" id="avoidA">🤖 Otomatik</button>
+            <button class="dirBtn" id="avoidL">↰ Soldan</button>
+            <button class="dirBtn" id="avoidR">Sağdan ↱</button>
           </div>
         </div>
       </div>
@@ -263,7 +264,7 @@
 <div id="toast"></div>
 
 <script src="robot-data.js?v=2"></script>
-<script src="rescue-core.js?v=2"></script>
+<script src="rescue-core.js?v=3"></script>
 <script>
 (function(){
   const RC = window.RescueCore;
@@ -530,7 +531,7 @@
         return o?'<span class="bchipR">'+o.icon+' '+o.name+'</span>':''; }).join(' ');
     }
     const modeTxt = LAB.mode==='pid'
-      ? '📈 PID — Temel '+LAB.pid.base+' · Kp '+LAB.pid.kp.toFixed(2)+' · Kd '+LAB.pid.kd.toFixed(2)+' · Engel: '+(LAB.pid.avoidDir==='L'?'Soldan':'Sağdan')
+      ? '📈 PID — Temel '+LAB.pid.base+' · Kp '+LAB.pid.kp.toFixed(2)+' · Kd '+LAB.pid.kd.toFixed(2)+' · Engel: '+(LAB.pid.avoidDir==='L'?'Soldan':LAB.pid.avoidDir==='R'?'Sağdan':'Otomatik')
       : '🧩 Kural — '+LAB.rules.length+' kural + varsayılan';
     const win=sim.status==='success';
     const box=document.getElementById('resultBox');
@@ -674,10 +675,11 @@
     kp.oninput=()=>{ LAB.pid.kp=+kp.value; sync(); };
     kd.oninput=()=>{ LAB.pid.kd=+kd.value; sync(); };
     sync();
-    const L=document.getElementById('avoidL'), R=document.getElementById('avoidR');
-    const setDir=d=>{ LAB.pid.avoidDir=d; L.classList.toggle('on',d==='L'); R.classList.toggle('on',d==='R'); };
-    L.onclick=()=>setDir('L'); R.onclick=()=>setDir('R');
-    setDir(LAB.pid.avoidDir||'R');
+    const A=document.getElementById('avoidA'), L=document.getElementById('avoidL'), R=document.getElementById('avoidR');
+    const setDir=d=>{ LAB.pid.avoidDir=d;
+      A.classList.toggle('on',d==='AUTO'); L.classList.toggle('on',d==='L'); R.classList.toggle('on',d==='R'); };
+    A.onclick=()=>setDir('AUTO'); L.onclick=()=>setDir('L'); R.onclick=()=>setDir('R');
+    setDir(LAB.pid.avoidDir||'AUTO');
   }
 
   // ---- params / continuity ----
