@@ -46,7 +46,7 @@
 
   .simwrap{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:16px;
     overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.35)}
-  canvas#sim{display:block;width:100%;height:auto;background:#f1f5f9}
+  canvas#sim{display:block;width:100%;height:auto;background:#0a0d12}
   /* HUD */
   .hud{position:absolute;inset:0;pointer-events:none}
   .hud .tl{position:absolute;top:12px;left:12px;display:flex;gap:8px;flex-wrap:wrap}
@@ -360,13 +360,13 @@
 
   function drawScene(){
     ctx.clearRect(0,0,600,600);
-    ctx.fillStyle = '#f1f5f9'; ctx.fillRect(0,0,600,600);
-    ctx.strokeStyle = '#dbe3ec'; ctx.lineWidth = 1;
+    ctx.fillStyle = '#0a0d12'; ctx.fillRect(0,0,600,600);
+    ctx.strokeStyle = '#161c25'; ctx.lineWidth = 1;
     for(let g=-10; g<=10; g+=2){ const [sx]=w2s(g,0),[,sy]=w2s(0,g);
       ctx.beginPath();ctx.moveTo(sx,0);ctx.lineTo(sx,600);ctx.stroke();
       ctx.beginPath();ctx.moveTo(0,sy);ctx.lineTo(600,sy);ctx.stroke(); }
     const sm = LAB.track.samples;
-    ctx.strokeStyle = '#0b1220';
+    ctx.strokeStyle = '#f6f8fb';
     ctx.lineWidth = S.LINE_HALF_WIDTH*2*view.scale;
     ctx.lineJoin='round'; ctx.lineCap='round';
     // gap-aware: lift the pen over absent (gap / dashed) stretches
@@ -399,7 +399,7 @@
     const corners=[[HL,-HW],[HL,HW],[-HL,HW],[-HL,-HW]].map(([f,r])=>{
       const [wx,wy]=localToWorld(robot,f,r); return w2s(wx,wy);
     });
-    ctx.fillStyle='rgba(30,41,59,.92)'; ctx.strokeStyle='#38bdf8'; ctx.lineWidth=2;
+    ctx.fillStyle='rgba(51,65,85,.96)'; ctx.strokeStyle='#38bdf8'; ctx.lineWidth=2;
     ctx.beginPath(); corners.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])); ctx.closePath();
     ctx.fill(); ctx.stroke();
     ctx.fillStyle='#0b1220';
