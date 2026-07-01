@@ -140,6 +140,37 @@
   .verdict.win h3{color:var(--green)} .verdict.lose h3{color:#fca5a5}
   .verdict p{margin:4px 0;color:var(--muted2);font-size:.86rem;line-height:1.5}
 
+  /* test bench (right side of test step) */
+  .testcols{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start}
+  .testleft{flex:1;min-width:300px}
+  .testright{flex:none;width:300px}
+  @media(max-width:800px){.testright{width:100%}}
+  .rig{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,#0c1526,#0a1120);
+    padding:16px;position:sticky;top:16px;transition:.3s}
+  .rig-h{font-size:.62rem;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:12px}
+  .rig-stage{position:relative;height:200px;border-radius:12px;background:#0a0d12;border:1px solid #16202e;overflow:hidden}
+  .rig-bot{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:92px;height:118px}
+  .rig-shape{position:absolute;inset:0;background:linear-gradient(180deg,#22334f,#152036);border:2px solid #3b5a82;transition:.3s}
+  .rig-icons{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+  .rig-icons .ci{font-size:.9rem;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+  .rig-roller{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);width:118px;display:flex;justify-content:space-between}
+  .roller{width:46px;height:11px;border-radius:6px;border:1px solid #223047;
+    background:repeating-linear-gradient(90deg,#3a4a63 0 7px,#1c2740 7px 14px);background-size:28px 100%}
+  .rig.testing .roller{animation:roll .35s linear infinite}
+  @keyframes roll{to{background-position:-28px 0}}
+  .rig.pass .rig-shape{border-color:#22c55e;box-shadow:0 0 22px rgba(34,197,94,.4)}
+  .rig.fail .rig-shape{border-color:#ef4444;box-shadow:0 0 22px rgba(239,68,68,.35)}
+  .rig-scan{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#38bdf8,transparent);top:0;opacity:0}
+  .rig.testing .rig-scan{animation:scan 1.6s linear infinite;opacity:1}
+  @keyframes scan{0%{top:6%}100%{top:94%}}
+  .rig-status{text-align:center;margin-top:12px;font-size:.86rem;font-weight:700;color:var(--sky)}
+  .rig.pass .rig-status{color:var(--green)} .rig.fail .rig-status{color:#fca5a5}
+  .rig-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:12px}
+  .rig-stat{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 4px;text-align:center}
+  .rig-stat .l{font-size:.5rem;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
+  .rig-stat .v{font-size:1rem;font-weight:800;margin-top:2px}
+  .rig-parts{margin-top:10px;font-size:.68rem;color:var(--muted2);line-height:1.6}
+
   .nav{display:flex;justify-content:space-between;gap:12px;margin-top:26px;border-top:1px solid var(--line);padding-top:18px}
   .btn{padding:11px 20px;border-radius:11px;border:1px solid var(--line);background:var(--panel);color:var(--txt);
     font-weight:700;cursor:pointer;font-size:.86rem;letter-spacing:.3px;transition:.14s}
@@ -207,9 +238,12 @@
   <section id="step4" class="hidden">
     <h2 class="step-title">🔧 Fonksiyon Testi</h2>
     <div class="step-sub">Robotun çalışıp çalışmadığını kontrol ediyoruz…</div>
-    <div class="teststage">
-      <div id="testSteps"></div>
-      <div id="verdict"></div>
+    <div class="testcols">
+      <div class="testleft">
+        <div id="testSteps"></div>
+        <div id="verdict"></div>
+      </div>
+      <div class="testright" id="testRig"></div>
     </div>
   </section>
 
@@ -402,8 +436,30 @@
 
   // ---- STEP 4: test ----
   let testTimer=null;
+  function renderTestRig(state){
+    const host=document.getElementById('testRig'); if(!host) return;
+    const shp=SHAPES.find(s=>s.id===B.chassis.shape)||SHAPES[0];
+    const shapeStyle = shp.cp ? ('clip-path:'+shp.cp+';border-radius:0') : ('border-radius:'+shp.br);
+    const icons=ORDER.filter(c=>B[c]).map(c=>'<span class="ci">'+RD.opt(c,B[c]).icon+'</span>').join('');
+    const parts=ORDER.filter(c=>B[c]).map(c=>RD.opt(c,B[c]).name).join(' · ');
+    const r=RD.computeReport(bctx());
+    const stat=(l,v,u)=>'<div class="rig-stat"><div class="l">'+l+'</div><div class="v">'+v+'<span style="font-size:.5rem;color:var(--muted2)">'+(u||'')+'</span></div></div>';
+    host.innerHTML='<div class="rig '+(state||'testing')+'" id="rigEl">'+
+      '<div class="rig-h">🔧 Test Düzeneği</div>'+
+      '<div class="rig-stage"><div class="rig-scan"></div>'+
+        '<div class="rig-bot"><div class="rig-shape" style="'+shapeStyle+'"></div><div class="rig-icons">'+icons+'</div></div>'+
+        '<div class="rig-roller"><div class="roller"></div><div class="roller"></div></div>'+
+      '</div>'+
+      '<div class="rig-status" id="rigStatus">Test yapılıyor…</div>'+
+      '<div class="rig-stats">'+stat('Ağırlık',r.weightG,'g')+stat('Hız',r.topSpeedKmh,'km/s')+stat('Güç',r.powerRating,'')+'</div>'+
+      '<div class="rig-parts">'+parts+'</div>'+
+    '</div>';
+  }
+  function setRig(state,text){ const el=document.getElementById('rigEl'); if(!el) return;
+    el.className='rig '+state; const s=document.getElementById('rigStatus'); if(s&&text) s.textContent=text; }
   function runTest(){
     document.getElementById('verdict').innerHTML='';
+    renderTestRig('testing');
     const res=RD.runPreTest(bctx());
     const wrap=document.getElementById('testSteps'); wrap.innerHTML='';
     res.steps.forEach((s,i)=>{ const d=document.createElement('div'); d.className='tstep'; d.id='ts'+i;
@@ -419,6 +475,7 @@
   }
   function showVerdict(res){
     const v=document.getElementById('verdict');
+    setRig(res.pass?'pass':'fail', res.pass?'✓ Robot çalışıyor':'✕ Sorun var');
     if(res.pass){ v.className='verdict win';
       v.innerHTML=`<h3>✅ Robotun çalışıyor!</h3>`+(res.notes.length?res.notes.map(n=>`<p>💡 ${n}</p>`).join(''):`<p>Her şey yolunda. Şimdi ona çizgiyi takip etmeyi öğret.</p>`)+
         `<button class="btn go" id="toLab" style="margin-top:12px">Kodlamaya Devam →</button>`;
