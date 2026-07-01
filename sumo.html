@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RoboForge · Mini Sumo Laboratuvarı</title>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#0f172a; --panel2:#111c33; --line:#1e3a5f;
+    --sky:#38bdf8; --sky2:#0ea5e9; --green:#22c55e; --amber:#f59e0b;
+    --red:#ef4444; --purple:#a855f7; --txt:#e2e8f0; --muted:#64748b; --muted2:#94a3b8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1200px 800px at 70% -10%,#13233f 0%,var(--bg) 55%);
+    color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+  .mono{font-family:'Courier New',monospace}
+  header.topbar{display:flex;align-items:center;gap:14px;padding:12px 20px;
+    border-bottom:1px solid var(--line);background:rgba(10,16,30,.7);backdrop-filter:blur(8px);
+    position:sticky;top:0;z-index:50;flex-wrap:wrap}
+  .brand{display:flex;flex-direction:column;line-height:1.1}
+  .brand b{font-size:1.05rem;letter-spacing:.5px}
+  .brand b span{color:var(--sky)}
+  .brand small{color:var(--muted);font-size:.62rem;letter-spacing:2px;text-transform:uppercase}
+  .tracktabs{display:flex;gap:6px;margin-left:8px}
+  .ttab{padding:7px 12px;border:1px solid var(--line);background:var(--panel);color:var(--muted2);
+    border-radius:9px;cursor:pointer;font-size:.74rem;font-weight:600;transition:.15s;white-space:nowrap}
+  .ttab small{display:block;font-size:.56rem;color:var(--muted);font-weight:400}
+  .ttab.active{border-color:var(--sky);color:var(--sky);box-shadow:0 0 16px rgba(56,189,248,.18);background:#0c1a30}
+  .grow{flex:1}
+  .btn{padding:9px 16px;border-radius:10px;border:1px solid var(--line);background:var(--panel);
+    color:var(--txt);font-weight:700;cursor:pointer;font-size:.8rem;letter-spacing:.5px;transition:.15s}
+  .btn:hover{border-color:var(--sky)}
+  .btn.run{background:linear-gradient(180deg,#16a34a,#15803d);border-color:#22c55e;color:#eafff0;
+    box-shadow:0 0 18px rgba(34,197,94,.25)}
+  .btn.run:hover{filter:brightness(1.08)}
+  .btn.stop{background:linear-gradient(180deg,#dc2626,#b91c1c);border-color:#ef4444;color:#fff}
+  .btn.ghost{background:transparent}
+  .speedwrap{display:flex;align-items:center;gap:8px;font-size:.7rem;color:var(--muted2)}
+  input[type=range]{accent-color:var(--sky)}
+  .helpbtn{width:36px;height:36px;border-radius:9px;border:1px solid var(--line);background:var(--panel);
+    color:var(--muted2);cursor:pointer;font-weight:800;font-size:.95rem}
+  .helpbtn:hover{border-color:var(--sky);color:var(--sky)}
+
+  .layout{display:grid;grid-template-columns:1fr 430px;gap:16px;padding:16px 20px;max-width:1280px;margin:0 auto}
+  @media(max-width:1040px){.layout{grid-template-columns:1fr}}
+
+  .simwrap{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:16px;
+    overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+  canvas#sim{display:block;width:100%;height:auto;background:#0a0d12}
+  .hud{position:absolute;inset:0;pointer-events:none}
+  .hud .tl{position:absolute;top:12px;left:12px;display:flex;gap:8px;flex-wrap:wrap}
+  .chip{background:rgba(8,12,24,.82);border:1px solid var(--line);border-radius:10px;padding:7px 11px;
+    font-size:.62rem;letter-spacing:1px;color:var(--muted2);backdrop-filter:blur(6px)}
+  .chip b{color:var(--sky);font-size:.95rem;display:block;margin-top:2px;letter-spacing:0}
+  .chip.ok b{color:var(--green)} .chip.warn b{color:var(--amber)} .chip.bad b{color:#fca5a5}
+  .hud .tr{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+  .sensbar{display:flex;gap:6px;align-items:center;background:rgba(8,12,24,.82);border:1px solid var(--line);
+    border-radius:10px;padding:7px 10px;backdrop-filter:blur(6px)}
+  .sdot{width:15px;height:15px;border-radius:50%;border:2px solid #334155;background:#0b1220;transition:.08s;
+    display:flex;align-items:center;justify-content:center;font-size:.5rem;color:#0b1220;font-weight:700}
+  .sdot.on{box-shadow:0 0 10px currentColor}
+  .motorbars{background:rgba(8,12,24,.82);border:1px solid var(--line);border-radius:10px;padding:8px 10px;
+    backdrop-filter:blur(6px);width:170px}
+  .mrow{display:flex;align-items:center;gap:8px;font-size:.58rem;color:var(--muted2);margin:3px 0}
+  .mrow span{width:26px}
+  .mtrack{flex:1;height:9px;background:#0b1220;border-radius:6px;position:relative;overflow:hidden;border:1px solid #1e293b}
+  .mfill{position:absolute;top:0;bottom:0;left:50%;background:var(--sky);transition:.06s}
+  .actionchip{background:rgba(8,12,24,.86);border:1px solid var(--line);border-radius:10px;padding:7px 12px;
+    font-size:.66rem;letter-spacing:1px;color:var(--muted2);backdrop-filter:blur(6px);text-align:center}
+  .actionchip b{display:block;color:var(--sky);font-size:1rem;margin-top:2px;letter-spacing:1px}
+  .countdown{position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+    font-size:6rem;font-weight:800;color:#fff;text-shadow:0 0 30px rgba(56,189,248,.8);
+    background:rgba(2,6,23,.35);font-family:'Courier New',monospace}
+
+  .result{margin-top:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:0;overflow:hidden}
+  .result .rhead{padding:14px 18px;font-weight:800;letter-spacing:.5px;display:flex;align-items:center;gap:10px;font-size:1rem}
+  .result.win .rhead{background:linear-gradient(90deg,rgba(34,197,94,.18),transparent);color:var(--green)}
+  .result.lose .rhead{background:linear-gradient(90deg,rgba(239,68,68,.16),transparent);color:#fca5a5}
+  .result.idle .rhead{color:var(--muted2)}
+  .rbody{padding:6px 18px 16px}
+  .rstats{display:flex;gap:22px;margin:6px 0 12px;flex-wrap:wrap}
+  .rstats div small{display:block;color:var(--muted);font-size:.6rem;letter-spacing:1px}
+  .rstats div b{font-size:1.3rem;color:var(--txt)}
+  .tip{display:flex;gap:9px;align-items:flex-start;font-size:.82rem;color:var(--muted2);
+    background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:9px 11px;margin:7px 0;line-height:1.45}
+  .tip .ic{color:var(--amber)}
+  .rclass{font-size:1.4rem;font-weight:800;color:var(--amber);margin:4px 0 8px}
+
+  .side{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;align-self:start}
+  .sidetabs{display:flex;border-bottom:1px solid var(--line)}
+  .sidetab{flex:1;padding:13px;text-align:center;cursor:pointer;font-weight:700;font-size:.82rem;
+    color:var(--muted);background:var(--panel2);transition:.15s;letter-spacing:.5px}
+  .sidetab.active{color:var(--sky);background:var(--panel);box-shadow:inset 0 -2px 0 var(--sky)}
+  .sidebody{padding:16px}
+  .sectlabel{font-size:.66rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin:4px 0 10px;font-weight:700}
+
+  .editorwrap{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+  .chassis{position:relative;width:210px;height:250px;border-radius:14px;flex:none;
+    background:repeating-linear-gradient(0deg,#0c1426 0 19px,#0e1830 19px 20px),
+               repeating-linear-gradient(90deg,#0c1426 0 19px,#0e1830 19px 20px);
+    border:1px dashed #25406b}
+  .chbody{position:absolute;border:2px solid #345b8c;border-radius:14px;background:linear-gradient(180deg,#1b2942,#141f36);
+    box-shadow:inset 0 0 0 1px rgba(56,189,248,.08)}
+  .chfront{position:absolute;color:var(--sky);font-size:.56rem;letter-spacing:3px;font-weight:700}
+  .wheel{position:absolute;width:12px;height:30px;background:#0b1220;border:1px solid #334155;border-radius:4px}
+  .sensor{position:absolute;width:26px;height:26px;border-radius:50%;transform:translate(-50%,-50%);
+    border:2px solid #fff;display:flex;align-items:center;justify-content:center;
+    font-size:.5rem;font-weight:800;color:#06121f;box-shadow:0 2px 8px rgba(0,0,0,.4);user-select:none}
+  .ed-side{flex:1;min-width:150px}
+  .hintbox{font-size:.72rem;color:var(--muted2);line-height:1.5;background:var(--panel2);
+    border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px}
+  .param{margin:14px 0}
+  .param label{display:flex;justify-content:space-between;font-size:.74rem;color:var(--muted2);margin-bottom:5px}
+  .param label b{color:var(--sky)}
+  .param input[type=range]{width:100%}
+
+  .rule{border:1px solid var(--line);border-radius:11px;background:var(--panel2);padding:11px;margin-bottom:10px}
+  .rule.def{border-style:dashed;border-color:#3b3450;background:#161325}
+  .rulehead{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+  .rulehead .when{font-size:.6rem;letter-spacing:2px;color:var(--muted);font-weight:700}
+  .ruleord{display:flex;gap:4px}
+  .iconbtn{width:24px;height:24px;border-radius:6px;border:1px solid var(--line);background:var(--panel);
+    color:var(--muted2);cursor:pointer;font-size:.7rem;line-height:1;display:flex;align-items:center;justify-content:center}
+  .iconbtn:hover{border-color:var(--sky);color:var(--sky)}
+  .iconbtn.x:hover{border-color:var(--red);color:var(--red)}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px}
+  .schip{padding:5px 9px;border-radius:8px;font-size:.66rem;font-weight:700;cursor:pointer;border:2px solid;
+    display:flex;flex-direction:column;align-items:center;gap:1px;min-width:52px;user-select:none;transition:.1s}
+  .schip small{font-size:.52rem;font-weight:600;letter-spacing:.5px}
+  .arrow{color:var(--muted);font-weight:700;text-align:center;margin:2px 0;font-size:.7rem;letter-spacing:2px}
+  .motors{display:flex;gap:8px}
+  .motorctl{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:8px}
+  .motorctl .ml{font-size:.6rem;color:var(--muted);letter-spacing:1px;margin-bottom:5px;font-weight:700}
+  .motorctl select,.motorctl input{width:100%;background:#0b1220;border:1px solid var(--line);color:var(--txt);
+    border-radius:6px;padding:5px;font-size:.74rem;margin-bottom:5px}
+  .motorctl input{appearance:auto}
+  .actlabel{font-size:.58rem;color:var(--amber);text-align:center;font-weight:700;letter-spacing:1px;margin-top:3px}
+  .addrule{width:100%;padding:10px;border:1px dashed var(--line);background:transparent;color:var(--sky);
+    border-radius:10px;cursor:pointer;font-weight:700;font-size:.78rem}
+  .addrule:hover{background:#0c1a30}
+  .legend{font-size:.62rem;color:var(--muted);margin-top:8px;line-height:1.6}
+  .legend b{color:var(--muted2)}
+  .backlink{color:var(--muted2);text-decoration:none;font-size:.78rem;font-weight:700;border:1px solid var(--line);padding:8px 12px;border-radius:9px;white-space:nowrap;transition:.15s}
+  .backlink:hover{border-color:var(--sky);color:var(--sky)}
+
+  .tutwrap{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;
+    background:rgba(2,6,23,.72);backdrop-filter:blur(3px)}
+  .tutcard{max-width:430px;margin:20px;background:var(--panel);border:1px solid var(--sky);border-radius:16px;
+    padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+  .tutcard .step{font-size:.6rem;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase}
+  .tutcard h3{margin:8px 0 8px;font-size:1.3rem;color:var(--sky)}
+  .tutcard p{margin:0 0 18px;color:var(--muted2);line-height:1.6;font-size:.95rem}
+  .tutnav{display:flex;justify-content:space-between;align-items:center}
+  .tutdots{display:flex;gap:6px}
+  .tutdot{width:7px;height:7px;border-radius:50%;background:#334155}
+  .tutdot.on{background:var(--sky)}
+
+  #toast{position:fixed;left:50%;bottom:32px;transform:translateX(-50%) translateY(20px);background:rgba(8,12,24,.96);
+    border:1px solid var(--line);color:var(--txt);padding:12px 20px;border-radius:12px;font-size:.84rem;font-weight:600;
+    opacity:0;pointer-events:none;transition:.25s;box-shadow:0 12px 40px rgba(0,0,0,.5);backdrop-filter:blur(8px);z-index:300}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  .reportModal{position:fixed;inset:0;z-index:400;display:none;align-items:center;justify-content:center}
+  .rm-back{position:absolute;inset:0;background:rgba(2,6,23,.78);backdrop-filter:blur(4px)}
+  .rm-sheet{position:relative;width:600px;max-width:94vw;max-height:88vh;display:flex;flex-direction:column;
+    background:var(--panel);border:1px solid var(--sky);border-radius:16px;box-shadow:0 24px 70px rgba(0,0,0,.6);overflow:hidden}
+  .rm-h{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--line);font-weight:800;font-size:1.05rem}
+  .rm-h span{color:var(--sky)}
+  .rm-x{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--muted2);cursor:pointer;font-size:.9rem}
+  .rm-scroll{overflow-y:auto;padding:18px 20px}
+  .rm-sec{margin-bottom:18px}
+  .rm-sec h4{margin:0 0 10px;font-size:.7rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+  .rm-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+  .rm-chip{border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:5px 10px;font-size:.75rem;color:var(--txt)}
+  .rm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
+  .rm-stat{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:9px 6px;text-align:center}
+  .rm-stat .rl{font-size:.5rem;letter-spacing:.5px;color:var(--muted);text-transform:uppercase}
+  .rm-stat .rv{font-size:1.15rem;font-weight:800;margin-top:3px}
+  .rm-line{font-size:.84rem;color:var(--muted2);margin:5px 0}
+  .rm-line b{color:var(--txt)}
+  .rm-note{font-size:.84rem;color:var(--muted2);line-height:1.5}
+  .rm-foot{padding:13px 20px;border-top:1px solid var(--line);text-align:right}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a href="./" class="backlink" title="Simülasyon kataloğuna dön">← Katalog</a>
+  <div class="brand">
+    <b>Robo<span>Forge</span> · Mini Sumo Laboratuvarı</b>
+    <small>Mini Sumo Lab</small>
+  </div>
+  <div class="tracktabs" id="tracktabs"></div>
+  <div class="grow"></div>
+  <div class="speedwrap">
+    <span>Sim Hızı</span>
+    <input type="range" id="simspeed" min="0.5" max="3" step="0.5" value="1" />
+    <span id="simspeedval" class="mono">1.0x</span>
+  </div>
+  <button class="btn run" id="runbtn">▶ DÖVÜŞ</button>
+  <button class="btn ghost" id="resetbtn">⟲ Sıfırla</button>
+  <button class="btn ghost" id="shareBtn" title="Robotunu paylaş">🔗 Paylaş</button>
+  <button class="helpbtn" id="helpBtn" title="Nasıl oynanır?">?</button>
+</header>
+
+<div class="layout">
+  <div>
+    <div class="simwrap">
+      <canvas id="sim" width="600" height="600"></canvas>
+      <div class="hud">
+        <div class="tl">
+          <div class="chip">SÜRE<b id="hudTime" class="mono">0.0s</b></div>
+          <div class="chip" id="hudLockChip">DURUM<b id="hudLock">HAZIR</b></div>
+        </div>
+        <div class="tr">
+          <div class="sensbar" id="hudSensors"></div>
+          <div class="actionchip">HAREKET<b id="hudAction">—</b></div>
+          <div class="motorbars">
+            <div class="mrow"><span>SOL</span><div class="mtrack"><div class="mfill" id="mfL"></div></div></div>
+            <div class="mrow"><span>SAĞ</span><div class="mtrack"><div class="mfill" id="mfR"></div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="countdown" id="countdown"></div>
+    </div>
+
+    <div class="result idle" id="result">
+      <div class="rhead" id="rhead">🥊 Robotunu kur, kodla ve <b style="color:var(--green);margin:0 4px">DÖVÜŞ</b> — rakibi ringden at.</div>
+      <div class="rbody" id="rbody" style="display:none"></div>
+    </div>
+  </div>
+
+  <div class="side">
+    <div class="sidetabs">
+      <div class="sidetab active" data-tab="robot" id="tab-robot">🤖 Robot</div>
+      <div class="sidetab" data-tab="kod" id="tab-kod">🧩 Kod</div>
+    </div>
+    <div class="sidebody">
+      <!-- ROBOT TAB -->
+      <div id="panel-robot">
+        <div class="sectlabel">Sensörler · düşman + kenar</div>
+        <div class="hintbox">
+          Sumo robotunun iki tür sensörü var: öne bakan <b style="color:#ef4444">DÜŞMAN</b> sensörleri
+          (<b style="color:#22c55e">SOL</b>/<b style="color:#f59e0b">SAĞ</b> ile rakibin yönünü bulur) ve
+          aşağı bakan <b style="color:#38bdf8">KENAR</b> sensörü (ringin beyaz çizgisini görüp düşmeni önler).
+        </div>
+        <div class="editorwrap">
+          <div class="chassis" id="chassis"></div>
+          <div class="ed-side">
+            <div class="param">
+              <label>İtiş Gücü / Hız <b id="vLabel">Orta</b></label>
+              <input type="range" id="vmax" min="2.4" max="5.2" step="0.2" value="3.4" />
+            </div>
+            <div class="param">
+              <label>Dönüş Çevikliği <b id="gLabel">Normal</b></label>
+              <input type="range" id="grip" min="0.6" max="1.6" step="0.1" value="1.0" />
+            </div>
+            <div class="hintbox" style="margin-top:6px;margin-bottom:0">
+              Bu iki ayar kurduğun robotun motor ve tekerleklerinden gelir. Daha güçlü motor = daha sert
+              itiş; daha çevik tekerlek = rakibi daha hızlı bulma.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KOD TAB -->
+      <div id="panel-kod" style="display:none">
+        <div class="sectlabel">Dövüş Kuralları</div>
+        <div class="hintbox">
+          Robot her an sensörlerini okur ve <b>yukarıdan aşağıya</b> ilk uyan kurala göre hareket eder.
+          Rozete tıklayarak koşulu değiştir: <b style="color:var(--green)">VAR</b> (algılıyor),
+          <b style="color:var(--red)">YOK</b> (algılamıyor), <b style="color:var(--muted2)">FARK ETMEZ</b>.
+        </div>
+        <div id="rules"></div>
+        <button class="addrule" id="addRule">＋ Yeni Kural Ekle</button>
+        <div class="rule def" id="defRuleBox" style="margin-top:12px"></div>
+        <div class="legend">
+          <b>Motorlar → hareket:</b> iki motor tam <b>İleri</b> = saldır/it · bir motor daha hızlı = o yöne kır ·
+          iki motor <b>Geri</b> = kenardan geri çekil. <br/>
+          <b>İpucu:</b> Güvenlik önce gelmeli — çoğu şampiyon robot önce <b>KENAR VAR</b> ise geri çekilir,
+          sonra <b>DÜŞMAN</b>'ı görünce tam güç saldırır.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tutwrap" id="tutwrap">
+  <div class="tutcard">
+    <div class="step" id="tutStep">Adım 1 / 4</div>
+    <h3 id="tutTitle">Mini Sumo Lab</h3>
+    <p id="tutText">…</p>
+    <div class="tutnav">
+      <button class="btn ghost" id="tutSkip">Geç</button>
+      <div class="tutdots" id="tutDots"></div>
+      <button class="btn run" id="tutNext">İleri →</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<div class="reportModal" id="reportModal"></div>
+
+<script src="robot-data.js"></script>
+<script src="sumo-core.js"></script>
+<script>
+(function(){
+  const M = window.SumoCore;
+  const DIRS = [['fwd','İleri'],['stop','Dur'],['rev','Geri']];
+
+  const LAB = {
+    oppIdx: 0,
+    sensors: M.starterSensors(),
+    rules: M.starterRules(),
+    defaultRule: M.starterDefault(),
+    params: M.defaultParams(),
+    sim: null, running:false, raf:null, acc:0, lastTs:0, simSpeed:1,
+    frames:[], replaying:false,
+  };
+
+  const cv = document.getElementById('sim'), ctx = cv.getContext('2d');
+  const R = M.R, scale = 43, CX = 300, CY = 300;
+  function w2s(x,y){ return [CX + x*scale, CY - y*scale]; }
+
+  function drawScene(){
+    ctx.clearRect(0,0,600,600);
+    ctx.fillStyle='#0a0d12'; ctx.fillRect(0,0,600,600);
+    // white edge band (danger)
+    ctx.beginPath(); ctx.arc(CX,CY,R*scale,0,7); ctx.fillStyle='#e8edf5'; ctx.fill();
+    // dark floor inside
+    ctx.beginPath(); ctx.arc(CX,CY,(R-M.EDGE_BAND)*scale,0,7); ctx.fillStyle='#0e1626'; ctx.fill();
+    // center circle + cross
+    ctx.strokeStyle='#24344f'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(CX,CY,1.4*scale,0,7); ctx.stroke();
+    ctx.strokeStyle='#1a2740'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(CX-0.8*scale,CY); ctx.lineTo(CX+0.8*scale,CY);
+    ctx.moveTo(CX,CY-0.8*scale); ctx.lineTo(CX,CY+0.8*scale); ctx.stroke();
+    // outer rim line
+    ctx.strokeStyle='#334155'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(CX,CY,R*scale,0,7); ctx.stroke();
+  }
+
+  function drawTrail(trail,color){
+    if(!trail || trail.length<2) return;
+    ctx.strokeStyle=color; ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.beginPath(); trail.forEach((p,i)=>{ const [x,y]=w2s(p[0],p[1]); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }); ctx.stroke();
+  }
+
+  function localToWorld(rb, fwd, right){
+    const c=Math.cos(rb.th), s=Math.sin(rb.th);
+    return [ rb.x + fwd*c + right*s, rb.y + fwd*s + right*(-c) ];
+  }
+  function drawRobot(rb, opts){
+    const HL=0.62, HW=0.5;
+    const corners=[[HL,-HW],[HL,HW],[-HL,HW],[-HL,-HW]].map(([f,r])=>{ const [wx,wy]=localToWorld(rb,f,r); return w2s(wx,wy); });
+    ctx.fillStyle=opts.fill; ctx.strokeStyle=opts.stroke; ctx.lineWidth=2;
+    ctx.beginPath(); corners.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])); ctx.closePath(); ctx.fill(); ctx.stroke();
+    // scoop / heading arrow
+    const tip=localToWorld(rb,HL+0.3,0), bl=localToWorld(rb,HL-0.02,-0.24), br=localToWorld(rb,HL-0.02,0.24);
+    const [tx,ty]=w2s(...tip),[blx,bly]=w2s(...bl),[brx,bry]=w2s(...br);
+    ctx.fillStyle=opts.arrow; ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(blx,bly); ctx.lineTo(brx,bry); ctx.closePath(); ctx.fill();
+    if(opts.sensors){
+      const states=opts.states;
+      LAB.sensors.forEach((sen,i)=>{ const [wx,wy]=localToWorld(rb,sen.fwd,sen.right); const [sx,sy]=w2s(wx,wy);
+        const on=states?states[i]:false;
+        ctx.beginPath(); ctx.arc(sx,sy,4.5,0,7);
+        if(on){ ctx.fillStyle=sen.color; ctx.shadowColor=sen.color; ctx.shadowBlur=8; } else { ctx.fillStyle='#1f2b3f'; ctx.shadowBlur=0; }
+        ctx.fill(); ctx.shadowBlur=0; ctx.lineWidth=1.5; ctx.strokeStyle=sen.color; ctx.stroke(); });
+    }
+  }
+
+  function liveStates(){ if(!LAB.sim) return null; return M.readSensors(LAB.sim.player, LAB.sim.opp, LAB.sensors); }
+
+  function render(states){
+    drawScene();
+    const sim=LAB.sim;
+    if(sim){ drawTrail(sim.otrail,'rgba(239,68,68,.4)'); drawTrail(sim.ptrail,'rgba(56,189,248,.5)'); }
+    const player = sim ? sim.player : M.makePlayer();
+    const opp = sim ? sim.opp : M.makeOpp();
+    drawRobot(opp, {fill:'rgba(80,30,36,.97)', stroke:'#ef4444', arrow:'#ef4444'});
+    drawRobot(player, {fill:'rgba(51,65,85,.97)', stroke:'#38bdf8', arrow:'#22c55e', sensors:true, states});
+  }
+
+  // ---------- HUD ----------
+  function buildSensorHud(){
+    const wrap=document.getElementById('hudSensors'); wrap.innerHTML='';
+    LAB.sensors.forEach(sen=>{ const d=document.createElement('div'); d.className='sdot'; d.dataset.id=sen.id;
+      d.style.color=sen.color; d.title=sen.label; wrap.appendChild(d); });
+  }
+  function updateHud(states){
+    document.getElementById('hudTime').textContent=(LAB.sim?LAB.sim.t:0).toFixed(1)+'s';
+    const lock=document.getElementById('hudLock'), chip=document.getElementById('hudLockChip');
+    if(!LAB.sim){ lock.textContent='HAZIR'; chip.className='chip'; }
+    else if(LAB.sim.status==='success'){ lock.textContent='KAZANDIN ✓'; chip.className='chip ok'; }
+    else if(LAB.sim.status==='failed'){ lock.textContent=(LAB.sim.reason==='timeout'?'BERABERE':'KAYBETTİN ✕'); chip.className='chip bad'; }
+    else { lock.textContent='DÖVÜŞ!'; chip.className='chip warn'; }
+    const dots=document.querySelectorAll('#hudSensors .sdot');
+    dots.forEach((d,i)=>{ const on=states&&states[i]; d.classList.toggle('on',!!on); d.style.background=on?d.style.color:'#0b1220'; });
+    let mL=0,mR=0;
+    if(states){ const cmd=M.evalRules(LAB.rules,LAB.defaultRule,states); mL=cmd.mL; mR=cmd.mR; }
+    document.getElementById('hudAction').textContent = states ? moveLabel(mL,mR) : '—';
+    setBar('mfL',mL); setBar('mfR',mR);
+  }
+  function setBar(id,frac){
+    const el=document.getElementById(id); const pct=Math.max(-1,Math.min(1,frac))*50;
+    if(frac>=0){ el.style.left='50%'; el.style.width=pct+'%'; el.style.background='var(--sky)'; }
+    else { el.style.left=(50+pct)+'%'; el.style.width=(-pct)+'%'; el.style.background='var(--amber)'; }
+  }
+  function moveLabel(mL,mR){
+    if(Math.abs(mL)<0.02&&Math.abs(mR)<0.02) return 'DUR';
+    const spd=(mL+mR)/2, diff=mR-mL;
+    if(spd<-0.02&&Math.abs(diff)<0.35) return 'GERİ';
+    if(diff>0.2) return '◄ SOL';
+    if(diff<-0.2) return 'SAĞ ►';
+    if(spd>0.7) return 'SALDIR';
+    return 'İLERİ';
+  }
+
+  // ---------- run loop ----------
+  function buildConfig(){
+    return { sensors:LAB.sensors, rules:LAB.rules, defaultRule:LAB.defaultRule, params:LAB.params, opponent:M.OPPONENTS[LAB.oppIdx] };
+  }
+  function startRun(){
+    if(LAB.running) return; stopLoop();
+    LAB.sim = M.createSim(buildConfig());
+    LAB.frames=[]; setResultRunning();
+    let n=3; const cd=document.getElementById('countdown'); cd.style.display='flex'; cd.textContent=n;
+    const iv=setInterval(()=>{ n--; if(n>0){cd.textContent=n;} else if(n===0){cd.textContent='DÖVÜŞ!';}
+      else { clearInterval(iv); cd.style.display='none'; beginMotion(); } },520);
+  }
+  function beginMotion(){
+    LAB.running=true; LAB.acc=0; LAB.lastTs=performance.now();
+    const b=document.getElementById('runbtn'); b.textContent='■ DURDUR'; b.classList.remove('run'); b.classList.add('stop');
+    LAB.raf=requestAnimationFrame(loop);
+  }
+  function loop(ts){
+    const FIXED=1/60; let real=(ts-LAB.lastTs)/1000; LAB.lastTs=ts; if(real>0.1) real=0.1;
+    LAB.acc += real*LAB.simSpeed; let steps=0;
+    while(LAB.acc>=FIXED && LAB.sim.status==='running' && steps<10){
+      M.tickSim(LAB.sim,FIXED); LAB.acc-=FIXED; steps++;
+      if(LAB.frames.length<4000){ const p=LAB.sim.player,o=LAB.sim.opp;
+        LAB.frames.push({px:p.x,py:p.y,pth:p.th,ox:o.x,oy:o.y,oth:o.th,states:(LAB.sim.lastStates||[]).slice()}); }
+    }
+    const st=liveStates(); render(st); updateHud(st);
+    if(LAB.sim.status!=='running'){ finishRun(); return; }
+    LAB.raf=requestAnimationFrame(loop);
+  }
+  function stopLoop(){ if(LAB.raf) cancelAnimationFrame(LAB.raf); LAB.raf=null; }
+  function stopRun(){
+    LAB.running=false; stopLoop();
+    const b=document.getElementById('runbtn'); b.textContent='▶ DÖVÜŞ'; b.classList.add('run'); b.classList.remove('stop');
+  }
+  function finishRun(){ stopRun(); showResult(); }
+
+  // ---------- result ----------
+  const REASONS={fell_out:'Robotun ringden düştü',timeout:'Süre doldu — berabere',double:'İkiniz de çıktınız'};
+  function setResultRunning(){
+    const r=document.getElementById('result'); r.className='result idle';
+    document.getElementById('rhead').innerHTML='🥊 Dövüş sürüyor… rakibi ringden atmaya çalış.';
+    document.getElementById('rbody').style.display='none';
+  }
+  function setResultReady(){
+    const r=document.getElementById('result'); r.className='result idle';
+    document.getElementById('rhead').innerHTML='🥊 Robotunu kur, kodla ve <b style="color:var(--green);margin:0 4px">DÖVÜŞ</b> — rakibi ringden at.';
+    document.getElementById('rbody').style.display='none';
+  }
+  function medal(sim){
+    if(sim.status!=='success') return null;
+    if(sim.t<=5) return {name:'🏆 Yıldırım Vuruşu', d:'İlk saldırıda rakibi devirdin!'};
+    if(sim.t<=12) return {name:'🥈 Usta Pehlivan', d:'Sağlam bir dövüştü.'};
+    return {name:'🥉 Sabırlı Şampiyon', d:'Kazandın! Daha hızlı bitirmeyi dene.'};
+  }
+  function showResult(){
+    const sim=LAB.sim, r=document.getElementById('result');
+    const win=sim.status==='success'; r.className='result '+(win?'win':'lose');
+    document.getElementById('rhead').innerHTML = win ? '🏆 Rakibi Ringden Attın!' : '💥 '+(REASONS[sim.reason]||'Kaybettin');
+    const md=medal(sim); const tips=M.coach(sim);
+    const body=document.getElementById('rbody'); body.style.display='block';
+    body.innerHTML =
+      (win&&md?`<div class="rclass">${md.name}</div><div style="font-size:.8rem;color:var(--muted2);margin:-4px 0 10px">${md.d}</div>`:'')+
+      `<div class="rstats">
+        <div><small>SÜRE</small><b>${sim.t.toFixed(1)}s</b></div>
+        <div><small>RAKİP</small><b>${M.OPPONENTS[LAB.oppIdx].name}</b></div>
+        <div><small>SONUÇ</small><b style="color:${win?'var(--green)':'#fca5a5'}">${win?'GALİBİYET':(sim.reason==='timeout'?'BERABERE':'MAĞLUP')}</b></div>
+      </div>`+
+      tips.map(t=>`<div class="tip"><span class="ic">💡</span><span>${t}</span></div>`).join('')+
+      `<div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+         <button class="btn run" id="retry">⟲ Tekrar Dövüş</button>
+         <button class="btn ghost" id="replayBtn">▶ Tekrarı İzle</button>
+         ${win?'<button class="btn" id="reportBtn" style="border-color:#38bdf8;color:#38bdf8">📄 Raporu Önizle</button>':''}
+       </div>`;
+    document.getElementById('retry').onclick=resetSim;
+    document.getElementById('replayBtn').onclick=replayRun;
+    if(win){ const rb=document.getElementById('reportBtn'); if(rb) rb.onclick=openReport; }
+    if(LAB.frames.length) drawFrame(LAB.frames.length-1);
+    setTimeout(()=>{ const el=document.getElementById('result'); if(el) el.scrollIntoView({behavior:'smooth',block:'center'}); },130);
+  }
+
+  function drawFrame(fi){
+    drawScene();
+    const fr=LAB.frames; if(!fr.length) return;
+    // partial trails up to fi
+    ctx.strokeStyle='rgba(239,68,68,.45)'; ctx.lineWidth=2.5; ctx.beginPath();
+    for(let i=0;i<=fi&&i<fr.length;i++){ const [x,y]=w2s(fr[i].ox,fr[i].oy); i?ctx.lineTo(x,y):ctx.moveTo(x,y);} ctx.stroke();
+    ctx.strokeStyle='rgba(56,189,248,.6)'; ctx.lineWidth=2.5; ctx.beginPath();
+    for(let i=0;i<=fi&&i<fr.length;i++){ const [x,y]=w2s(fr[i].px,fr[i].py); i?ctx.lineTo(x,y):ctx.moveTo(x,y);} ctx.stroke();
+    const f=fr[Math.min(fi,fr.length-1)];
+    drawRobot({x:f.ox,y:f.oy,th:f.oth}, {fill:'rgba(80,30,36,.97)',stroke:'#ef4444',arrow:'#ef4444'});
+    drawRobot({x:f.px,y:f.py,th:f.pth}, {fill:'rgba(51,65,85,.97)',stroke:'#38bdf8',arrow:'#22c55e',sensors:true,states:f.states});
+  }
+  function replayRun(){
+    if(!LAB.frames.length || LAB.running) return; stopLoop(); LAB.replaying=true; let i=0;
+    const stepR=()=>{ if(!LAB.replaying) return; drawFrame(i); i+=3;
+      if(i<LAB.frames.length){ LAB.raf=requestAnimationFrame(stepR); } else { LAB.replaying=false; drawFrame(LAB.frames.length-1); } };
+    stepR();
+  }
+
+  // ---------- report ----------
+  function rmStat(l,v,u){ return '<div class="rm-stat"><div class="rl">'+l+'</div><div class="rv">'+v+'<span style="font-size:.5rem;color:var(--muted2)">'+(u||'')+'</span></div></div>'; }
+  function closeReport(){ document.getElementById('reportModal').style.display='none'; }
+  function drawReportMini(){
+    const c=document.getElementById('rmMap'); if(!c) return; const x=c.getContext('2d'); const W=c.width,H=c.height;
+    x.clearRect(0,0,W,H); x.fillStyle='#0b1220'; x.fillRect(0,0,W,H);
+    const sc=Math.min(W,H)/(2*R)*0.9, ox=W/2, oy=H/2;
+    const P=(wx,wy)=>[ox+wx*sc, oy-wy*sc];
+    x.beginPath(); x.arc(ox,oy,R*sc,0,7); x.fillStyle='#e8edf5'; x.fill();
+    x.beginPath(); x.arc(ox,oy,(R-M.EDGE_BAND)*sc,0,7); x.fillStyle='#0e1626'; x.fill();
+    const fr=LAB.frames;
+    if(fr.length>1){ x.strokeStyle='#ef4444'; x.lineWidth=2; x.beginPath();
+      for(let i=0;i<fr.length;i++){ const [sx,sy]=P(fr[i].ox,fr[i].oy); i?x.lineTo(sx,sy):x.moveTo(sx,sy);} x.stroke();
+      x.strokeStyle='#38bdf8'; x.lineWidth=2; x.beginPath();
+      for(let i=0;i<fr.length;i++){ const [sx,sy]=P(fr[i].px,fr[i].py); i?x.lineTo(sx,sy):x.moveTo(sx,sy);} x.stroke(); }
+  }
+  function openReport(){
+    const sim=LAB.sim; if(!sim) return;
+    let build=null; try{ build=JSON.parse(localStorage.getItem('rf_robot')); }catch(e){}
+    const RD=window.RobotData; const opp=M.OPPONENTS[LAB.oppIdx]; const md=medal(sim);
+    let buildHtml='';
+    if(build && RD){
+      const chips=RD.ORDER.map(cat=>{ const o=RD.opt(cat,build[cat]); return o?('<span class="rm-chip">'+RD.COMPONENTS[cat].icon+' '+o.name+'</span>'):''; }).join('');
+      const shp=(build.chassis&&build.chassis.shape)||'rect'; const rr=RD.computeReport(build);
+      buildHtml='<div class="rm-chips">'+chips+'<span class="rm-chip">🧩 Şasi: '+shp+'</span></div>'+
+        '<div class="rm-grid">'+rmStat('Ağırlık',rr.weightG,'g')+rmStat('En Yüksek Hız',rr.topSpeedKmh,'km/s')+rmStat('Güç',rr.powerRating,'/100')+
+        rmStat('Tork',rr.torque,'/10')+rmStat('Tutuş',rr.grip,'')+rmStat('Batarya',rr.batteryMin,'dk')+'</div>';
+    } else { buildHtml='<div class="rm-note">Bu maç hazır bir robotla yapıldı. Kendi robotunu kurmak için katalogdan başlayabilirsin.</div>'; }
+    const codeHtml='<div class="rm-line"><b>Sensörler:</b> '+LAB.sensors.length+' adet (düşman ön/sol/sağ + kenar)</div>'+
+      '<div class="rm-line"><b>Dövüş kuralları:</b> '+LAB.rules.length+' kural + varsayılan</div>';
+    const perfHtml='<div class="rm-line"><b>Rakip:</b> '+opp.name+' · '+opp.difficulty+'</div>'+
+      (md?'<div class="rm-line"><b>Rozet:</b> '+md.name+'</div>':'')+
+      '<div class="rm-grid">'+rmStat('Süre',sim.t.toFixed(1),'s')+rmStat('Sonuç','GALİBİYET','')+'</div>'+
+      '<canvas id="rmMap" width="520" height="170" style="width:100%;margin-top:12px;border-radius:8px;border:1px solid var(--line);background:#0b1220;display:block"></canvas>';
+    const modal=document.getElementById('reportModal');
+    modal.innerHTML='<div class="rm-back" id="rmBack"></div><div class="rm-sheet">'+
+      '<div class="rm-h"><span>🏁 Robot Yapım Raporu</span><button class="rm-x" id="rmClose">✕</button></div>'+
+      '<div class="rm-scroll">'+
+        '<div class="rm-sec"><h4>🤖 Robot</h4>'+buildHtml+'</div>'+
+        '<div class="rm-sec"><h4>👁️ Sensörler &amp; Kod</h4>'+codeHtml+'</div>'+
+        '<div class="rm-sec"><h4>🥊 Maç Performansı</h4>'+perfHtml+'</div>'+
+      '</div>'+
+      '<div class="rm-foot"><button class="btn run" id="rmClose2">Kapat</button></div>'+
+    '</div>';
+    modal.style.display='flex';
+    document.getElementById('rmClose').onclick=closeReport;
+    document.getElementById('rmClose2').onclick=closeReport;
+    document.getElementById('rmBack').onclick=closeReport;
+    drawReportMini();
+  }
+
+  function resetSim(){
+    stopRun(); LAB.replaying=false; LAB.sim=null; LAB.acc=0; LAB.frames=[];
+    setResultReady(); render(null); updateHud(null);
+  }
+
+  // ---------- opponent tabs ----------
+  function buildOppTabs(){
+    const wrap=document.getElementById('tracktabs'); wrap.innerHTML='';
+    M.OPPONENTS.forEach((o,i)=>{ const d=document.createElement('div'); d.className='ttab'+(i===LAB.oppIdx?' active':'');
+      d.innerHTML=`${o.name}<small>${o.difficulty}</small>`;
+      d.onclick=()=>{ if(LAB.running) stopRun(); LAB.oppIdx=i; buildOppTabs(); resetSim(); };
+      wrap.appendChild(d); });
+  }
+
+  // ---------- chassis (static sensors) ----------
+  const ED={w:210,h:250,scale:80};
+  function edPos(sen){ const cx=ED.w/2, cy=ED.h*0.55; return { x: cx + sen.right*ED.scale, y: cy - sen.fwd*ED.scale }; }
+  function buildChassis(){
+    const ch=document.getElementById('chassis'); ch.innerHTML='';
+    const HL=0.62*ED.scale, HW=0.5*ED.scale; const cx=ED.w/2, cy=ED.h*0.55;
+    const body=document.createElement('div'); body.className='chbody';
+    body.style.left=(cx-HW)+'px'; body.style.top=(cy-HL)+'px'; body.style.width=(HW*2)+'px'; body.style.height=(HL*2)+'px';
+    ch.appendChild(body);
+    const fl=document.createElement('div'); fl.className='chfront'; fl.textContent='▲ ÖN';
+    fl.style.left=(cx-16)+'px'; fl.style.top=(cy-HL-16)+'px'; ch.appendChild(fl);
+    [[-HW-6],[HW-6]].forEach(([wx])=>{ const w=document.createElement('div'); w.className='wheel';
+      w.style.left=(cx+wx)+'px'; w.style.top=(cy-15)+'px'; ch.appendChild(w); });
+    LAB.sensors.forEach(sen=>{ const el=document.createElement('div'); el.className='sensor';
+      el.style.background=sen.color; el.textContent=sen.label.slice(0,1); el.title=sen.label;
+      const p=edPos(sen); el.style.left=p.x+'px'; el.style.top=p.y+'px'; ch.appendChild(el); });
+  }
+
+  // ---------- rules editor ----------
+  const PAT_CYCLE={any:'on',on:'off',off:'any'};
+  const PAT_STYLE={
+    on:{bg:'#0b2e16',tx:'#4ade80',label:'VAR'},
+    off:{bg:'#2e0b0b',tx:'#fca5a5',label:'YOK'},
+    any:{bg:'#13203a',tx:'#94a3b8',label:'FARK ETMEZ'},
+  };
+  function moveActionLabel(rule){
+    const mL=M.motorFraction(rule.left), mR=M.motorFraction(rule.right);
+    return '→ '+moveLabel(mL,mR);
+  }
+  function buildRules(){
+    const wrap=document.getElementById('rules'); wrap.innerHTML='';
+    LAB.rules.forEach((rule,ri)=>wrap.appendChild(ruleEl(rule,ri)));
+    document.getElementById('defRuleBox').replaceWith(defRuleEl());
+  }
+  function chipEl(rule,sen,si){
+    const st=rule.pattern[si]||'any'; const sty=PAT_STYLE[st];
+    const c=document.createElement('div'); c.className='schip';
+    c.style.background=sty.bg; c.style.borderColor=sen.color; c.style.color=sty.tx;
+    c.innerHTML=`${sen.label}<small style="color:${sty.tx}">${sty.label}</small>`;
+    c.onclick=()=>{ rule.pattern[si]=PAT_CYCLE[st]; buildRules(); };
+    return c;
+  }
+  function motorEl(rule,side){
+    const m=rule[side]; const box=document.createElement('div'); box.className='motorctl';
+    box.innerHTML=`<div class="ml">${side==='left'?'SOL MOTOR':'SAĞ MOTOR'}</div>`;
+    const sel=document.createElement('select');
+    DIRS.forEach(([v,t])=>{ const o=document.createElement('option'); o.value=v; o.textContent=t; if(m.dir===v)o.selected=true; sel.appendChild(o); });
+    sel.onchange=()=>{ m.dir=sel.value; buildRules(); };
+    const sp=document.createElement('input'); sp.type='number'; sp.min=0; sp.max=100; sp.step=5; sp.value=m.speed;
+    sp.oninput=()=>{ m.speed=Math.max(0,Math.min(100,+sp.value||0)); };
+    box.appendChild(sel); box.appendChild(sp);
+    const u=document.createElement('div'); u.style.cssText='font-size:.55rem;color:#475569;text-align:right'; u.textContent='hız %';
+    box.appendChild(u); return box;
+  }
+  function ruleEl(rule,ri){
+    const el=document.createElement('div'); el.className='rule';
+    const head=document.createElement('div'); head.className='rulehead';
+    head.innerHTML=`<span class="when">EĞER ↓</span>`;
+    const ord=document.createElement('div'); ord.className='ruleord';
+    const up=ib('▲',()=>moveRule(ri,-1)); const dn=ib('▼',()=>moveRule(ri,1));
+    const rm=ib('✕',()=>{LAB.rules.splice(ri,1);buildRules();},'x');
+    if(ri===0) up.style.visibility='hidden'; if(ri===LAB.rules.length-1) dn.style.visibility='hidden';
+    ord.append(up,dn,rm); head.appendChild(ord); el.appendChild(head);
+    const chips=document.createElement('div'); chips.className='chips';
+    LAB.sensors.forEach((sen,si)=>chips.appendChild(chipEl(rule,sen,si)));
+    el.appendChild(chips);
+    el.insertAdjacentHTML('beforeend','<div class="arrow">▼ O ZAMAN ▼</div>');
+    const motors=document.createElement('div'); motors.className='motors';
+    motors.append(motorEl(rule,'left'),motorEl(rule,'right')); el.appendChild(motors);
+    const al=document.createElement('div'); al.className='actlabel'; al.textContent=moveActionLabel(rule); el.appendChild(al);
+    return el;
+  }
+  function defRuleEl(){
+    const el=document.createElement('div'); el.className='rule def'; el.id='defRuleBox';
+    el.innerHTML=`<div class="rulehead"><span class="when" style="color:#a78bfa">HİÇBİRİ EŞLEŞMEZSE ↓</span></div>`;
+    const motors=document.createElement('div'); motors.className='motors';
+    motors.append(motorEl(LAB.defaultRule,'left'),motorEl(LAB.defaultRule,'right')); el.appendChild(motors);
+    const al=document.createElement('div'); al.className='actlabel'; al.textContent=moveActionLabel(LAB.defaultRule); el.appendChild(al);
+    return el;
+  }
+  function ib(txt,fn,cls){ const b=document.createElement('button'); b.className='iconbtn'+(cls?' '+cls:''); b.textContent=txt; b.onclick=fn; return b; }
+  function moveRule(ri,d){ const ni=ri+d; if(ni<0||ni>=LAB.rules.length)return; const t=LAB.rules[ri];LAB.rules[ri]=LAB.rules[ni];LAB.rules[ni]=t;buildRules(); }
+  function addRule(){ const pat=LAB.sensors.map(()=>'any'); LAB.rules.push({pattern:pat,left:{dir:'fwd',speed:80},right:{dir:'fwd',speed:80}}); buildRules(); }
+
+  // ---------- params ----------
+  function vLabel(v){ return v<3?'Zayıf':v<4.3?'Orta':'Güçlü'; }
+  function gLabel(g){ return g<0.9?'Hantal':g<1.25?'Normal':'Çevik'; }
+  function bindParams(){
+    const vm=document.getElementById('vmax'), gr=document.getElementById('grip');
+    vm.value=LAB.params.vMax; gr.value=LAB.params.turnGain;
+    vm.oninput=()=>{ LAB.params.vMax=+vm.value; document.getElementById('vLabel').textContent=vLabel(+vm.value); };
+    gr.oninput=()=>{ LAB.params.turnGain=+gr.value; document.getElementById('gLabel').textContent=gLabel(+gr.value); };
+    document.getElementById('vLabel').textContent=vLabel(LAB.params.vMax);
+    document.getElementById('gLabel').textContent=gLabel(LAB.params.turnGain);
+  }
+
+  // ---------- share ----------
+  function encodeState(){
+    const st={o:LAB.oppIdx,r:LAB.rules,d:LAB.defaultRule,p:{vMax:LAB.params.vMax,turnGain:LAB.params.turnGain,wheelBase:LAB.params.wheelBase}};
+    return btoa(unescape(encodeURIComponent(JSON.stringify(st))));
+  }
+  function applyState(st){
+    if(!st) return;
+    if(typeof st.o==='number' && st.o>=0 && st.o<M.OPPONENTS.length) LAB.oppIdx=st.o;
+    if(Array.isArray(st.r)) LAB.rules=st.r;
+    if(st.d) LAB.defaultRule=st.d;
+    LAB.params={...M.defaultParams(),...(st.p||{})};
+  }
+  function loadFromHash(){
+    if(location.hash && location.hash.indexOf('r=')>=0){
+      try{ const raw=location.hash.split('r=')[1]; applyState(JSON.parse(decodeURIComponent(escape(atob(raw))))); return true; }catch(e){}
+    }
+    return false;
+  }
+  function shareRobot(){
+    const link=location.origin+location.pathname+'#r='+encodeState();
+    history.replaceState(null,'','#r='+encodeState());
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(link).then(()=>toast('🔗 Bağlantı kopyalandı!'),()=>toast('🔗 Bağlantı adres çubuğunda hazır.'));
+    } else toast('🔗 Bağlantı adres çubuğunda hazır.');
+  }
+  let toastT=null;
+  function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show');
+    clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2600); }
+
+  // ---------- tutorial ----------
+  const TUT=[
+    {tab:null,t:'Mini Sumo Lab’a hoş geldin! 🥊',p:'Robotun rakibi ringden atmaya çalışacak — ama kendisi düşmemeli. Onu sen kodlayacaksın.'},
+    {tab:'robot',t:'1) Sensörleri tanı',p:'🤖 Robot sekmesinde düşman sensörleri (ön/sol/sağ) ve kenar sensörü var. Kenar sensörü beyaz çizgiyi görür.'},
+    {tab:'kod',t:'2) Dövüşü kodla',p:'🧩 Kod sekmesinde önce güvenliği (KENAR VAR → geri çekil), sonra saldırıyı (DÜŞMAN VAR → tam güç) yaz.'},
+    {tab:null,t:'3) Dövüştür ve öğren',p:'▶ DÖVÜŞ’e bas. Düşersen ya da berabere kalırsan ipuçları çıkar — robotunu güçlendir, kuralları düzelt, tekrar dene!'},
+  ];
+  let tutI=0;
+  function switchTab(name){
+    document.querySelectorAll('.sidetab').forEach(x=>x.classList.toggle('active',x.dataset.tab===name));
+    document.getElementById('panel-robot').style.display=name==='robot'?'block':'none';
+    document.getElementById('panel-kod').style.display=name==='kod'?'block':'none';
+  }
+  function showTut(i){
+    tutI=i; const s=TUT[i]; if(s.tab) switchTab(s.tab);
+    document.getElementById('tutStep').textContent='Adım '+(i+1)+' / '+TUT.length;
+    document.getElementById('tutTitle').textContent=s.t;
+    document.getElementById('tutText').textContent=s.p;
+    document.getElementById('tutNext').textContent=i===TUT.length-1?'Başla! 🚀':'İleri →';
+    const dots=document.getElementById('tutDots'); dots.innerHTML='';
+    TUT.forEach((_,k)=>{const d=document.createElement('div');d.className='tutdot'+(k===i?' on':'');dots.appendChild(d);});
+    document.getElementById('tutwrap').style.display='flex';
+  }
+  function nextTut(){ if(tutI<TUT.length-1) showTut(tutI+1); else endTut(); }
+  function endTut(){ document.getElementById('tutwrap').style.display='none'; try{localStorage.setItem('rf_sumo_tut','1');}catch(e){} }
+
+  function bindTabs(){ document.querySelectorAll('.sidetab').forEach(t=>t.onclick=()=>switchTab(t.dataset.tab)); }
+
+  // ---------- continuity + robot card ----------
+  function applyRobotBuild(){
+    try{
+      const raw=localStorage.getItem('rf_robot'); if(!raw || !window.RobotData) return;
+      const b=JSON.parse(raw); const sp=window.RobotData.toSimParams(b);
+      if(sp && sp.vMax){ LAB.params.vMax=Math.max(2.4,Math.min(5.2,sp.vMax)); LAB.params.turnGain=sp.turnGain;
+        if(sp.wheelBase) LAB.params.wheelBase=sp.wheelBase; }
+      const m=window.RobotData.opt('motor',b.motor), w=window.RobotData.opt('wheel',b.wheel);
+      const small=document.querySelector('.brand small');
+      if(small && (m||w)) small.textContent='🔧 '+(m?m.name:'?')+' · '+(w?w.name:'?');
+    }catch(e){}
+  }
+  function fillRobotCard(){
+    const side=document.querySelector('.side'); if(!side) return;
+    let build=null; try{ build=JSON.parse(localStorage.getItem('rf_robot')); }catch(e){}
+    const RD=window.RobotData; const card=document.createElement('div');
+    card.style.cssText='border-top:1px solid var(--line);padding:16px;background:#0c1526';
+    if(build && RD){
+      const chips=RD.ORDER.map(cat=>{ const o=RD.opt(cat,build[cat]);
+        return '<span style="border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:4px 8px;font-size:.68rem;color:var(--muted2)">'+RD.COMPONENTS[cat].icon+' <b style="color:var(--txt)">'+(o?o.name:'—')+'</b></span>'; }).join('');
+      const r=RD.computeReport(build);
+      const stat=(l,v,u)=>'<div style="background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:8px 6px;text-align:center"><div style="font-size:.52rem;letter-spacing:1px;color:var(--muted);text-transform:uppercase">'+l+'</div><div style="font-size:1.1rem;font-weight:800;margin-top:2px">'+v+'</div><div style="font-size:.55rem;color:var(--muted2)">'+u+'</div></div>';
+      card.innerHTML='<div style="font-size:.62rem;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:10px">🔧 Robotun Künyesi</div>'+
+        '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">'+chips+'</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">'+stat('Ağırlık',r.weightG,'g')+stat('Hız',r.topSpeedKmh,'km/s')+stat('Güç',r.powerRating,'/100')+'</div>'+
+        '<div style="font-size:.7rem;color:var(--muted2);line-height:1.5;margin-bottom:10px">Bu parça seçimlerin, robotun itiş gücünü ve dönüş çevikliğini belirledi.</div>'+
+        '<a href="build.html?sim=sumo" style="display:inline-block;border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:.74rem;font-weight:700;color:var(--muted2)">← Robotu yeniden kur</a>';
+    } else {
+      card.innerHTML='<div style="font-size:.62rem;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:8px">🤖 Kendi robotun</div>'+
+        '<div style="font-size:.8rem;color:var(--muted2);line-height:1.55;margin-bottom:12px">Parçaları seçip robotunu baştan kurarsan, seçtiğin güçlü motor ve tekerlekler bu ringde itiş gücünü belirler — şampiyonu yenmek için önemli!</div>'+
+        '<a href="build.html?sim=sumo" style="display:inline-block;background:linear-gradient(180deg,#0ea5e9,#0369a1);border:1px solid #38bdf8;border-radius:9px;padding:9px 14px;font-size:.8rem;font-weight:700;color:#eaf6ff">Robotunu kur →</a>';
+    }
+    side.appendChild(card);
+  }
+
+  function init(){
+    applyRobotBuild(); fillRobotCard(); loadFromHash();
+    buildOppTabs(); bindTabs(); bindParams();
+    buildChassis(); buildRules(); buildSensorHud();
+    document.getElementById('addRule').onclick=addRule;
+    document.getElementById('runbtn').onclick=()=>{ LAB.running?stopRun():startRun(); };
+    document.getElementById('resetbtn').onclick=resetSim;
+    document.getElementById('shareBtn').onclick=shareRobot;
+    document.getElementById('helpBtn').onclick=()=>showTut(0);
+    document.getElementById('tutNext').onclick=nextTut;
+    document.getElementById('tutSkip').onclick=endTut;
+    const ss=document.getElementById('simspeed');
+    ss.oninput=()=>{ LAB.simSpeed=+ss.value; document.getElementById('simspeedval').textContent=(+ss.value).toFixed(1)+'x'; };
+    render(null); updateHud(null);
+    let seen=false; try{ seen=!!localStorage.getItem('rf_sumo_tut'); }catch(e){}
+    if(!seen) setTimeout(()=>showTut(0),400);
+  }
+  init();
+})();
+</script>
+</body>
+</html>

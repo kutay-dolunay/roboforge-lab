@@ -304,10 +304,15 @@
     {id:'cross',name:'Artı',cp:'polygon(35% 0,65% 0,65% 35%,100% 35%,100% 65%,65% 65%,65% 100%,35% 100%,35% 65%,0 65%,0 35%,35% 35%)'},
   ];
 
+  // ---- scenario routing ----
+  const LABS = { line:'line-follower.html', maze:'maze.html', sumo:'sumo.html' };
+  const SIM = (function(){ try{ const q=new URLSearchParams(location.search).get('sim'); return LABS[q]?q:'line'; }catch(e){ return 'line'; } })();
+  const LAB_HREF = LABS[SIM];
+
   // ---- state ----
   let step=1, phase=0;
   // Always start a FRESH build when the page opens (do not resume the saved one).
-  const B = { brain:null,driver:null,motor:null,wheel:null,battery:null,
+  const B = { sim:SIM, brain:null,driver:null,motor:null,wheel:null,battery:null,
     chassis:{ shape:'rect', len:1, wid:1, place:{} } };
   function save(){ try{ localStorage.setItem('rf_robot', JSON.stringify(B)); }catch(e){} }
   function load(){ try{ return JSON.parse(localStorage.getItem('rf_robot')); }catch(e){ return null; } }
@@ -479,7 +484,7 @@
     if(res.pass){ v.className='verdict win';
       v.innerHTML=`<h3>✅ Robotun çalışıyor!</h3>`+(res.notes.length?res.notes.map(n=>`<p>💡 ${n}</p>`).join(''):`<p>Her şey yolunda. Şimdi ona çizgiyi takip etmeyi öğret.</p>`)+
         `<button class="btn go" id="toLab" style="margin-top:12px">Kodlamaya Devam →</button>`;
-      document.getElementById('toLab').onclick=()=>{ save(); location.href='line-follower.html'; };
+      document.getElementById('toLab').onclick=()=>{ save(); location.href=LAB_HREF; };
     } else { const fail=res.steps.find(s=>!s.ok); v.className='verdict lose';
       v.innerHTML=`<h3>❌ Robot çalışmadı</h3><p>${fail?fail.msg:'Bir şeyler eksik.'}</p>
         <p style="color:var(--muted)">Sorun değil — mühendislik denemekle öğrenilir. Parçalarını düzelt ve tekrar dene.</p>
