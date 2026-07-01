@@ -21,7 +21,7 @@
   .brand b{font-size:1.05rem;letter-spacing:.5px}
   .brand b span{color:var(--sky)}
   .brand small{color:var(--muted);font-size:.62rem;letter-spacing:2px;text-transform:uppercase}
-  .tracktabs{display:flex;gap:6px;margin-left:8px}
+  .tracktabs{display:flex;gap:6px;margin-left:8px;flex-wrap:wrap;max-width:660px}
   .ttab{padding:7px 12px;border:1px solid var(--line);background:var(--panel);color:var(--muted2);
     border-radius:9px;cursor:pointer;font-size:.74rem;font-weight:600;transition:.15s;white-space:nowrap}
   .ttab small{display:block;font-size:.56rem;color:var(--muted);font-weight:400}
@@ -351,8 +351,8 @@
 <div id="toast"></div>
 <div class="reportModal" id="reportModal"></div>
 
-<script src="robot-data.js"></script>
-<script src="sim-core.js"></script>
+<script src="robot-data.js?v=2"></script>
+<script src="sim-core.js?v=2"></script>
 <script>
 (function(){
   const S = window.SimCore;

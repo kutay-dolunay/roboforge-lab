@@ -21,8 +21,16 @@
   const ROBOT_R = 0.42;
   const DRIVE_FRAC = 0.72;   // fraction of vMax used when crossing a cell
   const TURN_RATE = 4.6;     // rad/s base pivot speed (scaled by turnGain)
-  const MAX_STEPS = 260;     // give-up guard (lost / looping)
+  const MAX_STEPS = 400;     // give-up guard (lost / looping)
   const LOOP_LIMIT = 6;      // same (cell,heading) revisits => lost
+  // PID (wall-follower) mode constants
+  const MAX_OM = 4.6;
+  const MATCH_TIME = 80;     // pid-mode timeout (s)
+  const WF_TARGET = 1.0;     // target distance from the LEFT wall
+  const WF_FRONT = 1.7;      // front wall -> swerve right
+  const WF_GAIN = 3.8;
+  const WF_RANGE = 3.0;
+  function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
 
   // ---- direction helpers (grid deltas) ----------------------------------
   const DIRS = { E: [0, 1], S: [1, 0], W: [0, -1], N: [-1, 0] };
@@ -32,9 +40,10 @@
   function rev(hd) { return [-hd[0], -hd[1]]; }
   function eqd(a, b) { return a[0] === b[0] && a[1] === b[1]; }
 
+  // 7-level ladder: Başlangıç ×2, Orta ×2, İleri ×2, Uzman ×1
   const MAZES = [
     {
-      id: 'snake', name: 'Kıvrım', difficulty: 'Kolay',
+      id: 'snake', name: 'Kıvrım', difficulty: 'Başlangıç',
       blurb: 'Tek yollu, dört büklüm bir koridor. Isınma turu.',
       grid: [
         [1,1,1,1,1,1,1,1,1],
@@ -43,6 +52,21 @@
         [1,0,0,0,0,0,0,0,1],
         [1,0,1,1,1,1,1,1,1],
         [1,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1],
+      ], start: [1,1], end: [7,1],
+    },
+    {
+      id: 'corner', name: 'Köşeler', difficulty: 'Başlangıç',
+      blurb: 'Tek bir büyük dönüş — sağdan aşağı, soldan geri.',
+      grid: [
+        [1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,0,1],
+        [1,1,1,1,1,1,1,0,1],
+        [1,1,1,1,1,1,1,0,1],
+        [1,1,1,1,1,1,1,0,1],
         [1,1,1,1,1,1,1,0,1],
         [1,0,0,0,0,0,0,0,1],
         [1,1,1,1,1,1,1,1,1],
@@ -66,7 +90,24 @@
       ], start: [1,1], end: [9,9],
     },
     {
-      id: 'spiral', name: 'Sarmal', difficulty: 'Zor',
+      id: 'rooms', name: 'Odalar', difficulty: 'Orta',
+      blurb: 'Küçük odalar ve çatallar. Doğru dönüşü bulmak gerek.',
+      grid: [
+        [1,1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,1,0,0,0,1,0,1],
+        [1,0,1,0,1,0,1,0,1,0,1],
+        [1,0,1,0,0,0,1,0,0,0,1],
+        [1,0,1,1,1,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,1,0,1],
+        [1,1,1,1,1,1,1,0,1,0,1],
+        [1,0,0,0,0,0,0,0,1,0,1],
+        [1,0,1,1,1,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1,1],
+      ], start: [1,1], end: [9,1],
+    },
+    {
+      id: 'spiral', name: 'Sarmal', difficulty: 'İleri',
       blurb: 'İçe doğru kıvrılan sarmal. Sabır ve iyi bir strateji gerekir.',
       grid: [
         [1,1,1,1,1,1,1,1,1,1,1],
@@ -82,6 +123,46 @@
         [1,1,1,1,1,1,1,1,1,1,1],
       ], start: [1,1], end: [5,5],
     },
+    {
+      id: 'puzzle', name: 'Bulmaca', difficulty: 'İleri',
+      blurb: 'Bol çatallı, çıkmazlı gerçek bir bulmaca.',
+      grid: [
+        [1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,0,0,1,0,0,0,0,0,1],
+        [1,1,1,0,1,0,1,0,1,1,1,0,1],
+        [1,0,0,0,1,0,0,0,1,0,0,0,1],
+        [1,0,1,1,1,1,1,1,1,0,1,1,1],
+        [1,0,0,0,0,0,0,0,0,0,1,0,1],
+        [1,1,1,0,1,1,1,0,1,1,1,0,1],
+        [1,0,0,0,1,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,0,1,1,1,1,1,0,1],
+        [1,0,1,0,0,0,0,0,0,0,1,0,1],
+        [1,0,1,0,1,1,1,1,1,0,1,0,1],
+        [1,0,0,0,1,0,0,0,0,0,1,0,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1],
+      ], start: [1,1], end: [11,11],
+    },
+    {
+      id: 'kabus', name: 'Kâbus', difficulty: 'Uzman',
+      blurb: 'Devasa, çıkmaz dolu labirent. Kusursuz bir duvar-takip stratejisi ister.',
+      grid: [
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,1,0,0,0,0,0,1,0,0,0,1],
+        [1,1,1,0,1,0,1,1,1,0,1,0,1,0,1],
+        [1,0,0,0,0,0,1,0,0,0,0,0,1,0,1],
+        [1,0,1,1,1,1,1,0,1,1,1,1,1,0,1],
+        [1,0,0,0,1,0,0,0,0,0,0,0,1,0,1],
+        [1,1,1,0,1,0,1,1,1,1,1,0,1,0,1],
+        [1,0,0,0,0,0,1,0,0,0,1,0,0,0,1],
+        [1,0,1,1,1,1,1,0,1,0,1,1,1,0,1],
+        [1,0,1,0,0,0,0,0,1,0,0,0,1,0,1],
+        [1,0,1,0,1,1,1,1,1,1,1,0,1,0,1],
+        [1,0,0,0,1,0,0,0,0,0,1,0,1,0,1],
+        [1,1,1,1,1,0,1,1,1,0,1,0,1,0,1],
+        [1,0,0,0,0,0,1,0,0,0,1,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      ], start: [1,1], end: [13,13],
+    },
   ];
 
   function buildMaze(def) {
@@ -90,6 +171,9 @@
   }
   function cellWall(mz, r, c) { if (r < 0 || r >= mz.rows || c < 0 || c >= mz.cols) return true; return mz.grid[r][c] === 1; }
   function cellCenter(r, c) { return [c * CELL, -r * CELL]; }
+  function isWallXY(mz, x, y) { return cellWall(mz, Math.round(-y / CELL), Math.round(x / CELL)); }
+  function rayDist(mz, ox, oy, dx, dy, mxr) { let t = 0.06; const M = mxr || WF_RANGE;
+    while (t < M) { if (isWallXY(mz, ox + dx * t, oy + dy * t)) return t; t += 0.06; } return M; }
 
   // ---- rule engine (shared shape with the line follower) ----------------
   function motorFraction(m) { if (!m || m.dir === 'stop') return 0; const f = (m.speed || 0) / 100; return m.dir === 'rev' ? -f : f; }
@@ -130,7 +214,32 @@
     const robot = makeRobot(cfg.maze);
     return { cfg, robot, t: 0, status: 'running', reason: null, mode: 'scan',
       steps: 0, driveTarget: null, targetTh: 0, pendingHd: null, lastAction: null,
-      lastStates: null, ruleIndex: -1, visits: {}, trail: [[robot.x, robot.y]], decisions: [] };
+      lastStates: null, ruleIndex: -1, visits: {}, trail: [[robot.x, robot.y]], decisions: [],
+      prevError: 0, lastError: 0, lastDists: null, lastV: 0 };
+  }
+
+  // ---- PID mode: continuous LEFT-wall follower --------------------------
+  function tickPID(sim, dt) {
+    const { maze, params, pid } = sim.cfg; const R = sim.robot;
+    const c = Math.cos(R.th), s = Math.sin(R.th);
+    const fD = rayDist(maze, R.x, R.y, c, s, WF_RANGE);
+    const lD = rayDist(maze, R.x, R.y, -s, c, WF_RANGE);
+    const rD = rayDist(maze, R.x, R.y, s, -c, WF_RANGE);
+    const err = lD - WF_TARGET;
+    let om = (pid.kp || 0) * err + (pid.kd || 0) * (err - sim.prevError);
+    sim.prevError = err; sim.lastError = err;
+    if (fD < WF_FRONT) om -= WF_GAIN * (WF_FRONT - fD);
+    om = clamp(om, -MAX_OM, MAX_OM);
+    let v = (params.vMax || 2.8) * ((pid.base || 100) / 100);
+    if (fD < WF_FRONT) v *= clamp(fD / WF_FRONT, 0.25, 1);
+    R.th += om * dt; R.x += v * Math.cos(R.th) * dt; R.y += v * Math.sin(R.th) * dt;
+    sim.t += dt; sim.lastDists = [fD, lD, rD]; sim.lastV = v;
+    sim.lastStates = [fD < 1.35, lD < 1.35, rD < 1.35];  // [front,left,right] wall-near (for HUD)
+    R.cell = [Math.round(-R.y / CELL), Math.round(R.x / CELL)];
+    if (Math.round(sim.t * 60) % 3 === 0) { sim.trail.push([R.x, R.y]); if (sim.trail.length > 900) sim.trail.shift(); }
+    if (isWallXY(maze, R.x, R.y)) { sim.status = 'failed'; sim.reason = 'crash'; return; }
+    if (R.cell[0] === maze.end[0] && R.cell[1] === maze.end[1]) { sim.status = 'success'; sim.reason = 'solved'; return; }
+    if (sim.t >= MATCH_TIME) { sim.status = 'failed'; sim.reason = 'timeout'; }
   }
 
   function turnSpeed(params) { return TURN_RATE * (params.turnGain || 1); }
@@ -138,6 +247,7 @@
 
   function tickSim(sim, dt) {
     if (sim.status !== 'running') return;
+    if (sim.cfg.mode === 'pid') { tickPID(sim, dt); return; }
     const { maze, sensors, rules, defaultRule, params } = sim.cfg;
     const R = sim.robot;
 
@@ -187,14 +297,18 @@
 
   function coach(sim) {
     const tips = [];
+    const pid = (sim.cfg.mode === 'pid');
     if (sim.reason === 'crash') {
-      tips.push('Robot bir duvara sürdü — kurallarından biri kapalı bir yöne "ileri" dedi. O kuralda önce yolun açık olduğundan emin ol.');
+      if (pid) tips.push('Robot duvara sürttü. PID modunda Kp çok yüksekse zikzak yapıp duvara vurur, hız çok yüksekse dönemez — Kp\'yi ve taban hızı düşürmeyi dene. Hızlı bir robotta bu labirentte yavaşlaman gerekir.');
+      else tips.push('Robot bir duvara sürdü — kurallarından biri kapalı bir yöne "ileri" dedi. O kuralda önce yolun açık olduğundan emin ol.');
     } else if (sim.reason === 'lost') {
       tips.push('Robot aynı yerlerde dönüp durdu (kayboldu). Bir "duvar takip" mantığı dene: solun açıksa sola dön, değilse düz git, o da kapalıysa sağa dön.');
+    } else if (sim.reason === 'timeout') {
+      tips.push('Süre doldu. PID modunda taban hızı biraz artır (daha hızlı ilerlesin) ya da Kp\'yi ayarla ki koridorları daha akıcı takip etsin.');
     } else if (sim.reason === 'stalled') {
       tips.push('Robot hiçbir kurala uymayıp durdu. "Hiçbiri eşleşmezse" durumuna bir hareket (ör. geri dön) ekle.');
     } else if (sim.status === 'success') {
-      tips.push('Çıkışı buldun! Daha az adımda bitirmek için gereksiz dönüşleri azaltmayı dene.');
+      tips.push(pid ? 'Çıkışı buldun! PID ile sol duvarı takip ettin. Kp/Kd ile daha hızlı ve pürüzsüz sürüş dene.' : 'Çıkışı buldun! Daha az adımda bitirmek için gereksiz dönüşleri azaltmayı dene.');
     }
     return tips;
   }
@@ -223,13 +337,14 @@
     ];
   }
   function starterDefault() { return { left: { dir: 'rev', speed: 55 }, right: { dir: 'rev', speed: 55 } }; } // dead end -> turn around
+  function starterPID() { return { kp: 2.8, kd: 0.7, base: 100 }; } // left-wall follower
   function defaultParams() { return { vMax: 2.8, wheelBase: 1.1, turnGain: 1.0 }; }
 
   const API = {
-    CELL, ROBOT_R, DIRS, MAZES, buildMaze, cellWall, cellCenter, thOf, rotL, rotR, rev,
-    motorFraction, ruleMatches, evalRules, actionOf, roleDir, readStates, makeRobot,
-    createSim, tickSim, exploredCount, coach, runHeadless,
-    starterSensors, starterRules, starterDefault, defaultParams, turnSpeed, driveSpeed,
+    CELL, ROBOT_R, DIRS, MAZES, MATCH_TIME, WF_RANGE, buildMaze, cellWall, cellCenter, isWallXY, rayDist,
+    thOf, rotL, rotR, rev, motorFraction, ruleMatches, evalRules, actionOf, roleDir, readStates, makeRobot,
+    createSim, tickSim, tickPID, exploredCount, coach, runHeadless,
+    starterSensors, starterRules, starterDefault, starterPID, defaultParams, turnSpeed, driveSpeed,
   };
   global.MazeCore = API;
   if (typeof module !== 'undefined' && module.exports) module.exports = API;

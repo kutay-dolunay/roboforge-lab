@@ -23,10 +23,16 @@
   // Optional per-track challenge fields:
   //   gaps: [[startProg,endProg],...]  line is ABSENT in these progress ranges
   //   dash: {on, off}                  auto-generated dashed line
+  // 7-level ladder: Başlangıç ×2, Orta ×2, İleri ×2, Uzman ×1
   const TRACKS = [
     {
-      id: 'oval', name: 'Klasik Oval', difficulty: 'Kolay',
+      id: 'oval', name: 'Klasik Oval', difficulty: 'Başlangıç',
       points: [[-8, 0], [-4, 8], [4, 8], [8, 0], [4, -8], [-4, -8]],
+      tension: 0.5, closed: true,
+    },
+    {
+      id: 'wide', name: 'Geniş Tur', difficulty: 'Başlangıç',
+      points: [[-8, -3.5], [-8, 3.5], [-3.5, 8], [3.5, 8], [8, 3.5], [8, -3.5], [3.5, -8], [-3.5, -8]],
       tension: 0.5, closed: true,
     },
     {
@@ -40,22 +46,22 @@
       tension: 0.3, closed: true,
     },
     {
-      id: 'gapped', name: 'Boşluklu Pist', difficulty: 'Zor',
+      id: 'hairpin', name: 'Çift Firkete', difficulty: 'İleri',
+      points: [[-7, -6], [-7, 6], [-2, 6], [-2, -2], [2, -2], [2, 6], [7, 6], [7, -6]],
+      tension: 0.18, closed: true,
+    },
+    {
+      id: 'gapped', name: 'Boşluklu Pist', difficulty: 'İleri',
       points: [[-8, 0], [-4, 8], [4, 8], [8, 0], [4, -8], [-4, -8]],
       tension: 0.5, closed: true,
       // gaps placed on the straight top & bottom so the robot can coast through
       gaps: [[0.235, 0.255], [0.735, 0.755]],
     },
     {
-      id: 'dashed', name: 'Kesik Çizgi', difficulty: 'Zor',
-      points: [[-8, 0], [-4, 8], [4, 8], [8, 0], [4, -8], [-4, -8]],
-      tension: 0.5, closed: true,
-      dash: { on: 0.08, off: 0.022 },
-    },
-    {
-      id: 'hairpin', name: 'Çift Firkete', difficulty: 'Zor',
-      points: [[-7, -6], [-7, 6], [-2, 6], [-2, -2], [2, -2], [2, 6], [7, 6], [7, -6]],
-      tension: 0.18, closed: true,
+      id: 'nightmare', name: 'Kâbus', difficulty: 'Uzman',
+      // tight triple serpentine — Kural kuralları yetmez, iyi bir PID + güçlü robot ister
+      points: [[-8, -6], [-8, 6], [-4.5, 6], [-4.5, -4], [-1, -4], [-1, 6], [2.5, 6], [2.5, -4], [6, -4], [6, 6], [8, 6], [8, -6]],
+      tension: 0.15, closed: true,
     },
   ];
 
