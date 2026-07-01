@@ -15,7 +15,7 @@
     background:radial-gradient(1100px 700px at 75% -15%,#15294a 0%,var(--bg) 55%)}
   a{color:inherit;text-decoration:none}
   .mono{font-family:'Courier New',monospace}
-  .wrap{max-width:1080px;margin:0 auto;padding:22px 22px 80px}
+  .wrap{max-width:1040px;margin:0 auto;padding:22px 22px 90px}
 
   header.top{display:flex;align-items:center;gap:14px;margin-bottom:18px;flex-wrap:wrap}
   .back{color:var(--muted2);font-size:.78rem;font-weight:700;border:1px solid var(--line);
@@ -26,46 +26,70 @@
     background:linear-gradient(145deg,#0ea5e9,#1e3a8a);font-size:1.1rem;box-shadow:0 0 18px rgba(14,165,233,.3)}
   .logo b{font-size:1.1rem}.logo b span{color:var(--sky)}
   .grow{flex:1}
-
-  /* stepper */
   .stepper{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .stp{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.78rem;font-weight:700}
-  .stp .num{width:24px;height:24px;border-radius:50%;border:1px solid var(--line);display:flex;
-    align-items:center;justify-content:center;font-size:.72rem;background:var(--panel)}
-  .stp.active{color:var(--sky)} .stp.active .num{border-color:var(--sky);background:#0c1a30;box-shadow:0 0 12px rgba(56,189,248,.25)}
+  .stp{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:.76rem;font-weight:700}
+  .stp .num{width:22px;height:22px;border-radius:50%;border:1px solid var(--line);display:flex;
+    align-items:center;justify-content:center;font-size:.68rem;background:var(--panel)}
+  .stp.active{color:var(--sky)} .stp.active .num{border-color:var(--sky);background:#0c1a30}
   .stp.done{color:var(--green)} .stp.done .num{border-color:var(--green);color:var(--green)}
-  .stp .bar{width:26px;height:2px;background:var(--line);border-radius:2px}
+  .stp .bar{width:20px;height:2px;background:var(--line);border-radius:2px}
 
-  h2.step-title{font-size:1.35rem;margin:6px 0 2px}
-  .step-sub{color:var(--muted2);font-size:.9rem;margin-bottom:18px}
+  /* build progress */
+  .bp{margin-bottom:20px}
+  .bp-top{display:flex;justify-content:space-between;align-items:baseline;font-size:.68rem;
+    letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:7px}
+  .bp-top b{color:var(--sky);font-size:.8rem}
+  .bp-track{height:8px;background:#0b1220;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .bp-fill{height:100%;width:0;background:linear-gradient(90deg,#0ea5e9,#22c55e);
+    border-radius:6px;transition:width .5s cubic-bezier(.4,1.3,.5,1)}
+  .bp-dots{display:flex;gap:6px;margin-top:8px}
+  .bp-dot{flex:1;height:3px;border-radius:2px;background:#1e293b}
+  .bp-dot.on{background:var(--sky)}
 
-  /* component category */
-  .cat{margin-bottom:22px}
-  .cat-head{display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
-  .cat-head .ic{font-size:1.2rem}
-  .cat-head h3{margin:0;font-size:1.02rem}
-  .cat-head .sub{color:var(--muted);font-size:.66rem;letter-spacing:1px;text-transform:uppercase;font-weight:700}
-  .cat-help{color:var(--muted2);font-size:.76rem;margin:0 0 10px}
-  .opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
-  .opt{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:12px;cursor:pointer;transition:.14s;position:relative}
-  .opt:hover{border-color:#2a4a73;transform:translateY(-2px)}
-  .opt.sel{border-color:var(--sky);background:#0c1a30;box-shadow:0 0 0 1px var(--sky),0 8px 24px rgba(56,189,248,.12)}
-  .opt .oh{display:flex;align-items:center;gap:8px}
-  .opt .oi{font-size:1.3rem}
-  .opt .on{font-weight:700;font-size:.9rem}
-  .opt .spec{color:var(--sky);font-size:.7rem;font-family:'Courier New',monospace;margin:6px 0 4px}
-  .opt .od{color:var(--muted2);font-size:.74rem;line-height:1.4}
-  .opt .chk{position:absolute;top:10px;right:10px;color:var(--sky);font-weight:800;opacity:0}
-  .opt.sel .chk{opacity:1}
+  /* phase */
+  .ph-head{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+  .ph-ic{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+    font-size:1.7rem;background:linear-gradient(145deg,#13233f,#0c1526);border:1px solid var(--line);flex:none}
+  .ph-title{font-size:1.5rem;margin:0;line-height:1.1}
+  .ph-title small{display:block;font-size:.64rem;letter-spacing:2px;color:var(--sky);text-transform:uppercase;font-weight:700;margin-bottom:3px}
+  .ph-intro{color:var(--muted2);font-size:.9rem;line-height:1.6;margin:12px 0 18px;
+    background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--sky);border-radius:10px;padding:13px 16px}
+
+  .opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+  .opt{border:1px solid var(--line);border-radius:14px;background:linear-gradient(160deg,var(--panel),#0c1526);
+    padding:14px;cursor:pointer;transition:.16s;position:relative;overflow:hidden}
+  .opt:hover{border-color:#2a4a73;transform:translateY(-3px);box-shadow:0 10px 26px rgba(0,0,0,.35)}
+  .opt.sel{border-color:var(--sky);box-shadow:0 0 0 1px var(--sky),0 10px 30px rgba(56,189,248,.16)}
+  .opt.sel::after{content:'✓';position:absolute;top:0;right:0;width:30px;height:30px;background:var(--sky);
+    color:#04121f;font-weight:800;display:flex;align-items:center;justify-content:center;
+    border-bottom-left-radius:12px;font-size:.85rem}
+  .opt .oh{display:flex;align-items:center;gap:9px;margin-bottom:4px}
+  .opt .oi{font-size:1.5rem}
+  .opt .on{font-weight:800;font-size:.98rem}
+  .opt .spec{color:var(--sky);font-size:.68rem;font-family:'Courier New',monospace;margin:2px 0 8px}
+  .opt .od{color:var(--muted2);font-size:.76rem;line-height:1.45;margin-bottom:10px}
+  .bar{display:flex;align-items:center;gap:8px;margin:5px 0}
+  .bar .bl{font-size:.6rem;color:var(--muted);width:56px;letter-spacing:.5px}
+  .bar .bt{flex:1;height:6px;background:#0b1220;border-radius:4px;overflow:hidden;border:1px solid #1e293b}
+  .bar .bf{height:100%;border-radius:4px;background:linear-gradient(90deg,#0ea5e9,#38bdf8)}
+
+  .confirm{margin-top:16px;border:1px solid rgba(34,197,94,.4);background:linear-gradient(90deg,rgba(34,197,94,.1),transparent);
+    border-radius:11px;padding:12px 15px;display:none;align-items:center;gap:10px;font-size:.86rem}
+  .confirm.show{display:flex}
+  .confirm b{color:var(--green)}
 
   /* chassis step */
   .chwrap{display:flex;gap:22px;flex-wrap:wrap}
-  .chstage{flex:none;width:460px;max-width:100%}
-  .shapebar{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
-  .shapebtn{padding:8px 12px;border:1px solid var(--line);background:var(--panel);color:var(--muted2);
-    border-radius:9px;cursor:pointer;font-size:.76rem;font-weight:600}
-  .shapebtn.on{border-color:var(--sky);color:var(--sky);background:#0c1a30}
-  .stage{position:relative;width:460px;height:340px;border-radius:14px;border:1px dashed #25406b;
+  .chstage{flex:none;width:440px;max-width:100%}
+  .shapegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px;margin-bottom:12px}
+  .shapebtn{border:1px solid var(--line);background:var(--panel);border-radius:10px;cursor:pointer;
+    padding:8px 4px 6px;display:flex;flex-direction:column;align-items:center;gap:5px;transition:.14s}
+  .shapebtn:hover{border-color:#2a4a73}
+  .shapebtn.on{border-color:var(--sky);background:#0c1a30;box-shadow:0 0 12px rgba(56,189,248,.18)}
+  .shapebtn .pv{width:26px;height:30px;background:linear-gradient(180deg,#2a4368,#1b2942);border:1px solid #38557f}
+  .shapebtn .pn{font-size:.6rem;color:var(--muted2);text-align:center;line-height:1.1}
+  .shapebtn.on .pn{color:var(--sky)}
+  .stage{position:relative;width:440px;height:330px;border-radius:14px;border:1px dashed #25406b;
     background:repeating-linear-gradient(0deg,#0c1426 0 23px,#0e1830 23px 24px),repeating-linear-gradient(90deg,#0c1426 0 23px,#0e1830 23px 24px);
     overflow:hidden;touch-action:none}
   .chassis-shape{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
@@ -73,7 +97,7 @@
   .front-tag{position:absolute;left:50%;transform:translateX(-50%);color:var(--sky);font-size:.55rem;letter-spacing:3px;font-weight:700}
   .wheelmark{position:absolute;width:12px;height:40px;background:#0b1220;border:1px solid #334155;border-radius:4px}
   .pmark{position:absolute;transform:translate(-50%,-50%);min-width:30px;height:30px;border-radius:8px;
-    background:rgba(15,23,42,.95);border:2px solid var(--sky);display:flex;align-items:center;justify-content:center;
+    background:rgba(15,23,42,.96);border:2px solid var(--sky);display:flex;align-items:center;justify-content:center;
     font-size:1rem;cursor:grab;box-shadow:0 3px 10px rgba(0,0,0,.5);user-select:none;touch-action:none;padding:0 4px}
   .pmark:active{cursor:grabbing}
   .pmark .plab{position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-size:.5rem;color:var(--muted2);white-space:nowrap}
@@ -87,17 +111,17 @@
   .balmid{position:absolute;left:50%;top:0;bottom:0;width:1px;background:#334155}
   .balfill{position:absolute;top:1px;bottom:1px;left:50%;width:4px;margin-left:-2px;background:var(--green);border-radius:2px;transition:.1s}
 
-  /* report */
-  .rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:18px}
+  h2.step-title{font-size:1.35rem;margin:6px 0 2px}
+  .step-sub{color:var(--muted2);font-size:.9rem;margin-bottom:18px}
+  .rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:12px;margin-bottom:18px}
   .rcard{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:14px}
-  .rcard .rl{font-size:.62rem;letter-spacing:1px;color:var(--muted);font-weight:700;text-transform:uppercase}
+  .rcard .rl{font-size:.6rem;letter-spacing:1px;color:var(--muted);font-weight:700;text-transform:uppercase}
   .rcard .rv{font-size:1.5rem;font-weight:800;margin-top:4px}
   .rcard .ru{font-size:.7rem;color:var(--muted2)}
-  .buildlist{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+  .buildlist{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
   .bchip{border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:6px 10px;font-size:.76rem;color:var(--muted2)}
   .bchip b{color:var(--txt)}
 
-  /* test */
   .teststage{max-width:560px}
   .tstep{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);
     border-radius:11px;background:var(--panel);margin-bottom:10px;opacity:.35;transition:.25s}
@@ -109,14 +133,13 @@
   .tstep .tt{font-size:.9rem;font-weight:600}
   .tstep .tm{font-size:.76rem;color:var(--muted2);margin-top:2px}
   .tstep.bad .tm{color:#fca5a5}
-  .verdict{margin-top:16px;border:1px solid var(--line);border-radius:14px;padding:18px;overflow:hidden}
+  .verdict{margin-top:16px;border:1px solid var(--line);border-radius:14px;padding:18px}
   .verdict.win{border-color:rgba(34,197,94,.5);background:linear-gradient(180deg,rgba(34,197,94,.08),transparent)}
   .verdict.lose{border-color:rgba(239,68,68,.5);background:linear-gradient(180deg,rgba(239,68,68,.08),transparent)}
   .verdict h3{margin:0 0 6px;font-size:1.2rem}
   .verdict.win h3{color:var(--green)} .verdict.lose h3{color:#fca5a5}
   .verdict p{margin:4px 0;color:var(--muted2);font-size:.86rem;line-height:1.5}
 
-  /* nav */
   .nav{display:flex;justify-content:space-between;gap:12px;margin-top:26px;border-top:1px solid var(--line);padding-top:18px}
   .btn{padding:11px 20px;border-radius:11px;border:1px solid var(--line);background:var(--panel);color:var(--txt);
     font-weight:700;cursor:pointer;font-size:.86rem;letter-spacing:.3px;transition:.14s}
@@ -124,7 +147,7 @@
   .btn.primary{background:linear-gradient(180deg,#0ea5e9,#0369a1);border-color:#38bdf8;color:#eaf6ff;box-shadow:0 0 18px rgba(56,189,248,.25)}
   .btn.go{background:linear-gradient(180deg,#16a34a,#15803d);border-color:#22c55e;color:#eafff0;box-shadow:0 0 18px rgba(34,197,94,.25)}
   .btn.ghost{background:transparent}
-  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
   .hidden{display:none}
 </style>
 </head>
@@ -137,11 +160,15 @@
     <div class="stepper" id="stepper"></div>
   </header>
 
-  <!-- STEP 1: COMPONENTS -->
+  <!-- STEP 1: COMPONENTS (phase by phase) -->
   <section id="step1">
-    <h2 class="step-title">🧩 Robotunun parçalarını seç</h2>
-    <div class="step-sub">Kendi robotunu kur. Çizgi sensörünü sonra, kodlama bölümünde ekleyeceksin.</div>
-    <div id="cats"></div>
+    <div class="bp" id="bp">
+      <div class="bp-top"><span>Robot Kurulumu</span><b id="bpPct">%0</b></div>
+      <div class="bp-track"><div class="bp-fill" id="bpFill"></div></div>
+      <div class="bp-dots" id="bpDots"></div>
+    </div>
+    <div id="phaseHost"></div>
+    <div class="confirm" id="confirm"></div>
   </section>
 
   <!-- STEP 2: CHASSIS -->
@@ -150,7 +177,7 @@
     <div class="step-sub">Bir gövde biçimi seç, boyutunu ayarla ve parçaları sürükleyerek yerleştir. Denge önemlidir!</div>
     <div class="chwrap">
       <div class="chstage">
-        <div class="shapebar" id="shapebar"></div>
+        <div class="shapegrid" id="shapegrid"></div>
         <div class="stage" id="stage"></div>
       </div>
       <div class="chside">
@@ -186,7 +213,6 @@
     </div>
   </section>
 
-  <!-- NAV -->
   <div class="nav">
     <button class="btn ghost" id="prevBtn">← Geri</button>
     <button class="btn primary" id="nextBtn">Devam →</button>
@@ -197,155 +223,179 @@
 <script>
 (function(){
   const RD = window.RobotData;
+  const ORDER = RD.ORDER;                 // ['brain','driver','motor','wheel','battery']
   const STEPS = ['Bileşenler','Çizim','Rapor','Test'];
-  const SHAPES = [['rect','Dikdörtgen'],['round','Yuvarlak'],['hex','Altıgen']];
 
-  // ---- state ----
-  let step = 1;
-  const B = load() || { brain:null,driver:null,motor:null,wheel:null,battery:null,
-    chassis:{ shape:'rect', len:1, wid:1, place:{} } };
-  if(!B.chassis) B.chassis={shape:'rect',len:1,wid:1,place:{}};
-
-  function save(){ try{ localStorage.setItem('rf_robot', JSON.stringify(B)); }catch(e){} }
-  function load(){ try{ return JSON.parse(localStorage.getItem('rf_robot')); }catch(e){ return null; } }
-
-  // ---- stepper ----
-  function renderStepper(){
-    const el=document.getElementById('stepper'); el.innerHTML='';
-    STEPS.forEach((s,i)=>{
-      const n=i+1;
-      const d=document.createElement('div');
-      d.className='stp'+(n===step?' active':'')+(n<step?' done':'');
-      d.innerHTML=`<div class="num">${n<step?'✓':n}</div>${s}`;
-      el.appendChild(d);
-      if(i<STEPS.length-1){ const b=document.createElement('div'); b.className='bar'; el.appendChild(b); }
-    });
+  // educational intro per component (long + educative)
+  const EDU = {
+    brain:'Beyin, robotunun karar veren parçasıdır. Sensörlerden gelen bilgiyi okur ve motorlara ne yapacaklarını söyler. Hızlı bir beyin çizgiyi daha sık kontrol eder; ama güç tüketimi ve öğrenme kolaylığı da önemlidir. Eğitimde sağlam ve affedici bir beyin çoğu zaman en iyisidir.',
+    driver:'Sürücü kartı, beyinin zayıf sinyalini motorları döndürecek güce çevirir — beyin motoru doğrudan süremez, arada bu köprü olmalı. Sürücünün taşıyabildiği akım motorun ihtiyacını karşılamazsa motor zorlanır ve sürücü ısınır. Verimli bir sürücü pili daha az yorar.',
+    motor:'Motorlar tekerlekleri döndürür. RPM (devir) ne kadar hızlı gideceğini, tork ise viraj/tırmanma gücünü belirler. Yüksek RPM düz pistte uçar ama kontrolü zorlaştırır; yüksek tork virajı kazır ama genelde daha yavaştır. İki motor birlikte çalışır.',
+    wheel:'Tekerlek, robotun yere değen tek noktasıdır. Çap büyüdükçe robot aynı devirde daha hızlı gider; tutuş (grip) arttıkça virajda daha az kayar. Yarış lastiği hızlıdır ama tutuşu düşüktür; silikon yavaştır ama virajda güven verir.',
+    battery:'Batarya tüm sisteme enerji verir. Voltaj motorların ne kadar sert döneceğini, kapasite (mAh) ise robotun ne kadar süre çalışacağını belirler. Düşük voltaj motorları güçsüz bırakır; ağır batarya robotu yavaşlatır. Dengeyi bulmak önemli.',
+  };
+  const clamp=x=>Math.max(0.05,Math.min(1,x));
+  function bars(cat,o){
+    if(cat==='brain')   return [['İşlem',o.power/10],['Hafiflik',clamp(1-o.weightG/30)]];
+    if(cat==='driver')  return [['Akım',clamp(o.maxA/12)],['Verim',o.eff],['Hafiflik',clamp(1-o.weightG/35)]];
+    if(cat==='motor')   return [['Hız',clamp(o.rpm/1000)],['Tork',o.torque/10],['Hafiflik',clamp(1-o.weightG/30)]];
+    if(cat==='wheel')   return [['Hız',clamp(o.diaMM/70)],['Tutuş',o.grip],['Hafiflik',clamp(1-o.weightG/40)]];
+    if(cat==='battery') return [['Kapasite',clamp(o.mAh/2600)],['Voltaj',clamp(o.voltage/7.4)]];
+    return [];
   }
-
-  // ---- STEP 1: components ----
   function specLine(cat,o){
-    if(cat==='brain') return `İşlem ${o.power}/10 · ${o.weightG}g · ${o.voltage}V`;
-    if(cat==='driver') return `${o.maxA}A · verim ${Math.round(o.eff*100)}% · ${o.weightG}g`;
-    if(cat==='motor') return `${o.rpm} RPM · tork ${o.torque}/10 · ${o.weightG}g`;
-    if(cat==='wheel') return `${o.diaMM}mm · tutuş ${o.grip} · ${o.weightG}g`;
+    if(cat==='brain')   return `İşlem ${o.power}/10 · ${o.weightG}g · ${o.voltage}V`;
+    if(cat==='driver')  return `${o.maxA}A · verim %${Math.round(o.eff*100)} · ${o.weightG}g`;
+    if(cat==='motor')   return `${o.rpm} RPM · tork ${o.torque}/10 · ${o.weightG}g`;
+    if(cat==='wheel')   return `${o.diaMM}mm · tutuş ${o.grip} · ${o.weightG}g`;
     if(cat==='battery') return `${o.voltage}V · ${o.mAh}mAh · ${o.weightG}g`;
     return '';
   }
-  function renderCats(){
-    const wrap=document.getElementById('cats'); wrap.innerHTML='';
-    RD.ORDER.forEach(cat=>{
-      const c=RD.COMPONENTS[cat];
-      const sec=document.createElement('div'); sec.className='cat';
-      sec.innerHTML=`<div class="cat-head"><span class="ic">${c.icon}</span><h3>${c.label}</h3><span class="sub">${c.sub}</span></div>
-        <p class="cat-help">${c.help}</p>`;
-      const grid=document.createElement('div'); grid.className='opts';
-      c.options.forEach(o=>{
-        const card=document.createElement('div');
-        card.className='opt'+(B[cat]===o.id?' sel':'');
-        card.innerHTML=`<div class="chk">✓ SEÇİLİ</div>
-          <div class="oh"><span class="oi">${o.icon}</span><span class="on">${o.name}</span></div>
-          <div class="spec">${specLine(cat,o)}</div><div class="od">${o.desc}</div>`;
-        card.onclick=()=>{ B[cat]=o.id; save(); renderCats(); };
-        grid.appendChild(card);
-      });
-      sec.appendChild(grid); wrap.appendChild(sec);
+
+  // chassis shapes — many figures
+  const SHAPES=[
+    {id:'rect',name:'Dikdörtgen',br:'16px'},
+    {id:'round',name:'Elips',br:'50%'},
+    {id:'capsule',name:'Kapsül',br:'999px'},
+    {id:'bullet',name:'Mermi',br:'50% 50% 14px 14px'},
+    {id:'teardrop',name:'Damla',br:'50% 50% 50% 14px'},
+    {id:'hex',name:'Altıgen',cp:'polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)'},
+    {id:'octagon',name:'Sekizgen',cp:'polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%)'},
+    {id:'pentagon',name:'Beşgen',cp:'polygon(50% 0,100% 38%,82% 100%,18% 100%,0 38%)'},
+    {id:'arrow',name:'Ön Sivri',cp:'polygon(50% 0,100% 30%,100% 100%,0 100%,0 30%)'},
+    {id:'diamond',name:'Elmas',cp:'polygon(50% 0,100% 50%,50% 100%,0 50%)'},
+    {id:'trapezoid',name:'Yamuk',cp:'polygon(22% 0,78% 0,100% 100%,0 100%)'},
+    {id:'shield',name:'Kalkan',cp:'polygon(0 0,100% 0,100% 68%,50% 100%,0 68%)'},
+    {id:'tshape',name:'T Gövde',cp:'polygon(0 0,100% 0,100% 42%,68% 42%,68% 100%,32% 100%,32% 42%,0 42%)'},
+    {id:'cross',name:'Artı',cp:'polygon(35% 0,65% 0,65% 35%,100% 35%,100% 65%,65% 65%,65% 100%,35% 100%,35% 65%,0 65%,0 35%,35% 35%)'},
+  ];
+
+  // ---- state ----
+  let step=1, phase=0;
+  const B = load() || { brain:null,driver:null,motor:null,wheel:null,battery:null,
+    chassis:{ shape:'rect', len:1, wid:1, place:{} } };
+  if(!B.chassis) B.chassis={shape:'rect',len:1,wid:1,place:{}};
+  function save(){ try{ localStorage.setItem('rf_robot', JSON.stringify(B)); }catch(e){} }
+  function load(){ try{ return JSON.parse(localStorage.getItem('rf_robot')); }catch(e){ return null; } }
+  function selectedCount(){ return ORDER.filter(c=>B[c]).length; }
+
+  function renderStepper(){
+    const el=document.getElementById('stepper'); el.innerHTML='';
+    STEPS.forEach((s,i)=>{ const n=i+1;
+      const d=document.createElement('div'); d.className='stp'+(n===step?' active':'')+(n<step?' done':'');
+      d.innerHTML=`<div class="num">${n<step?'✓':n}</div>${s}`; el.appendChild(d);
+      if(i<STEPS.length-1){ const b=document.createElement('div'); b.className='bar'; el.appendChild(b); }
     });
+  }
+  function renderProgress(){
+    const pct=Math.round(selectedCount()/ORDER.length*100);
+    document.getElementById('bpFill').style.width=pct+'%';
+    document.getElementById('bpPct').textContent='%'+pct;
+    const dots=document.getElementById('bpDots'); dots.innerHTML='';
+    ORDER.forEach(c=>{ const d=document.createElement('div'); d.className='bp-dot'+(B[c]?' on':''); dots.appendChild(d); });
+  }
+
+  // ---- STEP 1: one component at a time ----
+  function renderPhase(){
+    const cat=ORDER[phase], c=RD.COMPONENTS[cat];
+    const host=document.getElementById('phaseHost');
+    host.innerHTML=`<div class="ph-head"><div class="ph-ic">${c.icon}</div>
+        <h2 class="ph-title"><small>Faz ${phase+1} / ${ORDER.length} · ${c.sub}</small>${c.label}</h2></div>
+      <div class="ph-intro">${EDU[cat]||c.help}</div>`;
+    const grid=document.createElement('div'); grid.className='opts';
+    c.options.forEach(o=>{
+      const card=document.createElement('div'); card.className='opt'+(B[cat]===o.id?' sel':'');
+      const barHtml=bars(cat,o).map(([l,v])=>`<div class="bar"><span class="bl">${l}</span><span class="bt"><span class="bf" style="width:${Math.round(v*100)}%"></span></span></div>`).join('');
+      card.innerHTML=`<div class="oh"><span class="oi">${o.icon}</span><span class="on">${o.name}</span></div>
+        <div class="spec">${specLine(cat,o)}</div><div class="od">${o.desc}</div>${barHtml}`;
+      card.onclick=()=>{ B[cat]=o.id; save(); renderPhase(); renderProgress(); showConfirm(cat,o); updateNav(); };
+      grid.appendChild(card);
+    });
+    host.appendChild(grid);
+    renderProgress();
+    const cur=B[cat]?RD.opt(cat,B[cat]):null;
+    if(cur) showConfirm(cat,cur); else document.getElementById('confirm').classList.remove('show');
+  }
+  function showConfirm(cat,o){
+    const el=document.getElementById('confirm');
+    el.innerHTML=`<span style="font-size:1.2rem">${o.icon}</span><div><b>${o.name}</b> seçildi. <span style="color:var(--muted2)">${o.desc}</span></div>`;
+    el.classList.add('show');
   }
 
   // ---- STEP 2: chassis ----
-  const STAGE={w:460,h:340};
-  function chassisPx(){ // returns {w,h} of chassis rect in px
-    return { w: Math.round(150*B.chassis.wid), h: Math.round(210*B.chassis.len) };
+  const STAGE={w:440,h:330};
+  function chassisPx(){ return { w:Math.round(146*B.chassis.wid), h:Math.round(200*B.chassis.len) }; }
+  function renderShapeGrid(){
+    const g=document.getElementById('shapegrid'); g.innerHTML='';
+    SHAPES.forEach(s=>{ const b=document.createElement('button');
+      b.className='shapebtn'+(B.chassis.shape===s.id?' on':'');
+      const pv=`<div class="pv" style="${s.cp?('clip-path:'+s.cp):('border-radius:'+s.br)}"></div>`;
+      b.innerHTML=pv+`<div class="pn">${s.name}</div>`;
+      b.onclick=()=>{ B.chassis.shape=s.id; save(); renderChassis(); }; g.appendChild(b);
+    });
   }
   function renderChassis(){
-    // shape buttons
-    const sb=document.getElementById('shapebar'); sb.innerHTML='';
-    SHAPES.forEach(([id,label])=>{ const b=document.createElement('button');
-      b.className='shapebtn'+(B.chassis.shape===id?' on':''); b.textContent=label;
-      b.onclick=()=>{ B.chassis.shape=id; save(); renderChassis(); }; sb.appendChild(b); });
+    renderShapeGrid();
     document.getElementById('chLen').value=B.chassis.len;
     document.getElementById('chWid').value=B.chassis.wid;
     document.getElementById('lenV').textContent=sizeLabel(B.chassis.len);
     document.getElementById('widV').textContent=sizeLabel(B.chassis.wid);
-
     const stage=document.getElementById('stage'); stage.innerHTML='';
     const cx=STAGE.w/2, cy=STAGE.h/2; const {w,h}=chassisPx();
-    // chassis body
+    const shp=SHAPES.find(s=>s.id===B.chassis.shape)||SHAPES[0];
     const body=document.createElement('div'); body.className='chassis-shape';
     body.style.width=w+'px'; body.style.height=h+'px';
-    if(B.chassis.shape==='round') body.style.borderRadius='50%';
-    else if(B.chassis.shape==='hex'){ body.style.clipPath='polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)'; body.style.borderRadius='0'; }
-    else body.style.borderRadius='16px';
+    if(shp.cp){ body.style.clipPath=shp.cp; body.style.borderRadius='0'; }
+    else { body.style.borderRadius=shp.br; body.style.clipPath='none'; }
     stage.appendChild(body);
     const ft=document.createElement('div'); ft.className='front-tag'; ft.textContent='▲ ÖN';
     ft.style.top=(cy-h/2-16)+'px'; stage.appendChild(ft);
-    // wheels at sides mid
     [[-w/2-6],[w/2-6]].forEach(([wx])=>{ const wm=document.createElement('div'); wm.className='wheelmark';
       wm.style.left=(cx+wx)+'px'; wm.style.top=(cy-20)+'px'; stage.appendChild(wm); });
-    // component markers (only selected ones)
-    RD.ORDER.forEach((cat,i)=>{
-      if(!B[cat]) return;
-      const o=RD.opt(cat,B[cat]);
-      if(!B.chassis.place[cat]){ // default layout down the center
-        const n=RD.ORDER.filter(k=>B[k]).length;
-        B.chassis.place[cat]={ x:0.5, y:0.25+0.5*(i/Math.max(1,RD.ORDER.length-1)) };
-      }
+    ORDER.forEach((cat,i)=>{ if(!B[cat])return; const o=RD.opt(cat,B[cat]);
+      if(!B.chassis.place[cat]) B.chassis.place[cat]={x:0.5,y:0.22+0.56*(i/Math.max(1,ORDER.length-1))};
       const p=B.chassis.place[cat];
       const el=document.createElement('div'); el.className='pmark';
       el.innerHTML=`<span class="plab">${RD.COMPONENTS[cat].label}</span>${o.icon}`;
       el.style.left=(cx-w/2 + p.x*w)+'px'; el.style.top=(cy-h/2 + p.y*h)+'px';
-      makeDrag(el,cat,body); stage.appendChild(el);
+      makeDrag(el,cat); stage.appendChild(el);
     });
     updateBalance();
   }
-  function makeDrag(el,cat,body){
+  function makeDrag(el,cat){
     let drag=false;
     el.addEventListener('pointerdown',e=>{ drag=true; el.setPointerCapture(e.pointerId); e.preventDefault(); });
-    el.addEventListener('pointermove',e=>{
-      if(!drag) return;
+    el.addEventListener('pointermove',e=>{ if(!drag)return;
       const sr=document.getElementById('stage').getBoundingClientRect();
       const cx=STAGE.w/2, cy=STAGE.h/2; const {w,h}=chassisPx();
-      let x=(e.clientX-sr.left - (cx-w/2))/w, y=(e.clientY-sr.top - (cy-h/2))/h;
+      let x=(e.clientX-sr.left-(cx-w/2))/w, y=(e.clientY-sr.top-(cy-h/2))/h;
       x=Math.max(0,Math.min(1,x)); y=Math.max(0,Math.min(1,y));
       B.chassis.place[cat]={x:+x.toFixed(3),y:+y.toFixed(3)};
-      el.style.left=(cx-w/2 + x*w)+'px'; el.style.top=(cy-h/2 + y*h)+'px';
-      updateBalance();
+      el.style.left=(cx-w/2+x*w)+'px'; el.style.top=(cy-h/2+y*h)+'px'; updateBalance();
     });
     el.addEventListener('pointerup',()=>{ drag=false; save(); });
   }
   function sizeLabel(v){ return v<0.85?'Kısa/Dar':v<1.12?'Orta':'Uzun/Geniş'; }
-  function chassisWeight(){ // rough: area-based
-    const {w,h}=chassisPx(); return Math.round(30 + (w*h)/900);
-  }
+  function chassisWeight(){ const {w,h}=chassisPx(); return Math.round(30+(w*h)/900); }
   function updateBalance(){
-    // CoM y (0 front .. 1 back) from placed component weights
     let num=0,den=0;
-    RD.ORDER.forEach(cat=>{ if(!B[cat]||!B.chassis.place[cat])return; const o=RD.opt(cat,B[cat]);
-      const wt=(cat==='motor'||cat==='wheel')?o.weightG*2:o.weightG; num+=o? wt*B.chassis.place[cat].y:0; den+=wt; });
-    const com= den? num/den : 0.5;               // 0 front, 1 back
-    const off = com-0.5;                          // + = rear-heavy
-    document.getElementById('balFill').style.left=(50 - off*90)+'%';
+    ORDER.forEach(cat=>{ if(!B[cat]||!B.chassis.place[cat])return; const o=RD.opt(cat,B[cat]);
+      const wt=(cat==='motor'||cat==='wheel')?o.weightG*2:o.weightG; num+=wt*B.chassis.place[cat].y; den+=wt; });
+    const com=den?num/den:0.5, off=com-0.5;
+    document.getElementById('balFill').style.left=(50-off*90)+'%';
     const bn=document.getElementById('balNote');
-    if(Math.abs(off)<0.12){ bn.textContent='Denge iyi görünüyor.'; }
-    else if(off>0){ bn.textContent='Arkaya ağır — ön tekerlek hafif kalabilir.'; }
-    else { bn.textContent='Öne ağır — sert virajda burun dalabilir.'; }
+    bn.textContent=Math.abs(off)<0.12?'Denge iyi görünüyor.':(off>0?'Arkaya ağır — ön tekerlek hafif kalabilir.':'Öne ağır — sert virajda burun dalabilir.');
   }
 
   // ---- STEP 3: report ----
+  function bctx(){ return Object.assign({},B,{chassis:{weightG:chassisWeight(),widthU:1+(B.chassis.wid-1)*0.4}}); }
   function renderReport(){
     const bl=document.getElementById('buildList'); bl.innerHTML='';
-    RD.ORDER.forEach(cat=>{ const o=RD.opt(cat,B[cat]);
+    ORDER.forEach(cat=>{ const o=RD.opt(cat,B[cat]);
       bl.innerHTML+=`<div class="bchip">${RD.COMPONENTS[cat].icon} ${RD.COMPONENTS[cat].label}: <b>${o?o.name:'— yok —'}</b></div>`; });
-    const cw=chassisWeight();
-    const r=RD.computeReport(Object.assign({},B,{chassis:{weightG:cw,widthU:1+(B.chassis.wid-1)*0.4}}));
-    const cards=[
-      ['Ağırlık', r.weightG, 'g'],
-      ['En Yüksek Hız', r.topSpeedKmh, 'km/s'],
-      ['Güç', r.powerRating, '/100'],
-      ['Tork', r.torque, '/10'],
-      ['Tutuş', r.grip, ''],
-      ['Batarya Ömrü', r.batteryMin, 'dk'],
-    ];
+    const r=RD.computeReport(bctx());
+    const cards=[['Ağırlık',r.weightG,'g'],['En Yüksek Hız',r.topSpeedKmh,'km/s'],['Güç',r.powerRating,'/100'],
+      ['Tork',r.torque,'/10'],['Tutuş',r.grip,''],['Batarya Ömrü',r.batteryMin,'dk']];
     const g=document.getElementById('reportGrid'); g.innerHTML='';
     cards.forEach(([l,v,u])=>{ g.innerHTML+=`<div class="rcard"><div class="rl">${l}</div><div class="rv">${v}</div><div class="ru">${u}</div></div>`; });
   }
@@ -354,73 +404,76 @@
   let testTimer=null;
   function runTest(){
     document.getElementById('verdict').innerHTML='';
-    const cw=chassisWeight();
-    const res=RD.runPreTest(Object.assign({},B,{chassis:{weightG:cw,widthU:1+(B.chassis.wid-1)*0.4}}));
+    const res=RD.runPreTest(bctx());
     const wrap=document.getElementById('testSteps'); wrap.innerHTML='';
-    res.steps.forEach((s,i)=>{
-      const d=document.createElement('div'); d.className='tstep'; d.id='ts'+i;
-      d.innerHTML=`<div class="ti">…</div><div><div class="tt">${s.label}</div><div class="tm"></div></div>`;
-      wrap.appendChild(d);
-    });
-    let i=0;
-    clearTimeout(testTimer);
-    const reveal=()=>{
-      if(i>=res.steps.length){ showVerdict(res); return; }
-      const s=res.steps[i]; const d=document.getElementById('ts'+i);
-      d.classList.add('show', s.ok?'ok':'bad');
-      d.querySelector('.ti').textContent = s.ok?'✓':'✕';
-      if(!s.ok) d.querySelector('.tm').textContent=s.msg;
-      else if(s.msg) d.querySelector('.tm').textContent=s.msg;
-      i++;
+    res.steps.forEach((s,i)=>{ const d=document.createElement('div'); d.className='tstep'; d.id='ts'+i;
+      d.innerHTML=`<div class="ti">…</div><div><div class="tt">${s.label}</div><div class="tm"></div></div>`; wrap.appendChild(d); });
+    let i=0; clearTimeout(testTimer);
+    const reveal=()=>{ if(i>=res.steps.length){ showVerdict(res); return; }
+      const s=res.steps[i], d=document.getElementById('ts'+i);
+      d.classList.add('show', s.ok?'ok':'bad'); d.querySelector('.ti').textContent=s.ok?'✓':'✕';
+      if(s.msg) d.querySelector('.tm').textContent=s.msg; i++;
       if(!s.ok){ testTimer=setTimeout(()=>showVerdict(res),700); return; }
-      testTimer=setTimeout(reveal, 750);
-    };
-    reveal();
+      testTimer=setTimeout(reveal,750);
+    }; reveal();
   }
   function showVerdict(res){
     const v=document.getElementById('verdict');
-    if(res.pass){
-      v.className='verdict win';
-      v.innerHTML=`<h3>✅ Robotun çalışıyor!</h3>`+
-        (res.notes.length?res.notes.map(n=>`<p>💡 ${n}</p>`).join(''):`<p>Her şey yolunda. Şimdi ona çizgiyi takip etmeyi öğret.</p>`)+
+    if(res.pass){ v.className='verdict win';
+      v.innerHTML=`<h3>✅ Robotun çalışıyor!</h3>`+(res.notes.length?res.notes.map(n=>`<p>💡 ${n}</p>`).join(''):`<p>Her şey yolunda. Şimdi ona çizgiyi takip etmeyi öğret.</p>`)+
         `<button class="btn go" id="toLab" style="margin-top:12px">Kodlamaya Devam →</button>`;
       document.getElementById('toLab').onclick=()=>{ save(); location.href='line-follower.html'; };
-    } else {
-      const fail=res.steps.find(s=>!s.ok);
-      v.className='verdict lose';
+    } else { const fail=res.steps.find(s=>!s.ok); v.className='verdict lose';
       v.innerHTML=`<h3>❌ Robot çalışmadı</h3><p>${fail?fail.msg:'Bir şeyler eksik.'}</p>
         <p style="color:var(--muted)">Sorun değil — mühendislik denemekle öğrenilir. Parçalarını düzelt ve tekrar dene.</p>
         <button class="btn primary" id="fixIt" style="margin-top:12px">← Geri dön ve düzelt</button>`;
-      document.getElementById('fixIt').onclick=()=>{ go(1); };
+      document.getElementById('fixIt').onclick=()=>{ step=1; phase=0; go(1); };
     }
   }
 
   // ---- navigation ----
+  function updateNav(){
+    const prev=document.getElementById('prevBtn'), next=document.getElementById('nextBtn');
+    next.classList.remove('hidden');
+    if(step===1){
+      prev.style.visibility = phase===0 ? 'hidden' : 'visible';
+      const cat=ORDER[phase];
+      next.disabled = !B[cat];
+      next.className='btn primary';
+      next.textContent = phase<ORDER.length-1 ? ('Devam → '+RD.COMPONENTS[ORDER[phase+1]].label) : 'Devam → Çizim';
+    } else {
+      prev.style.visibility='visible'; next.disabled=false;
+      if(step===2){ next.textContent='Devam → Rapor'; next.className='btn primary'; }
+      else if(step===3){ next.textContent='Testi Çalıştır →'; next.className='btn go'; }
+      else { next.classList.add('hidden'); }
+    }
+  }
   function go(n){
-    step=n; save();
+    step=n;
     for(let i=1;i<=4;i++) document.getElementById('step'+i).classList.toggle('hidden', i!==step);
+    document.getElementById('bp').style.display = step===1 ? 'block' : 'none';
     renderStepper();
-    document.getElementById('prevBtn').style.visibility = step===1?'hidden':'visible';
-    const next=document.getElementById('nextBtn');
-    if(step===1){ next.textContent='Devam → Çizim'; next.className='btn primary'; }
-    else if(step===2){ next.textContent='Devam → Rapor'; next.className='btn primary'; }
-    else if(step===3){ next.textContent='Testi Çalıştır →'; next.className='btn go'; }
-    else { next.classList.add('hidden'); }
-    if(step!==4) next.classList.remove('hidden');
+    if(step===1) renderPhase();
     if(step===2) renderChassis();
     if(step===3) renderReport();
     if(step===4) runTest();
+    updateNav();
     window.scrollTo(0,0);
   }
-  document.getElementById('nextBtn').onclick=()=>{ if(step<4) go(step+1); };
-  document.getElementById('prevBtn').onclick=()=>{ if(step>1) go(step-1); };
-
-  // size sliders
+  document.getElementById('nextBtn').onclick=()=>{
+    if(step===1){ const cat=ORDER[phase]; if(!B[cat]) return;
+      if(phase<ORDER.length-1){ phase++; document.getElementById('confirm').classList.remove('show'); renderPhase(); updateNav(); window.scrollTo(0,0); }
+      else go(2);
+    } else if(step<4) go(step+1);
+  };
+  document.getElementById('prevBtn').onclick=()=>{
+    if(step===1){ if(phase>0){ phase--; renderPhase(); updateNav(); window.scrollTo(0,0); } }
+    else { if(step===2){ step=1; phase=ORDER.length-1; go(1); } else go(step-1); }
+  };
   document.getElementById('chLen').oninput=e=>{ B.chassis.len=+e.target.value; save(); renderChassis(); };
   document.getElementById('chWid').oninput=e=>{ B.chassis.wid=+e.target.value; save(); renderChassis(); };
 
   // ---- init ----
-  renderCats();
   go(1);
 })();
 </script>
