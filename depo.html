@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RoboForge · Depo Filosu Laboratuvarı</title>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#0f172a; --panel2:#111c33; --line:#1e3a5f;
+    --sky:#38bdf8; --green:#22c55e; --amber:#f59e0b; --red:#ef4444; --purple:#a855f7;
+    --txt:#e2e8f0; --muted:#64748b; --muted2:#94a3b8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif;
+    background:radial-gradient(1100px 700px at 75% -15%,#15294a 0%,var(--bg) 55%)}
+  a{color:inherit;text-decoration:none}
+  .mono{font-family:'Courier New',monospace}
+  header.bar{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);
+    background:rgba(10,16,30,.85);backdrop-filter:blur(8px);position:sticky;top:0;z-index:40;flex-wrap:wrap}
+  .back{color:var(--muted2);font-size:.74rem;font-weight:700;border:1px solid var(--line);padding:7px 11px;border-radius:9px;white-space:nowrap}
+  .back:hover{border-color:var(--sky);color:var(--sky)}
+  .ttl b span{color:var(--sky)}
+  .ttl small{display:block;color:var(--muted);font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase}
+  .tabsTrack{display:flex;gap:6px;flex-wrap:wrap;max-width:640px}
+  .ttab{border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:5px 10px;cursor:pointer;
+    font-size:.72rem;font-weight:700;color:var(--muted2);transition:.14s;line-height:1.15;text-align:left}
+  .ttab small{display:block;font-size:.54rem;color:var(--muted);letter-spacing:.5px}
+  .ttab.on{border-color:var(--sky);color:var(--sky);background:#0c1a30}
+  .grow{flex:1}
+  .simspeed{display:flex;align-items:center;gap:7px;font-size:.68rem;color:var(--muted2)}
+  .simspeed input{width:90px;accent-color:var(--sky)}
+  .btn{padding:9px 16px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--txt);
+    font-weight:800;cursor:pointer;font-size:.8rem;letter-spacing:.4px;transition:.14s}
+  .btn:hover{border-color:var(--sky)}
+  .btn.run{background:linear-gradient(180deg,#16a34a,#15803d);border-color:#22c55e;color:#eafff0;box-shadow:0 0 16px rgba(34,197,94,.25)}
+  .btn.stop{background:linear-gradient(180deg,#dc2626,#b91c1c);border-color:#ef4444;color:#fff}
+  .btn.ghost{background:transparent;color:var(--muted2)}
+  .btn.outline{background:transparent;border-color:var(--sky);color:var(--sky)}
+  .layout{display:grid;grid-template-columns:1fr 400px;gap:14px;padding:14px 16px;max-width:1500px;margin:0 auto}
+  @media(max-width:1040px){.layout{grid-template-columns:1fr}}
+  .stageWrap{position:relative}
+  canvas#arena{width:100%;border-radius:14px;border:1px solid #16202e;background:#0a0d12;display:block}
+  .hud{position:absolute;top:12px;left:12px;display:flex;gap:8px;flex-wrap:wrap}
+  .hudbox{background:rgba(8,12,24,.88);border:1px solid var(--line);border-radius:10px;padding:7px 12px;min-width:70px}
+  .hudbox .l{font-size:.54rem;color:var(--muted);letter-spacing:1.5px;font-weight:700}
+  .hudbox .v{font-size:1rem;font-weight:800;margin-top:1px}
+  .hudbox .v.ok{color:var(--green)} .hudbox .v.bad{color:#fca5a5} .hudbox .v.hot{color:var(--amber)}
+  .hint{margin-top:10px;background:var(--panel2);border:1px solid var(--line);border-radius:11px;
+    padding:11px 15px;font-size:.85rem;color:var(--muted2)}
+  .hint b{color:var(--green)}
+  .rdock{margin-top:10px;border:1px solid rgba(34,197,94,.45);border-radius:13px;overflow:hidden;
+    background:linear-gradient(180deg,#0e1a2e,#0b1220)}
+  .rdock.lose{border-color:rgba(239,68,68,.45)}
+  .rdock .rd-head{padding:10px 16px;font-weight:800;font-size:.95rem;color:var(--green);
+    background:rgba(34,197,94,.08);border-bottom:1px solid rgba(34,197,94,.25)}
+  .rdock.lose .rd-head{color:#fca5a5;background:rgba(239,68,68,.07);border-bottom-color:rgba(239,68,68,.25)}
+  .rdock .rd-body{padding:14px 16px}
+  .rdock .rd-medal{font-size:1.15rem;font-weight:800;color:var(--amber);margin-bottom:2px}
+  .rdock .rd-cmt{font-size:.78rem;color:var(--muted2);margin-bottom:12px}
+  .rdock .rd-stats{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:12px}
+  .rdock .rd-stat .l{font-size:.56rem;letter-spacing:1.5px;color:var(--muted);font-weight:700}
+  .rdock .rd-stat .v{font-size:1.25rem;font-weight:800;margin-top:2px}
+  .rdock .rd-stat .v.ok{color:var(--green)} .rdock .rd-stat .v.bad{color:#fca5a5}
+  .rdock .rd-tip{background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.3);border-radius:10px;
+    padding:9px 13px;font-size:.8rem;color:var(--muted2);margin-bottom:13px}
+  .rdock .rd-btns{display:flex;gap:9px;flex-wrap:wrap}
+  .side .tabbar{display:flex;gap:6px;margin-bottom:12px}
+  .stab{flex:1;text-align:center;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--panel);
+    cursor:pointer;font-weight:800;font-size:.8rem;color:var(--muted2)}
+  .stab.on{border-color:var(--sky);color:var(--sky);background:#0c1a30}
+  .card{border:1px solid var(--line);border-radius:13px;background:var(--panel);padding:14px;margin-bottom:12px}
+  .card h4{margin:0 0 8px;font-size:.66rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+  .card p.exp{font-size:.76rem;color:var(--muted2);line-height:1.5;margin:0 0 10px}
+  .modeRow{display:flex;gap:6px;margin-bottom:12px}
+  .modeBtn{flex:1;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--panel);
+    cursor:pointer;font-weight:800;font-size:.76rem;color:var(--muted2)}
+  .modeBtn.on{border-color:var(--purple);color:#d8b4fe;background:#170f28}
+  .step{border:1px solid var(--line);border-radius:11px;background:var(--panel2);padding:8px 10px;margin-bottom:7px;
+    display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .step.active{border-color:var(--green);box-shadow:0 0 10px rgba(34,197,94,.25)}
+  .step.done{opacity:.45}
+  .step .num{width:22px;height:22px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;
+    justify-content:center;font-size:.66rem;font-weight:800;color:var(--sky);flex:none;background:var(--panel)}
+  .step select{background:#0b1220;border:1px solid #26364e;color:var(--txt);border-radius:6px;font-size:.7rem;padding:4px 4px}
+  .step input{width:56px;background:#0b1220;border:1px solid #26364e;color:var(--txt);border-radius:6px;
+    font-size:.72rem;padding:4px 5px}
+  .step .cfg{padding:4px 8px;border:1px solid #26364e;border-radius:7px;background:#0d1524;cursor:pointer;
+    font-size:.6rem;font-weight:800;color:var(--muted)}
+  .step .cfg.up{border-color:var(--sky);color:#7dd3fc}
+  .step .cfg.down{border-color:var(--amber);color:#fcd34d}
+  .iconbtn{border:1px solid var(--line);background:var(--panel);color:var(--muted2);border-radius:7px;
+    width:24px;height:24px;cursor:pointer;font-size:.7rem;line-height:1;flex:none}
+  .iconbtn:hover{border-color:var(--sky);color:var(--sky)}
+  .iconbtn.del:hover{border-color:var(--red);color:#fca5a5}
+  .addRule{width:100%;padding:9px;border:1px dashed var(--line);border-radius:10px;background:transparent;
+    color:var(--muted2);font-weight:700;cursor:pointer;font-size:.78rem}
+  .addRule:hover{border-color:var(--sky);color:var(--sky)}
+  .rule{border:1px solid var(--line);border-radius:11px;background:var(--panel2);padding:10px;margin-bottom:8px}
+  .rule.live{border-color:var(--green);box-shadow:0 0 8px rgba(34,197,94,.25)}
+  .rchips{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}
+  .rchip{padding:4px 7px;border:1px solid #26364e;border-radius:7px;background:#0d1524;cursor:pointer;
+    font-size:.56rem;font-weight:800;color:var(--muted);user-select:none;line-height:1.25;text-align:center}
+  .rchip small{display:block;font-size:.47rem;font-weight:600;color:inherit;opacity:.75}
+  .rchip.on{border-color:var(--green);color:#86efac;background:#07190e}
+  .rchip.off{border-color:var(--red);color:#fca5a5;background:#1c0b0b}
+  .ract{display:flex;gap:6px;align-items:center}
+  .ract select{background:#0b1220;border:1px solid #26364e;color:var(--txt);border-radius:7px;font-size:.74rem;padding:5px 6px}
+  .rtools{display:flex;gap:4px;margin-left:auto}
+  .stpick{display:flex;gap:3px;margin-left:auto}
+  .stpo{padding:5px 10px;border:1px solid #26364e;border-radius:7px;background:#0d1524;cursor:pointer;font-size:.66rem;font-weight:800;color:var(--muted)}
+  .stpo.on.ac{border-color:var(--green);color:#86efac;background:#07190e}
+  .stpo.on.kp{border-color:var(--red);color:#fca5a5;background:#1c0b0b}
+  .kunye .chipsRow{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px}
+  .kunye .kchip{border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:4px 8px;font-size:.66rem;color:var(--muted2)}
+  .kunye .kchip b{color:var(--txt)}
+  .bchipR{display:inline-block;border:1px solid var(--line);background:var(--panel2);border-radius:7px;
+    padding:3px 8px;font-size:.7rem;color:var(--muted2);margin:2px 2px 2px 0}
+  #resultWrap{position:fixed;inset:0;background:rgba(5,8,16,.7);backdrop-filter:blur(4px);display:none;
+    align-items:center;justify-content:center;z-index:80;padding:18px}
+  #resultWrap.show{display:flex}
+  .result{max-width:560px;width:100%;border:1px solid var(--line);border-radius:18px;padding:24px;
+    background:linear-gradient(180deg,#101b31,#0b1220);box-shadow:0 30px 80px rgba(0,0,0,.6);max-height:92vh;overflow:auto}
+  .result h3{margin:0 0 4px;font-size:1.2rem}
+  .result h3.win{color:var(--green)} .result h3.lose{color:#fca5a5}
+  .rstats{display:flex;gap:8px;margin:12px 0}
+  .rstat{flex:1;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px;text-align:center}
+  .rstat .l{font-size:.54rem;color:var(--muted);letter-spacing:1px}
+  .rstat .v{font-size:1.05rem;font-weight:800;margin-top:2px}
+  .rbtns{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+  .evline{font-size:.72rem;color:var(--muted2);padding:2px 0;border-bottom:1px dashed #16233b}
+  .evline b{color:var(--sky);font-weight:700}
+  #tutwrap{position:fixed;inset:0;background:rgba(5,8,16,.75);display:none;align-items:center;justify-content:center;z-index:90;padding:18px}
+  .tut{max-width:460px;border:1px solid var(--sky);border-radius:16px;background:#0d1830;padding:22px;box-shadow:0 0 60px rgba(56,189,248,.2)}
+  .tut h3{margin:0 0 8px;color:var(--sky);font-size:1.1rem}
+  .tut p{font-size:.86rem;color:var(--muted2);line-height:1.6;margin:0 0 14px}
+  .tut .dots{display:flex;gap:5px;margin-bottom:12px}
+  .tut .dots i{width:8px;height:8px;border-radius:50%;background:#1e293b}
+  .tut .dots i.on{background:var(--sky)}
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:rgba(8,12,24,.95);
+    border:1px solid var(--line);padding:10px 18px;border-radius:11px;font-size:.8rem;font-weight:700;opacity:0;
+    transition:.25s;pointer-events:none;z-index:99}
+  #toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header class="bar">
+  <a class="back" href="./">← Katalog</a>
+  <div class="ttl"><b>Robo<span>Forge</span> · Depo Filosu</b><small id="buildLine">FİLO YÖNETİMİ</small></div>
+  <div class="tabsTrack" id="trackTabs"></div>
+  <div class="grow"></div>
+  <div class="simspeed">Sim Hızı <input type="range" id="simSpeed" min="0.5" max="3" step="0.5" value="1"><span id="simSpeedV" class="mono">1.0x</span></div>
+  <button class="btn run" id="runBtn">▶ VARDİYAYI AÇ</button>
+  <button class="btn ghost" id="resetBtn">⟲ Sıfırla</button>
+  <button class="btn ghost" id="shareBtn">🔗 Paylaş</button>
+  <button class="btn ghost" id="helpBtn">?</button>
+</header>
+<div class="layout">
+  <div class="stageWrap">
+    <canvas id="arena" width="920" height="560"></canvas>
+    <div class="hud">
+      <div class="hudbox"><div class="l">SÜRE</div><div class="v mono" id="hudT">0.0s</div></div>
+      <div class="hudbox"><div class="l">TESLİMAT</div><div class="v mono" id="hudA">0/0</div></div>
+      <div class="hudbox"><div class="l">BEKLEME</div><div class="v mono" id="hudE">0s</div></div>
+      <div class="hudbox"><div class="l">DURUM</div><div class="v" id="hudS">HAZIR</div></div>
+    </div>
+    <div class="hint" id="hint">🤖 Filo yönetimi: robotlar rafa gider, kutuyu alır, istasyona taşır. Sorun tek robot değil — <b>TRAFİK</b>. Dar koridorda burun buruna gelen iki robottan biri yol vermezse: <b>KİLİTLENME</b> (deadlock). Sözleşmeni seç, akışı izle!</div>
+    <div class="rdock" id="resultDock" style="display:none"></div>
+  </div>
+  <div class="side">
+    <div class="tabbar">
+      <div class="stab on" data-tab="prog">📋 Program</div>
+      <div class="stab" data-tab="robot">🦾 Kol</div>
+    </div>
+    <div id="tab-prog">
+      <div class="modeRow">
+        <button class="modeBtn on" id="modeRules">🧩 Trafik Kuralları</button>
+        <button class="modeBtn" id="modeRes">📈 Rezervasyon</button>
+      </div>
+      <div class="card" id="rulesCard">
+        <h4>Trafik Sözleşmesi</h4>
+        <p class="exp">Herkes AYNI kurala uyarsa akış olur. Kavşak önceliği kimde, dar koridorda ne yapılır?
+          "Bekle + bekle" kombinasyonu ders kitabı kilitlenmesidir — dene ve gör!</p>
+        <div class="ract" style="margin:10px 0">
+          <span style="font-size:.72rem;color:var(--muted2)">Kavşak önceliği</span>
+          <select id="polOncelik" style="background:#0b1220;border:1px solid #26364e;color:var(--txt);border-radius:7px;font-size:.74rem;padding:5px 6px;margin-left:auto">
+            <option value="yuklu">Yüklü robot önce</option>
+            <option value="id">Küçük numara önce</option>
+          </select>
+        </div>
+        <div class="ract" style="margin:10px 0">
+          <span style="font-size:.72rem;color:var(--muted2)">Dar koridorda</span>
+          <select id="polDar" style="background:#0b1220;border:1px solid #26364e;color:var(--txt);border-radius:7px;font-size:.74rem;padding:5px 6px;margin-left:auto">
+            <option value="yolver">Yol ver (yeniden rota / geri çekil)</option>
+            <option value="bekle">Bekle (⚠️ kilitlenme riski!)</option>
+          </select>
+        </div>
+      </div>
+      <div class="card" id="resCard" style="display:none">
+        <h4>Hücre Rezervasyonu</h4>
+        <p class="exp">Her robot önündeki N hücreyi rezerve eder; çakışan rezervasyonda küçük numara kazanır.
+          <b>Geniş pencere</b> = çarpışma imkânsız ama koridorlar kilitli; <b>dar pencere</b> = akıcı ama
+          burun buruna riski. Güven ↔ verim.</p>
+        <div class="sliderRow"><label>Rezervasyon Penceresi <b id="rpV">2 hücre</b></label>
+          <input type="range" id="rp" min="1" max="8" step="1" value="2"></div>
+        <div class="ract" style="margin:8px 0">
+          <span style="font-size:.72rem;color:var(--muted2)">Yeniden rota</span>
+          <div class="stpick" id="rrPick"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h4>Vardiya Panosu</h4>
+        <p class="exp mono" id="ledger" style="font-size:.74rem">—</p>
+      </div>
+    </div>
+    <div id="tab-robot" style="display:none">
+      <div class="card">
+        <h4>Deadlock Nedir?</h4>
+        <p class="exp">Dört koşul aynı anda sağlanırsa sistem kilitlenir: karşılıklı dışlama, tut-ve-bekle,
+          zorla alamama, <b>döngüsel bekleme</b>. Çözüm hep aynıdır: döngüyü KIR — biri yol versin.
+          1971'den beri işletim sistemlerinin baş belası, bugün depo robotlarının günlük gerçeği.</p>
+      </div>
+      <div class="card kunye" id="kunye"></div>
+    </div>
+  </div>
+</div>
+<div id="resultWrap"><div class="result" id="resultBox"></div></div>
+<div id="tutwrap"><div class="tut" id="tutBox"></div></div>
+<div id="toast"></div>
+<script src="robot-data.js?v=2"></script>
+<script src="depo-core.js?v=1"></script>
+<script>
+(function(){
+  const D = window.DepoCore;
+  const CVS = document.getElementById('arena'), CTX = CVS.getContext('2d');
+  const LAB = {
+    misIdx: 0, mode: 'rules',
+    policy: D.defaultPolicy(), res: D.defaultRes(),
+    sim: null, raf: null, lastTs: 0, simSpeed: 1,
+  };
+  function drawScene(){
+    const sim=LAB.sim;
+    const m=D.MISSIONS[LAB.misIdx];
+    const gr=sim?sim.gr:D.parseGrid(m);
+    const W=CVS.width,H=CVS.height;
+    CTX.fillStyle='#141821'; CTX.fillRect(0,0,W,H);
+    const sc=Math.min((W-60)/gr.w,(H-60)/gr.h);
+    const ox=(W-gr.w*sc)/2, oy=(H-gr.h*sc)/2;
+    // zemin
+    CTX.fillStyle='#1c2430';
+    CTX.fillRect(ox,oy,gr.w*sc,gr.h*sc);
+    // koridor karoları
+    CTX.strokeStyle='rgba(56,74,105,.3)'; CTX.lineWidth=1;
+    gr.cells.forEach(k=>{
+      const [x,y]=k.split(',').map(Number);
+      CTX.strokeRect(ox+x*sc,oy+y*sc,sc,sc);
+    });
+    // rezervasyon gölgesi (res modunda)
+    if(sim&&(sim.cfg.mode||'rules')==='res'){
+      const hexA=(h,al)=>{ const n=parseInt(h.slice(1),16); return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+al+')'; };
+      sim.bots.forEach(b=>{
+        if(!b.task||!b.path) return;
+        CTX.fillStyle=hexA(D.COLORS[b.id%4],0.14);
+        for(let k=0;k<(sim.cfg.res.pencere||2)&&b.pi+k<b.path.length;k++){
+          const c=b.path[b.pi+k];
+          CTX.fillRect(ox+c[0]*sc+2,oy+c[1]*sc+2,sc-4,sc-4);
+        }
+      });
+    }
+    // raflar
+    gr.shelves.forEach(([x,y])=>{
+      CTX.fillStyle='#3a2f22'; CTX.strokeStyle='#8a6d3b'; CTX.lineWidth=1.5;
+      CTX.fillRect(ox+x*sc+1,oy+y*sc+1,sc-2,sc-2);
+      CTX.strokeRect(ox+x*sc+1,oy+y*sc+1,sc-2,sc-2);
+      CTX.strokeStyle='rgba(201,162,39,.4)';
+      CTX.beginPath(); CTX.moveTo(ox+x*sc+3,oy+y*sc+sc/2); CTX.lineTo(ox+x*sc+sc-3,oy+y*sc+sc/2); CTX.stroke();
+    });
+    // istasyon
+    const [stx,sty]=gr.station;
+    CTX.fillStyle='rgba(34,197,94,.2)'; CTX.strokeStyle='#22c55e'; CTX.lineWidth=2;
+    CTX.fillRect(ox+stx*sc+2,oy+sty*sc+2,sc-4,sc-4);
+    CTX.strokeRect(ox+stx*sc+2,oy+sty*sc+2,sc-4,sc-4);
+    CTX.fillStyle='#4ade80'; CTX.font='800 '+(sc*0.4)+'px Segoe UI'; CTX.textAlign='center'; CTX.textBaseline='middle';
+    CTX.fillText('📤',ox+(stx+0.5)*sc,oy+(sty+0.5)*sc);
+    // görev rafları işaretle
+    if(sim){
+      sim.bots.forEach(b=>{
+        if(!b.task||b.carrying) return;
+        const [ax,ay]=b.task.at;
+        CTX.strokeStyle=D.COLORS[b.id%4]; CTX.lineWidth=2; CTX.setLineDash([4,3]);
+        CTX.strokeRect(ox+ax*sc+3,oy+ay*sc+3,sc-6,sc-6); CTX.setLineDash([]);
+      });
+    }
+    // AGV'ler
+    const bots=sim?sim.bots:D.parseGrid(m).starts.map((s,i)=>({id:i,x:s[0],y:s[1],carrying:false,wait:0}));
+    bots.forEach(b=>{
+      const px=ox+(b.x+0.5)*sc, py=oy+(b.y+0.5)*sc;
+      CTX.save(); CTX.translate(px,py);
+      CTX.fillStyle=D.COLORS[b.id%4]; CTX.strokeStyle='#0f172a'; CTX.lineWidth=2;
+      CTX.beginPath(); CTX.roundRect(-sc*0.32,-sc*0.32,sc*0.64,sc*0.64,sc*0.14); CTX.fill(); CTX.stroke();
+      CTX.fillStyle='rgba(15,23,42,.85)'; CTX.font='800 '+(sc*0.3)+'px Segoe UI'; CTX.textAlign='center'; CTX.textBaseline='middle';
+      CTX.fillText(b.id+1,0,1);
+      if(b.carrying){ CTX.fillStyle='#c9a227'; CTX.strokeStyle='#8a6d3b';
+        CTX.beginPath(); CTX.roundRect(-sc*0.18,-sc*0.46,sc*0.36,sc*0.2,2); CTX.fill(); CTX.stroke(); }
+      if(b.wait>0.8){ CTX.fillStyle='#fca5a5'; CTX.font='800 '+(sc*0.34)+'px Segoe UI';
+        CTX.fillText('⏳',sc*0.4,-sc*0.35); }
+      CTX.restore();
+    });
+    CTX.textBaseline='alphabetic';
+    // kilitlenme flaşı
+    if(sim&&sim.deadT>1.5){
+      CTX.fillStyle='rgba(239,68,68,'+(0.12+0.1*Math.sin(sim.t*8))+')';
+      CTX.fillRect(0,0,W,H);
+      CTX.fillStyle='#fca5a5'; CTX.font='800 20px Segoe UI'; CTX.textAlign='center';
+      CTX.fillText('⚠️ KİMSE KIPIRDAMIYOR…',W/2,40);
+    }
+  }
+  function updateHud(){
+    const sim=LAB.sim;
+    const m=D.MISSIONS[LAB.misIdx];
+    document.getElementById('hudT').textContent=(sim?sim.t:0).toFixed(1)+'s';
+    document.getElementById('hudA').textContent=(sim?sim.delivered:0)+'/'+m.tasks;
+    document.getElementById('hudE').textContent=(sim?sim.waits:0).toFixed(0)+'s';
+    const s=document.getElementById('hudS');
+    if(!sim){ s.textContent='HAZIR'; s.className='v'; }
+    else if(sim.status==='running'){ s.textContent=sim.deadT>1.5?'TIKANIYOR…':'AKIYOR'; s.className='v '+(sim.deadT>1.5?'bad':'ok'); }
+    else if(sim.status==='success'){ s.textContent='VARDİYA TAMAM'; s.className='v ok'; }
+    else { s.textContent='BAŞARISIZ'; s.className='v bad'; }
+    if(sim) document.getElementById('ledger').innerHTML=
+      '📦 teslim: <b>'+sim.delivered+'/'+m.tasks+'</b> · robot: '+m.bots+'<br>'+
+      '⏳ toplam bekleme: <b>'+sim.waits.toFixed(0)+' sn</b><br>'+
+      (sim.deadT>0.5?'<b style="color:var(--red)">⚠️ hareketsizlik: '+sim.deadT.toFixed(1)+' sn</b>':'akış normal');
+  }
+  function buildConfig(){
+    return { mission: D.MISSIONS[LAB.misIdx], mode: LAB.mode,
+      policy: {...LAB.policy}, res: {...LAB.res} };
+  }
+  function startRun(){
+    stopLoop(); hideResult();
+    LAB.sim=D.createSim(buildConfig());
+    document.getElementById('runBtn').textContent='■ DURDUR';
+    document.getElementById('runBtn').className='btn stop';
+    LAB.lastTs=0; LAB.raf=requestAnimationFrame(loop);
+  }
+  function loop(ts){
+    if(!LAB.lastTs) LAB.lastTs=ts;
+    let dt=(ts-LAB.lastTs)/1000; LAB.lastTs=ts;
+    if(dt>0.1) dt=0.1;
+    const steps=Math.max(1,Math.round(dt*30*LAB.simSpeed));
+    for(let i=0;i<steps;i++){ D.tickSim(LAB.sim,1/30); if(LAB.sim.status!=='running') break; }
+    drawScene(); updateHud();
+    if(LAB.sim.status==='running') LAB.raf=requestAnimationFrame(loop);
+    else { stopRunUi(); setTimeout(showResult,450); }
+  }
+  function stopLoop(){ if(LAB.raf) cancelAnimationFrame(LAB.raf); LAB.raf=null; }
+  function stopRunUi(){
+    document.getElementById('runBtn').textContent='▶ VARDİYAYI AÇ';
+    document.getElementById('runBtn').className='btn run';
+  }
+  function resetSim(){ stopLoop(); stopRunUi(); LAB.sim=null; drawScene(); updateHud(); hideResult(); }
+  function hideResult(){
+    document.getElementById('resultDock').style.display='none';
+    document.getElementById('hint').style.display='block';
+    document.getElementById('resultWrap').classList.remove('show');
+  }
+  const REASONS={ vardiya:'Bütün siparişler teslim edildi!', kilitlenme:'KİLİTLENME — robotlar birbirini sonsuza dek bekliyor! 💀',
+    sure:'Süre doldu — vardiya kotası tutmadı.' };
+  function showResult(){
+    const sim=LAB.sim; if(!sim) return;
+    const win=sim.status==='success';
+    const cls=D.robotClass(sim);
+    const tips=D.coach(sim);
+    const dock=document.getElementById('resultDock');
+    dock.className='rdock'+(win?'':' lose');
+    dock.innerHTML =
+      '<div class="rd-head">'+(win?'🤖 Vardiya Tamamlandı!':'❌ Vardiya Başarısız')+'</div>'+
+      '<div class="rd-body">'+
+        (cls?'<div class="rd-medal">'+cls.name+'</div><div class="rd-cmt">'+(cls.cmt||'')+'</div>'
+            :'<div class="rd-cmt">'+(REASONS[sim.reason]||'')+'</div>')+
+        '<div class="rd-stats">'+
+          '<div class="rd-stat"><div class="l">TESLİMAT</div><div class="v mono">'+sim.delivered+'/'+sim.mission.tasks+'</div></div>'+
+          '<div class="rd-stat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
+          '<div class="rd-stat"><div class="l">BEKLEME</div><div class="v mono">'+sim.waits.toFixed(0)+'s</div></div>'+
+          '<div class="rd-stat"><div class="l">DURUM</div><div class="v '+(win?'ok':'bad')+'">'+(win?'TAMAM':'BAŞARISIZ')+'</div></div>'+
+        '</div>'+
+        (tips.length?'<div class="rd-tip">💡 '+tips[0]+'</div>':'')+
+        '<div class="rd-btns">'+
+          '<button class="btn run" id="againBtn">⟲ Tekrar Dene</button>'+
+          '<button class="btn outline" id="reportBtn">📄 Raporu Önizle</button>'+
+        '</div>'+
+      '</div>';
+    document.getElementById('hint').style.display='none';
+    dock.style.display='block';
+    document.getElementById('againBtn').onclick=()=>{ hideResult(); startRun(); };
+    document.getElementById('reportBtn').onclick=openReport;
+  }
+  function openReport(){
+    const sim=LAB.sim; if(!sim) return;
+    const win=sim.status==='success';
+    const m=sim.mission;
+    const box=document.getElementById('resultBox');
+    box.innerHTML =
+      '<h3 class="'+(win?'win':'lose')+'">📄 Vardiya Raporu — '+m.name+'</h3>'+
+      '<div style="font-size:.76rem;color:var(--sky);margin:8px 0">'+
+        (LAB.mode==='rules'?'🧩 Trafik: öncelik '+(LAB.policy.oncelik==='yuklu'?'yüklü':'numara')+' · dar koridor '+(LAB.policy.darKoridor==='bekle'?'BEKLE ⚠️':'yol ver')
+        :'📈 Rezervasyon: pencere '+LAB.res.pencere+' · yeniden rota '+(LAB.res.yenidenRota?'açık':'kapalı'))+'</div>'+
+      '<div class="rstats">'+
+        '<div class="rstat"><div class="l">TESLİMAT</div><div class="v mono">'+sim.delivered+'/'+m.tasks+'</div></div>'+
+        '<div class="rstat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
+        '<div class="rstat"><div class="l">BEKLEME</div><div class="v mono">'+sim.waits.toFixed(0)+'s</div></div>'+
+        '<div class="rstat"><div class="l">ROBOT</div><div class="v mono">'+m.bots+'</div></div>'+
+      '</div>'+
+      '<h4 style="margin:8px 0 6px;font-size:.66rem;letter-spacing:2px;color:var(--muted)">📓 VARDİYA KAYDI</h4>'+
+      '<div style="max-height:190px;overflow:auto">'+
+        (sim.events.length?sim.events.map(e=>'<div class="evline"><b>'+e[0]+'s</b> '+e[1]+'</div>').join(''):'<div class="evline">Kayıt boş.</div>')+
+      '</div>'+
+      '<div class="rbtns"><button class="btn ghost" id="repClose">Kapat</button></div>';
+    document.getElementById('resultWrap').classList.add('show');
+    document.getElementById('repClose').onclick=()=>document.getElementById('resultWrap').classList.remove('show');
+  }
+  function setMode(m){
+    LAB.mode=m;
+    document.getElementById('modeRules').classList.toggle('on',m==='rules');
+    document.getElementById('modeRes').classList.toggle('on',m==='res');
+    document.getElementById('rulesCard').style.display=m==='rules'?'block':'none';
+    document.getElementById('resCard').style.display=m==='res'?'block':'none';
+  }
+  document.getElementById('modeRules').onclick=()=>setMode('rules');
+  document.getElementById('modeRes').onclick=()=>setMode('res');
+  function bindControls(){
+    const po=document.getElementById('polOncelik'), pd=document.getElementById('polDar');
+    po.value=LAB.policy.oncelik; pd.value=LAB.policy.darKoridor;
+    po.onchange=()=>{ LAB.policy.oncelik=po.value; };
+    pd.onchange=()=>{ LAB.policy.darKoridor=pd.value; };
+    const rp=document.getElementById('rp');
+    rp.value=LAB.res.pencere;
+    rp.oninput=()=>{ LAB.res.pencere=+rp.value; document.getElementById('rpV').textContent=rp.value+' hücre'; };
+    document.getElementById('rpV').textContent=LAB.res.pencere+' hücre';
+    const host=document.getElementById('rrPick'); host.innerHTML='';
+    [[true,'AÇIK','ac'],[false,'KAPALI','kp']].forEach(([v,l,c])=>{
+      const b=document.createElement('div'); b.className='stpo'+(LAB.res.yenidenRota===v?' on '+c:''); b.textContent=l;
+      b.onclick=()=>{ LAB.res.yenidenRota=v; bindControls(); };
+      host.appendChild(b);
+    });
+  }
+  function fillKunye(){
+    document.getElementById('kunye').innerHTML='<h4>🤖 Filo Künyesi</h4><p class="exp" style="margin:0">'+
+      'AGV hızı 2 hücre/sn · kilitlenme dedektörü 4 sn hareketsizlikte alarm verir. '+
+      '<a style="color:var(--sky)" href="build.html?sim=depo">Robotunu kur →</a></p>';
+  }
+  function buildTrackTabs(){
+    const el=document.getElementById('trackTabs'); el.innerHTML='';
+    D.MISSIONS.forEach((l,i)=>{
+      const b=document.createElement('button'); b.className='ttab'+(i===LAB.misIdx?' on':'');
+      b.innerHTML=l.name+'<small>'+l.difficulty+'</small>';
+      b.title=l.desc;
+      b.onclick=()=>{ LAB.misIdx=i; resetSim(); buildTrackTabs(); };
+      el.appendChild(b);
+    });
+  }
+  function shareRobot(){
+    try{
+      const st={ l:LAB.misIdx, mo:LAB.mode, p:LAB.policy, r:LAB.res };
+      location.hash='r='+btoa(unescape(encodeURIComponent(JSON.stringify(st))));
+      navigator.clipboard && navigator.clipboard.writeText(location.href);
+      toast('Bağlantı kopyalandı! Arkadaşına gönder.');
+    }catch(e){ toast('Paylaşım hazırlanamadı.'); }
+  }
+  function loadFromHash(){
+    try{
+      if(!location.hash.startsWith('#r=')) return false;
+      const st=JSON.parse(decodeURIComponent(escape(atob(location.hash.slice(3)))));
+      if(typeof st.l==='number'&&D.MISSIONS[st.l]) LAB.misIdx=st.l;
+      if(st.mo==='rules'||st.mo==='res') LAB.mode=st.mo;
+      if(st.p) LAB.policy={...D.defaultPolicy(),...st.p};
+      if(st.r) LAB.res={...D.defaultRes(),...st.r};
+      toast('Paylaşılan filo politikası yüklendi!');
+      return true;
+    }catch(e){}
+    return false;
+  }
+  let toastTimer=null;
+  function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2400); }
+  const TUT=[
+    ['🤖 Sorun Trafik','Tek robot kolaydır — dört robot aynı koridorlarda? Amazon depolarının gerçek problemi: rota değil TRAFİK. Filoyu sen yöneteceksin.'],
+    ['🤝 Sözleşme','Kavşakta kim önce geçer? Cevabın ne olduğu değil, HERKESİN AYNI cevabı bilmesi önemli. Trafik kuralı bir sözleşmedir.'],
+    ['💀 Kilitlenme','Dar koridorda burun buruna iki robot: ikisi de "beklerim" derse SONSUZA DEK beklerler. Deadlock — 1971\\u2019den beri bilgisayar biliminin baş belası. "Bekle" politikasını seç ve tanış!'],
+    ['🔀 Döngüyü Kır','Çözüm hep aynı: biri yol vermeli. Yeniden rota (etrafından dolan) ya da geri çekilme. Kim yol verir? İşte öncelik kuralın orada devreye girer.'],
+    ['📈 Rezervasyon','İkinci yaklaşım: her robot önündeki N hücreyi rezerve eder. Geniş pencere = güvenli ama tıkanık; dar = akıcı ama riskli. Güven ↔ verim ödünleşimi.'],
+    ['🏁 Vardiyayı Aç','Isınmadan Kâbus Deposuna 7 vardiya. Bekleme sayacı puandır: akan filo kazanır. Lojistik Beyni ol!'],
+  ];
+  let tutI=0;
+  function showTut(i){
+    tutI=i; const [h,p]=TUT[i];
+    const dots=TUT.map((_,j)=>'<i class="'+(j<=i?'on':'')+'"></i>').join('');
+    document.getElementById('tutBox').innerHTML='<div class="dots">'+dots+'</div><h3>'+h+'</h3><p>'+p+'</p>'+
+      '<div style="display:flex;gap:8px"><button class="btn run" id="tutN">'+(i<TUT.length-1?'Devam →':'Başla! 🚀')+'</button>'+
+      (i<TUT.length-1?'<button class="btn ghost" id="tutS">Atla</button>':'')+'</div>';
+    document.getElementById('tutwrap').style.display='flex';
+    document.getElementById('tutN').onclick=()=>{ tutI<TUT.length-1?showTut(tutI+1):endTut(); };
+    const s=document.getElementById('tutS'); if(s) s.onclick=endTut;
+  }
+  function endTut(){ document.getElementById('tutwrap').style.display='none';
+    try{ localStorage.setItem('rf_depo_tut','1'); }catch(e){} }
+  document.getElementById('runBtn').onclick=()=>{
+    if(LAB.sim&&LAB.sim.status==='running'){ stopLoop(); LAB.sim.status='failed'; LAB.sim.reason='sure'; stopRunUi(); updateHud(); return; }
+    startRun();
+  };
+  document.getElementById('resetBtn').onclick=()=>{ LAB.policy=D.defaultPolicy(); LAB.res=D.defaultRes(); bindControls(); resetSim(); toast('Politika fabrika ayarlarına döndü.'); };
+  document.getElementById('shareBtn').onclick=shareRobot;
+  document.getElementById('helpBtn').onclick=()=>showTut(0);
+  document.getElementById('simSpeed').oninput=e=>{ LAB.simSpeed=+e.target.value;
+    document.getElementById('simSpeedV').textContent=(+e.target.value).toFixed(1)+'x'; };
+  document.querySelectorAll('.stab').forEach(t=>{
+    t.onclick=()=>{ document.querySelectorAll('.stab').forEach(x=>x.classList.remove('on')); t.classList.add('on');
+      document.getElementById('tab-prog').style.display=t.dataset.tab==='prog'?'block':'none';
+      document.getElementById('tab-robot').style.display=t.dataset.tab==='robot'?'block':'none'; };
+  });
+  loadFromHash();
+  buildTrackTabs(); setMode(LAB.mode); bindControls(); fillKunye();
+  drawScene(); updateHud();
+  let seen=false; try{ seen=!!localStorage.getItem('rf_depo_tut'); }catch(e){}
+  if(!seen) showTut(0);
+})();
+</script>
+</body>
+</html>
