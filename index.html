@@ -9,9 +9,15 @@
     --bg:#0b1220; --panel:#0f172a; --panel2:#111c33; --line:#1e3a5f;
     --sky:#38bdf8; --sky2:#0ea5e9; --green:#22c55e; --amber:#f59e0b;
     --red:#ef4444; --purple:#a855f7; --txt:#e2e8f0; --muted:#64748b; --muted2:#94a3b8;
-    --t1:#22c55e; --t1soft:rgba(34,197,94,.14);
-    --t2:#38bdf8; --t2soft:rgba(56,189,248,.14);
-    --t3:#a855f7; --t3soft:rgba(168,85,247,.16);
+    /* 6 theme colors */
+    --c1:#22c55e; --c1s:rgba(34,197,94,.14);   /* Temel Sürüş — yeşil */
+    --c2:#38bdf8; --c2s:rgba(56,189,248,.14);  /* Görev & Strateji — mavi */
+    --c3:#a855f7; --c3s:rgba(168,85,247,.16);  /* Kontrol Mühendisliği — mor */
+    --c4:#f59e0b; --c4s:rgba(245,158,11,.15);  /* Fabrika & Otomasyon — amber */
+    --c5:#2dd4bf; --c5s:rgba(45,212,191,.15);  /* Uzay & Telemetri — teal */
+    --c6:#f472b6; --c6s:rgba(244,114,182,.15); /* Sürü & Lokomosyon — pembe */
+    /* difficulty band colors */
+    --d1:#4ade80; --d2:#38bdf8; --d3:#fbbf24; --d4:#f87171;
   }
   *{box-sizing:border-box}
   body{margin:0;min-height:100vh;color:var(--txt);
@@ -27,73 +33,72 @@
   .logo b{font-size:1.5rem;letter-spacing:.4px}
   .logo b span{color:var(--sky)}
   .logo small{display:block;color:var(--muted);font-size:.62rem;letter-spacing:3px;text-transform:uppercase;margin-top:2px}
-  .tagline{color:var(--muted2);font-size:1rem;max-width:720px;line-height:1.55;margin-top:14px}
+  .tagline{color:var(--muted2);font-size:1rem;max-width:740px;line-height:1.55;margin-top:14px}
   .tagline b{color:var(--txt)}
 
-  /* progression path nav */
-  .pathnav{position:sticky;top:0;z-index:50;display:flex;gap:8px;align-items:center;
-    margin:26px -24px 8px;padding:12px 24px;background:rgba(10,16,30,.88);backdrop-filter:blur(10px);
+  /* category path nav */
+  .pathnav{position:sticky;top:0;z-index:50;display:flex;gap:7px;align-items:center;
+    margin:26px -24px 8px;padding:12px 24px;background:rgba(10,16,30,.9);backdrop-filter:blur(10px);
     border-bottom:1px solid rgba(30,58,95,.6);overflow-x:auto}
-  .pathnav a{display:flex;align-items:center;gap:9px;padding:8px 14px;border-radius:11px;
+  .pathnav a{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:11px;
     border:1px solid var(--line);background:var(--panel);white-space:nowrap;transition:.15s;flex:none}
-  .pathnav a .pnum{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    font-size:.68rem;font-weight:800;color:#0b1220}
-  .pathnav a .pt{font-size:.78rem;font-weight:800}
-  .pathnav a .ps{display:block;font-size:.58rem;color:var(--muted);font-weight:600;letter-spacing:.4px}
-  .pathnav a.p1:hover{border-color:var(--t1)} .pathnav a.p2:hover{border-color:var(--t2)} .pathnav a.p3:hover{border-color:var(--t3)}
-  .pathnav a.p1 .pnum{background:var(--t1)} .pathnav a.p2 .pnum{background:var(--t2)} .pathnav a.p3 .pnum{background:var(--t3)}
-  .pathnav .arrow{color:var(--muted);font-size:.9rem;flex:none}
+  .pathnav a .pic{font-size:1rem;line-height:1}
+  .pathnav a .pt{font-size:.76rem;font-weight:800}
+  .pathnav a .cnt{font-size:.58rem;font-weight:800;color:var(--muted);margin-left:2px}
+  .pathnav a.g1:hover{border-color:var(--c1)} .pathnav a.g2:hover{border-color:var(--c2)}
+  .pathnav a.g3:hover{border-color:var(--c3)} .pathnav a.g4:hover{border-color:var(--c4)}
+  .pathnav a.g5:hover{border-color:var(--c5)} .pathnav a.g6:hover{border-color:var(--c6)}
 
-  /* tier sections */
-  .tier{margin-top:46px;scroll-margin-top:86px}
-  .tier-head{display:flex;align-items:flex-start;gap:16px;margin-bottom:6px}
-  .tier-badge{flex:none;width:52px;height:52px;border-radius:14px;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;font-weight:800;border:1px solid}
-  .tier-badge small{font-size:.5rem;letter-spacing:1.5px;opacity:.85;font-weight:700}
-  .tier-badge span{font-size:1.3rem;line-height:1}
-  .tier.t1 .tier-badge{background:var(--t1soft);border-color:rgba(34,197,94,.45);color:#4ade80}
-  .tier.t2 .tier-badge{background:var(--t2soft);border-color:rgba(56,189,248,.45);color:#7dd3fc}
-  .tier.t3 .tier-badge{background:var(--t3soft);border-color:rgba(168,85,247,.45);color:#d8b4fe}
-  .tier-title h2{margin:0;font-size:1.35rem;letter-spacing:.3px}
-  .tier.t1 .tier-title h2 em{color:#4ade80;font-style:normal}
-  .tier.t2 .tier-title h2 em{color:#7dd3fc;font-style:normal}
-  .tier.t3 .tier-title h2 em{color:#d8b4fe;font-style:normal}
-  .tier-title p{margin:5px 0 0;color:var(--muted2);font-size:.88rem;line-height:1.5;max-width:760px}
-  .tier-title .tcount{display:inline-block;margin-left:8px;font-size:.62rem;font-weight:800;letter-spacing:1px;
+  /* legend for difficulty bands */
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin:20px 0 2px;font-size:.72rem;color:var(--muted2)}
+  .legend .lk{display:flex;align-items:center;gap:6px}
+  .legend .dot{width:9px;height:9px;border-radius:50%}
+  .legend b{color:var(--txt);font-weight:700}
+
+  /* category sections */
+  .cat{margin-top:44px;scroll-margin-top:80px}
+  .cat-head{display:flex;align-items:flex-start;gap:16px;margin-bottom:6px}
+  .cat-badge{flex:none;width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+    font-size:1.5rem;border:1px solid}
+  .cat-title h2{margin:0;font-size:1.3rem;letter-spacing:.3px}
+  .cat-title h2 em{font-style:normal}
+  .cat-title p{margin:5px 0 0;color:var(--muted2);font-size:.87rem;line-height:1.5;max-width:770px}
+  .cat-title .ccount{display:inline-block;margin-left:8px;font-size:.6rem;font-weight:800;letter-spacing:1px;
     padding:3px 9px;border-radius:7px;vertical-align:2px}
-  .tier.t1 .tcount{background:var(--t1soft);color:#4ade80}
-  .tier.t2 .tcount{background:var(--t2soft);color:#7dd3fc}
-  .tier.t3 .tcount{background:var(--t3soft);color:#d8b4fe}
-  .tier-line{height:2px;border-radius:2px;margin:16px 0 18px;opacity:.55}
-  .tier.t1 .tier-line{background:linear-gradient(90deg,var(--t1),transparent)}
-  .tier.t2 .tier-line{background:linear-gradient(90deg,var(--t2),transparent)}
-  .tier.t3 .tier-line{background:linear-gradient(90deg,var(--t3),transparent)}
+  .cat-line{height:2px;border-radius:2px;margin:16px 0 18px;opacity:.55}
+  /* per-category tinting via .g1..g6 */
+  .g1 .cat-badge{background:var(--c1s);border-color:var(--c1);color:var(--c1)} .g1 .cat-title h2 em{color:var(--c1)} .g1 .ccount{background:var(--c1s);color:var(--c1)} .g1 .cat-line{background:linear-gradient(90deg,var(--c1),transparent)}
+  .g2 .cat-badge{background:var(--c2s);border-color:var(--c2);color:var(--c2)} .g2 .cat-title h2 em{color:var(--c2)} .g2 .ccount{background:var(--c2s);color:var(--c2)} .g2 .cat-line{background:linear-gradient(90deg,var(--c2),transparent)}
+  .g3 .cat-badge{background:var(--c3s);border-color:var(--c3);color:var(--c3)} .g3 .cat-title h2 em{color:var(--c3)} .g3 .ccount{background:var(--c3s);color:var(--c3)} .g3 .cat-line{background:linear-gradient(90deg,var(--c3),transparent)}
+  .g4 .cat-badge{background:var(--c4s);border-color:var(--c4);color:var(--c4)} .g4 .cat-title h2 em{color:var(--c4)} .g4 .ccount{background:var(--c4s);color:var(--c4)} .g4 .cat-line{background:linear-gradient(90deg,var(--c4),transparent)}
+  .g5 .cat-badge{background:var(--c5s);border-color:var(--c5);color:var(--c5)} .g5 .cat-title h2 em{color:var(--c5)} .g5 .ccount{background:var(--c5s);color:var(--c5)} .g5 .cat-line{background:linear-gradient(90deg,var(--c5),transparent)}
+  .g6 .cat-badge{background:var(--c6s);border-color:var(--c6);color:var(--c6)} .g6 .cat-title h2 em{color:var(--c6)} .g6 .ccount{background:var(--c6s);color:var(--c6)} .g6 .cat-line{background:linear-gradient(90deg,var(--c6),transparent)}
 
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:18px}
 
   .card{position:relative;border:1px solid var(--line);border-radius:16px;padding:22px;
-    background:linear-gradient(160deg,var(--panel) 0%,#0c1526 100%);min-height:206px;
+    background:linear-gradient(160deg,var(--panel) 0%,#0c1526 100%);min-height:214px;
     display:flex;flex-direction:column;transition:.18s;overflow:hidden;cursor:pointer}
-  .card .ic{font-size:2.1rem;margin-bottom:12px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4))}
+  .card .ic{font-size:2.1rem;margin-bottom:10px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4))}
   .card h3{margin:0 0 2px;font-size:1.12rem}
   .card .en{color:var(--muted);font-size:.64rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
   .card p{margin:0;color:var(--muted2);font-size:.84rem;line-height:1.5;flex:1}
-  .card .ribbon{position:absolute;top:14px;right:-34px;transform:rotate(45deg);
-    color:#04210f;font-size:.55rem;font-weight:800;letter-spacing:1.5px;padding:4px 40px}
-  .startbtn{margin-top:14px;align-self:flex-start;color:#eafff0;border:1px solid;padding:9px 16px;
+  /* difficulty band chip (top-right) */
+  .card .band{position:absolute;top:13px;right:13px;font-size:.56rem;font-weight:800;letter-spacing:.6px;
+    padding:4px 9px;border-radius:20px;text-transform:uppercase;border:1px solid}
+  .band.b1{background:rgba(74,222,128,.13);color:var(--d1);border-color:rgba(74,222,128,.45)}
+  .band.b2{background:rgba(56,189,248,.13);color:var(--d2);border-color:rgba(56,189,248,.45)}
+  .band.b3{background:rgba(251,191,36,.13);color:var(--d3);border-color:rgba(251,191,36,.45)}
+  .band.b4{background:rgba(248,113,113,.13);color:var(--d4);border-color:rgba(248,113,113,.45)}
+  .startbtn{margin-top:14px;align-self:flex-start;color:#0b1220;border:1px solid;padding:9px 16px;
     border-radius:10px;font-weight:800;font-size:.8rem;letter-spacing:.5px;cursor:pointer}
-  .tier.t1 .card:hover{transform:translateY(-4px);border-color:var(--t1);box-shadow:0 14px 40px rgba(34,197,94,.16)}
-  .tier.t2 .card:hover{transform:translateY(-4px);border-color:var(--t2);box-shadow:0 14px 40px rgba(56,189,248,.16)}
-  .tier.t3 .card:hover{transform:translateY(-4px);border-color:var(--t3);box-shadow:0 14px 40px rgba(168,85,247,.18)}
-  .tier.t1 .ribbon{background:var(--t1)}
-  .tier.t2 .ribbon{background:var(--t2);color:#04121f}
-  .tier.t3 .ribbon{background:var(--t3);color:#160726}
-  .tier.t1 .card{border-color:rgba(34,197,94,.28)}
-  .tier.t2 .card{border-color:rgba(56,189,248,.28)}
-  .tier.t3 .card{border-color:rgba(168,85,247,.3)}
-  .tier.t1 .startbtn{background:linear-gradient(180deg,#16a34a,#15803d);border-color:#22c55e;box-shadow:0 0 16px rgba(34,197,94,.25)}
-  .tier.t2 .startbtn{background:linear-gradient(180deg,#0ea5e9,#0369a1);border-color:#38bdf8;color:#eaf6ff;box-shadow:0 0 16px rgba(56,189,248,.25)}
-  .tier.t3 .startbtn{background:linear-gradient(180deg,#9333ea,#7e22ce);border-color:#a855f7;color:#f6eaff;box-shadow:0 0 16px rgba(168,85,247,.3)}
+  /* per-category card hover + button */
+  .g1 .card:hover{transform:translateY(-4px);border-color:var(--c1);box-shadow:0 14px 40px var(--c1s)} .g1 .card{border-color:rgba(34,197,94,.26)} .g1 .startbtn{background:var(--c1);border-color:var(--c1)}
+  .g2 .card:hover{transform:translateY(-4px);border-color:var(--c2);box-shadow:0 14px 40px var(--c2s)} .g2 .card{border-color:rgba(56,189,248,.26)} .g2 .startbtn{background:var(--c2);border-color:var(--c2)}
+  .g3 .card:hover{transform:translateY(-4px);border-color:var(--c3);box-shadow:0 14px 40px var(--c3s)} .g3 .card{border-color:rgba(168,85,247,.28)} .g3 .startbtn{background:var(--c3);border-color:var(--c3);color:#160726}
+  .g4 .card:hover{transform:translateY(-4px);border-color:var(--c4);box-shadow:0 14px 40px var(--c4s)} .g4 .card{border-color:rgba(245,158,11,.28)} .g4 .startbtn{background:var(--c4);border-color:var(--c4)}
+  .g5 .card:hover{transform:translateY(-4px);border-color:var(--c5);box-shadow:0 14px 40px var(--c5s)} .g5 .card{border-color:rgba(45,212,191,.28)} .g5 .startbtn{background:var(--c5);border-color:var(--c5)}
+  .g6 .card:hover{transform:translateY(-4px);border-color:var(--c6);box-shadow:0 14px 40px var(--c6s)} .g6 .card{border-color:rgba(244,114,182,.28)} .g6 .startbtn{background:var(--c6);border-color:var(--c6);color:#2a0a1a}
 
   footer{margin-top:52px;color:var(--muted);font-size:.72rem;text-align:center;line-height:1.6}
   footer b{color:var(--muted2)}
@@ -110,19 +115,22 @@
       </div>
     </div>
     <p class="tagline">Bir simülasyon seç; <b>kendi robotunu kur, kodla ve test et.</b>
-      Üç seviyelik yol: önce sensörleri ve sürüşü öğren, sonra gerçek görevleri çöz,
-      en sonda yeni fizik dünyalarına geç — ve hep hatalarından öğren.</p>
+      30 senaryo, altı dünyada: temel sürüşten fabrika otomasyonuna, uzay görevlerinden sürü zekâsına.
+      Her kartın köşesindeki rozet o simülasyonun genel seviyesini gösterir — ama hepsinin içinde
+      Başlangıç'tan Uzman'a 7 kademe var.</p>
   </header>
 
-  <nav class="pathnav">
-    <a class="p1" href="#seviye1"><span class="pnum">1</span><span><span class="pt">Temel Robotik</span><span class="ps">sensörler &amp; sürüş</span></span></a>
-    <span class="arrow">→</span>
-    <a class="p2" href="#seviye2"><span class="pnum">2</span><span><span class="pt">Görev Robotları</span><span class="ps">planlama &amp; strateji</span></span></a>
-    <span class="arrow">→</span>
-    <a class="p3" href="#seviye3"><span class="pnum">3</span><span><span class="pt">İleri Robotik</span><span class="ps">yeni fizik &amp; sürü</span></span></a>
-  </nav>
+  <nav class="pathnav" id="pathnav"></nav>
 
-  <div id="tiers"></div>
+  <div class="legend">
+    <span style="color:var(--muted);font-weight:700;letter-spacing:1px">SEVİYE:</span>
+    <span class="lk"><i class="dot" style="background:var(--d1)"></i><b>Başlangıç</b></span>
+    <span class="lk"><i class="dot" style="background:var(--d2)"></i><b>Orta</b></span>
+    <span class="lk"><i class="dot" style="background:var(--d3)"></i><b>İleri</b></span>
+    <span class="lk"><i class="dot" style="background:var(--d4)"></i><b>Uzman</b></span>
+  </div>
+
+  <div id="cats"></div>
 
   <footer>
     RoboForge · RoboFabrik Akademi — Lise Robotik Programı<br/>
@@ -131,136 +139,164 @@
 </div>
 
 <script>
-  const TIERS = [
-    { id:'seviye1', cls:'t1', icon:'🚗', num:'1',
-      title:'SEVİYE 1 · <em>Temel Robotik</em>',
+  // band: 1=Başlangıç, 2=Orta, 3=İleri, 4=Uzman (simin genel seviyesi)
+  const CATS = [
+    { id:'temel', g:'g1', icon:'🚗',
+      title:'Temel <em>Sürüş &amp; Sensörler</em>',
       desc:'Hepsi aynı iki tekerlekli araç — fark eden şey SENSÖRLER. Çizgi, duvar, mesafe, ışık ve rakip algıla; kural yaz, PID ile tanış. Robotiğin alfabesi burada.',
       sims:[
-        { id:'line', icon:'🏁', title:'Çizgi Takip', en:'Line Follower',
+        { id:'line', icon:'🏁', title:'Çizgi Takip', en:'Line Follower', band:1,
           desc:'Parçalarını seç, robotunu çiz, test et — sonra sensörleri yerleştirip blok kodlarla çizgiyi takip ettir. Baştan sona kendi robotun.',
           href:'build.html' },
-        { id:'maze', icon:'🧩', title:'Labirent Çözücü', en:'Maze Solver',
+        { id:'maze', icon:'🧩', title:'Labirent Çözücü', en:'Maze Solver', band:1,
           desc:'Duvarları algıla, çıkışı bul. Sol-el kuralı mı, en kısa yol mu? Kendi keşif stratejini kur.',
           href:'build.html?sim=maze' },
-        { id:'obstacle', icon:'🚧', title:'Engelden Kaçış', en:'Obstacle Avoidance',
+        { id:'obstacle', icon:'🚧', title:'Engelden Kaçış', en:'Obstacle Avoidance', band:2,
           desc:'Mesafe sensörleriyle engellere çarpmadan ilerle. Hız ve güvenlik dengesini bul.',
           href:'build.html?sim=obstacle' },
-        { id:'pid', icon:'⚡', title:'PID Çizgi Yarışı', en:'PID Racing',
-          desc:'Analog dizi sensör + PID ile en hızlı turu at. Çizgi takibinin ileri seviyesi.',
-          href:'build.html?sim=pid' },
-        { id:'light', icon:'💡', title:'Işık Takibi', en:'Light Follower',
+        { id:'light', icon:'💡', title:'Işık Takibi', en:'Light Follower', band:1,
           desc:'LDR sensörlerle ışık kaynağını takip et ya da karanlığa kaç. Tepki ve eşik ayarı.',
           href:'build.html?sim=light' },
-        { id:'sumo', icon:'🥊', title:'Mini Sumo', en:'Mini Sumo',
+        { id:'sumo', icon:'🥊', title:'Mini Sumo', en:'Mini Sumo', band:2,
           desc:'Rakibi alandan çıkar. Saldırı, savunma ve kenar algılama stratejilerini dene.',
           href:'build.html?sim=sumo' },
+        { id:'pid', icon:'⚡', title:'PID Çizgi Yarışı', en:'PID Racing', band:3,
+          desc:'Analog dizi sensör + PID ile en hızlı turu at. Çizgi takibinin ileri seviyesi.',
+          href:'build.html?sim=pid' },
       ]},
-    { id:'seviye2', cls:'t2', icon:'🎯', num:'2',
-      title:'SEVİYE 2 · <em>Görev Robotları</em>',
-      desc:'Sensörleri artık biliyorsun. Şimdi robotun bir İŞİ var: kazazede kurtar, paket teslim et, gol at, yangın söndür, konvoyda sür, park et. Planlama, strateji ve çok adımlı davranışlar.',
+    { id:'gorev', g:'g2', icon:'🎯',
+      title:'Görev <em>&amp; Strateji</em>',
+      desc:'Sensörleri artık biliyorsun. Şimdi robotun bir İŞİ var: kazazede kurtar, paket teslim et, gol at, yangın söndür, konvoyda sür, park et. Çok adımlı planlama ve strateji.',
       sims:[
-        { id:'rescue', icon:'🚑', title:'Kurtarma Hattı', en:'Rescue Line',
+        { id:'rescue', icon:'🚑', title:'Kurtarma Hattı', en:'Rescue Line', band:3,
           desc:'Kesik çizgiler, yeşil kavşak işaretleri ve yolu kapatan engeller… Kazazedeye ulaş! Çizgi becerilerinin final sınavı.',
           href:'build.html?sim=rescue' },
-        { id:'delivery', icon:'📦', title:'Teslimat Robotu', en:'Delivery Robot',
+        { id:'delivery', icon:'📦', title:'Teslimat Robotu', en:'Delivery Robot', band:2,
           desc:'Şehir sokaklarında kavşak kavşak rota planla, paketleri adreslere ulaştır. Kapalı yollara dikkat!',
           href:'build.html?sim=delivery' },
-        { id:'soccer', icon:'⚽', title:'Robot Futbolu', en:'Robot Soccer',
+        { id:'soccer', icon:'⚽', title:'Robot Futbolu', en:'Robot Soccer', band:2,
           desc:'Savunmacıyı geç, gol at! Topa yönelme, top sürme ve bitiricilik — PID forvetini ayarla, madalyayı kap.',
           href:'build.html?sim=soccer' },
-        { id:'fire', icon:'🧯', title:'Ateş Söndürme', en:'Firefighting',
+        { id:'fire', icon:'🧯', title:'Ateş Söndürme', en:'Firefighting', band:2,
           desc:'Evin odalarını duvar takibiyle keşfet, alevi ışık sensörleriyle bul, fanla söndür. Keşif + müdahale!',
           href:'build.html?sim=fire' },
-        { id:'convoy', icon:'🚚', title:'Konvoy Takibi', en:'Adaptive Cruise',
+        { id:'convoy', icon:'🚚', title:'Konvoy Takibi', en:'Adaptive Cruise', band:2,
           desc:'Öndeki kamyonu sabit mesafede izle: çarpma, kaybetme! Gerçek araçlardaki adaptif hız sabitleyici dersi.',
           href:'build.html?sim=convoy' },
-        { id:'linemaze', icon:'🌀', title:'Çizgi Labirenti', en:'Line Maze',
-          desc:'Sol-el kuralı + LSRB cebiri: keşfet, kaydet, sadeleştir, yarış! Kavşak disiplininin ve kestirme haritalamanın dersi.',
-          href:'build.html?sim=linemaze' },
-        { id:'park', icon:'🅿️', title:'Otonom Park', en:'Autonomous Parking',
+        { id:'park', icon:'🅿️', title:'Otonom Park', en:'Autonomous Parking', band:3,
           desc:'Araban yerinde dönemez! Manevra planını adım adım kur: ileri, geri, direksiyon… Paralel parkın sırrını çöz.',
           href:'build.html?sim=park' },
       ]},
-    { id:'seviye3', cls:'t3', icon:'🚀', num:'3',
-      title:'SEVİYE 3 · <em>İleri Robotik</em>',
-      desc:'Tekerlekli aracın ötesi: kendi kendine duramayan denge robotu, yerçekimiyle savaşan drone, fiziğin sınandığı dağ tırmanışı ve lidersiz sürü zekâsı. Gerçek kontrol mühendisliği.',
+    { id:'kontrol', g:'g3', icon:'🎮',
+      title:'Kontrol <em>Mühendisliği</em>',
+      desc:'Kendi kendine duramayan, yerçekimiyle savaşan, sallanan sistemler: ters sarkaç, drone, roket, vinç, sualtı aracı, dağ tırmanışı. PID, momentum ve gerçek denge kontrolü.',
       sims:[
-        { id:'balance', icon:'🤸', title:'Denge Robotu', en:'Self-Balancing',
+        { id:'balance', icon:'🤸', title:'Denge Robotu', en:'Self-Balancing', band:3,
           desc:'Hiçbir şey yapmazsan devrilir! Ters sarkacı PID ile ayakta tut — dürtmelere, rüzgâra ve yüke rağmen.',
           href:'build.html?sim=balance' },
-        { id:'drone', icon:'🚁', title:'Drone Görevi', en:'Drone Flight',
+        { id:'drone', icon:'🚁', title:'Drone Görevi', en:'Drone Flight', band:3,
           desc:'İtki yerçekimine karşı! İrtifa PID ile görev noktalarına uç, kargo taşı, fırtınada yumuşak in. Ki dersi burada.',
           href:'build.html?sim=drone' },
-        { id:'hill', icon:'⛰️', title:'Tepe Tırmanışı', en:'Hill Climb',
+        { id:'hill', icon:'⛰️', title:'Tepe Tırmanışı', en:'Hill Climb', band:2,
           desc:'Tork tırmandırır, tutuş patinajı önler, momentum rampaları aşırtır. Parça seçiminin gerçek sınavı!',
           href:'build.html?sim=hill' },
-        { id:'swarm', icon:'🐝', title:'Sürü Robotları', en:'Swarm Robotics',
-          desc:'6 robot, lider yok! Ayrılma-hizalanma-toplanma içgüdüleriyle sürü zekâsı doğsun. Emergence dersi.',
-          href:'build.html?sim=swarm' },
-        { id:'sera', icon:'🌱', title:'Akıllı Sera', en:'IoT Telemetry',
-          desc:'Telemetri kitinin provası! ESP32 telefonuna veri yollar, sen komut gönderirsin — ama Wi-Fi kopunca bitkiyi cihaz üstü kurallar kurtarır.',
-          href:'build.html?sim=sera' },
-        { id:'cansat', icon:'🛰️', title:'CanSat Kapsülü', en:'Model Satellite',
-          desc:'Model uydu görevi: çift paraşüt zamanlaması, açılma şoku, rüzgâr sürüklenmesi, RF karartması. Uçuş bilgisayarını sen yazıyorsun!',
-          href:'build.html?sim=cansat' },
-        { id:'kol', icon:'🦾', title:'Robot Kol', en:'Robot Arm',
-          desc:'İki eklem, bir kıskaç: ileri ve ters kinematik! Kutuları taşı, istifle, raf altından al — ağır yük sarkması ve nazik bırakış sanatı.',
-          href:'build.html?sim=kol' },
-        { id:'vinc', icon:'🏗️', title:'Kule Vinci', en:'Anti-Sway Crane',
-          desc:'Halattaki yük bir sarkaçtır! Sallanan yük tutulmaz, bırakılmaz. Kademeli hız + aktif söndürme — anti-sway kontrolün kalbi.',
-          href:'build.html?sim=vinc' },
-        { id:'rov', icon:'🤿', title:'Sualtı ROV', en:'Underwater ROV',
-          desc:'Arşimet pilotluğu: balast su alınca batarsın! Akıntı katmanları, kablo menzili, güvenlik molası — derin deniz görevleri.',
-          href:'build.html?sim=rov' },
-        { id:'bant', icon:'🏭', title:'Ayıklama Bandı', en:'Sorting Line',
-          desc:'Konveyör akar, sensör okur, kuralların karar verir. Öncelik sırası + kapsam + hız↔doğruluk: fabrika otomasyonunun kalbi.',
-          href:'build.html?sim=bant' },
-        { id:'cnc', icon:'✏️', title:'CNC Çizici', en:'CNC Plotter',
-          desc:'G-code mantığı: adım adım çiz! Hız köşeleri yuvarlar, dişli boşluğu çizgiyi kaydırır — kalibrasyon sanatıyla tanış.',
-          href:'build.html?sim=cnc' },
-        { id:'solar', icon:'☀️', title:'Güneş Takipçisi', en:'Solar Tracker',
-          desc:'Kosinüs yasası + motor muhasebesi: titreyen takipçi kazandığından çok harcar! Ölü bant ve bulut tuzağı dersleri.',
-          href:'build.html?sim=solar' },
-        { id:'roket', icon:'🚀', title:'Roket İniş', en:'Hoverslam',
+        { id:'roket', icon:'🚀', title:'Roket İniş', en:'Hoverslam', band:4,
           desc:'Suicide burn: motoru tam doğru anda ateşle! h = v²/(2a) formülü, değişken kütle, ateşleme gecikmesi — Falcon 9 matematiği.',
           href:'build.html?sim=roket' },
-        { id:'depo', icon:'🤖', title:'Depo Filosu', en:'AGV Fleet',
+        { id:'vinc', icon:'🏗️', title:'Kule Vinci', en:'Anti-Sway Crane', band:3,
+          desc:'Halattaki yük bir sarkaçtır! Sallanan yük tutulmaz, bırakılmaz. Kademeli hız + aktif söndürme — anti-sway kontrolün kalbi.',
+          href:'build.html?sim=vinc' },
+        { id:'rov', icon:'🤿', title:'Sualtı ROV', en:'Underwater ROV', band:3,
+          desc:'Arşimet pilotluğu: balast su alınca batarsın! Akıntı katmanları, kablo menzili, güvenlik molası — derin deniz görevleri.',
+          href:'build.html?sim=rov' },
+      ]},
+    { id:'fabrika', g:'g4', icon:'🏭',
+      title:'Fabrika <em>&amp; Otomasyon</em>',
+      desc:'Endüstriyel robotlar: konveyör ayıklama, CNC çizim, güneş takibi, çok robotlu depo filosu ve pick-and-place kol. Öncelik kuralları, kalibrasyon, trafik ve kinematik.',
+      sims:[
+        { id:'bant', icon:'🏭', title:'Ayıklama Bandı', en:'Sorting Line', band:2,
+          desc:'Konveyör akar, sensör okur, kuralların karar verir. Öncelik sırası + kapsam + hız↔doğruluk: fabrika otomasyonunun kalbi.',
+          href:'build.html?sim=bant' },
+        { id:'cnc', icon:'✏️', title:'CNC Çizici', en:'CNC Plotter', band:3,
+          desc:'G-code mantığı: adım adım çiz! Hız köşeleri yuvarlar, dişli boşluğu çizgiyi kaydırır — kalibrasyon sanatıyla tanış.',
+          href:'build.html?sim=cnc' },
+        { id:'solar', icon:'☀️', title:'Güneş Takipçisi', en:'Solar Tracker', band:2,
+          desc:'Kosinüs yasası + motor muhasebesi: titreyen takipçi kazandığından çok harcar! Ölü bant ve bulut tuzağı dersleri.',
+          href:'build.html?sim=solar' },
+        { id:'kol', icon:'🦾', title:'Robot Kol', en:'Robot Arm', band:4,
+          desc:'İki eklem, bir kıskaç: ileri ve ters kinematik! Kutuları taşı, istifle, raf altından al — ağır yük sarkması ve nazik bırakış sanatı.',
+          href:'build.html?sim=kol' },
+        { id:'depo', icon:'🤖', title:'Depo Filosu', en:'AGV Fleet', band:4,
           desc:'Dört robot, aynı koridorlar: sorun rota değil TRAFİK! Kavşak sözleşmesi, rezervasyon penceresi ve efsanevi deadlock dersi.',
           href:'build.html?sim=depo' },
-        { id:'sinyal', icon:'📡', title:'Sinyal Avcısı', en:'RSSI Trilateration',
+      ]},
+    { id:'uzay', g:'g5', icon:'🛰️',
+      title:'Uzay <em>&amp; Telemetri</em>',
+      desc:'Uzaktan algılama ve uçuş bilgisayarları: model uydu görevi, IoT sera telemetrisi ve sinyal gücünden konum bulma. Gürültülü veri, RF, paraşüt zamanlaması — gerçek kitlere köprü.',
+      sims:[
+        { id:'cansat', icon:'🛰️', title:'CanSat Kapsülü', en:'Model Satellite', band:4,
+          desc:'Model uydu görevi: çift paraşüt zamanlaması, açılma şoku, rüzgâr sürüklenmesi, RF karartması. Uçuş bilgisayarını sen yazıyorsun!',
+          href:'build.html?sim=cansat' },
+        { id:'sera', icon:'🌱', title:'Akıllı Sera', en:'IoT Telemetry', band:3,
+          desc:'Telemetri kitinin provası! ESP32 telefonuna veri yollar, sen komut gönderirsin — ama Wi-Fi kopunca bitkiyi cihaz üstü kurallar kurtarır.',
+          href:'build.html?sim=sera' },
+        { id:'sinyal', icon:'📡', title:'Sinyal Avcısı', en:'RSSI Trilateration', band:3,
           desc:'Gizli vericiyi göremezsin — sinyal gücünden bul! Üç antenle trilaterasyon, gürültü filtreleme, GPS mantığı. Telemetri kitine köprü.',
           href:'build.html?sim=sinyal' },
-        { id:'hexapod', icon:'🕷️', title:'Altı Bacak', en:'Hexapod Gait',
+      ]},
+    { id:'suru', g:'g6', icon:'🐝',
+      title:'Sürü <em>&amp; Lokomosyon</em>',
+      desc:'Çok ajanlı zekâ ve gelişmiş hareket: lidersiz sürü, altı bacaklı yürüyüş, mikro fare hız turu ve çizgi labirenti cebiri. Emergence, gait ritmi ve haritalama algoritmaları.',
+      sims:[
+        { id:'swarm', icon:'🐝', title:'Sürü Robotları', en:'Swarm Robotics', band:3,
+          desc:'6 robot, lider yok! Ayrılma-hizalanma-toplanma içgüdüleriyle sürü zekâsı doğsun. Emergence dersi.',
+          href:'build.html?sim=swarm' },
+        { id:'hexapod', icon:'🕷️', title:'Altı Bacak', en:'Hexapod Gait', band:3,
           desc:'Altı bacak, tek ritim: tripod yürüyüşü! Hangi bacak ne zaman kalkar? Yürüme bir koordinasyon dansıdır — görsel şölen.',
           href:'build.html?sim=hexapod' },
-        { id:'fare', icon:'🐭', title:'Mikro Fare', en:'Micromouse',
+        { id:'linemaze', icon:'🌀', title:'Çizgi Labirenti', en:'Line Maze', band:3,
+          desc:'Sol-el kuralı + LSRB cebiri: keşfet, kaydet, sadeleştir, yarış! Kavşak disiplininin ve kestirme haritalamanın dersi.',
+          href:'build.html?sim=linemaze' },
+        { id:'fare', icon:'🐭', title:'Mikro Fare', en:'Micromouse', band:4,
           desc:'Katalog finali: flood-fill haritalama, iyimser keşif, hız turu. Duvar takibinin matematiksel imkânsızlıkla tanıştığı yer!',
           href:'build.html?sim=fare' },
       ]},
   ];
 
-  const host = document.getElementById('tiers');
-  TIERS.forEach(tier=>{
+  const BANDNAME = {1:'Başlangıç',2:'Orta',3:'İleri',4:'Uzman'};
+
+  // path nav
+  const nav = document.getElementById('pathnav');
+  CATS.forEach((c,i)=>{
+    const a=document.createElement('a');
+    a.className=c.g; a.href='#'+c.id;
+    a.innerHTML='<span class="pic">'+c.icon+'</span><span class="pt">'+c.title.replace(/<\/?em>/g,'')+'</span><span class="cnt">'+c.sims.length+'</span>';
+    nav.appendChild(a);
+  });
+
+  // sections
+  const host = document.getElementById('cats');
+  CATS.forEach(cat=>{
     const sec = document.createElement('section');
-    sec.className = 'tier ' + tier.cls;
-    sec.id = tier.id;
+    sec.className = 'cat ' + cat.g;
+    sec.id = cat.id;
     sec.innerHTML =
-      '<div class="tier-head">'+
-        '<div class="tier-badge"><span>'+tier.icon+'</span><small>SEVİYE '+tier.num+'</small></div>'+
-        '<div class="tier-title">'+
-          '<h2>'+tier.title+'<span class="tcount">'+tier.sims.length+' SENARYO</span></h2>'+
-          '<p>'+tier.desc+'</p>'+
+      '<div class="cat-head">'+
+        '<div class="cat-badge">'+cat.icon+'</div>'+
+        '<div class="cat-title">'+
+          '<h2>'+cat.title+'<span class="ccount">'+cat.sims.length+' SENARYO</span></h2>'+
+          '<p>'+cat.desc+'</p>'+
         '</div>'+
       '</div>'+
-      '<div class="tier-line"></div>';
+      '<div class="cat-line"></div>';
     const grid = document.createElement('div');
     grid.className = 'grid';
-    tier.sims.forEach(s=>{
+    cat.sims.forEach(s=>{
       const el = document.createElement('a');
       el.className = 'card';
       el.href = s.href;
       el.innerHTML =
-        '<div class="ribbon">AÇIK</div>'+
+        '<div class="band b'+s.band+'">'+BANDNAME[s.band]+'</div>'+
         '<div class="ic">'+s.icon+'</div>'+
         '<h3>'+s.title+'</h3>'+
         '<div class="en">'+s.en+'</div>'+
