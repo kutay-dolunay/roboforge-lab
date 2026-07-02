@@ -305,7 +305,7 @@
   ];
 
   // ---- scenario routing ----
-  const LABS = { line:'line-follower.html', maze:'maze.html', sumo:'sumo.html', light:'light.html', obstacle:'obstacle.html', pid:'pid.html', rescue:'rescue.html', delivery:'delivery.html', soccer:'soccer.html', fire:'fire.html', convoy:'convoy.html', park:'park.html', balance:'balance.html', drone:'drone.html', hill:'hill.html', swarm:'swarm.html', sera:'sera.html', cansat:'cansat.html' };
+  const LABS = { line:'line-follower.html', maze:'maze.html', sumo:'sumo.html', light:'light.html', obstacle:'obstacle.html', pid:'pid.html', rescue:'rescue.html', delivery:'delivery.html', soccer:'soccer.html', fire:'fire.html', convoy:'convoy.html', park:'park.html', balance:'balance.html', drone:'drone.html', hill:'hill.html', swarm:'swarm.html', sera:'sera.html', cansat:'cansat.html', kol:'kol.html' };
   const SIM = (function(){ try{ const q=new URLSearchParams(location.search).get('sim'); return LABS[q]?q:'line'; }catch(e){ return 'line'; } })();
   const LAB_HREF = LABS[SIM];
 
