@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RoboForge · Tepe Tırmanışı Laboratuvarı</title>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#0f172a; --panel2:#111c33; --line:#1e3a5f;
+    --sky:#38bdf8; --green:#22c55e; --amber:#f59e0b; --red:#ef4444; --purple:#a855f7;
+    --txt:#e2e8f0; --muted:#64748b; --muted2:#94a3b8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif;
+    background:radial-gradient(1100px 700px at 75% -15%,#15294a 0%,var(--bg) 55%)}
+  a{color:inherit;text-decoration:none}
+  .mono{font-family:'Courier New',monospace}
+  header.bar{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);
+    background:rgba(10,16,30,.85);backdrop-filter:blur(8px);position:sticky;top:0;z-index:40;flex-wrap:wrap}
+  .back{color:var(--muted2);font-size:.74rem;font-weight:700;border:1px solid var(--line);padding:7px 11px;border-radius:9px;white-space:nowrap}
+  .back:hover{border-color:var(--sky);color:var(--sky)}
+  .ttl b span{color:var(--sky)}
+  .ttl small{display:block;color:var(--muted);font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase}
+  .tabsTrack{display:flex;gap:6px;flex-wrap:wrap;max-width:640px}
+  .ttab{border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:5px 10px;cursor:pointer;
+    font-size:.72rem;font-weight:700;color:var(--muted2);transition:.14s;line-height:1.15;text-align:left}
+  .ttab small{display:block;font-size:.54rem;color:var(--muted);letter-spacing:.5px}
+  .ttab.on{border-color:var(--sky);color:var(--sky);background:#0c1a30}
+  .grow{flex:1}
+  .simspeed{display:flex;align-items:center;gap:7px;font-size:.68rem;color:var(--muted2)}
+  .simspeed input{width:90px;accent-color:var(--sky)}
+  .btn{padding:9px 16px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--txt);
+    font-weight:800;cursor:pointer;font-size:.8rem;letter-spacing:.4px;transition:.14s}
+  .btn:hover{border-color:var(--sky)}
+  .btn.run{background:linear-gradient(180deg,#16a34a,#15803d);border-color:#22c55e;color:#eafff0;box-shadow:0 0 16px rgba(34,197,94,.25)}
+  .btn.stop{background:linear-gradient(180deg,#dc2626,#b91c1c);border-color:#ef4444;color:#fff}
+  .btn.ghost{background:transparent;color:var(--muted2)}
+  .btn.outline{background:transparent;border-color:var(--sky);color:var(--sky)}
+
+  .layout{display:grid;grid-template-columns:1fr 380px;gap:14px;padding:14px 16px;max-width:1500px;margin:0 auto}
+  @media(max-width:1040px){.layout{grid-template-columns:1fr}}
+
+  .stageWrap{position:relative}
+  canvas#arena{width:100%;border-radius:14px;border:1px solid #16202e;background:#0a0d12;display:block}
+  .hud{position:absolute;top:12px;left:12px;display:flex;gap:8px;flex-wrap:wrap}
+  .hudbox{background:rgba(8,12,24,.88);border:1px solid var(--line);border-radius:10px;padding:7px 12px;min-width:70px}
+  .hudbox .l{font-size:.54rem;color:var(--muted);letter-spacing:1.5px;font-weight:700}
+  .hudbox .v{font-size:1rem;font-weight:800;margin-top:1px}
+  .hudbox .v.ok{color:var(--green)} .hudbox .v.bad{color:#fca5a5} .hudbox .v.hot{color:var(--amber)}
+  .hint{margin-top:10px;background:var(--panel2);border:1px solid var(--line);border-radius:11px;
+    padding:11px 15px;font-size:.85rem;color:var(--muted2)}
+  .hint b{color:var(--green)}
+
+  .rdock{margin-top:10px;border:1px solid rgba(34,197,94,.45);border-radius:13px;overflow:hidden;
+    background:linear-gradient(180deg,#0e1a2e,#0b1220)}
+  .rdock.lose{border-color:rgba(239,68,68,.45)}
+  .rdock .rd-head{padding:10px 16px;font-weight:800;font-size:.95rem;color:var(--green);
+    background:rgba(34,197,94,.08);border-bottom:1px solid rgba(34,197,94,.25)}
+  .rdock.lose .rd-head{color:#fca5a5;background:rgba(239,68,68,.07);border-bottom-color:rgba(239,68,68,.25)}
+  .rdock .rd-body{padding:14px 16px}
+  .rdock .rd-medal{font-size:1.15rem;font-weight:800;color:var(--amber);margin-bottom:2px}
+  .rdock .rd-cmt{font-size:.78rem;color:var(--muted2);margin-bottom:12px}
+  .rdock .rd-stats{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:12px}
+  .rdock .rd-stat .l{font-size:.56rem;letter-spacing:1.5px;color:var(--muted);font-weight:700}
+  .rdock .rd-stat .v{font-size:1.25rem;font-weight:800;margin-top:2px}
+  .rdock .rd-stat .v.ok{color:var(--green)} .rdock .rd-stat .v.bad{color:#fca5a5}
+  .rdock .rd-tip{background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.3);border-radius:10px;
+    padding:9px 13px;font-size:.8rem;color:var(--muted2);margin-bottom:13px}
+  .rdock .rd-btns{display:flex;gap:9px;flex-wrap:wrap}
+
+  .side .tabbar{display:flex;gap:6px;margin-bottom:12px}
+  .stab{flex:1;text-align:center;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--panel);
+    cursor:pointer;font-weight:800;font-size:.8rem;color:var(--muted2)}
+  .stab.on{border-color:var(--sky);color:var(--sky);background:#0c1a30}
+  .card{border:1px solid var(--line);border-radius:13px;background:var(--panel);padding:14px;margin-bottom:12px}
+  .card h4{margin:0 0 8px;font-size:.66rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+  .card p.exp{font-size:.76rem;color:var(--muted2);line-height:1.5;margin:0 0 10px}
+
+  .modeRow{display:flex;gap:6px;margin-bottom:12px}
+  .modeBtn{flex:1;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel);cursor:pointer;
+    font-weight:800;font-size:.76rem;color:var(--muted2)}
+  .modeBtn.on{border-color:var(--purple);color:#d8b4fe;background:#160f2b}
+
+  .rule{border:1px solid var(--line);border-radius:11px;background:var(--panel2);padding:9px;margin-bottom:8px}
+  .rule.active{border-color:var(--green);box-shadow:0 0 10px rgba(34,197,94,.25)}
+  .rule .chips{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:7px}
+  .chip{border:1px solid #26364e;border-radius:7px;padding:3px 6px;font-size:.56rem;font-weight:800;cursor:pointer;
+    background:#0d1524;color:var(--muted);min-width:44px;text-align:center;line-height:1.25}
+  .chip small{display:block;font-size:.44rem;color:var(--muted);letter-spacing:.5px;font-weight:700}
+  .chip.on{border-color:var(--green);color:#4ade80}
+  .chip.off{border-color:var(--red);color:#fca5a5}
+  .motors{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .mot{display:flex;gap:4px;align-items:center;background:#0d1524;border:1px solid #26364e;border-radius:8px;padding:4px 6px}
+  .mot b{font-size:.6rem;color:var(--muted2)}
+  .mot select,.mot input{background:#0b1220;border:1px solid #26364e;color:var(--txt);border-radius:6px;font-size:.66rem;padding:2px 3px}
+  .mot input{width:44px}
+  .rtools{display:flex;gap:5px;margin-left:auto}
+  .iconbtn{border:1px solid var(--line);background:var(--panel);color:var(--muted2);border-radius:7px;
+    width:24px;height:24px;cursor:pointer;font-size:.7rem;line-height:1}
+  .iconbtn:hover{border-color:var(--sky);color:var(--sky)}
+  .iconbtn.del:hover{border-color:var(--red);color:#fca5a5}
+  .addRule{width:100%;padding:9px;border:1px dashed var(--line);border-radius:10px;background:transparent;
+    color:var(--muted2);font-weight:700;cursor:pointer;font-size:.78rem}
+  .addRule:hover{border-color:var(--sky);color:var(--sky)}
+  .defTag{font-size:.58rem;letter-spacing:1px;color:var(--amber);font-weight:800;margin-bottom:5px}
+
+  .sliderRow{margin:10px 0}
+  .sliderRow label{display:flex;justify-content:space-between;font-size:.74rem;color:var(--muted2);margin-bottom:4px}
+  .sliderRow label b{color:var(--sky)}
+  input[type=range]{width:100%;accent-color:var(--sky)}
+
+  .kunye .chipsRow{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px}
+  .kunye .kchip{border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:4px 8px;font-size:.66rem;color:var(--muted2)}
+  .kunye .kchip b{color:var(--txt)}
+  .kstats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+  .kstat{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 4px;text-align:center}
+  .kstat .l{font-size:.5rem;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
+  .kstat .v{font-size:.95rem;font-weight:800}
+  .kstat .v small{font-size:.5rem;color:var(--muted2)}
+  .bchipR{display:inline-block;border:1px solid var(--line);background:var(--panel2);border-radius:7px;
+    padding:3px 8px;font-size:.7rem;color:var(--muted2);margin:2px 2px 2px 0}
+
+  #resultWrap{position:fixed;inset:0;background:rgba(5,8,16,.7);backdrop-filter:blur(4px);display:none;
+    align-items:center;justify-content:center;z-index:80;padding:18px}
+  #resultWrap.show{display:flex}
+  .result{max-width:520px;width:100%;border:1px solid var(--line);border-radius:18px;padding:24px;
+    background:linear-gradient(180deg,#101b31,#0b1220);box-shadow:0 30px 80px rgba(0,0,0,.6);max-height:92vh;overflow:auto}
+  .result h3{margin:0 0 4px;font-size:1.2rem}
+  .result h3.win{color:var(--green)} .result h3.lose{color:#fca5a5}
+  .rstats{display:flex;gap:8px;margin:12px 0}
+  .rstat{flex:1;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px;text-align:center}
+  .rstat .l{font-size:.54rem;color:var(--muted);letter-spacing:1px}
+  .rstat .v{font-size:1.05rem;font-weight:800;margin-top:2px}
+  .rbtns{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+
+  #tutwrap{position:fixed;inset:0;background:rgba(5,8,16,.75);display:none;align-items:center;justify-content:center;z-index:90;padding:18px}
+  .tut{max-width:460px;border:1px solid var(--sky);border-radius:16px;background:#0d1830;padding:22px;box-shadow:0 0 60px rgba(56,189,248,.2)}
+  .tut h3{margin:0 0 8px;color:var(--sky);font-size:1.1rem}
+  .tut p{font-size:.86rem;color:var(--muted2);line-height:1.6;margin:0 0 14px}
+  .tut .dots{display:flex;gap:5px;margin-bottom:12px}
+  .tut .dots i{width:8px;height:8px;border-radius:50%;background:#1e293b}
+  .tut .dots i.on{background:var(--sky)}
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:rgba(8,12,24,.95);
+    border:1px solid var(--line);padding:10px 18px;border-radius:11px;font-size:.8rem;font-weight:700;opacity:0;
+    transition:.25s;pointer-events:none;z-index:99}
+  #toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header class="bar">
+  <a class="back" href="./">← Katalog</a>
+  <div class="ttl"><b>Robo<span>Forge</span> · Tepe Tırmanışı</b><small id="buildLine">VARSAYILAN ROBOT</small></div>
+  <div class="tabsTrack" id="trackTabs"></div>
+  <div class="grow"></div>
+  <div class="simspeed">Sim Hızı <input type="range" id="simSpeed" min="0.5" max="3" step="0.5" value="1"><span id="simSpeedV" class="mono">1.0x</span></div>
+  <button class="btn run" id="runBtn">▶ TIRMAN</button>
+  <button class="btn ghost" id="resetBtn">⟲ Sıfırla</button>
+  <button class="btn ghost" id="shareBtn">🔗 Paylaş</button>
+  <button class="btn ghost" id="helpBtn">?</button>
+</header>
+
+<div class="layout">
+  <div class="stageWrap">
+    <canvas id="arena" width="920" height="560"></canvas>
+    <div class="hud">
+      <div class="hudbox"><div class="l">SÜRE</div><div class="v mono" id="hudT">0.0s</div></div>
+      <div class="hudbox"><div class="l">HIZ</div><div class="v mono" id="hudV">0.0</div></div>
+      <div class="hudbox"><div class="l">EĞİM</div><div class="v mono" id="hudE">0°</div></div>
+      <div class="hudbox"><div class="l">DURUM</div><div class="v" id="hudS">HAZIR</div></div>
+    </div>
+    <div class="hint" id="hint">⛰️ Zirveye ulaş! <b>Tork tırmandırır, tutuş patinajı önler, momentum kısa rampaları aşırtır.</b> Tekerlek boşa dönüyorsa daha çok gaz ÇARE DEĞİL — bu senaryo parça seçiminin sınavı.</div>
+    <div class="rdock" id="resultDock" style="display:none"></div>
+  </div>
+
+  <div class="side">
+    <div class="tabbar">
+      <div class="stab on" data-tab="robot">🤖 Robot</div>
+      <div class="stab" data-tab="kod">⛰️ Kod</div>
+    </div>
+
+    <div id="tab-robot">
+      <div class="card">
+        <h4>Dağcı Robot</h4>
+        <p class="exp">Eğim sensörü yokuşun dikliğini ölçer. Fizik acımasız: motor kuvveti <b>tutuş sınırını</b>
+          aşarsa tekerlek boşa döner (patinaj) ve gücün %85’i bile yetmeyebilir. Torklu motor + yapışkan teker = dağcı seti.</p>
+      </div>
+      <div class="card">
+        <h4>Şasi (robotundan gelir)</h4>
+        <div class="sliderRow"><label>Motor Torku <b id="fLabel">Orta</b></label>
+          <input type="range" id="pForce" min="6" max="14" step="0.5" value="9.5"></div>
+        <div class="sliderRow"><label>Teker Tutuşu <b id="gLabel">Normal</b></label>
+          <input type="range" id="pGrip" min="0.35" max="0.9" step="0.05" value="0.62"></div>
+      </div>
+      <div class="card kunye" id="kunye"></div>
+    </div>
+
+    <div id="tab-kod" style="display:none">
+      <div class="modeRow">
+        <button class="modeBtn on" id="modeRules">🧩 Eğim Kuralları</button>
+        <button class="modeBtn" id="modePid">📈 Hız Sabitleyici</button>
+      </div>
+      <div id="rulesPanel">
+        <div class="card">
+          <h4>Eğim Bandı Kuralları</h4>
+          <p class="exp">Her eğim bandına bir gaz yüzdesi. Sır: <b>düzlükte hızlan</b> ki rampaya momentumla gir.
+            Dik inişte Geri = motor freni!</p>
+          <div id="rulesList"></div>
+          <button class="addRule" id="addRule">+ Yeni Kural</button>
+          <div style="margin-top:12px">
+            <div class="defTag">VARSAYILAN (hiçbiri eşleşmezse)</div>
+            <div id="defRule"></div>
+          </div>
+        </div>
+      </div>
+      <div id="pidPanel" style="display:none">
+        <div class="card">
+          <h4>Hız Sabitleyici (Cruise)</h4>
+          <p class="exp">gaz = Kp·(hedef−hız) + Ki·∫hata. Yokuşta hız düşer, Ki birikir ve gazı kalıcı artırır —
+            integralin yokuş dersi. Hedefi düşük tutarsan momentum kaybedersin!</p>
+          <div class="sliderRow"><label>Hedef Hız <b id="pHedefV">5.0</b></label>
+            <input type="range" id="pHedef" min="1.5" max="7" step="0.1" value="5.0"></div>
+          <div class="sliderRow"><label>Kp <b id="pKpV">1.5</b></label>
+            <input type="range" id="pKp" min="0.3" max="3.5" step="0.1" value="1.5"></div>
+          <div class="sliderRow"><label>Ki <b id="pKiV">1.0</b></label>
+            <input type="range" id="pKi" min="0" max="2" step="0.1" value="1.0"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="resultWrap"><div class="result" id="resultBox"></div></div>
+<div id="tutwrap"><div class="tut" id="tutBox"></div></div>
+<div id="toast"></div>
+
+<script src="robot-data.js?v=2"></script>
+<script src="hill-core.js?v=1"></script>
+<script>
+(function(){
+  const HC = window.HillCore;
+  const CVS = document.getElementById('arena'), CTX = CVS.getContext('2d');
+
+  const LAB = {
+    courseIdx: 0, mode: 'rules',
+    rules: HC.starterRules(), defaultRule: HC.starterDefault(),
+    pid: HC.defaultPID(), params: HC.defaultParams(),
+    sim: null, raf: null, lastTs: 0, simSpeed: 1, terr: null,
+  };
+
+  function rebuildTerr(){ LAB.terr = HC.buildTerrain(HC.COURSES[LAB.courseIdx]); }
+  function W2S(x,y){
+    const sx = 30 + (x/50)*(CVS.width-60);
+    const sy = CVS.height-90 - y*((CVS.height-220)/11);
+    return [sx,sy];
+  }
+
+  function drawScene(last){
+    const course=HC.COURSES[LAB.courseIdx];
+    const g=CTX.createLinearGradient(0,0,0,CVS.height);
+    g.addColorStop(0,'#0a0f1e'); g.addColorStop(1,'#0e1524');
+    CTX.fillStyle=g; CTX.fillRect(0,0,CVS.width,CVS.height);
+    // terrain fill
+    CTX.beginPath();
+    for(let i=0;i<LAB.terr.xs.length;i++){
+      const q=W2S(LAB.terr.xs[i],LAB.terr.ys[i]);
+      i?CTX.lineTo(q[0],q[1]):CTX.moveTo(q[0],q[1]);
+    }
+    CTX.lineTo(CVS.width-30,CVS.height); CTX.lineTo(30,CVS.height); CTX.closePath();
+    const tg=CTX.createLinearGradient(0,100,0,CVS.height);
+    tg.addColorStop(0,'#1d2a40'); tg.addColorStop(1,'#101724');
+    CTX.fillStyle=tg; CTX.fill();
+    CTX.strokeStyle='#3a4f72'; CTX.lineWidth=3;
+    CTX.beginPath();
+    for(let i=0;i<LAB.terr.xs.length;i++){
+      const q=W2S(LAB.terr.xs[i],LAB.terr.ys[i]);
+      i?CTX.lineTo(q[0],q[1]):CTX.moveTo(q[0],q[1]);
+    }
+    CTX.stroke();
+    // rain patches
+    (course.surface||[]).forEach(s=>{
+      CTX.strokeStyle='rgba(56,189,248,.6)'; CTX.lineWidth=5; CTX.setLineDash([2,7]);
+      CTX.beginPath();
+      let started=false;
+      for(let i=0;i<LAB.terr.xs.length;i++){
+        if(LAB.terr.xs[i]>=s.x0&&LAB.terr.xs[i]<=s.x1){
+          const q=W2S(LAB.terr.xs[i],LAB.terr.ys[i]+0.12);
+          started?CTX.lineTo(q[0],q[1]):CTX.moveTo(q[0],q[1]); started=true;
+        }
+      }
+      CTX.stroke(); CTX.setLineDash([]);
+      const mid=W2S((s.x0+s.x1)/2,HC.heightAt(LAB.terr,(s.x0+s.x1)/2));
+      CTX.font='13px Segoe UI'; CTX.textAlign='center'; CTX.fillStyle='rgba(147,197,253,.8)';
+      CTX.fillText('🌧️ kaygan', mid[0], mid[1]-26);
+    });
+    // finish flag
+    const fq=W2S(HC.FINISH_X,HC.heightAt(LAB.terr,HC.FINISH_X));
+    CTX.strokeStyle='#e2e8f0'; CTX.lineWidth=2;
+    CTX.beginPath(); CTX.moveTo(fq[0],fq[1]); CTX.lineTo(fq[0],fq[1]-34); CTX.stroke();
+    CTX.fillStyle='#22c55e';
+    CTX.beginPath(); CTX.moveTo(fq[0],fq[1]-34); CTX.lineTo(fq[0]+18,fq[1]-28); CTX.lineTo(fq[0],fq[1]-22); CTX.closePath(); CTX.fill();
+    // robot
+    const x=LAB.sim?LAB.sim.x:1;
+    const y=HC.heightAt(LAB.terr,x);
+    const phi=HC.slopeAt(LAB.terr,x);
+    const q=W2S(x,y);
+    const scale=13;
+    CTX.save(); CTX.translate(q[0],q[1]-scale*0.55);
+    CTX.rotate(-Math.atan2(Math.sin(phi)*( (CVS.height-220)/11 )/( (CVS.width-60)/50 ),Math.cos(phi)) );
+    CTX.fillStyle='#1c2c49'; CTX.strokeStyle=LAB.sim&&LAB.sim.slip?'#f59e0b':'#38bdf8'; CTX.lineWidth=2;
+    CTX.beginPath(); CTX.roundRect(-scale,-scale*0.6,scale*2,scale*0.9,4); CTX.fill(); CTX.stroke();
+    CTX.fillStyle='#0b1220'; CTX.strokeStyle='#4a5f82';
+    [[-scale*0.6],[scale*0.6]].forEach(([wx])=>{
+      CTX.beginPath(); CTX.arc(wx,scale*0.42,scale*0.42,0,7); CTX.fill(); CTX.stroke();
+    });
+    if(LAB.sim&&LAB.sim.slip){
+      CTX.font='700 13px Segoe UI'; CTX.textAlign='center'; CTX.fillStyle='rgba(148,163,184,.8)';
+      CTX.fillText('💨', -scale*1.4, scale*0.5);
+      CTX.fillStyle='#fcd34d'; CTX.font='700 10px Segoe UI';
+      CTX.fillText('PATİNAJ!', 0, -scale);
+    }
+    CTX.restore();
+    // speed chart
+    if(LAB.sim&&LAB.sim.log.length>1){
+      const gh=56, gy0=CVS.height-8, gx0=60, gw=CVS.width-120;
+      CTX.fillStyle='rgba(8,12,24,.8)'; CTX.fillRect(gx0-8,gy0-gh-8,gw+16,gh+12);
+      const T=course.time, yFor=v=>gy0-(Math.max(0,Math.min(8,v))/8)*gh;
+      CTX.strokeStyle='#38bdf8'; CTX.lineWidth=1.6; CTX.beginPath();
+      LAB.sim.log.forEach((pt,i)=>{ const lx=gx0+(pt[0]/T)*gw, ly=yFor(pt[1]); i?CTX.lineTo(lx,ly):CTX.moveTo(lx,ly); });
+      CTX.stroke();
+      // slip markers
+      CTX.fillStyle='rgba(245,158,11,.5)';
+      LAB.sim.log.forEach(pt=>{ if(pt[3]){ const lx=gx0+(pt[0]/T)*gw; CTX.fillRect(lx,gy0-4,1.6,4); } });
+      CTX.fillStyle='#94a3b8'; CTX.font='600 9px Segoe UI'; CTX.textAlign='left';
+      CTX.fillText('hız grafiği (turuncu noktalar = patinaj)', gx0, gy0-gh-12);
+    }
+  }
+
+  function updateHud(last){
+    document.getElementById('hudT').textContent=(LAB.sim?LAB.sim.t:0).toFixed(1)+'s';
+    document.getElementById('hudV').textContent=(LAB.sim?LAB.sim.v:0).toFixed(1);
+    const phi=last?last.phi:HC.slopeAt(LAB.terr,LAB.sim?LAB.sim.x:1);
+    const E=document.getElementById('hudE');
+    E.textContent=(phi*57.3).toFixed(0)+'°';
+    E.className='v mono '+(phi>0.3?'bad':phi>0.12?'hot':'ok');
+    const s=document.getElementById('hudS');
+    if(!LAB.sim){ s.textContent='HAZIR'; s.className='v'; }
+    else if(LAB.sim.status==='running'){ s.textContent=LAB.sim.slip?'PATİNAJ!':'TIRMANIYOR'; s.className='v '+(LAB.sim.slip?'hot':'ok'); }
+    else if(LAB.sim.status==='success'){ s.textContent='ZİRVE!'; s.className='v ok'; }
+    else { s.textContent='BAŞARISIZ'; s.className='v bad'; }
+    if(LAB.mode==='rules'&&last){
+      document.querySelectorAll('.rule').forEach(el=>el.classList.remove('active'));
+      const el=document.getElementById(last.ruleIndex===-1?'ruleDef':'rule'+last.ruleIndex);
+      if(el) el.classList.add('active');
+    }
+  }
+
+  function buildConfig(){
+    return { course: HC.COURSES[LAB.courseIdx], mode: LAB.mode, rules: LAB.rules,
+      defaultRule: LAB.defaultRule, pid: LAB.pid, params: LAB.params };
+  }
+  function startRun(){
+    stopLoop(); hideResult();
+    LAB.sim = HC.createSim(buildConfig());
+    document.getElementById('runBtn').textContent='■ DURDUR';
+    document.getElementById('runBtn').className='btn stop';
+    LAB.lastTs=0; LAB.raf=requestAnimationFrame(loop);
+  }
+  function loop(ts){
+    if(!LAB.lastTs) LAB.lastTs=ts;
+    let dt=(ts-LAB.lastTs)/1000; LAB.lastTs=ts;
+    if(dt>0.1) dt=0.1;
+    let last=null;
+    const steps=Math.max(1,Math.round(dt*60*LAB.simSpeed));
+    for(let i=0;i<steps;i++){ last=HC.tickSim(LAB.sim,1/60); if(LAB.sim.status!=='running') break; }
+    drawScene(last); updateHud(last);
+    if(LAB.sim.status==='running') LAB.raf=requestAnimationFrame(loop);
+    else { stopRunUi(); setTimeout(showResult,450); }
+  }
+  function stopLoop(){ if(LAB.raf) cancelAnimationFrame(LAB.raf); LAB.raf=null; }
+  function stopRunUi(){
+    document.getElementById('runBtn').textContent='▶ TIRMAN';
+    document.getElementById('runBtn').className='btn run';
+  }
+  function resetSim(){ stopLoop(); stopRunUi(); LAB.sim=null; drawScene(null); updateHud(null); hideResult(); }
+  function hideResult(){
+    document.getElementById('resultDock').style.display='none';
+    document.getElementById('hint').style.display='block';
+    document.getElementById('resultWrap').classList.remove('show');
+  }
+
+  const REASONS={ summit:'Zirveye ulaştın!', rollback:'Robot geriye kaydı! ⬇️',
+    stuck:'Robot yokuşta çakılı kaldı.', timeout:'Süre doldu.' };
+  function showResult(){
+    const sim=LAB.sim; if(!sim) return;
+    const win=sim.status==='success';
+    const cls=HC.robotClass(sim);
+    const tips=HC.coach(sim);
+    const dock=document.getElementById('resultDock');
+    dock.className='rdock'+(win?'':' lose');
+    dock.innerHTML =
+      '<div class="rd-head">'+(win?'⛰️ Zirveye Ulaştın!':'❌ Tırmanış Başarısız')+'</div>'+
+      '<div class="rd-body">'+
+        (cls?'<div class="rd-medal">'+cls.name+'</div><div class="rd-cmt">'+(cls.cmt||'')+'</div>'
+            :'<div class="rd-cmt">'+(REASONS[sim.reason]||'')+'</div>')+
+        '<div class="rd-stats">'+
+          '<div class="rd-stat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
+          '<div class="rd-stat"><div class="l">MESAFE</div><div class="v mono">'+Math.round(sim.maxX/HC.FINISH_X*100)+'%</div></div>'+
+          '<div class="rd-stat"><div class="l">PATİNAJ</div><div class="v mono">'+sim.slipTime.toFixed(1)+'s</div></div>'+
+          '<div class="rd-stat"><div class="l">DURUM</div><div class="v '+(win?'ok':'bad')+'">'+(win?'ZİRVE':'BAŞARISIZ')+'</div></div>'+
+        '</div>'+
+        (tips.length?'<div class="rd-tip">💡 '+tips[0]+'</div>':'')+
+        '<div class="rd-btns">'+
+          '<button class="btn run" id="againBtn">⟲ Tekrar Dene</button>'+
+          '<button class="btn outline" id="reportBtn">📄 Raporu Önizle</button>'+
+        '</div>'+
+      '</div>';
+    document.getElementById('hint').style.display='none';
+    dock.style.display='block';
+    document.getElementById('againBtn').onclick=()=>{ hideResult(); startRun(); };
+    document.getElementById('reportBtn').onclick=openReport;
+  }
+
+  function openReport(){
+    const sim=LAB.sim; if(!sim) return;
+    let build=null; try{ build=JSON.parse(localStorage.getItem('rf_robot')); }catch(e){}
+    const RD=window.RobotData;
+    let chips='<span class="bchipR">Varsayılan robot</span>';
+    if(build&&build.motor&&RD){
+      chips=RD.ORDER.map(cat=>{ const o=RD.opt(cat,build[cat]);
+        return o?'<span class="bchipR">'+o.icon+' '+o.name+'</span>':''; }).join(' ');
+    }
+    const win=sim.status==='success';
+    const course=HC.COURSES[LAB.courseIdx];
+    const box=document.getElementById('resultBox');
+    box.innerHTML =
+      '<h3 class="'+(win?'win':'lose')+'">📄 Tırmanış Raporu — '+course.name+'</h3>'+
+      '<div style="margin:8px 0;font-size:.8rem;color:var(--muted2)">'+chips+'</div>'+
+      '<div style="font-size:.76rem;color:var(--sky);margin-bottom:8px">Tork '+LAB.params.force.toFixed(1)+' · Tutuş '+LAB.params.grip.toFixed(2)+' · '+
+        (LAB.mode==='pid'?'📈 Cruise (hedef '+LAB.pid.hedef.toFixed(1)+')':'🧩 Eğim Kuralları')+'</div>'+
+      '<div class="rstats">'+
+        '<div class="rstat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
+        '<div class="rstat"><div class="l">MESAFE</div><div class="v mono">'+Math.round(sim.maxX/HC.FINISH_X*100)+'%</div></div>'+
+        '<div class="rstat"><div class="l">PATİNAJ</div><div class="v mono">'+sim.slipTime.toFixed(1)+'s</div></div>'+
+        '<div class="rstat"><div class="l">DURUM</div><div class="v" style="color:'+(win?'var(--green)':'#fca5a5')+'">'+(win?'ZİRVE':'KALDI')+'</div></div>'+
+      '</div>'+
+      '<canvas id="repMap" width="460" height="180" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#0a0d12"></canvas>'+
+      '<div class="rbtns"><button class="btn ghost" id="repClose">Kapat</button></div>';
+    document.getElementById('resultWrap').classList.add('show');
+    document.getElementById('repClose').onclick=()=>document.getElementById('resultWrap').classList.remove('show');
+    const cv=document.getElementById('repMap'), x=cv.getContext('2d');
+    const w2=(wx,wy)=>[10+(wx/50)*(cv.width-20), cv.height-16-wy*((cv.height-40)/11)];
+    x.strokeStyle='#3a4f72'; x.lineWidth=2; x.beginPath();
+    for(let i=0;i<LAB.terr.xs.length;i++){ const q=w2(LAB.terr.xs[i],LAB.terr.ys[i]); i?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]); }
+    x.stroke();
+    const rq=w2(sim.maxX,HC.heightAt(LAB.terr,sim.maxX));
+    x.fillStyle=win?'#22c55e':'#ef4444'; x.beginPath(); x.arc(rq[0],rq[1],5,0,7); x.fill();
+  }
+
+  // ---- rules editor ----
+  const CHIP_DEFS=[
+    { key:0, name:'DİK YOKUŞ', sub:'>19°' }, { key:1, name:'YOKUŞ', sub:'7-19°' },
+    { key:2, name:'DÜZ', sub:'±7°' }, { key:3, name:'İNİŞ', sub:'-7..-19°' },
+    { key:4, name:'DİK İNİŞ', sub:'<-19°' },
+  ];
+  function ruleEl(rule,ri,isDef){
+    const el=document.createElement('div'); el.className='rule'; el.id=isDef?'ruleDef':'rule'+ri;
+    if(!isDef){
+      const chips=document.createElement('div'); chips.className='chips';
+      CHIP_DEFS.forEach(def=>{
+        const val=rule.pattern[def.key]||'any';
+        const ch=document.createElement('div');
+        ch.className='chip'+(val==='on'?' on':val==='off'?' off':'');
+        ch.innerHTML=def.name+'<small>'+def.sub+(val==='any'?' · fark etmez':val==='on'?' · BU BANT':' · DEĞİL')+'</small>';
+        ch.onclick=()=>{ rule.pattern[def.key]=val==='any'?'on':val==='on'?'off':'any'; buildRules(); };
+        chips.appendChild(ch);
+      });
+      el.appendChild(chips);
+    }
+    const mot=document.createElement('div'); mot.className='motors';
+    const m=rule.left;
+    const wrap=document.createElement('div'); wrap.className='mot';
+    wrap.innerHTML='<b>GAZ</b>';
+    const sel=document.createElement('select');
+    [['fwd','İleri'],['stop','Boş'],['rev','Fren/Geri']].forEach(([v,l])=>{
+      const o=document.createElement('option'); o.value=v; o.textContent=l; if(m.dir===v)o.selected=true; sel.appendChild(o); });
+    sel.onchange=()=>{ m.dir=sel.value; };
+    const inp=document.createElement('input'); inp.type='number'; inp.min=0; inp.max=100; inp.value=m.speed;
+    inp.onchange=()=>{ m.speed=Math.max(0,Math.min(100,+inp.value||0)); };
+    wrap.appendChild(sel); wrap.appendChild(inp);
+    mot.appendChild(wrap);
+    if(!isDef){
+      const tools=document.createElement('div'); tools.className='rtools';
+      const mk=(t,f,c)=>{ const b=document.createElement('button'); b.className='iconbtn'+(c?' '+c:''); b.textContent=t; b.onclick=f; return b; };
+      tools.appendChild(mk('↑',()=>{ if(ri>0){ const t=LAB.rules[ri]; LAB.rules[ri]=LAB.rules[ri-1]; LAB.rules[ri-1]=t; buildRules(); } }));
+      tools.appendChild(mk('↓',()=>{ if(ri<LAB.rules.length-1){ const t=LAB.rules[ri]; LAB.rules[ri]=LAB.rules[ri+1]; LAB.rules[ri+1]=t; buildRules(); } }));
+      tools.appendChild(mk('✕',()=>{ LAB.rules.splice(ri,1); buildRules(); },'del'));
+      mot.appendChild(tools);
+    }
+    el.appendChild(mot);
+    return el;
+  }
+  function buildRules(){
+    const list=document.getElementById('rulesList'); list.innerHTML='';
+    LAB.rules.forEach((r,i)=>list.appendChild(ruleEl(r,i,false)));
+    const def=document.getElementById('defRule'); def.innerHTML='';
+    def.appendChild(ruleEl(LAB.defaultRule,-1,true));
+  }
+  document.getElementById('addRule').onclick=()=>{
+    LAB.rules.push({ pattern:['any','any','any','any','any'], left:{dir:'fwd',speed:60} });
+    buildRules();
+  };
+
+  // ---- mode / pid / params ----
+  function setMode(m){
+    LAB.mode=m;
+    document.getElementById('modeRules').classList.toggle('on',m==='rules');
+    document.getElementById('modePid').classList.toggle('on',m==='pid');
+    document.getElementById('rulesPanel').style.display=m==='rules'?'block':'none';
+    document.getElementById('pidPanel').style.display=m==='pid'?'block':'none';
+  }
+  document.getElementById('modeRules').onclick=()=>setMode('rules');
+  document.getElementById('modePid').onclick=()=>setMode('pid');
+  function bindPid(){
+    const h=document.getElementById('pHedef'), kp=document.getElementById('pKp'), ki=document.getElementById('pKi');
+    h.value=LAB.pid.hedef; kp.value=LAB.pid.kp; ki.value=LAB.pid.ki;
+    const sync=()=>{ document.getElementById('pHedefV').textContent=(+h.value).toFixed(1);
+      document.getElementById('pKpV').textContent=(+kp.value).toFixed(1);
+      document.getElementById('pKiV').textContent=(+ki.value).toFixed(1); };
+    h.oninput=()=>{ LAB.pid.hedef=+h.value; sync(); };
+    kp.oninput=()=>{ LAB.pid.kp=+kp.value; sync(); };
+    ki.oninput=()=>{ LAB.pid.ki=+ki.value; sync(); };
+    sync();
+  }
+  function bindParams(){
+    const f=document.getElementById('pForce'), g=document.getElementById('pGrip');
+    f.value=LAB.params.force; g.value=LAB.params.grip;
+    const sync=()=>{ document.getElementById('fLabel').textContent=LAB.params.force<8?'Zayıf':LAB.params.force<11.5?'Orta':'Canavar';
+      document.getElementById('gLabel').textContent=LAB.params.grip<0.5?'Kaygan':LAB.params.grip<0.72?'Normal':'Yapışkan'; };
+    f.oninput=()=>{ LAB.params.force=+f.value; sync(); };
+    g.oninput=()=>{ LAB.params.grip=+g.value; sync(); };
+    sync();
+  }
+  function applyRobotBuild(){
+    try{
+      const raw=localStorage.getItem('rf_robot'); if(!raw||!window.RobotData) return;
+      const build=JSON.parse(raw); if(!build||!build.motor) return;
+      const RD=window.RobotData;
+      const mo=RD.opt('motor',build.motor), wh=RD.opt('wheel',build.wheel);
+      if(mo) LAB.params.force = 6 + mo.torque*0.85;         // tork -> kuvvet
+      if(wh) LAB.params.grip = Math.max(0.35, wh.grip);     // teker -> tutuş
+      const rep=RD.computeReport(build);
+      LAB.params.mass = Math.max(0.8, rep.weightG/300);
+      document.getElementById('buildLine').textContent=((mo?mo.name:'')+' · '+(wh?wh.name:'')).toUpperCase();
+    }catch(e){}
+  }
+  function fillKunye(){
+    const el=document.getElementById('kunye');
+    let build=null; try{ build=JSON.parse(localStorage.getItem('rf_robot')); }catch(e){}
+    if(!build||!build.motor||!window.RobotData){
+      el.innerHTML='<h4>🤖 Robotun Künyesi</h4><p class="exp">Henüz robot kurmadın. Bu dağlar N20 300 RPM + silikon teker ister!</p><a class="btn ghost" href="build.html?sim=hill">Robotunu kur →</a>';
+      return;
+    }
+    const RD=window.RobotData, r=RD.computeReport(build);
+    const chips=RD.ORDER.map(cat=>{ const o=RD.opt(cat,build[cat]);
+      return o?'<div class="kchip">'+o.icon+' <b>'+o.name+'</b></div>':''; }).join('');
+    el.innerHTML='<h4>🤖 Robotun Künyesi</h4><div class="chipsRow">'+chips+'</div>'+
+      '<div class="kstats">'+
+      '<div class="kstat"><div class="l">Tork</div><div class="v">'+r.torque+'<small>/10</small></div></div>'+
+      '<div class="kstat"><div class="l">Tutuş</div><div class="v">'+r.grip+'</div></div>'+
+      '<div class="kstat"><div class="l">Ağırlık</div><div class="v">'+r.weightG+'<small>g</small></div></div>'+
+      '</div>'+
+      '<p class="exp" style="margin-top:9px">Bu senaryoda tork ve tutuş her şeydir — hız değil!</p>';
+  }
+
+  function buildTrackTabs(){
+    const el=document.getElementById('trackTabs'); el.innerHTML='';
+    HC.COURSES.forEach((c,i)=>{
+      const b=document.createElement('button'); b.className='ttab'+(i===LAB.courseIdx?' on':'');
+      b.innerHTML=c.name+'<small>'+c.difficulty+'</small>';
+      b.onclick=()=>{ LAB.courseIdx=i; rebuildTerr(); resetSim(); buildTrackTabs(); };
+      el.appendChild(b);
+    });
+  }
+
+  function shareRobot(){
+    try{
+      const st={ c:LAB.courseIdx, m:LAB.mode, r:LAB.rules, d:LAB.defaultRule, p:LAB.pid };
+      location.hash='r='+btoa(unescape(encodeURIComponent(JSON.stringify(st))));
+      navigator.clipboard && navigator.clipboard.writeText(location.href);
+      toast('Bağlantı kopyalandı! Arkadaşına gönder.');
+    }catch(e){ toast('Paylaşım hazırlanamadı.'); }
+  }
+  function loadFromHash(){
+    try{
+      if(!location.hash.startsWith('#r=')) return;
+      const st=JSON.parse(decodeURIComponent(escape(atob(location.hash.slice(3)))));
+      if(typeof st.c==='number'&&HC.COURSES[st.c]) LAB.courseIdx=st.c;
+      if(st.m) LAB.mode=st.m;
+      if(st.r) LAB.rules=st.r; if(st.d) LAB.defaultRule=st.d; if(st.p) LAB.pid=st.p;
+      toast('Paylaşılan ayarlar yüklendi!');
+    }catch(e){}
+  }
+  let toastTimer=null;
+  function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2400); }
+
+  const TUT=[
+    ['⛰️ Dağ Seni Bekliyor','Görev basit: zirvedeki bayrağa ulaş. Ama fizik basit değil: yokuş dikleştikçe yerçekimi seni geri çeker, gazı köklemek ise tekerleri boşa döndürebilir.'],
+    ['🌀 Tork ve Tutuş','TORK tırmanma kuvvetidir; TUTUŞ o kuvveti yola aktarır. Kuvvet tutuş sınırını aşarsa PATİNAJ olur — tekerlek döner ama robot ilerlemez. Daha çok gaz her zaman çare değil!'],
+    ['🚀 Momentum Hilesi','Gücün yetmediği kısa dik rampalar için fizik hilesi: rampaya HIZLA gir! Kinetik enerji seni tepenin üstüne taşır. DÜZ bandında gazı yüksek tut.'],
+    ['📈 Hız Sabitleyici','Cruise modunda Ki yokuş dersi verir: yokuşta hız düşer, integral birikir, gaz kalıcı artar. Ama hedef hızı düşük tutarsan momentum kaybedersin!'],
+    ['🏁 Tırman!','Isınma Turundan Kâbus Zirvesine… Torklu motor + yapışkan teker kur, patinaj noktalarını grafikte izle. Zirve Fatihi ol!'],
+  ];
+  let tutI=0;
+  function showTut(i){
+    tutI=i; const [h,p]=TUT[i];
+    const dots=TUT.map((_,j)=>'<i class="'+(j<=i?'on':'')+'"></i>').join('');
+    document.getElementById('tutBox').innerHTML='<div class="dots">'+dots+'</div><h3>'+h+'</h3><p>'+p+'</p>'+
+      '<div style="display:flex;gap:8px"><button class="btn run" id="tutN">'+(i<TUT.length-1?'Devam →':'Başla! 🚀')+'</button>'+
+      (i<TUT.length-1?'<button class="btn ghost" id="tutS">Atla</button>':'')+'</div>';
+    document.getElementById('tutwrap').style.display='flex';
+    document.getElementById('tutN').onclick=()=>{ tutI<TUT.length-1?showTut(tutI+1):endTut(); };
+    const s=document.getElementById('tutS'); if(s) s.onclick=endTut;
+  }
+  function endTut(){ document.getElementById('tutwrap').style.display='none';
+    try{ localStorage.setItem('rf_hill_tut','1'); }catch(e){} }
+
+  document.getElementById('runBtn').onclick=()=>{
+    if(LAB.sim&&LAB.sim.status==='running'){ stopLoop(); LAB.sim.status='failed'; LAB.sim.reason='timeout'; stopRunUi(); updateHud(null); return; }
+    startRun();
+  };
+  document.getElementById('resetBtn').onclick=resetSim;
+  document.getElementById('shareBtn').onclick=shareRobot;
+  document.getElementById('helpBtn').onclick=()=>showTut(0);
+  document.getElementById('simSpeed').oninput=e=>{ LAB.simSpeed=+e.target.value;
+    document.getElementById('simSpeedV').textContent=(+e.target.value).toFixed(1)+'x'; };
+  document.querySelectorAll('.stab').forEach(t=>{
+    t.onclick=()=>{ document.querySelectorAll('.stab').forEach(x=>x.classList.remove('on')); t.classList.add('on');
+      document.getElementById('tab-robot').style.display=t.dataset.tab==='robot'?'block':'none';
+      document.getElementById('tab-kod').style.display=t.dataset.tab==='kod'?'block':'none'; };
+  });
+
+  // ---- init ----
+  loadFromHash();
+  rebuildTerr();
+  applyRobotBuild();
+  buildTrackTabs(); buildRules(); bindPid(); bindParams(); fillKunye(); setMode(LAB.mode);
+  drawScene(null); updateHud(null);
+  let seen=false; try{ seen=!!localStorage.getItem('rf_hill_tut'); }catch(e){}
+  if(!seen) showTut(0);
+})();
+</script>
+</body>
+</html>
