@@ -214,12 +214,63 @@
   }
 
   function shippedPlan(lot) { return (lot.plan || []).map(s => s.slice()); }
+
+  // ---- sensor autopilot: template + tiny search, style perturbed by sliders ----------
+  // sliders: { kavis: 0.8..1.3 (arc scale), pay: 0.7..1.4 (final leg scale) }
+  function sensorTemplates(lot, s) {
+    const bay = lot.bay;
+    const Q = Math.PI / 2 * TURN_R;
+    const gens = [];
+    if (bay.ang === -Math.PI / 2) {
+      gens.push(a => [['F', 'D', a], ['F', 'R', Q * s.kavis], ['F', 'D', 3.8 * s.pay]]);
+    } else if (bay.ang === Math.PI / 2) {
+      gens.push(a => [['F', 'D', a], ['G', 'R', Q * s.kavis], ['G', 'D', 3.8 * s.pay]]);
+      gens.push(a => [['F', 'D', a], ['F', 'L', 0.6 * s.kavis], ['G', 'R', 2.0 * s.kavis], ['G', 'D', 4.2 * s.pay]]);
+    } else {
+      for (const arc of [1.6, 1.7, 1.8]) {
+        gens.push(a => [['F', 'D', a], ['G', 'R', arc * s.kavis], ['G', 'L', arc * s.kavis], ['F', 'D', 0.3 * s.pay]]);
+      }
+    }
+    return gens;
+  }
+  function solveSensorPlan(lot, sliders) {
+    const s = sliders || defaultSensor();
+    let best = null, bestScore = -1e9;
+    for (const gen of sensorTemplates(lot, s)) {
+      for (let a = 3; a <= 14.5; a += 0.25) {
+        const plan = gen(a);
+        const r = runHeadless({ lot, plan, params: { vMax: 4.5, wheelBase: 1.1, turnGain: 1 } }, 45, 1 / 30);
+        let score = (r.status === 'success' ? 1000 : 0) + r.pct;
+        if (r.reason && String(r.reason).indexOf('crash') === 0) score -= 400;
+        if (score > bestScore) { bestScore = score; best = plan; }
+      }
+    }
+    return { plan: best, score: bestScore };
+  }
+  function previewPath(lot, plan) {
+    // pure kinematic trace of a plan (no collision) for the ghost preview
+    const p = { x: lot.start.x, y: lot.start.y, th: lot.start.th };
+    const pts = [[p.x, p.y]];
+    for (const [dirC, steer, dist] of plan) {
+      const dir = dirC === 'G' ? -1 : 1;
+      let done = 0;
+      while (done < dist) {
+        const ds = Math.min(0.12, dist - done);
+        stepPose(p, dir, steer, ds);
+        done += ds;
+        pts.push([p.x, p.y]);
+      }
+    }
+    return { pts, end: { ...p } };
+  }
+  function defaultSensor() { return { kavis: 1.0, pay: 1.0 }; }
   function defaultParams() { return { vMax: 3.6, wheelBase: 1.1, turnGain: 1.0 }; }
 
   const API = {
     TURN_R, CAR_L, CAR_W, LOT_X, LOT_Y, ANG_TOL,
     LOTS, stepPose, carCorners, collides, parkScore, wrapA,
     createSim, tickSim, coach, robotClass, runHeadless, shippedPlan, defaultParams,
+    solveSensorPlan, previewPath, defaultSensor,
   };
   global.ParkCore = API;
   if (typeof module !== 'undefined' && module.exports) module.exports = API;

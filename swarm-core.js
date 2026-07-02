@@ -68,6 +68,21 @@
     };
   }
 
+  function botGoal(sim, b, task) {
+    if (task.type === 'gather') return [task.x - b.x, task.y - b.y];
+    if (task.type === 'cover') {
+      const ANCH = [[-7, 4], [0, 4], [7, 4], [7, -4], [0, -4], [-7, -4]];
+      const a = ANCH[(b.id + Math.floor(sim.t / 6)) % ANCH.length];
+      return [a[0] - b.x, a[1] - b.y];
+    }
+    if (task.type === 'spread') {
+      const POSTS = [[-6, 3], [0, 3], [6, 3], [-6, -3], [0, -3], [6, -3]];
+      const p = POSTS[b.id];
+      return [p[0] - b.x, p[1] - b.y];
+    }
+    return [0, 0];
+  }
+
   function taskProgress(sim) {
     const task = sim.level.task;
     if (task.type === 'gather') {
@@ -91,9 +106,34 @@
     return { label: '—', done: false, frac: 0 };
   }
 
+  function motorFraction(m) {
+    if (!m || m.dir === 'stop') return 0;
+    const f = (m.speed || 0) / 100;
+    return m.dir === 'rev' ? -f : f;
+  }
+  function ruleMatches(rule, arr) {
+    for (let i = 0; i < arr.length; i++) {
+      const c = rule.pattern[i] || 'any';
+      if (c === 'any') continue;
+      if (c === 'on' && !arr[i]) return false;
+      if (c === 'off' && arr[i]) return false;
+    }
+    return true;
+  }
+  function evalRules(rules, defaultRule, arr) {
+    for (let i = 0; i < rules.length; i++) {
+      if (ruleMatches(rules[i], arr)) {
+        return { mL: motorFraction(rules[i].left), mR: motorFraction(rules[i].right), ruleIndex: i };
+      }
+    }
+    return { mL: motorFraction(defaultRule.left), mR: motorFraction(defaultRule.right), ruleIndex: -1 };
+  }
+  function wrapA(a) { while (a > Math.PI) a -= 2 * Math.PI; while (a < -Math.PI) a += 2 * Math.PI; return a; }
+
   function tickSim(sim, dt) {
     if (sim.status !== 'running') return sim.last;
     const level = sim.level;
+    const mode = sim.cfg.mode || 'weights';
     const w = sim.cfg.weights;   // { sep, ali, coh, goal }
     const speed = ((sim.cfg.params && sim.cfg.params.vMax) || 3.6) * 0.62;
     const task = level.task;
@@ -111,19 +151,8 @@
         aliX += Math.cos(o.th); aliY += Math.sin(o.th);
         cohX += dx; cohY += dy;
       }
-      let gx = 0, gy = 0;
-      if (task.type === 'gather') { gx = task.x - b.x; gy = task.y - b.y; }
-      else if (task.type === 'cover') {
-        // personal patrol anchors: each robot cycles the arena corners with an offset
-        const ANCH = [[-7, 4], [0, 4], [7, 4], [7, -4], [0, -4], [-7, -4]];
-        const a = ANCH[(b.id + Math.floor(sim.t / 6)) % ANCH.length];
-        gx = a[0] - b.x; gy = a[1] - b.y;
-      } else if (task.type === 'spread') {
-        // personal posts spaced across the arena
-        const POSTS = [[-6, 3], [0, 3], [6, 3], [-6, -3], [0, -3], [6, -3]];
-        const p = POSTS[b.id];
-        gx = p[0] - b.x; gy = p[1] - b.y;
-      }
+      let g0 = botGoal(sim, b, task);
+      let gx = g0[0], gy = g0[1];
       const gm = Math.hypot(gx, gy) || 1e-9;
       gx /= gm; gy /= gm;
 
@@ -155,18 +184,50 @@
         wx += wallTx * sgn * 0.9; wy += wallTy * sgn * 0.9;
       }
 
-      let vx = (w.sep || 0) * sepX + (w.coh || 0) * cohX * 0.12 + (w.goal || 0) * gx * 1.6 + wx * 2.0;
-      let vy = (w.sep || 0) * sepY + (w.coh || 0) * cohY * 0.12 + (w.goal || 0) * gy * 1.6 + wy * 2.0;
-      if (nN > 0) { vx += (w.ali || 0) * aliX / nN; vy += (w.ali || 0) * aliY / nN; }
-      const vm = Math.hypot(vx, vy);
-      if (vm > 1e-6) {
-        const targetTh = Math.atan2(vy, vx);
-        let dth = targetTh - b.th;
-        while (dth > Math.PI) dth -= 2 * Math.PI;
-        while (dth < -Math.PI) dth += 2 * Math.PI;
-        b.th += Math.max(-TURN_RATE * dt, Math.min(TURN_RATE * dt, dth));
+      let sp;
+      if (mode === 'rules') {
+        // discrete chips: nearest-neighbour side + goal bearing
+        let nd = 1e9, nb = null;
+        for (const o of sim.bots) {
+          if (o === b) continue;
+          const d = Math.hypot(o.x - b.x, o.y - b.y);
+          if (d < nd) { nd = d; nb = o; }
+        }
+        const seen = nd <= SENSE_R;
+        const kb = seen ? wrapA(Math.atan2(nb.y - b.y, nb.x - b.x) - b.th) : 0;
+        const gb = wrapA(Math.atan2(gy, gx) - b.th);
+        const bits = [
+          !seen,                                  // YALNIZ
+          seen && kb > 0.35,                      // KOMŞU solda
+          seen && kb < -0.35,                     // KOMŞU sağda
+          seen && nd < 1.0,                       // ÇOK YAKIN
+          gb > 0.4,                               // HEDEF solda
+          Math.abs(gb) <= 0.4,                    // HEDEF önde
+          gb < -0.4,                              // HEDEF sağda
+        ];
+        const cmd = evalRules(sim.cfg.rules || [], sim.cfg.defaultRule || { left: { dir: 'fwd', speed: 55 }, right: { dir: 'fwd', speed: 55 } }, bits);
+        b.lastRule = cmd.ruleIndex;
+        let om = (cmd.mR - cmd.mL) * 3.4;
+        // wall reflex still steers (safety instinct)
+        const wm = Math.hypot(wx, wy);
+        if (wm > 0.6) {
+          const dthW = wrapA(Math.atan2(wy, wx) - b.th);
+          om += Math.max(-2.2, Math.min(2.2, dthW * 2.0 * Math.min(1, wm * 0.4)));
+        }
+        b.th += Math.max(-TURN_RATE * 1.4, Math.min(TURN_RATE * 1.4, om)) * dt;
+        sp = Math.max(0, (cmd.mL + cmd.mR) / 2) * speed * 1.35;
+      } else {
+        let vx = (w.sep || 0) * sepX + (w.coh || 0) * cohX * 0.12 + (w.goal || 0) * gx * 1.6 + wx * 2.0;
+        let vy = (w.sep || 0) * sepY + (w.coh || 0) * cohY * 0.12 + (w.goal || 0) * gy * 1.6 + wy * 2.0;
+        if (nN > 0) { vx += (w.ali || 0) * aliX / nN; vy += (w.ali || 0) * aliY / nN; }
+        const vm = Math.hypot(vx, vy);
+        if (vm > 1e-6) {
+          const targetTh = Math.atan2(vy, vx);
+          let dth = wrapA(targetTh - b.th);
+          b.th += Math.max(-TURN_RATE * dt, Math.min(TURN_RATE * dt, dth));
+        }
+        sp = speed * (0.4 + 0.6 * Math.min(1, vm * 0.5));
       }
-      const sp = speed * (0.4 + 0.6 * Math.min(1, vm * 0.5));
       const nx = b.x + Math.cos(b.th) * sp * dt;
       const ny = b.y + Math.sin(b.th) * sp * dt;
       // hard wall block
@@ -242,12 +303,24 @@
   }
 
   function defaultWeights() { return { sep: 1.1, ali: 0.6, coh: 0.9, goal: 1.0 }; }
+  // pattern = [yalniz, komsuSol, komsuSag, cokYakin, hedefSol, hedefOn, hedefSag]
+  function starterRules() {
+    return [
+      { pattern: ['off', 'on', 'any', 'on', 'any', 'any', 'any'], left: { dir: 'fwd', speed: 80 }, right: { dir: 'fwd', speed: 32 } }, // çok yakın soldaki: sağa kaç
+      { pattern: ['off', 'any', 'on', 'on', 'any', 'any', 'any'], left: { dir: 'fwd', speed: 32 }, right: { dir: 'fwd', speed: 80 } }, // çok yakın sağdaki: sola kaç
+      { pattern: ['any', 'any', 'any', 'off', 'any', 'on', 'any'], left: { dir: 'fwd', speed: 75 }, right: { dir: 'fwd', speed: 75 } }, // hedef önde: düz
+      { pattern: ['any', 'any', 'any', 'off', 'on', 'off', 'any'], left: { dir: 'fwd', speed: 30 }, right: { dir: 'fwd', speed: 75 } }, // hedef solda: sola
+      { pattern: ['any', 'any', 'any', 'off', 'any', 'off', 'on'], left: { dir: 'fwd', speed: 75 }, right: { dir: 'fwd', speed: 30 } }, // hedef sağda: sağa
+    ];
+  }
+  function starterDefault() { return { left: { dir: 'fwd', speed: 55 }, right: { dir: 'fwd', speed: 55 } }; }
   function defaultParams() { return { vMax: 3.6 }; }
 
   const API = {
     N, SENSE_R, ROBOT_R, ARENA_X, ARENA_Y, CELL,
     LEVELS, STARTS, segDist, createSim, tickSim, taskProgress,
     coach, robotClass, runHeadless, defaultWeights, defaultParams,
+    starterRules, starterDefault, evalRules, ruleMatches, motorFraction, botGoal,
   };
   global.SwarmCore = API;
   if (typeof module !== 'undefined' && module.exports) module.exports = API;

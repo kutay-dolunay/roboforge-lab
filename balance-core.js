@@ -149,7 +149,8 @@
       } else {
         thRef = Math.max(-0.08, Math.min(0.08, -sim.x * 0.008 - sim.v * 0.012)); // hold station
       }
-      m = (pid.kp || 0) * (sim.th - thRef) + (pid.kd || 0) * sim.om;
+      sim.iTh = Math.max(-1.2, Math.min(1.2, (sim.iTh || 0) + (sim.th - thRef) * dt));
+      m = (pid.kp || 0) * (sim.th - thRef) + (pid.kd || 0) * sim.om + (pid.ki || 0) * sim.iTh;
       m = Math.max(-1, Math.min(1, m));
     } else {
       const b = tiltBands(sim.th);
@@ -182,7 +183,7 @@
     } else sim.targetHold = 0;
 
     if (sim.totalTicks % 4 === 0) {
-      sim.log.push([sim.t, sim.th, sim.x]);
+      sim.log.push([sim.t, sim.th, sim.x, sim.om]);
       if (sim.log.length > 2000) sim.log.shift();
     }
 
@@ -259,7 +260,7 @@
   }
   function starterDefault() { return { left: { dir: 'stop', speed: 0 } }; }
   function defaultParams() { return { vMax: 3.6, wheelBase: 1.1, turnGain: 1.0 }; }
-  function defaultPID() { return { kp: 2.6, kd: 0.55, kx: 1.0 }; }
+  function defaultPID() { return { kp: 2.6, kd: 0.55, ki: 0.35, kx: 1.0 }; }
 
   const API = {
     G, CPL, FALL, X_LIM, TARGET_R, BAND1, BAND2,

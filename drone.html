@@ -165,6 +165,7 @@
       <div class="hudbox"><div class="l">SÜRE</div><div class="v mono" id="hudT">0.0s</div></div>
       <div class="hudbox"><div class="l">İRTİFA</div><div class="v mono" id="hudH">0.0</div></div>
       <div class="hudbox"><div class="l">GÖREV</div><div class="v mono" id="hudW">—</div></div>
+      <div class="hudbox"><div class="l">BATARYA</div><div class="v mono" id="hudB">%100</div></div>
       <div class="hudbox"><div class="l">DURUM</div><div class="v" id="hudS">HAZIR</div></div>
     </div>
     <div class="hint" id="hint">🚁 İtki yerçekimiyle savaşır! Görev noktalarında <b>1 saniye sabit dur</b>, sonra pistte yumuşak in. Sadece Kp ile dene: drone hedefin hep <b>biraz altında</b> kalır — işte Ki bunun için var.</div>
@@ -234,7 +235,7 @@
 <div id="toast"></div>
 
 <script src="robot-data.js?v=2"></script>
-<script src="drone-core.js?v=1"></script>
+<script src="drone-core.js?v=2"></script>
 <script>
 (function(){
   const DR = window.DroneCore;
@@ -357,6 +358,10 @@
     document.getElementById('hudH').textContent=(LAB.sim?LAB.sim.y:0.4).toFixed(1);
     const M=DR.MISSIONS[LAB.misIdx];
     document.getElementById('hudW').textContent=(LAB.sim?LAB.sim.wpIdx:0)+'/'+M.wps.length+(M.land?'+iniş':'');
+    const B=document.getElementById('hudB');
+    const bp=LAB.sim?Math.max(0,Math.round(100*LAB.sim.batt/LAB.sim.battMax)):100;
+    B.textContent='%'+bp;
+    B.className='v mono '+(bp<20?'bad':bp<45?'hot':'ok');
     const s=document.getElementById('hudS');
     if(!LAB.sim){ s.textContent='HAZIR'; s.className='v'; }
     else if(LAB.sim.status==='running'){ s.textContent='UÇUŞTA'; s.className='v ok'; }
@@ -405,7 +410,7 @@
 
   const REASONS={ landed:'Yumuşak iniş, görev tamam!', hovered:'Askı görevi tamamlandı!',
     crash_ground:'Sert çakılma! 💥', crash_gate:'Kuleye çarptın! 💥', wrong_pad:'Pist dışına indin!',
-    out:'Sahne dışına savruldun!', timeout:'Süre doldu.' };
+    out:'Sahne dışına savruldun!', timeout:'Süre doldu.', battery:'Batarya bitti — pervaneler durdu! 🪫' };
   function showResult(){
     const sim=LAB.sim; if(!sim) return;
     const win=sim.status==='success';
@@ -457,10 +462,12 @@
       '<div class="rstats">'+
         '<div class="rstat"><div class="l">HASSASİYET</div><div class="v mono">%'+DR.precision(sim)+'</div></div>'+
         '<div class="rstat"><div class="l">GÖREV</div><div class="v mono">'+sim.wpIdx+'/'+M.wps.length+'</div></div>'+
+        '<div class="rstat"><div class="l">KALAN BATARYA</div><div class="v mono">%'+Math.max(0,Math.round(100*sim.batt/sim.battMax))+'</div></div>'+
         '<div class="rstat"><div class="l">DURUM</div><div class="v" style="color:'+(win?'var(--green)':'#fca5a5')+'">'+(win?'TAMAM':'BAŞARISIZ')+'</div></div>'+
       '</div>'+
       '<canvas id="repMap" width="460" height="200" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#0a0d12"></canvas>'+
       '<div style="font-size:.68rem;color:var(--muted);margin-top:4px">İrtifa grafiği — mavi çizgi yeşil kesikli hedefi ne kadar iyi izledi?</div>'+
+      '<div style="font-size:.74rem;color:var(--muted2);margin-top:8px">🔋 Enerji: '+Math.round(sim.battMax-sim.batt)+' / '+Math.round(sim.battMax)+' birim harcandı. Gaz maliyeti kareseldir — titrek (salınan) gaz, sakin gazdan çok daha fazla yakar. Salınımı Kd bastırır.</div>'+
       '<div class="rbtns"><button class="btn ghost" id="repClose">Kapat</button></div>';
     document.getElementById('resultWrap').classList.add('show');
     document.getElementById('repClose').onclick=()=>document.getElementById('resultWrap').classList.remove('show');
@@ -563,8 +570,10 @@
       const build=JSON.parse(raw); if(!build||!build.motor) return;
       const sp=window.RobotData.toSimParams(build);
       LAB.params.vMax=sp.vMax;
-      const m=window.RobotData.opt('motor',build.motor), w=window.RobotData.opt('wheel',build.wheel);
-      document.getElementById('buildLine').textContent=((m?m.name:'')+' · '+(w?w.name:'')).toUpperCase();
+      const bat=window.RobotData.opt('battery',build.battery);
+      if(bat&&bat.mAh) LAB.params.battery=Math.max(60,Math.min(170,Math.round(bat.mAh*0.06)));
+      const m=window.RobotData.opt('motor',build.motor);
+      document.getElementById('buildLine').textContent=((m?m.name:'')+(bat?' · '+bat.name:'')).toUpperCase();
     }catch(e){}
   }
   function fillKunye(){
@@ -622,6 +631,7 @@
     ['📉 Kalıcı Hata (Ki dersi!)','Sadece Kp ile uç ve gözle: drone hedefin hep BİRAZ ALTINDA süzülür. Neden? Denge itki=yerçekimi noktasında kurulur ve o itki için hata gerekir! Ki (integral) bu inatçı açığı zamanla sıfırlar. Bu görevin en büyük dersi.'],
     ['🌬️ Rüzgâr ve Kargo','Rüzgâr seni iter, kargo ağırlaştırır. Zayıf motorlu robot ağır kargoyu kaldıramaz bile — fizik pazarlık etmez. Güçlü motor kur!'],
     ['🛬 İniş','Pistin üstüne gel, otopilot yumuşak alçalır. İrtifa grafiğini izle: mavi çizgi yeşil hedefe ne kadar yapışıksa o kadar iyi pilotsun.'],
+    ['🔋 Batarya Gerçeği','Her gaz vuruşu enerji yakar — hem de KARESEL: %90 gaz, %45 gazın 4 katı yakar! Salınan (titrek) drone bataryayı kavurur. Robotuna büyük batarya tak ya da uçuşunu sakinleştir.'],
     ['🏁 Kalkış!','Havalan ve Dur ile başla, Fırtına Kurtarma’ya kadar tırman. Bant kuralları modunu da dene — zıplamalı uçuşu görünce PID’e âşık olacaksın!'],
   ];
   let tutI=0;

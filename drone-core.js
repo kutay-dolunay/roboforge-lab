@@ -94,6 +94,7 @@
       x: -8, y: 0.4, vx: 0, vy: 0,
       t: 0, status: 'running', reason: null,
       wpIdx: 0, wpHold: 0, landing: false,
+      batt: (cfg.params && cfg.params.battery) || 120, battMax: (cfg.params && cfg.params.battery) || 120, battOut: false,
       iErr: 0, sumHerr: 0, totalTicks: 0,
       log: [], last: null,
     };
@@ -147,6 +148,10 @@
       }
     }
 
+    // battery: thrust costs energy (quadratic — hovering hot burns fast)
+    if (sim.batt > 0) sim.batt -= (2.2 * thr * thr + 0.45) * dt;
+    if (sim.batt <= 0) { sim.batt = 0; sim.battOut = true; thr = 0; }
+
     const wind = windAt(M, sim.t);
     sim.vy += (thr * thrustAuth / mass - GRAV - DRAG * sim.vy) * dt;
     sim.vx += (tilt * H_AUTH / mass + wind - DRAG * sim.vx) * dt;
@@ -179,7 +184,7 @@
       const wpsDone = sim.wpIdx >= M.wps.length;
       if (M.land && onPad && soft && wpsDone) { sim.status = 'success'; sim.reason = 'landed'; }
       else if (sim.t < 1.5 && sim.vy > -0.5) { sim.y = 0.4; sim.vy = Math.max(0, sim.vy); } // takeoff grace
-      else { sim.status = 'failed'; sim.reason = soft ? 'wrong_pad' : 'crash_ground'; }
+      else { sim.status = 'failed'; sim.reason = sim.battOut ? 'battery' : (soft ? 'wrong_pad' : 'crash_ground'); }
     }
     if (sim.y > Y_LIM) { sim.y = Y_LIM; sim.vy = Math.min(0, sim.vy); }
     if (Math.abs(sim.x) > X_LIM) { sim.status = 'failed'; sim.reason = 'out'; }
@@ -209,6 +214,9 @@
   function coach(sim) {
     const tips = [];
     const mode = sim.cfg.mode || 'pid';
+    if (sim.reason === 'battery') {
+      tips.push('Enerji bitti ve drone gökten düştü! İtki maliyeti kareseldir: %90 itki, %45 itkinin DÖRT katı yakar. Daha alçak uç, salınımı azalt (Kd/Ki) — pürüzsüz uçuş = verimli uçuş.');
+    }
     if (sim.reason === 'crash_ground') {
       tips.push(mode === 'pid'
         ? 'Sert çakılma! İnişte Kd hayat kurtarır — alçalma hızını görüp itkiyi artırır. Kd değerini yükselt.'
@@ -246,7 +254,8 @@
     let g = 0;
     while (sim.status === 'running' && sim.t < mt && g++ < 2e6) tickSim(sim, dt);
     return { status: sim.status, reason: sim.reason, time: +sim.t.toFixed(2),
-      precision: precision(sim), wps: sim.wpIdx + '/' + cfg.mission.wps.length };
+      precision: precision(sim), wps: sim.wpIdx + '/' + cfg.mission.wps.length,
+      batt: Math.round(sim.batt) };
   }
 
   // pattern = [cokAlcak, alcak, tamam, yuksek, cokYuksek, hedefSol, hedefSag]

@@ -102,6 +102,11 @@
   .addRule{width:100%;padding:9px;border:1px dashed var(--line);border-radius:10px;background:transparent;
     color:var(--muted2);font-weight:700;cursor:pointer;font-size:.78rem}
   .addRule:hover{border-color:var(--sky);color:var(--sky)}
+  .gpick{display:flex;gap:4px;align-items:center}
+  .gpick span{font-size:.56rem;color:var(--muted);letter-spacing:1px;font-weight:700;margin-right:2px}
+  .gpo{padding:4px 9px;border:1px solid #26364e;border-radius:7px;background:#0d1524;cursor:pointer;
+    font-size:.64rem;font-weight:800;color:var(--muted);user-select:none}
+  .gpo.on{border-color:var(--amber);color:#fcd34d;background:#1c1608}
   .defTag{font-size:.58rem;letter-spacing:1px;color:var(--amber);font-weight:800;margin-bottom:5px}
 
   .sliderRow{margin:10px 0}
@@ -166,9 +171,10 @@
       <div class="hudbox"><div class="l">SÜRE</div><div class="v mono" id="hudT">0.0s</div></div>
       <div class="hudbox"><div class="l">HIZ</div><div class="v mono" id="hudV">0.0</div></div>
       <div class="hudbox"><div class="l">EĞİM</div><div class="v mono" id="hudE">0°</div></div>
+      <div class="hudbox"><div class="l">VİTES</div><div class="v mono" id="hudG">—</div></div>
       <div class="hudbox"><div class="l">DURUM</div><div class="v" id="hudS">HAZIR</div></div>
     </div>
-    <div class="hint" id="hint">⛰️ Zirveye ulaş! <b>Tork tırmandırır, tutuş patinajı önler, momentum kısa rampaları aşırtır.</b> Tekerlek boşa dönüyorsa daha çok gaz ÇARE DEĞİL — bu senaryo parça seçiminin sınavı.</div>
+    <div class="hint" id="hint">⛰️ Zirveye ulaş! <b>Tork tırmandırır, tutuş patinajı önler, momentum kısa rampaları aşırtır.</b> Tekerlek boşa dönüyorsa daha çok gaz ÇARE DEĞİL — bu senaryo parça seçiminin + <b>vites</b> seçiminin sınavı.</div>
     <div class="rdock" id="resultDock" style="display:none"></div>
   </div>
 
@@ -202,8 +208,11 @@
       <div id="rulesPanel">
         <div class="card">
           <h4>Eğim Bandı Kuralları</h4>
-          <p class="exp">Her eğim bandına bir gaz yüzdesi. Sır: <b>düzlükte hızlan</b> ki rampaya momentumla gir.
+          <p class="exp">Her eğim bandına bir gaz yüzdesi <b>ve bir vites</b>. Sır: <b>düzlükte hızlan</b> ki rampaya momentumla gir.
             Dik inişte Geri = motor freni!</p>
+          <p class="exp" style="border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:var(--panel2)">
+            ⚙️ <b>1. vites:</b> güç ×1.35 ama ~4.8 hızdan sonra motor nefessiz kalır.
+            <b>2. vites:</b> tavan 8.5 — düzlükte uçar, dikte zayıf. Gerçek arazi araçlarındaki şanzıman ikilemi!</p>
           <div id="rulesList"></div>
           <button class="addRule" id="addRule">+ Yeni Kural</button>
           <div style="margin-top:12px">
@@ -223,6 +232,13 @@
             <input type="range" id="pKp" min="0.3" max="3.5" step="0.1" value="1.5"></div>
           <div class="sliderRow"><label>Ki <b id="pKiV">1.0</b></label>
             <input type="range" id="pKi" min="0" max="2" step="0.1" value="1.0"></div>
+          <div class="sliderRow"><label>Vites <b id="pViV">Oto</b></label>
+            <div class="gpick" style="margin-top:2px">
+              <div class="gpo on" data-g="auto">Oto</div>
+              <div class="gpo" data-g="1">1. vites</div>
+              <div class="gpo" data-g="2">2. vites</div>
+            </div></div>
+          <p class="exp" style="margin:8px 0 0">⚙️ <b>Oto</b>: dikte veya yavaşken 1. vitese iner — gerçek otomatik şanzıman mantığı. Elle seçersen ödünleşimi kendin yaşarsın.</p>
         </div>
       </div>
     </div>
@@ -234,7 +250,7 @@
 <div id="toast"></div>
 
 <script src="robot-data.js?v=2"></script>
-<script src="hill-core.js?v=1"></script>
+<script src="hill-core.js?v=2"></script>
 <script>
 (function(){
   const HC = window.HillCore;
@@ -342,6 +358,9 @@
     const E=document.getElementById('hudE');
     E.textContent=(phi*57.3).toFixed(0)+'°';
     E.className='v mono '+(phi>0.3?'bad':phi>0.12?'hot':'ok');
+    const G=document.getElementById('hudG');
+    G.textContent=LAB.sim?(LAB.sim.gear||1)+'. vites':'—';
+    G.className='v mono '+(LAB.sim&&LAB.sim.gear===1?'hot':'');
     const s=document.getElementById('hudS');
     if(!LAB.sim){ s.textContent='HAZIR'; s.className='v'; }
     else if(LAB.sim.status==='running'){ s.textContent=LAB.sim.slip?'PATİNAJ!':'TIRMANIYOR'; s.className='v '+(LAB.sim.slip?'hot':'ok'); }
@@ -436,7 +455,7 @@
       '<h3 class="'+(win?'win':'lose')+'">📄 Tırmanış Raporu — '+course.name+'</h3>'+
       '<div style="margin:8px 0;font-size:.8rem;color:var(--muted2)">'+chips+'</div>'+
       '<div style="font-size:.76rem;color:var(--sky);margin-bottom:8px">Tork '+LAB.params.force.toFixed(1)+' · Tutuş '+LAB.params.grip.toFixed(2)+' · '+
-        (LAB.mode==='pid'?'📈 Cruise (hedef '+LAB.pid.hedef.toFixed(1)+')':'🧩 Eğim Kuralları')+'</div>'+
+        (LAB.mode==='pid'?'📈 Cruise (hedef '+LAB.pid.hedef.toFixed(1)+' · vites '+((LAB.pid.vites||'auto')==='auto'?'Oto':LAB.pid.vites)+')':'🧩 Eğim Kuralları + vites')+'</div>'+
       '<div class="rstats">'+
         '<div class="rstat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
         '<div class="rstat"><div class="l">MESAFE</div><div class="v mono">'+Math.round(sim.maxX/HC.FINISH_X*100)+'%</div></div>'+
@@ -488,6 +507,14 @@
     inp.onchange=()=>{ m.speed=Math.max(0,Math.min(100,+inp.value||0)); };
     wrap.appendChild(sel); wrap.appendChild(inp);
     mot.appendChild(wrap);
+    const gp=document.createElement('div'); gp.className='gpick';
+    const gs=document.createElement('span'); gs.textContent='VİTES'; gp.appendChild(gs);
+    [1,2].forEach(g=>{
+      const b=document.createElement('div'); b.className='gpo'+((rule.vites||1)===g?' on':''); b.textContent=g+'.';
+      b.onclick=()=>{ rule.vites=g; buildRules(); };
+      gp.appendChild(b);
+    });
+    mot.appendChild(gp);
     if(!isDef){
       const tools=document.createElement('div'); tools.className='rtools';
       const mk=(t,f,c)=>{ const b=document.createElement('button'); b.className='iconbtn'+(c?' '+c:''); b.textContent=t; b.onclick=f; return b; };
@@ -506,7 +533,7 @@
     def.appendChild(ruleEl(LAB.defaultRule,-1,true));
   }
   document.getElementById('addRule').onclick=()=>{
-    LAB.rules.push({ pattern:['any','any','any','any','any'], left:{dir:'fwd',speed:60} });
+    LAB.rules.push({ pattern:['any','any','any','any','any'], left:{dir:'fwd',speed:60}, vites:2 });
     buildRules();
   };
 
@@ -529,6 +556,15 @@
     h.oninput=()=>{ LAB.pid.hedef=+h.value; sync(); };
     kp.oninput=()=>{ LAB.pid.kp=+kp.value; sync(); };
     ki.oninput=()=>{ LAB.pid.ki=+ki.value; sync(); };
+    const gbs=document.querySelectorAll('#pidPanel .gpo');
+    const gLbl=g=>g==='auto'?'Oto':g+'. vites';
+    gbs.forEach(b=>{ b.onclick=()=>{
+      LAB.pid.vites=b.dataset.g==='auto'?'auto':+b.dataset.g;
+      gbs.forEach(x=>x.classList.toggle('on',x===b));
+      document.getElementById('pViV').textContent=gLbl(b.dataset.g); }; });
+    const cur=String(LAB.pid.vites||'auto');
+    gbs.forEach(x=>x.classList.toggle('on',x.dataset.g===cur));
+    document.getElementById('pViV').textContent=gLbl(cur);
     sync();
   }
   function bindParams(){
@@ -608,7 +644,8 @@
     ['⛰️ Dağ Seni Bekliyor','Görev basit: zirvedeki bayrağa ulaş. Ama fizik basit değil: yokuş dikleştikçe yerçekimi seni geri çeker, gazı köklemek ise tekerleri boşa döndürebilir.'],
     ['🌀 Tork ve Tutuş','TORK tırmanma kuvvetidir; TUTUŞ o kuvveti yola aktarır. Kuvvet tutuş sınırını aşarsa PATİNAJ olur — tekerlek döner ama robot ilerlemez. Daha çok gaz her zaman çare değil!'],
     ['🚀 Momentum Hilesi','Gücün yetmediği kısa dik rampalar için fizik hilesi: rampaya HIZLA gir! Kinetik enerji seni tepenin üstüne taşır. DÜZ bandında gazı yüksek tut.'],
-    ['📈 Hız Sabitleyici','Cruise modunda Ki yokuş dersi verir: yokuşta hız düşer, integral birikir, gaz kalıcı artar. Ama hedef hızı düşük tutarsan momentum kaybedersin!'],
+    ['⚙️ Vites Kutusu','1. vites: bol güç, düşük hız tavanı. 2. vites: hız var, güç yok. Her kurala vites seç: dikte 1, düzlükte 2. Yanlış vites = patinaj ya da sünme!'],
+    ['📈 Hız Sabitleyici','Cruise modunda Ki yokuş dersi verir: yokuşta hız düşer, integral birikir, gaz kalıcı artar. Vitesi Oto bırakabilir ya da elle sürebilirsin.'],
     ['🏁 Tırman!','Isınma Turundan Kâbus Zirvesine… Torklu motor + yapışkan teker kur, patinaj noktalarını grafikte izle. Zirve Fatihi ol!'],
   ];
   let tutI=0;

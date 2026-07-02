@@ -96,6 +96,10 @@
     color:var(--muted2);font-weight:700;cursor:pointer;font-size:.78rem}
   .addRule:hover{border-color:var(--sky);color:var(--sky)}
 
+  .modeRow{display:flex;gap:6px;margin-bottom:12px}
+  .modeBtn{flex:1;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--panel);
+    cursor:pointer;font-weight:800;font-size:.76rem;color:var(--muted2)}
+  .modeBtn.on{border-color:var(--purple);color:#d8b4fe;background:#170f28}
   .sliderRow{margin:10px 0}
   .sliderRow label{display:flex;justify-content:space-between;font-size:.74rem;color:var(--muted2);margin-bottom:4px}
   .sliderRow label b{color:var(--sky)}
@@ -186,12 +190,32 @@
     </div>
 
     <div id="tab-kod" style="display:none">
-      <div class="card">
-        <h4>Manevra Planı</h4>
-        <p class="exp">Adımlar sırayla uygulanır. <b>İpucu:</b> düz gidişin mesafesi manevranın başlangıç
-          noktasını belirler — en kritik sayı odur. Kavisli adımlar dönüş açısını belirler (2.51 ≈ 90°).</p>
-        <div id="planList"></div>
-        <button class="addRule" id="addStep">+ Adım Ekle</button>
+      <div class="modeRow">
+        <button class="modeBtn on" id="modePlan">🧩 Manevra Planı</button>
+        <button class="modeBtn" id="modeSensor">📈 Sensör Otopilot</button>
+      </div>
+      <div id="planPanel">
+        <div class="card">
+          <h4>Manevra Planı</h4>
+          <p class="exp">Adımlar sırayla uygulanır. <b>İpucu:</b> düz gidişin mesafesi manevranın başlangıç
+            noktasını belirler — en kritik sayı odur. Kavisli adımlar dönüş açısını belirler (2.51 ≈ 90°).
+            Gri hayalet çizgi planının izleyeceği yolu önceden gösterir.</p>
+          <div id="planList"></div>
+          <button class="addRule" id="addStep">+ Adım Ekle</button>
+        </div>
+      </div>
+      <div id="sensorPanel" style="display:none">
+        <div class="card">
+          <h4>Sensör Otopilot</h4>
+          <p class="exp">Gerçek otonom araç gibi: robot cebi <b>sensörle ölçer ve manevrayı kendisi türetir</b> —
+            sen sadece sürüş stilini ayarlarsın. Kavis çarpanı dönüşlerin sıkılığını, güvenlik payı son
+            yaklaşmanın uzunluğunu değiştirir. Yanlış stil = plan cebe sığmaz!</p>
+          <div class="sliderRow"><label>Kavis Çarpanı <b id="sKavisV">1.00</b></label>
+            <input type="range" id="sKavis" min="0.80" max="1.25" step="0.01" value="1.00"></div>
+          <div class="sliderRow"><label>Güvenlik Payı <b id="sPayV">1.00</b></label>
+            <input type="range" id="sPay" min="0.70" max="1.40" step="0.01" value="1.00"></div>
+          <p class="exp" id="sensorInfo" style="margin-top:8px;border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:var(--panel2)">🛰️ Otopilot hazır — hayalet çizgi türetilen manevrayı gösteriyor.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -202,7 +226,7 @@
 <div id="toast"></div>
 
 <script src="robot-data.js?v=2"></script>
-<script src="park-core.js?v=1"></script>
+<script src="park-core.js?v=2"></script>
 <script>
 (function(){
   const PC = window.ParkCore;
@@ -210,9 +234,29 @@
 
   const LAB = {
     lotIdx: 0, plan: [], params: PC.defaultParams(),
+    mode: 'plan', sensor: PC.defaultSensor(), solved: null,
     sim: null, raf: null, lastTs: 0, simSpeed: 1, replay: null,
     view: { scale: 30 },
   };
+  const GHOST = { key: '', path: null };
+  function activePlan(){
+    if(LAB.mode!=='sensor') return LAB.plan;
+    const key='s'+LAB.lotIdx+'|'+LAB.sensor.kavis+'|'+LAB.sensor.pay;
+    if(LAB.solved && LAB.solved.key===key) return LAB.solved.plan;
+    const r=PC.solveSensorPlan(PC.LOTS[LAB.lotIdx], LAB.sensor);
+    LAB.solved={ key, plan:r.plan||[], ok:r.score>=1000 };
+    const info=document.getElementById('sensorInfo');
+    if(info) info.innerHTML = LAB.solved.ok
+      ? '🛰️ Otopilot bu stille cebe oturan bir manevra türetti — hayalet çizgiye bak.'
+      : '⚠️ Bu sürüş stiliyle otopilot cebe tam oturan manevra BULAMADI — en yakın denemesini gösteriyor. Kavis/pay ayarlarını değiştir.';
+    return LAB.solved.plan;
+  }
+  function ghostPath(){
+    const plan=activePlan();
+    const key=LAB.mode+'|'+LAB.lotIdx+'|'+JSON.stringify(plan);
+    if(GHOST.key!==key){ GHOST.key=key; GHOST.path=plan.length?PC.previewPath(PC.LOTS[LAB.lotIdx],plan):null; }
+    return GHOST.path;
+  }
 
   function fitView(){
     LAB.view.scale = Math.min(CVS.width/(PC.LOT_X*2+1.6), CVS.height/(PC.LOT_Y*2+1.6));
@@ -268,6 +312,16 @@
       LAB.sim.trail.forEach((p,i)=>{ const q=W2S(p[0],p[1]); i?CTX.lineTo(q[0],q[1]):CTX.moveTo(q[0],q[1]); });
       CTX.stroke();
     }
+    // planned-path ghost (pre-run only)
+    if(!LAB.sim){
+      const gp=ghostPath();
+      if(gp && gp.pts.length>1){
+        CTX.strokeStyle='rgba(168,85,247,.5)'; CTX.lineWidth=2; CTX.setLineDash([7,6]); CTX.beginPath();
+        gp.pts.forEach((p,i)=>{ const q=W2S(p[0],p[1]); i?CTX.lineTo(q[0],q[1]):CTX.moveTo(q[0],q[1]); });
+        CTX.stroke(); CTX.setLineDash([]);
+        drawCar(gp.end,'#1d1230','#a855f7',true);
+      }
+    }
     // ghost target
     drawCar({x:bay.x,y:bay.y,th:bay.ang},'#123422','#22c55e',true);
     // robot car
@@ -282,7 +336,7 @@
   function updateHud(){
     document.getElementById('hudT').textContent=(LAB.sim?LAB.sim.t:0).toFixed(1)+'s';
     const A=document.getElementById('hudA');
-    A.textContent = LAB.sim ? ((LAB.sim.stepIdx+1)+'/'+LAB.plan.length) : '—';
+    A.textContent = LAB.sim ? ((LAB.sim.stepIdx+1)+'/'+(LAB.sim.cfg.plan.length)) : '—';
     const s=document.getElementById('hudS');
     if(!LAB.sim){ s.textContent='HAZIR'; s.className='v'; }
     else if(LAB.sim.status==='running'){ s.textContent='MANEVRADA'; s.className='v ok'; }
@@ -296,7 +350,7 @@
   }
 
   function buildConfig(){
-    return { lot: PC.LOTS[LAB.lotIdx], plan: LAB.plan.map(s=>s.slice()), params: LAB.params };
+    return { lot: PC.LOTS[LAB.lotIdx], plan: activePlan().map(s=>s.slice()), params: LAB.params };
   }
   function startRun(){
     stopLoop(); LAB.replay=null; hideResult();
@@ -395,7 +449,9 @@
     const win=sim.status==='success';
     const lot=PC.LOTS[LAB.lotIdx];
     const sc=PC.parkScore(sim,sim.pose);
-    const planTxt=LAB.plan.map((s,i)=>(i+1)+'.'+(s[0]==='G'?'Geri':'İleri')+'-'+(s[1]==='L'?'Sol':s[1]==='R'?'Sağ':'Düz')+'('+s[2]+')').join(' → ');
+    const repPlan=(sim.cfg&&sim.cfg.plan)||LAB.plan;
+    const planTxt=(LAB.mode==='sensor'?'📈 Sensör Otopilot (kavis '+LAB.sensor.kavis.toFixed(2)+' · pay '+LAB.sensor.pay.toFixed(2)+') → ':'')+
+      repPlan.map((s,i)=>(i+1)+'.'+(s[0]==='G'?'Geri':'İleri')+'-'+(s[1]==='L'?'Sol':s[1]==='R'?'Sağ':'Düz')+'('+(+s[2]).toFixed(2).replace(/\.?0+$/,'')+')').join(' → ');
     const box=document.getElementById('resultBox');
     box.innerHTML =
       '<h3 class="'+(win?'win':'lose')+'">📄 Park Raporu — '+lot.name+'</h3>'+
@@ -456,8 +512,30 @@
       el.appendChild(mk('✕',()=>{ LAB.plan.splice(i,1); buildPlan(); },'del'));
       list.appendChild(el);
     });
+    if(!LAB.sim) drawScene(null);
   }
   document.getElementById('addStep').onclick=()=>{ LAB.plan.push(['F','D',2.0]); buildPlan(); };
+  // ---- mode toggle + sensor sliders ----
+  function setMode(m){
+    LAB.mode=m;
+    document.getElementById('modePlan').classList.toggle('on',m==='plan');
+    document.getElementById('modeSensor').classList.toggle('on',m==='sensor');
+    document.getElementById('planPanel').style.display=m==='plan'?'block':'none';
+    document.getElementById('sensorPanel').style.display=m==='sensor'?'block':'none';
+    if(!LAB.sim) drawScene(null);
+  }
+  document.getElementById('modePlan').onclick=()=>setMode('plan');
+  document.getElementById('modeSensor').onclick=()=>setMode('sensor');
+  function bindSensor(){
+    const k=document.getElementById('sKavis'), p=document.getElementById('sPay');
+    k.value=LAB.sensor.kavis; p.value=LAB.sensor.pay;
+    const lbl=()=>{ document.getElementById('sKavisV').textContent=(+k.value).toFixed(2);
+      document.getElementById('sPayV').textContent=(+p.value).toFixed(2); };
+    k.oninput=lbl; p.oninput=lbl;
+    const commit=()=>{ LAB.sensor={kavis:+k.value, pay:+p.value}; if(!LAB.sim) drawScene(null); };
+    k.onchange=commit; p.onchange=commit;
+    lbl();
+  }
 
   // ---- params / künye ----
   function vLabel(v){ return v<3?'Yavaş':v<4.3?'Orta':'Hızlı'; }
@@ -501,14 +579,14 @@
     PC.LOTS.forEach((l,i)=>{
       const b=document.createElement('button'); b.className='ttab'+(i===LAB.lotIdx?' on':'');
       b.innerHTML=l.name+'<small>'+l.difficulty+'</small>';
-      b.onclick=()=>{ LAB.lotIdx=i; LAB.plan=PC.shippedPlan(PC.LOTS[i]); resetSim(); buildTrackTabs(); buildPlan(); };
+      b.onclick=()=>{ LAB.lotIdx=i; LAB.plan=PC.shippedPlan(PC.LOTS[i]); LAB.solved=null; resetSim(); buildTrackTabs(); buildPlan(); };
       el.appendChild(b);
     });
   }
 
   function shareRobot(){
     try{
-      const st={ l:LAB.lotIdx, pl:LAB.plan };
+      const st={ l:LAB.lotIdx, pl:LAB.plan, mo:LAB.mode, sn:LAB.sensor };
       location.hash='r='+btoa(unescape(encodeURIComponent(JSON.stringify(st))));
       navigator.clipboard && navigator.clipboard.writeText(location.href);
       toast('Bağlantı kopyalandı! Arkadaşına gönder.');
@@ -519,6 +597,8 @@
       if(!location.hash.startsWith('#r=')) return false;
       const st=JSON.parse(decodeURIComponent(escape(atob(location.hash.slice(3)))));
       if(typeof st.l==='number'&&PC.LOTS[st.l]) LAB.lotIdx=st.l;
+      if(st.mo==='sensor'||st.mo==='plan') LAB.mode=st.mo;
+      if(st.sn&&typeof st.sn.kavis==='number') LAB.sensor=st.sn;
       if(st.pl){ LAB.plan=st.pl; toast('Paylaşılan manevra yüklendi!'); return true; }
     }catch(e){}
     return false;
@@ -532,6 +612,7 @@
     ['📐 Manevra Planı','Plan = adım listesi: İleri/Geri + direksiyon (Sol/Düz/Sağ) + mesafe. Robot adımları sırayla uygular. Sihirli sayı: 2.51 birim kavis = 90° dönüş.'],
     ['🚗 Paralel Park Sırrı','Cebi geç, sonra geri-Sağ + geri-Sol yap (S manevrası) — araç yan yan cebe süzülür. Şoför kursunda öğretilen de tam budur!'],
     ['💯 Hassasiyet','Cebe girmek yetmez — düzgün durmalısın. Rapor açı sapmanı ve merkeze uzaklığını gösterir. Mesafelerde küçük (0.1) ince ayarlar madalya getirir.'],
+    ['🛰️ Sensör Otopilot','İkinci mod gerçek otonom araç gibi: robot cebi ölçer, manevrayı KENDİSİ türetir. Sen sadece kavis ve güvenlik payını ayarlarsın. Mor hayalet çizgi türetilen yolu anında gösterir.'],
     ['🏁 Başla!','Hazır plan yüklü — önce çalıştır, izle, sonra sayılarla oyna. Kâbus Park seviyesine kadar tırman!'],
   ];
   let tutI=0;
@@ -567,7 +648,7 @@
   const hadShared=loadFromHash();
   applyRobotBuild();
   if(!hadShared) LAB.plan=PC.shippedPlan(PC.LOTS[LAB.lotIdx]);
-  fitView(); buildTrackTabs(); buildPlan(); bindParams(); fillKunye();
+  fitView(); buildTrackTabs(); buildPlan(); bindParams(); bindSensor(); fillKunye(); setMode(LAB.mode);
   drawScene(null); updateHud();
   let seen=false; try{ seen=!!localStorage.getItem('rf_park_tut'); }catch(e){}
   if(!seen) showTut(0);

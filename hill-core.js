@@ -20,6 +20,7 @@
   const ROLLBACK_V = -0.4, ROLLBACK_T = 2.0;
   const STUCK_T = 5.0;
   const BAND1 = 0.12, BAND2 = 0.33; // slope bands (rad)
+  const GEAR = { 1: { f: 1.35, cap: 5.5 }, 2: { f: 1.0, cap: 9.5 } };
 
   // ---- courses: terrain control points [x, y] (+ surface patches) ------------------
   // surface: [{x0,x1,mu}] grip multipliers (yağmur/çamur) · finish = last x
@@ -130,22 +131,32 @@
     const mu = surfaceAt(sim.course, sim.x);
     const m = params.mass || 1;
 
-    let thr, ruleIndex = null;
+    let thr, ruleIndex = null, gear = 1;
     if (mode === 'pid') {
       const pid = sim.cfg.pid || defaultPID();
       const err = (pid.hedef || 3) - sim.v;
       sim.iErr = Math.max(-3, Math.min(3, sim.iErr + err * dt));
       thr = (pid.kp || 0) * err * 0.5 + (pid.ki || 0) * sim.iErr * 0.4;
       thr = Math.max(-1, Math.min(1, thr));
+      const vs = pid.vites || 'auto';
+      gear = vs === 'auto' ? ((phi > 0.12 || sim.v < 2.0) ? 1 : 2) : +vs;
     } else {
       const b = slopeBands(phi);
       const arr = [b.dikYokus, b.yokus, b.duz, b.inis, b.dikInis];
       const r = evalRules(sim.cfg.rules, sim.cfg.defaultRule, arr);
       thr = r.m; ruleIndex = r.ruleIndex;
+      const rl = ruleIndex >= 0 ? sim.cfg.rules[ruleIndex] : sim.cfg.defaultRule;
+      gear = rl.vites || 1;
     }
+    sim.gear = gear;
+    const G2 = GEAR[gear] || GEAR[1];
 
-    // traction-limited drive
-    const Fdemand = thr * (params.force || 8);
+    // traction-limited drive (gear scales force; each gear has a top speed)
+    let Fdemand = thr * (params.force || 8) * G2.f;
+    if (thr > 0 && sim.v > G2.cap * 0.8) {          // vites tavanına yaklaştıkça güç düşer
+      const taper = Math.max(0, 1 - (sim.v - G2.cap * 0.8) / (G2.cap * 0.55));
+      Fdemand *= taper;
+    }
     const Fmax = (params.grip || 0.55) * m * GRAV * Math.cos(phi) * mu;
     let F = Fdemand;
     sim.slip = Math.abs(Fdemand) > Fmax;
@@ -172,7 +183,7 @@
     else if (sim.stuckTime > STUCK_T) { sim.status = 'failed'; sim.reason = 'stuck'; }
     else if (sim.t > (sim.course.time || 45)) { sim.status = 'failed'; sim.reason = 'timeout'; }
 
-    sim.last = { thr, ruleIndex, phi, slip: sim.slip, mu, F, Fmax };
+    sim.last = { thr, ruleIndex, phi, slip: sim.slip, mu, F, Fmax, gear };
     return sim.last;
   }
 
@@ -214,20 +225,20 @@
   // pattern = [dikYokus, yokus, duz, inis, dikInis]
   function starterRules() {
     return [
-      { pattern: ['on', 'any', 'any', 'any', 'any'], left: { dir: 'fwd', speed: 100 } },
-      { pattern: ['off', 'on', 'any', 'any', 'any'], left: { dir: 'fwd', speed: 85 } },
-      { pattern: ['any', 'any', 'on', 'any', 'any'], left: { dir: 'fwd', speed: 72 } },
-      { pattern: ['any', 'any', 'any', 'on', 'off'], left: { dir: 'fwd', speed: 30 } },
-      { pattern: ['any', 'any', 'any', 'any', 'on'], left: { dir: 'rev', speed: 25 } },
+      { pattern: ['on', 'any', 'any', 'any', 'any'], left: { dir: 'fwd', speed: 100 }, vites: 1 },
+      { pattern: ['off', 'on', 'any', 'any', 'any'], left: { dir: 'fwd', speed: 85 }, vites: 1 },
+      { pattern: ['any', 'any', 'on', 'any', 'any'], left: { dir: 'fwd', speed: 72 }, vites: 2 },
+      { pattern: ['any', 'any', 'any', 'on', 'off'], left: { dir: 'fwd', speed: 30 }, vites: 2 },
+      { pattern: ['any', 'any', 'any', 'any', 'on'], left: { dir: 'rev', speed: 18 }, vites: 1 },
     ];
   }
-  function starterDefault() { return { left: { dir: 'fwd', speed: 55 } }; }
+  function starterDefault() { return { left: { dir: 'fwd', speed: 55 }, vites: 2 }; }
   // params from build: force ~ torque, grip ~ wheel; defaults = TT + plastik-ish
   function defaultParams() { return { force: 9.5, grip: 0.62, mass: 1 }; }
-  function defaultPID() { return { hedef: 5.0, kp: 1.5, ki: 1.0 }; }
+  function defaultPID() { return { hedef: 5.0, kp: 1.5, ki: 1.0, vites: 'auto' }; }
 
   const API = {
-    GRAV, BAND1, BAND2, FINISH_X, SLIP_EFF,
+    GRAV, BAND1, BAND2, FINISH_X, SLIP_EFF, GEAR,
     COURSES, buildTerrain, heightAt, slopeAt, surfaceAt, slopeBands,
     evalRules, ruleMatches, motorFraction,
     createSim, tickSim, coach, robotClass, runHeadless,

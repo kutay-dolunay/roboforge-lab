@@ -201,12 +201,15 @@
       <div id="pidPanel">
         <div class="card">
           <h4>PID Denge Kontrolü</h4>
-          <p class="exp">motor = Kp·eğim + Kd·devrilme hızı. <b>Kd olmazsa olmaz:</b> sadece Kp ile robot
-            düzelirken hız kazanır ve öbür tarafa aşar — salınım büyür, devrilir. Kd erken frenler.</p>
+          <p class="exp">motor = Kp·eğim + Kd·devrilme hızı + Ki·birikmiş eğim. <b>Kd olmazsa olmaz:</b> sadece Kp ile robot
+            düzelirken hız kazanır ve öbür tarafa aşar — salınım büyür, devrilir. Kd erken frenler.
+            <b>Ki</b> ise inatçı yamukluğu düzeltir: rüzgâr/dengesiz yük robotu hep bir yana yatırıyorsa, Ki o kalıcı hatayı biriktirip siler.</p>
           <div class="sliderRow"><label>Kp (eğim tepkisi) <b id="pKpV">2.6</b></label>
             <input type="range" id="pKp" min="0.5" max="5" step="0.1" value="2.6"></div>
           <div class="sliderRow"><label>Kd (devrilme freni) <b id="pKdV">0.55</b></label>
             <input type="range" id="pKd" min="0" max="1.5" step="0.05" value="0.55"></div>
+          <div class="sliderRow"><label>Ki (kalıcı hata sileci) <b id="pKiV">0.35</b></label>
+            <input type="range" id="pKi" min="0" max="1.2" step="0.05" value="0.35"></div>
           <div class="sliderRow"><label>Hedef Çekimi <b id="pKxV">1.0</b></label>
             <input type="range" id="pKx" min="0" max="2.5" step="0.1" value="1.0"></div>
         </div>
@@ -233,7 +236,7 @@
 <div id="toast"></div>
 
 <script src="robot-data.js?v=2"></script>
-<script src="balance-core.js?v=1"></script>
+<script src="balance-core.js?v=2"></script>
 <script>
 (function(){
   const BC = window.BalanceCore;
@@ -449,7 +452,7 @@
       '<h3 class="'+(win?'win':'lose')+'">📄 Denge Raporu — '+lvl.name+'</h3>'+
       '<div style="margin:8px 0;font-size:.8rem;color:var(--muted2)">'+chips+'</div>'+
       '<div style="font-size:.76rem;color:var(--sky);margin-bottom:8px">'+
-        (LAB.mode==='pid'?'📈 PID — Kp '+LAB.pid.kp.toFixed(1)+' · Kd '+LAB.pid.kd.toFixed(2)+' · Çekim '+LAB.pid.kx.toFixed(1):'🧩 Bant Kuralları — '+LAB.rules.length+' kural')+'</div>'+
+        (LAB.mode==='pid'?'📈 PID — Kp '+LAB.pid.kp.toFixed(1)+' · Kd '+LAB.pid.kd.toFixed(2)+' · Ki '+(LAB.pid.ki!=null?LAB.pid.ki:0.35).toFixed(2)+' · Çekim '+LAB.pid.kx.toFixed(1):'🧩 Bant Kuralları — '+LAB.rules.length+' kural')+'</div>'+
       '<div class="rstats">'+
         '<div class="rstat"><div class="l">DENGE</div><div class="v mono">%'+BC.steadiness(sim)+'</div></div>'+
         '<div class="rstat"><div class="l">MAKS EĞİM</div><div class="v mono">'+(sim.maxTilt*57.3).toFixed(0)+'°</div></div>'+
@@ -458,6 +461,8 @@
       '</div>'+
       '<canvas id="repMap" width="460" height="200" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#0a0d12"></canvas>'+
       '<div style="font-size:.68rem;color:var(--muted);margin-top:4px">Eğim grafiği — düz çizgi = mükemmel denge, kırmızı sınırlar = devrilme</div>'+
+      '<canvas id="repPhase" width="460" height="220" style="width:100%;margin-top:10px;border:1px solid var(--line);border-radius:10px;background:#0a0d12"></canvas>'+
+      '<div style="font-size:.68rem;color:var(--muted);margin-top:4px">Faz portresi (eğim ↔ devrilme hızı) — kontrol mühendislerinin gizli silahı. İçe sarılan spiral = sönümlenen salınım = iyi ayar. Genişleyen halka = felakete gidiş.</div>'+
       '<div class="rbtns"><button class="btn ghost" id="repClose">Kapat</button></div>';
     document.getElementById('resultWrap').classList.add('show');
     document.getElementById('repClose').onclick=()=>document.getElementById('resultWrap').classList.remove('show');
@@ -471,6 +476,31 @@
     x.strokeStyle='#38bdf8'; x.lineWidth=1.6; x.beginPath();
     sim.log.forEach((pt,i)=>{ const px=8+(pt[0]/T)*(cv.width-16), py=yFor(pt[1]); i?x.lineTo(px,py):x.moveTo(px,py); });
     x.stroke();
+    // phase portrait: th (x-axis) vs om (y-axis), time = color fade
+    const pv=document.getElementById('repPhase');
+    if(pv){
+      const p=pv.getContext('2d');
+      const thM=0.65, omM=Math.max(1.2,...sim.log.map(q=>Math.abs(q[3]||0)))*1.05;
+      const PX=v=>pv.width/2+(Math.max(-thM,Math.min(thM,v))/thM)*(pv.width/2-12);
+      const PY=v=>pv.height/2-(Math.max(-omM,Math.min(omM,v))/omM)*(pv.height/2-10);
+      p.strokeStyle='rgba(148,163,184,.25)';
+      p.beginPath(); p.moveTo(PX(0),8); p.lineTo(PX(0),pv.height-8); p.stroke();
+      p.beginPath(); p.moveTo(10,PY(0)); p.lineTo(pv.width-10,PY(0)); p.stroke();
+      p.strokeStyle='rgba(239,68,68,.45)'; p.setLineDash([4,3]);
+      [0.6,-0.6].forEach(v=>{ p.beginPath(); p.moveTo(PX(v),8); p.lineTo(PX(v),pv.height-8); p.stroke(); });
+      p.setLineDash([]);
+      p.fillStyle='#64748b'; p.font='9px Segoe UI'; p.textAlign='left';
+      p.fillText('eğim →',pv.width-46,PY(0)-5); p.fillText('devrilme hızı ↑',PX(0)+5,14);
+      const n=sim.log.length;
+      for(let i=1;i<n;i++){
+        const a=sim.log[i-1], b=sim.log[i];
+        p.strokeStyle='rgba(56,189,248,'+(0.15+0.75*(i/n)).toFixed(2)+')';
+        p.lineWidth=1.4; p.beginPath();
+        p.moveTo(PX(a[1]),PY(a[3]||0)); p.lineTo(PX(b[1]),PY(b[3]||0)); p.stroke();
+      }
+      const lp=sim.log[n-1];
+      if(lp){ p.fillStyle='#38bdf8'; p.beginPath(); p.arc(PX(lp[1]),PY(lp[3]||0),3.5,0,7); p.fill(); }
+    }
   }
 
   // ---- rules editor ----
@@ -539,13 +569,15 @@
   document.getElementById('modePid').onclick=()=>setMode('pid');
   document.getElementById('modeRules').onclick=()=>setMode('rules');
   function bindPid(){
-    const kp=document.getElementById('pKp'), kd=document.getElementById('pKd'), kx=document.getElementById('pKx');
-    kp.value=LAB.pid.kp; kd.value=LAB.pid.kd; kx.value=LAB.pid.kx;
+    const kp=document.getElementById('pKp'), kd=document.getElementById('pKd'), kx=document.getElementById('pKx'), ki=document.getElementById('pKi');
+    kp.value=LAB.pid.kp; kd.value=LAB.pid.kd; kx.value=LAB.pid.kx; ki.value=(LAB.pid.ki!=null?LAB.pid.ki:0.35);
     const sync=()=>{ document.getElementById('pKpV').textContent=(+kp.value).toFixed(1);
       document.getElementById('pKdV').textContent=(+kd.value).toFixed(2);
+      document.getElementById('pKiV').textContent=(+ki.value).toFixed(2);
       document.getElementById('pKxV').textContent=(+kx.value).toFixed(1); };
     kp.oninput=()=>{ LAB.pid.kp=+kp.value; sync(); };
     kd.oninput=()=>{ LAB.pid.kd=+kd.value; sync(); };
+    ki.oninput=()=>{ LAB.pid.ki=+ki.value; sync(); };
     kx.oninput=()=>{ LAB.pid.kx=+kx.value; sync(); };
     sync();
   }
@@ -621,6 +653,7 @@
     ['🤸 Kararsız Sistem','Bu robot şimdiye kadarki her şeyden farklı: HİÇBİR ŞEY YAPMAZSAN DEVRİLİR. Çizgi izleyen robot dursa çizgi kaçmaz — bu robot bir an bile duramaz. Kontrol mühendisliğinin en ünlü problemi: ters sarkaç.'],
     ['⚖️ Denge Sırrı','Devrilirken kurtulmanın tek yolu: devrildiğin YÖNE doğru sürmek! Taban gövdenin altına kaçar ve robot doğrulur. Segway ve hoverboard saniyede yüzlerce kez bunu yapar.'],
     ['📈 Kp ve Kd','Kp eğime tepki verir ama tek başına YETMEZ: robot düzelirken hız kazanır, öbür tarafa aşar, salınım büyür… Kd devrilme HIZINI görür ve erken fren yapar. İkisinin dansı = denge.'],
+    ['🧲 Ki — Gizli Kahraman','Rüzgârlı seviyede robot hep rüzgâr yönüne hafif yatık durur — Kp bunu asla sıfırlayamaz (dengede kalmak için o hata GEREKLİ sanır). Ki hatayı zamanla biriktirir ve yamukluğu siler. Raporda faz portresine bak: iyi ayar içe sarılan spiraldir!'],
     ['🎯 Hedefe Gitmek','Denge robotu ileri gitmek için öne EĞİLMELİDİR — tıpkı yürürken yaptığın gibi! Hedef Çekimi kazancı robotu hedefe doğru hafifçe eğer.'],
     ['🏁 Başla!','Önce sadece ayakta kal. Sonra dürtmeler, rüzgâr, yük ve fırtına… Denge grafiğini izle: düz çizgi = usta işi. Bant kuralları modunu da dene — PID neden şart, bizzat gör!'],
   ];

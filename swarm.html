@@ -82,6 +82,31 @@
   .sliderRow .desc{font-size:.64rem;color:var(--muted);margin-top:2px}
   input[type=range]{width:100%;accent-color:var(--sky)}
 
+  .modeRow{display:flex;gap:6px;margin-bottom:12px}
+  .modeBtn{flex:1;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--panel);
+    cursor:pointer;font-weight:800;font-size:.76rem;color:var(--muted2)}
+  .modeBtn.on{border-color:var(--purple);color:#d8b4fe;background:#170f28}
+  .rule{border:1px solid var(--line);border-radius:11px;background:var(--panel2);padding:10px;margin-bottom:8px}
+  .rchips{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}
+  .rchip{padding:4px 7px;border:1px solid #26364e;border-radius:7px;background:#0d1524;cursor:pointer;
+    font-size:.58rem;font-weight:800;color:var(--muted);user-select:none;line-height:1.25;text-align:center}
+  .rchip small{display:block;font-size:.48rem;font-weight:600;color:inherit;opacity:.75}
+  .rchip.on{border-color:var(--green);color:#86efac;background:#07190e}
+  .rchip.off{border-color:var(--red);color:#fca5a5;background:#1c0b0b}
+  .motors{display:flex;gap:8px;align-items:flex-end}
+  .mot{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:7px}
+  .mot b{display:block;font-size:.56rem;color:var(--muted);letter-spacing:1px;margin-bottom:4px}
+  .mot select,.mot input{width:100%;background:#0b1220;border:1px solid #26364e;color:var(--txt);
+    border-radius:6px;font-size:.72rem;padding:4px 5px;margin-bottom:3px}
+  .rtools{display:flex;gap:4px}
+  .iconbtn{border:1px solid var(--line);background:var(--panel);color:var(--muted2);border-radius:7px;
+    width:26px;height:26px;cursor:pointer;font-size:.7rem;line-height:1}
+  .iconbtn:hover{border-color:var(--sky);color:var(--sky)}
+  .iconbtn.del:hover{border-color:var(--red);color:#fca5a5}
+  .addRule{width:100%;padding:9px;border:1px dashed var(--line);border-radius:10px;background:transparent;
+    color:var(--muted2);font-weight:700;cursor:pointer;font-size:.78rem}
+  .addRule:hover{border-color:var(--sky);color:var(--sky)}
+  .defTag{font-size:.56rem;color:#a78bfa;letter-spacing:1.5px;font-weight:800;margin:10px 0 5px}
   .kunye .chipsRow{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px}
   .kunye .kchip{border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:4px 8px;font-size:.66rem;color:var(--muted2)}
   .kunye .kchip b{color:var(--txt)}
@@ -151,6 +176,11 @@
     </div>
 
     <div id="tab-kod">
+      <div class="modeRow">
+        <button class="modeBtn on" id="modeWeights">📈 İçgüdü Harmanı</button>
+        <button class="modeBtn" id="modeRules">🧩 Kural Zinciri</button>
+      </div>
+      <div id="weightsPanel">
       <div class="card">
         <h4>İçgüdü Ağırlıkları (sürünün kodu)</h4>
         <p class="exp">Karıncalar, arılar ve sığırcık sürüleri böyle çalışır — merkezi beyin yok,
@@ -176,6 +206,19 @@
           <div class="desc">Görev hedefine yönelme gücü.</div>
         </div>
       </div>
+      </div>
+      <div id="rulesPanel" style="display:none">
+        <div class="card">
+          <h4>Kural Zinciri (her robotta aynı minik beyin)</h4>
+          <p class="exp">İçgüdü harmanı yerine <b>klasik EĞER→YAP kuralları</b> — ama aynı zincir 6 robotta
+            birden çalışır! Her robot kendi sensörlerine bakar: komşu nerede, çok mu yakın, hedef ne yanda.
+            Üstteki kural kazanır. Tek robotu değil, <b>sürünün tamamını</b> programlıyorsun.</p>
+          <div id="rulesList"></div>
+          <button class="addRule" id="addRule">+ Yeni Kural</button>
+          <div class="defTag">VARSAYILAN (hiçbiri eşleşmezse)</div>
+          <div id="defRule"></div>
+        </div>
+      </div>
     </div>
 
     <div id="tab-robot" style="display:none">
@@ -199,7 +242,7 @@
 <div id="toast"></div>
 
 <script src="robot-data.js?v=2"></script>
-<script src="swarm-core.js?v=1"></script>
+<script src="swarm-core.js?v=2"></script>
 <script>
 (function(){
   const SW = window.SwarmCore;
@@ -208,6 +251,7 @@
   const LAB = {
     levelIdx: 0,
     weights: SW.defaultWeights(), params: SW.defaultParams(),
+    mode: 'weights', rules: SW.starterRules(), defaultRule: SW.starterDefault(),
     sim: null, raf: null, lastTs: 0, simSpeed: 1,
     view: { scale: 40 },
   };
@@ -285,7 +329,10 @@
   }
 
   function buildConfig(){
-    return { level: SW.LEVELS[LAB.levelIdx], weights: { ...LAB.weights }, params: LAB.params };
+    return { level: SW.LEVELS[LAB.levelIdx], mode: LAB.mode, weights: { ...LAB.weights },
+      rules: LAB.rules.map(r=>({ pattern:r.pattern.slice(), left:{...r.left}, right:{...r.right} })),
+      defaultRule: { left:{...LAB.defaultRule.left}, right:{...LAB.defaultRule.right} },
+      params: LAB.params };
   }
   function startRun(){
     stopLoop(); hideResult();
@@ -355,8 +402,10 @@
     const box=document.getElementById('resultBox');
     box.innerHTML =
       '<h3 class="'+(win?'win':'lose')+'">📄 Sürü Raporu — '+level.name+'</h3>'+
-      '<div style="font-size:.76rem;color:var(--sky);margin:8px 0">🫸 '+LAB.weights.sep.toFixed(1)+
-        ' · 🧭 '+LAB.weights.ali.toFixed(1)+' · 🧲 '+LAB.weights.coh.toFixed(1)+' · 🎯 '+LAB.weights.goal.toFixed(1)+'</div>'+
+      '<div style="font-size:.76rem;color:var(--sky);margin:8px 0">'+
+        (LAB.mode==='rules'
+          ?'🧩 Kural Zinciri — '+LAB.rules.length+' kural × 6 robot'
+          :'🫸 '+LAB.weights.sep.toFixed(1)+' · 🧭 '+LAB.weights.ali.toFixed(1)+' · 🧲 '+LAB.weights.coh.toFixed(1)+' · 🎯 '+LAB.weights.goal.toFixed(1))+'</div>'+
       '<div class="rstats">'+
         '<div class="rstat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
         '<div class="rstat"><div class="l">GÖREV</div><div class="v mono">'+prog.label+'</div></div>'+
@@ -382,6 +431,77 @@
       x.stroke();
     }
   }
+
+  // ---- rules editor ----
+  const CHIP_DEFS=[
+    { key:0, name:'YALNIZ', sub:'komşu yok' },
+    { key:1, name:'KOMŞU ◀', sub:'solda' },
+    { key:2, name:'KOMŞU ▶', sub:'sağda' },
+    { key:3, name:'ÇOK YAKIN', sub:'&lt;1 birim' },
+    { key:4, name:'HEDEF ◀', sub:'solda' },
+    { key:5, name:'HEDEF ▲', sub:'önde' },
+    { key:6, name:'HEDEF ▶', sub:'sağda' },
+  ];
+  function motEl(m,label){
+    const wrap=document.createElement('div'); wrap.className='mot';
+    const b=document.createElement('b'); b.textContent=label; wrap.appendChild(b);
+    const sel=document.createElement('select');
+    [['fwd','İleri'],['stop','Dur'],['rev','Geri']].forEach(([v,l])=>{
+      const o=document.createElement('option'); o.value=v; o.textContent=l; if(m.dir===v)o.selected=true; sel.appendChild(o); });
+    sel.onchange=()=>{ m.dir=sel.value; };
+    const inp=document.createElement('input'); inp.type='number'; inp.min=0; inp.max=100; inp.step=5; inp.value=m.speed;
+    inp.onchange=()=>{ m.speed=Math.max(0,Math.min(100,+inp.value||0)); };
+    wrap.appendChild(sel); wrap.appendChild(inp);
+    return wrap;
+  }
+  function ruleEl(rule,ri,isDef){
+    const el=document.createElement('div'); el.className='rule';
+    if(!isDef){
+      const chips=document.createElement('div'); chips.className='rchips';
+      CHIP_DEFS.forEach(def=>{
+        const val=rule.pattern[def.key]||'any';
+        const ch=document.createElement('div');
+        ch.className='rchip'+(val==='on'?' on':val==='off'?' off':'');
+        ch.innerHTML=def.name+'<small>'+def.sub+(val==='any'?' · fark etmez':val==='on'?' · EVET':' · HAYIR')+'</small>';
+        ch.onclick=()=>{ rule.pattern[def.key]=val==='any'?'on':val==='on'?'off':'any'; buildRules(); };
+        chips.appendChild(ch);
+      });
+      el.appendChild(chips);
+    }
+    const mot=document.createElement('div'); mot.className='motors';
+    mot.appendChild(motEl(rule.left,'SOL MOTOR'));
+    mot.appendChild(motEl(rule.right,'SAĞ MOTOR'));
+    if(!isDef){
+      const tools=document.createElement('div'); tools.className='rtools';
+      const mk=(t,f,c)=>{ const b=document.createElement('button'); b.className='iconbtn'+(c?' '+c:''); b.textContent=t; b.onclick=f; return b; };
+      tools.appendChild(mk('↑',()=>{ if(ri>0){ const t=LAB.rules[ri]; LAB.rules[ri]=LAB.rules[ri-1]; LAB.rules[ri-1]=t; buildRules(); } }));
+      tools.appendChild(mk('↓',()=>{ if(ri<LAB.rules.length-1){ const t=LAB.rules[ri]; LAB.rules[ri]=LAB.rules[ri+1]; LAB.rules[ri+1]=t; buildRules(); } }));
+      tools.appendChild(mk('✕',()=>{ LAB.rules.splice(ri,1); buildRules(); },'del'));
+      mot.appendChild(tools);
+    }
+    el.appendChild(mot);
+    return el;
+  }
+  function buildRules(){
+    const list=document.getElementById('rulesList'); list.innerHTML='';
+    LAB.rules.forEach((r,i)=>list.appendChild(ruleEl(r,i,false)));
+    const def=document.getElementById('defRule'); def.innerHTML='';
+    def.appendChild(ruleEl(LAB.defaultRule,-1,true));
+  }
+  document.getElementById('addRule').onclick=()=>{
+    LAB.rules.push({ pattern:['any','any','any','any','any','any','any'],
+      left:{dir:'fwd',speed:60}, right:{dir:'fwd',speed:60} });
+    buildRules();
+  };
+  function setMode(m){
+    LAB.mode=m;
+    document.getElementById('modeWeights').classList.toggle('on',m==='weights');
+    document.getElementById('modeRules').classList.toggle('on',m==='rules');
+    document.getElementById('weightsPanel').style.display=m==='weights'?'block':'none';
+    document.getElementById('rulesPanel').style.display=m==='rules'?'block':'none';
+  }
+  document.getElementById('modeWeights').onclick=()=>setMode('weights');
+  document.getElementById('modeRules').onclick=()=>setMode('rules');
 
   // ---- weights ----
   function bindWeights(){
@@ -441,7 +561,7 @@
 
   function shareRobot(){
     try{
-      const st={ l:LAB.levelIdx, w:LAB.weights };
+      const st={ l:LAB.levelIdx, w:LAB.weights, mo:LAB.mode, r:LAB.rules, d:LAB.defaultRule };
       location.hash='r='+btoa(unescape(encodeURIComponent(JSON.stringify(st))));
       navigator.clipboard && navigator.clipboard.writeText(location.href);
       toast('Bağlantı kopyalandı! Arkadaşına gönder.');
@@ -453,6 +573,9 @@
       const st=JSON.parse(decodeURIComponent(escape(atob(location.hash.slice(3)))));
       if(typeof st.l==='number'&&SW.LEVELS[st.l]) LAB.levelIdx=st.l;
       if(st.w) LAB.weights=st.w;
+      if(st.mo==='rules'||st.mo==='weights') LAB.mode=st.mo;
+      if(Array.isArray(st.r)&&st.r.length) LAB.rules=st.r;
+      if(st.d&&st.d.left) LAB.defaultRule=st.d;
       toast('Paylaşılan içgüdüler yüklendi!');
     }catch(e){}
   }
@@ -465,6 +588,7 @@
     ['🧬 4 İçgüdü','Sırrı doğa bulmuş: AYRILMA (çarpma!), HİZALANMA (akışa uy), TOPLANMA (kopma!), HEDEF ÇEKİMİ (oraya git). Sığırcık sürüleri ve balık okulları tam bu üç-dört kuralla uçar/yüzer.'],
     ['⚖️ Ağırlıkların Dansı','Görev tipine göre denge değişir: toplanmada Toplanma+Hedef, taramada Ayrılma kraldır. Kaydırıcılarla oyna, sürünün KARAKTERİNİN değiştiğini gör.'],
     ['🚪 Dar Geçit Mucizesi','Sürü dar geçitte sıkışmaz — Ayrılma doğal bir sıra oluşturur! Kimse "önce sen" demez ama sıralı geçerler. İşte emergence: kimsenin planlamadığı düzen.'],
+    ['🧩 Kural Zinciri Modu','İkinci mod: içgüdü yerine EĞER→YAP kuralları yaz — aynı zincir 6 robotta birden çalışır. KOMŞU, ÇOK YAKIN ve HEDEF sensörleriyle sürü davranışını satır satır sen kur. Tek beyin, altı beden!'],
     ['🏁 Sal Sürüyü!','Toplanmadan Kâbus Görevine… Renkli izler her robotun yolunu gösterir. Sürü Beyni madalyası hızlı ve uyumlu sürülere!'],
   ];
   let tutI=0;
@@ -499,7 +623,7 @@
   // ---- init ----
   loadFromHash();
   applyRobotBuild();
-  fitView(); buildTrackTabs(); bindWeights(); bindParams(); fillKunye();
+  fitView(); buildTrackTabs(); bindWeights(); bindParams(); buildRules(); setMode(LAB.mode); fillKunye();
   drawScene(); updateHud(null);
   let seen=false; try{ seen=!!localStorage.getItem('rf_swarm_tut'); }catch(e){}
   if(!seen) showTut(0);
