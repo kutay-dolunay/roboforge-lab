@@ -9,6 +9,9 @@
     --bg:#0b1220; --panel:#0f172a; --panel2:#111c33; --line:#1e3a5f;
     --sky:#38bdf8; --sky2:#0ea5e9; --green:#22c55e; --amber:#f59e0b;
     --red:#ef4444; --purple:#a855f7; --txt:#e2e8f0; --muted:#64748b; --muted2:#94a3b8;
+    --t1:#22c55e; --t1soft:rgba(34,197,94,.14);
+    --t2:#38bdf8; --t2soft:rgba(56,189,248,.14);
+    --t3:#a855f7; --t3soft:rgba(168,85,247,.16);
   }
   *{box-sizing:border-box}
   body{margin:0;min-height:100vh;color:var(--txt);
@@ -24,55 +27,76 @@
   .logo b{font-size:1.5rem;letter-spacing:.4px}
   .logo b span{color:var(--sky)}
   .logo small{display:block;color:var(--muted);font-size:.62rem;letter-spacing:3px;text-transform:uppercase;margin-top:2px}
-  .tagline{color:var(--muted2);font-size:1rem;max-width:680px;line-height:1.55;margin-top:14px}
+  .tagline{color:var(--muted2);font-size:1rem;max-width:720px;line-height:1.55;margin-top:14px}
   .tagline b{color:var(--txt)}
 
-  .barrow{display:flex;align-items:center;justify-content:space-between;margin:34px 0 16px;flex-wrap:wrap;gap:10px}
-  .barrow h2{font-size:.82rem;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin:0;font-weight:700}
-  .legend{display:flex;gap:14px;font-size:.72rem;color:var(--muted2)}
-  .legend span{display:flex;align-items:center;gap:6px}
-  .dot{width:9px;height:9px;border-radius:50%}
+  /* progression path nav */
+  .pathnav{position:sticky;top:0;z-index:50;display:flex;gap:8px;align-items:center;
+    margin:26px -24px 8px;padding:12px 24px;background:rgba(10,16,30,.88);backdrop-filter:blur(10px);
+    border-bottom:1px solid rgba(30,58,95,.6);overflow-x:auto}
+  .pathnav a{display:flex;align-items:center;gap:9px;padding:8px 14px;border-radius:11px;
+    border:1px solid var(--line);background:var(--panel);white-space:nowrap;transition:.15s;flex:none}
+  .pathnav a .pnum{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:.68rem;font-weight:800;color:#0b1220}
+  .pathnav a .pt{font-size:.78rem;font-weight:800}
+  .pathnav a .ps{display:block;font-size:.58rem;color:var(--muted);font-weight:600;letter-spacing:.4px}
+  .pathnav a.p1:hover{border-color:var(--t1)} .pathnav a.p2:hover{border-color:var(--t2)} .pathnav a.p3:hover{border-color:var(--t3)}
+  .pathnav a.p1 .pnum{background:var(--t1)} .pathnav a.p2 .pnum{background:var(--t2)} .pathnav a.p3 .pnum{background:var(--t3)}
+  .pathnav .arrow{color:var(--muted);font-size:.9rem;flex:none}
+
+  /* tier sections */
+  .tier{margin-top:46px;scroll-margin-top:86px}
+  .tier-head{display:flex;align-items:flex-start;gap:16px;margin-bottom:6px}
+  .tier-badge{flex:none;width:52px;height:52px;border-radius:14px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;font-weight:800;border:1px solid}
+  .tier-badge small{font-size:.5rem;letter-spacing:1.5px;opacity:.85;font-weight:700}
+  .tier-badge span{font-size:1.3rem;line-height:1}
+  .tier.t1 .tier-badge{background:var(--t1soft);border-color:rgba(34,197,94,.45);color:#4ade80}
+  .tier.t2 .tier-badge{background:var(--t2soft);border-color:rgba(56,189,248,.45);color:#7dd3fc}
+  .tier.t3 .tier-badge{background:var(--t3soft);border-color:rgba(168,85,247,.45);color:#d8b4fe}
+  .tier-title h2{margin:0;font-size:1.35rem;letter-spacing:.3px}
+  .tier.t1 .tier-title h2 em{color:#4ade80;font-style:normal}
+  .tier.t2 .tier-title h2 em{color:#7dd3fc;font-style:normal}
+  .tier.t3 .tier-title h2 em{color:#d8b4fe;font-style:normal}
+  .tier-title p{margin:5px 0 0;color:var(--muted2);font-size:.88rem;line-height:1.5;max-width:760px}
+  .tier-title .tcount{display:inline-block;margin-left:8px;font-size:.62rem;font-weight:800;letter-spacing:1px;
+    padding:3px 9px;border-radius:7px;vertical-align:2px}
+  .tier.t1 .tcount{background:var(--t1soft);color:#4ade80}
+  .tier.t2 .tcount{background:var(--t2soft);color:#7dd3fc}
+  .tier.t3 .tcount{background:var(--t3soft);color:#d8b4fe}
+  .tier-line{height:2px;border-radius:2px;margin:16px 0 18px;opacity:.55}
+  .tier.t1 .tier-line{background:linear-gradient(90deg,var(--t1),transparent)}
+  .tier.t2 .tier-line{background:linear-gradient(90deg,var(--t2),transparent)}
+  .tier.t3 .tier-line{background:linear-gradient(90deg,var(--t3),transparent)}
 
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px}
 
   .card{position:relative;border:1px solid var(--line);border-radius:16px;padding:22px;
-    background:linear-gradient(160deg,var(--panel) 0%,#0c1526 100%);min-height:212px;
-    display:flex;flex-direction:column;transition:.18s;overflow:hidden}
+    background:linear-gradient(160deg,var(--panel) 0%,#0c1526 100%);min-height:206px;
+    display:flex;flex-direction:column;transition:.18s;overflow:hidden;cursor:pointer}
   .card .ic{font-size:2.1rem;margin-bottom:12px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4))}
   .card h3{margin:0 0 2px;font-size:1.12rem}
   .card .en{color:var(--muted);font-size:.64rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
   .card p{margin:0;color:var(--muted2);font-size:.84rem;line-height:1.5;flex:1}
-  .meta{display:flex;align-items:center;gap:8px;margin-top:14px;flex-wrap:wrap}
-  .badge{font-size:.58rem;letter-spacing:1.5px;font-weight:800;padding:4px 9px;border-radius:7px;text-transform:uppercase}
-  .lvl{font-size:.6rem;color:var(--muted);letter-spacing:1px;border:1px solid var(--line);padding:3px 8px;border-radius:7px}
-
-  /* available */
-  .card.open{border-color:rgba(34,197,94,.45);cursor:pointer;box-shadow:0 0 0 1px rgba(34,197,94,.06)}
-  .card.open:hover{transform:translateY(-4px);border-color:var(--green);box-shadow:0 14px 40px rgba(34,197,94,.18)}
-  .card.open .badge{background:rgba(34,197,94,.16);color:#4ade80;border:1px solid rgba(34,197,94,.4)}
-  .card.open .ribbon{position:absolute;top:14px;right:-34px;transform:rotate(45deg);background:var(--green);
+  .card .ribbon{position:absolute;top:14px;right:-34px;transform:rotate(45deg);
     color:#04210f;font-size:.55rem;font-weight:800;letter-spacing:1.5px;padding:4px 40px}
-  .startbtn{margin-top:14px;align-self:flex-start;background:linear-gradient(180deg,#16a34a,#15803d);
-    color:#eafff0;border:1px solid #22c55e;padding:9px 16px;border-radius:10px;font-weight:800;font-size:.8rem;
-    letter-spacing:.5px;box-shadow:0 0 16px rgba(34,197,94,.25)}
+  .startbtn{margin-top:14px;align-self:flex-start;color:#eafff0;border:1px solid;padding:9px 16px;
+    border-radius:10px;font-weight:800;font-size:.8rem;letter-spacing:.5px;cursor:pointer}
+  .tier.t1 .card:hover{transform:translateY(-4px);border-color:var(--t1);box-shadow:0 14px 40px rgba(34,197,94,.16)}
+  .tier.t2 .card:hover{transform:translateY(-4px);border-color:var(--t2);box-shadow:0 14px 40px rgba(56,189,248,.16)}
+  .tier.t3 .card:hover{transform:translateY(-4px);border-color:var(--t3);box-shadow:0 14px 40px rgba(168,85,247,.18)}
+  .tier.t1 .ribbon{background:var(--t1)}
+  .tier.t2 .ribbon{background:var(--t2);color:#04121f}
+  .tier.t3 .ribbon{background:var(--t3);color:#160726}
+  .tier.t1 .card{border-color:rgba(34,197,94,.28)}
+  .tier.t2 .card{border-color:rgba(56,189,248,.28)}
+  .tier.t3 .card{border-color:rgba(168,85,247,.3)}
+  .tier.t1 .startbtn{background:linear-gradient(180deg,#16a34a,#15803d);border-color:#22c55e;box-shadow:0 0 16px rgba(34,197,94,.25)}
+  .tier.t2 .startbtn{background:linear-gradient(180deg,#0ea5e9,#0369a1);border-color:#38bdf8;color:#eaf6ff;box-shadow:0 0 16px rgba(56,189,248,.25)}
+  .tier.t3 .startbtn{background:linear-gradient(180deg,#9333ea,#7e22ce);border-color:#a855f7;color:#f6eaff;box-shadow:0 0 16px rgba(168,85,247,.3)}
 
-  /* locked */
-  .card.soon{opacity:.62;cursor:not-allowed}
-  .card.soon:hover{opacity:.78;border-color:#2a4a73}
-  .card.soon .ic{filter:grayscale(.6) drop-shadow(0 4px 10px rgba(0,0,0,.4))}
-  .card.soon .badge{background:rgba(148,163,184,.12);color:var(--muted2);border:1px solid var(--line)}
-  .lock{position:absolute;top:18px;right:18px;font-size:1rem;opacity:.8}
-
-  footer{margin-top:46px;color:var(--muted);font-size:.72rem;text-align:center;line-height:1.6}
+  footer{margin-top:52px;color:var(--muted);font-size:.72rem;text-align:center;line-height:1.6}
   footer b{color:var(--muted2)}
-
-  /* toast */
-  #toast{position:fixed;left:50%;bottom:32px;transform:translateX(-50%) translateY(20px);
-    background:rgba(8,12,24,.95);border:1px solid var(--line);color:var(--txt);padding:12px 20px;
-    border-radius:12px;font-size:.84rem;font-weight:600;opacity:0;pointer-events:none;transition:.25s;
-    box-shadow:0 12px 40px rgba(0,0,0,.5);backdrop-filter:blur(8px)}
-  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-  #toast .em{color:var(--amber);margin-right:6px}
 </style>
 </head>
 <body>
@@ -86,109 +110,125 @@
       </div>
     </div>
     <p class="tagline">Bir simülasyon seç; <b>kendi robotunu kur, kodla ve test et.</b>
-      Sensörlerini seç, istediğin yere yerleştir, blok kurallarla davranışını yaz — ve hatalarından öğren.</p>
+      Üç seviyelik yol: önce sensörleri ve sürüşü öğren, sonra gerçek görevleri çöz,
+      en sonda yeni fizik dünyalarına geç — ve hep hatalarından öğren.</p>
   </header>
 
-  <div class="barrow">
-    <h2>Senaryolar</h2>
-    <div class="legend">
-      <span><i class="dot" style="background:var(--green)"></i>Mevcut</span>
-      <span><i class="dot" style="background:var(--muted)"></i>Yakında</span>
-    </div>
-  </div>
+  <nav class="pathnav">
+    <a class="p1" href="#seviye1"><span class="pnum">1</span><span><span class="pt">Temel Robotik</span><span class="ps">sensörler &amp; sürüş</span></span></a>
+    <span class="arrow">→</span>
+    <a class="p2" href="#seviye2"><span class="pnum">2</span><span><span class="pt">Görev Robotları</span><span class="ps">planlama &amp; strateji</span></span></a>
+    <span class="arrow">→</span>
+    <a class="p3" href="#seviye3"><span class="pnum">3</span><span><span class="pt">İleri Robotik</span><span class="ps">yeni fizik &amp; sürü</span></span></a>
+  </nav>
 
-  <div class="grid" id="grid"></div>
+  <div id="tiers"></div>
 
   <footer>
     RoboForge · RoboFabrik Akademi — Lise Robotik Programı<br/>
-    Daha fazla senaryo ve kit her kohortta açılır.
+    Her senaryonun içinde 7 kademeli kendi zorluk merdiveni vardır: Başlangıç → Uzman.
   </footer>
 </div>
 
-<div id="toast"><span class="em">⏳</span><span id="toastmsg"></span></div>
-
 <script>
-  const SIMS = [
-    { id:'line', icon:'🏁', title:'Çizgi Takip', en:'Line Follower', level:'Başlangıç',
-      desc:'Parçalarını seç, robotunu çiz, test et — sonra sensörleri yerleştirip blok kodlarla çizgiyi takip ettir. Baştan sona kendi robotun.',
-      status:'open', href:'build.html' },
-    { id:'maze', icon:'🧩', title:'Labirent Çözücü', en:'Maze Solver', level:'Orta',
-      desc:'Duvarları algıla, çıkışı bul. Sol-el kuralı mı, en kısa yol mu? Kendi keşif stratejini kur.',
-      status:'open', href:'build.html?sim=maze' },
-    { id:'obstacle', icon:'🚧', title:'Engelden Kaçış', en:'Obstacle Avoidance', level:'Orta',
-      desc:'Mesafe sensörleriyle engellere çarpmadan ilerle. Hız ve güvenlik dengesini bul.',
-      status:'open', href:'build.html?sim=obstacle' },
-    { id:'pid', icon:'⚡', title:'PID Çizgi Yarışı', en:'PID Racing', level:'İleri',
-      desc:'Analog dizi sensör + PID ile en hızlı turu at. Çizgi takibinin ileri seviyesi.',
-      status:'open', href:'build.html?sim=pid' },
-    { id:'light', icon:'💡', title:'Işık Takibi', en:'Light Follower', level:'Başlangıç',
-      desc:'LDR sensörlerle ışık kaynağını takip et ya da karanlığa kaç. Tepki ve eşik ayarı.',
-      status:'open', href:'build.html?sim=light' },
-    { id:'sumo', icon:'🥊', title:'Mini Sumo', en:'Mini Sumo', level:'İleri',
-      desc:'Rakibi alandan çıkar. Saldırı, savunma ve kenar algılama stratejilerini dene.',
-      status:'open', href:'build.html?sim=sumo' },
-    { id:'rescue', icon:'🚑', title:'Kurtarma Hattı', en:'Rescue Line', level:'İleri',
-      desc:'Kesik çizgiler, yeşil kavşak işaretleri ve yolu kapatan engeller… Kazazedeye ulaş! Çizgi becerilerinin final sınavı.',
-      status:'open', href:'build.html?sim=rescue' },
-    { id:'delivery', icon:'📦', title:'Teslimat Robotu', en:'Delivery Robot', level:'Orta',
-      desc:'Şehir sokaklarında kavşak kavşak rota planla, paketleri adreslere ulaştır. Kapalı yollara dikkat!',
-      status:'open', href:'build.html?sim=delivery' },
-    { id:'soccer', icon:'⚽', title:'Robot Futbolu', en:'Robot Soccer', level:'İleri',
-      desc:'Savunmacıyı geç, gol at! Topa yönelme, top sürme ve bitiricilik — PID forvetini ayarla, madalyayı kap.',
-      status:'open', href:'build.html?sim=soccer' },
-    { id:'fire', icon:'🧯', title:'Ateş Söndürme', en:'Firefighting', level:'İleri',
-      desc:'Evin odalarını duvar takibiyle keşfet, alevi ışık sensörleriyle bul, fanla söndür. Keşif + müdahale!',
-      status:'open', href:'build.html?sim=fire' },
-    { id:'convoy', icon:'🚚', title:'Konvoy Takibi', en:'Adaptive Cruise', level:'Orta',
-      desc:'Öndeki kamyonu sabit mesafede izle: çarpma, kaybetme! Gerçek araçlardaki adaptif hız sabitleyici dersi.',
-      status:'open', href:'build.html?sim=convoy' },
-    { id:'park', icon:'🅿️', title:'Otonom Park', en:'Autonomous Parking', level:'İleri',
-      desc:'Araban yerinde dönemez! Manevra planını adım adım kur: ileri, geri, direksiyon… Paralel parkın sırrını çöz.',
-      status:'open', href:'build.html?sim=park' },
-    { id:'balance', icon:'🤸', title:'Denge Robotu', en:'Self-Balancing', level:'Uzman',
-      desc:'Hiçbir şey yapmazsan devrilir! Ters sarkacı PID ile ayakta tut — dürtmelere, rüzgâra ve yüke rağmen.',
-      status:'open', href:'build.html?sim=balance' },
-    { id:'drone', icon:'🚁', title:'Drone Görevi', en:'Drone Flight', level:'Uzman',
-      desc:'İtki yerçekimine karşı! İrtifa PID ile görev noktalarına uç, kargo taşı, fırtınada yumuşak in. Ki dersi burada.',
-      status:'open', href:'build.html?sim=drone' },
-    { id:'hill', icon:'⛰️', title:'Tepe Tırmanışı', en:'Hill Climb', level:'İleri',
-      desc:'Tork tırmandırır, tutuş patinajı önler, momentum rampaları aşırtır. Parça seçiminin gerçek sınavı!',
-      status:'open', href:'build.html?sim=hill' },
-    { id:'swarm', icon:'🐝', title:'Sürü Robotları', en:'Swarm Robotics', level:'Uzman',
-      desc:'6 robot, lider yok! Ayrılma-hizalanma-toplanma içgüdüleriyle sürü zekâsı doğsun. Emergence dersi.',
-      status:'open', href:'build.html?sim=swarm' },
+  const TIERS = [
+    { id:'seviye1', cls:'t1', icon:'🚗', num:'1',
+      title:'SEVİYE 1 · <em>Temel Robotik</em>',
+      desc:'Hepsi aynı iki tekerlekli araç — fark eden şey SENSÖRLER. Çizgi, duvar, mesafe, ışık ve rakip algıla; kural yaz, PID ile tanış. Robotiğin alfabesi burada.',
+      sims:[
+        { id:'line', icon:'🏁', title:'Çizgi Takip', en:'Line Follower',
+          desc:'Parçalarını seç, robotunu çiz, test et — sonra sensörleri yerleştirip blok kodlarla çizgiyi takip ettir. Baştan sona kendi robotun.',
+          href:'build.html' },
+        { id:'maze', icon:'🧩', title:'Labirent Çözücü', en:'Maze Solver',
+          desc:'Duvarları algıla, çıkışı bul. Sol-el kuralı mı, en kısa yol mu? Kendi keşif stratejini kur.',
+          href:'build.html?sim=maze' },
+        { id:'obstacle', icon:'🚧', title:'Engelden Kaçış', en:'Obstacle Avoidance',
+          desc:'Mesafe sensörleriyle engellere çarpmadan ilerle. Hız ve güvenlik dengesini bul.',
+          href:'build.html?sim=obstacle' },
+        { id:'pid', icon:'⚡', title:'PID Çizgi Yarışı', en:'PID Racing',
+          desc:'Analog dizi sensör + PID ile en hızlı turu at. Çizgi takibinin ileri seviyesi.',
+          href:'build.html?sim=pid' },
+        { id:'light', icon:'💡', title:'Işık Takibi', en:'Light Follower',
+          desc:'LDR sensörlerle ışık kaynağını takip et ya da karanlığa kaç. Tepki ve eşik ayarı.',
+          href:'build.html?sim=light' },
+        { id:'sumo', icon:'🥊', title:'Mini Sumo', en:'Mini Sumo',
+          desc:'Rakibi alandan çıkar. Saldırı, savunma ve kenar algılama stratejilerini dene.',
+          href:'build.html?sim=sumo' },
+      ]},
+    { id:'seviye2', cls:'t2', icon:'🎯', num:'2',
+      title:'SEVİYE 2 · <em>Görev Robotları</em>',
+      desc:'Sensörleri artık biliyorsun. Şimdi robotun bir İŞİ var: kazazede kurtar, paket teslim et, gol at, yangın söndür, konvoyda sür, park et. Planlama, strateji ve çok adımlı davranışlar.',
+      sims:[
+        { id:'rescue', icon:'🚑', title:'Kurtarma Hattı', en:'Rescue Line',
+          desc:'Kesik çizgiler, yeşil kavşak işaretleri ve yolu kapatan engeller… Kazazedeye ulaş! Çizgi becerilerinin final sınavı.',
+          href:'build.html?sim=rescue' },
+        { id:'delivery', icon:'📦', title:'Teslimat Robotu', en:'Delivery Robot',
+          desc:'Şehir sokaklarında kavşak kavşak rota planla, paketleri adreslere ulaştır. Kapalı yollara dikkat!',
+          href:'build.html?sim=delivery' },
+        { id:'soccer', icon:'⚽', title:'Robot Futbolu', en:'Robot Soccer',
+          desc:'Savunmacıyı geç, gol at! Topa yönelme, top sürme ve bitiricilik — PID forvetini ayarla, madalyayı kap.',
+          href:'build.html?sim=soccer' },
+        { id:'fire', icon:'🧯', title:'Ateş Söndürme', en:'Firefighting',
+          desc:'Evin odalarını duvar takibiyle keşfet, alevi ışık sensörleriyle bul, fanla söndür. Keşif + müdahale!',
+          href:'build.html?sim=fire' },
+        { id:'convoy', icon:'🚚', title:'Konvoy Takibi', en:'Adaptive Cruise',
+          desc:'Öndeki kamyonu sabit mesafede izle: çarpma, kaybetme! Gerçek araçlardaki adaptif hız sabitleyici dersi.',
+          href:'build.html?sim=convoy' },
+        { id:'park', icon:'🅿️', title:'Otonom Park', en:'Autonomous Parking',
+          desc:'Araban yerinde dönemez! Manevra planını adım adım kur: ileri, geri, direksiyon… Paralel parkın sırrını çöz.',
+          href:'build.html?sim=park' },
+      ]},
+    { id:'seviye3', cls:'t3', icon:'🚀', num:'3',
+      title:'SEVİYE 3 · <em>İleri Robotik</em>',
+      desc:'Tekerlekli aracın ötesi: kendi kendine duramayan denge robotu, yerçekimiyle savaşan drone, fiziğin sınandığı dağ tırmanışı ve lidersiz sürü zekâsı. Gerçek kontrol mühendisliği.',
+      sims:[
+        { id:'balance', icon:'🤸', title:'Denge Robotu', en:'Self-Balancing',
+          desc:'Hiçbir şey yapmazsan devrilir! Ters sarkacı PID ile ayakta tut — dürtmelere, rüzgâra ve yüke rağmen.',
+          href:'build.html?sim=balance' },
+        { id:'drone', icon:'🚁', title:'Drone Görevi', en:'Drone Flight',
+          desc:'İtki yerçekimine karşı! İrtifa PID ile görev noktalarına uç, kargo taşı, fırtınada yumuşak in. Ki dersi burada.',
+          href:'build.html?sim=drone' },
+        { id:'hill', icon:'⛰️', title:'Tepe Tırmanışı', en:'Hill Climb',
+          desc:'Tork tırmandırır, tutuş patinajı önler, momentum rampaları aşırtır. Parça seçiminin gerçek sınavı!',
+          href:'build.html?sim=hill' },
+        { id:'swarm', icon:'🐝', title:'Sürü Robotları', en:'Swarm Robotics',
+          desc:'6 robot, lider yok! Ayrılma-hizalanma-toplanma içgüdüleriyle sürü zekâsı doğsun. Emergence dersi.',
+          href:'build.html?sim=swarm' },
+      ]},
   ];
 
-  const grid = document.getElementById('grid');
-  SIMS.forEach(s=>{
-    const el = document.createElement(s.status==='open' ? 'a' : 'div');
-    el.className = 'card ' + s.status;
-    if(s.status==='open'){ el.href = s.href; }
-    el.innerHTML =
-      (s.status==='open' ? '<div class="ribbon">AÇIK</div>' : '<div class="lock">🔒</div>') +
-      `<div class="ic">${s.icon}</div>
-       <h3>${s.title}</h3>
-       <div class="en">${s.en}</div>
-       <p>${s.desc}</p>
-       <div class="meta">
-         <span class="badge">${s.status==='open'?'Mevcut':'Yakında'}</span>
-         <span class="lvl">${s.level}</span>
-       </div>` +
-      (s.status==='open' ? '<button class="startbtn">Başla →</button>' : '');
-    if(s.status==='soon'){
-      el.addEventListener('click', ()=>toast(`“${s.title}” çok yakında geliyor!`));
-    }
-    grid.appendChild(el);
+  const host = document.getElementById('tiers');
+  TIERS.forEach(tier=>{
+    const sec = document.createElement('section');
+    sec.className = 'tier ' + tier.cls;
+    sec.id = tier.id;
+    sec.innerHTML =
+      '<div class="tier-head">'+
+        '<div class="tier-badge"><span>'+tier.icon+'</span><small>SEVİYE '+tier.num+'</small></div>'+
+        '<div class="tier-title">'+
+          '<h2>'+tier.title+'<span class="tcount">'+tier.sims.length+' SENARYO</span></h2>'+
+          '<p>'+tier.desc+'</p>'+
+        '</div>'+
+      '</div>'+
+      '<div class="tier-line"></div>';
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+    tier.sims.forEach(s=>{
+      const el = document.createElement('a');
+      el.className = 'card';
+      el.href = s.href;
+      el.innerHTML =
+        '<div class="ribbon">AÇIK</div>'+
+        '<div class="ic">'+s.icon+'</div>'+
+        '<h3>'+s.title+'</h3>'+
+        '<div class="en">'+s.en+'</div>'+
+        '<p>'+s.desc+'</p>'+
+        '<span class="startbtn">Başla →</span>';
+      grid.appendChild(el);
+    });
+    sec.appendChild(grid);
+    host.appendChild(sec);
   });
-
-  let toastTimer=null;
-  function toast(msg){
-    const t=document.getElementById('toast');
-    document.getElementById('toastmsg').textContent=msg;
-    t.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer=setTimeout(()=>t.classList.remove('show'),2200);
-  }
 </script>
 </body>
 </html>
