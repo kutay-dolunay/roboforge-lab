@@ -347,10 +347,12 @@
     host.appendChild(sec);
   });
 </script>
-<script src="rf-auth.js?v=1"></script>
+<script src="rf-auth.js?v=2"></script>
+<script src="rf-progress.js?v=2"></script>
 <script>
   // ---- Moodle SSO auth box ----
   (function(){
+    function safeProgress(){ try{ if(typeof renderProgress==='function') renderProgress(); }catch(e){} }
     function initials(name){ if(!name) return '👤'; var p=name.trim().split(/\s+/); return ((p[0]||'')[0]||'')+((p[1]||'')[0]||''); }
     function renderLoggedOut(){
       var box=document.getElementById('authbox'); if(!box) return;
@@ -368,13 +370,15 @@
         '</div>';
       document.getElementById('rfLogout').onclick=function(){ if(window.RFAuth){ RFAuth.logout(); renderLoggedOut(); } };
     }
-    if(window.RFAuth){
-      RFAuth.init().then(function(u){ u?renderLoggedIn(u):renderLoggedOut(); renderProgress(); })
-        .catch(function(){ renderLoggedOut(); renderProgress(); });
-    } else { renderLoggedOut(); renderProgress(); }
+    // expose so the (later) progress script can re-render the chip once it's ready
+    window.__rfRenderAuth=function(){
+      if(!window.RFAuth){ renderLoggedOut(); return; }
+      RFAuth.init().then(function(u){ u?renderLoggedIn(u):renderLoggedOut(); safeProgress(); })
+        .catch(function(){ renderLoggedOut(); safeProgress(); });
+    };
+    window.__rfRenderAuth();
   })();
 </script>
-<script src="rf-progress.js?v=1"></script>
 <script>
   // ---- per-card + header progress (local, from rf-progress) ----
   function renderProgress(){
@@ -414,6 +418,9 @@
       }
     }
   }
+  // renderProgress is now defined; render once and re-sync the auth chip too.
+  try{ renderProgress(); }catch(e){}
+  try{ if(window.__rfRenderAuth) window.__rfRenderAuth(); }catch(e){}
 </script>
 </body>
 </html>
