@@ -103,6 +103,18 @@
   footer{margin-top:52px;color:var(--muted);font-size:.72rem;text-align:center;line-height:1.6}
   footer b{color:var(--muted2)}
 
+  /* progress summary bar */
+  .progsum{display:flex;align-items:center;gap:6px;margin:14px 0 2px;padding:9px 15px;border-radius:11px;
+    border:1px solid rgba(34,197,94,.35);background:rgba(34,197,94,.08);color:var(--muted2);font-size:.82rem}
+  .progsum b{color:#4ade80;font-weight:800}
+  /* per-card progress footer */
+  .cardfoot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}
+  .card .prog{font-size:.7rem;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:5px}
+  .card .prog .pcount{color:var(--d3);font-weight:800}
+  .card .prog.done{color:#4ade80}
+  .card .prog.done .pstar{font-size:.95rem}
+  .card.cleared{box-shadow:inset 0 0 0 1px rgba(74,222,128,.35)}
+
   /* auth box (Moodle SSO) */
   .logorow{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
   .authbox{display:flex;align-items:center;gap:10px;padding-top:4px}
@@ -150,6 +162,8 @@
     <span class="lk"><i class="dot" style="background:var(--d3)"></i><b>İleri</b></span>
     <span class="lk"><i class="dot" style="background:var(--d4)"></i><b>Uzman</b></span>
   </div>
+
+  <div class="progsum" id="progsum" style="display:none"></div>
 
   <div id="cats"></div>
 
@@ -316,13 +330,17 @@
       const el = document.createElement('a');
       el.className = 'card';
       el.href = s.href;
+      el.setAttribute('data-sim', s.id);
       el.innerHTML =
         '<div class="band b'+s.band+'">'+BANDNAME[s.band]+'</div>'+
         '<div class="ic">'+s.icon+'</div>'+
         '<h3>'+s.title+'</h3>'+
         '<div class="en">'+s.en+'</div>'+
         '<p>'+s.desc+'</p>'+
-        '<span class="startbtn">Başla →</span>';
+        '<div class="cardfoot">'+
+          '<span class="prog" data-prog></span>'+
+          '<span class="startbtn">Başla →</span>'+
+        '</div>';
       grid.appendChild(el);
     });
     sec.appendChild(grid);
@@ -351,10 +369,51 @@
       document.getElementById('rfLogout').onclick=function(){ if(window.RFAuth){ RFAuth.logout(); renderLoggedOut(); } };
     }
     if(window.RFAuth){
-      RFAuth.init().then(function(u){ u?renderLoggedIn(u):renderLoggedOut(); })
-        .catch(function(){ renderLoggedOut(); });
-    } else { renderLoggedOut(); }
+      RFAuth.init().then(function(u){ u?renderLoggedIn(u):renderLoggedOut(); renderProgress(); })
+        .catch(function(){ renderLoggedOut(); renderProgress(); });
+    } else { renderLoggedOut(); renderProgress(); }
   })();
+</script>
+<script src="rf-progress.js?v=1"></script>
+<script>
+  // ---- per-card + header progress (local, from rf-progress) ----
+  function renderProgress(){
+    if(!window.RFProgress) return;
+    var LVL=7; // every sim has 7 levels
+    var totalCleared=0, simsStarted=0, simsCleared=0, simsTotal=0;
+    document.querySelectorAll('.card[data-sim]').forEach(function(card){
+      simsTotal++;
+      var simId=card.getAttribute('data-sim');
+      var d=RFProgress.getSim(simId);
+      var el=card.querySelector('[data-prog]'); if(!el) return;
+      totalCleared+=d.cleared;
+      if(d.played) simsStarted++;
+      if(d.cleared>=LVL) simsCleared++;
+      if(d.cleared>=LVL){
+        var m=d.bestMedal?d.bestMedal.trim().charAt(0):'⭐';
+        el.className='prog done';
+        el.innerHTML='<span class="pstar">'+(d.bestMedal?d.bestMedal.trim().split(/\s+/)[0]:'⭐')+'</span> Tamamlandı';
+        card.classList.add('cleared');
+      } else if(d.played){
+        el.className='prog partial';
+        el.innerHTML='<span class="pcount">'+d.cleared+'/'+LVL+'</span> geçildi';
+      } else {
+        el.className='prog';
+        el.innerHTML='';
+      }
+    });
+    // header summary
+    var hb=document.getElementById('progsum');
+    if(hb){
+      if(simsStarted===0){ hb.style.display='none'; }
+      else {
+        hb.style.display='flex';
+        hb.innerHTML='<b>'+totalCleared+'</b> seviye geçildi'+
+          ' · <b>'+simsStarted+'</b>/'+simsTotal+' senaryo başlandı'+
+          (simsCleared>0?' · <b>'+simsCleared+'</b> tamamlandı 🏆':'');
+      }
+    }
+  }
 </script>
 </body>
 </html>

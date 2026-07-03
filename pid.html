@@ -229,6 +229,8 @@
 </div>
 <div id="toast"></div>
 
+<script src="rf-auth.js?v=2"></script>
+<script src="rf-progress.js?v=1"></script>
 <script src="robot-data.js?v=2"></script>
 <script src="sim-core.js?v=2"></script>
 <script src="pid-core.js?v=2"></script>
@@ -341,6 +343,7 @@
     document.getElementById('rhead').innerHTML='🏁 Robotunu ayarla ve <b style="color:var(--green);margin:0 4px">YARIŞ</b> — en hızlı temiz turu at.'; document.getElementById('rbody').style.display='none'; }
   function showResult(){
     const sim=LAB.sim, r=document.getElementById('result'); const win=sim.status==='success';
+      try{ if(window.RFProgress){ var __rfwin=(sim.status==='success'||sim.status==='win'); var __rfmedal=null; try{ var __core=window['SimCore']; if(__core&&__core.robotClass){var __c=__core.robotClass(sim); if(__c)__rfmedal=__c.name;} }catch(e){} RFProgress.record('pid', LAB.trackIdx, {pass:__rfwin, time:(sim&&typeof sim.t==='number')?sim.t:null, medal:__rfmedal, mode:LAB.mode}); } }catch(e){}
     let record=false;
     if(win){ const id=trackId(), prev=LAB.best[id];
       if(prev==null || sim.t<prev){ LAB.best[id]=+sim.t.toFixed(2); record=true; LAB.ghost[id]=LAB.frames.slice(); try{localStorage.setItem('rf_pid_best',JSON.stringify(LAB.best));}catch(e){} } }

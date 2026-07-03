@@ -234,6 +234,8 @@
 <div id="tutwrap"><div class="tut" id="tutBox"></div></div>
 <div id="toast"></div>
 
+<script src="rf-auth.js?v=2"></script>
+<script src="rf-progress.js?v=1"></script>
 <script src="robot-data.js?v=2"></script>
 <script src="drone-core.js?v=2"></script>
 <script>
@@ -414,6 +416,7 @@
   function showResult(){
     const sim=LAB.sim; if(!sim) return;
     const win=sim.status==='success';
+      try{ if(window.RFProgress){ var __rfwin=(sim.status==='success'||sim.status==='win'); var __rfmedal=null; try{ var __core=window['DroneCore']; if(__core&&__core.robotClass){var __c=__core.robotClass(sim); if(__c)__rfmedal=__c.name;} }catch(e){} RFProgress.record('drone', LAB.misIdx, {pass:__rfwin, time:(sim&&typeof sim.t==='number')?sim.t:null, medal:__rfmedal, mode:LAB.mode}); } }catch(e){}
     const cls=DR.robotClass(sim);
     const tips=DR.coach(sim);
     const M=DR.MISSIONS[LAB.misIdx];
