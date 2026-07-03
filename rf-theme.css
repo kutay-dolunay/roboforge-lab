@@ -1,0 +1,113 @@
+/* =============================================================================
+ * RoboForge — Shared theme  (rf-theme.css)  v1.0.0
+ * -----------------------------------------------------------------------------
+ * ONE source of truth for design tokens, base styles, shared components and the
+ * standard responsive breakpoints. Linked from EVERY page BEFORE its inline
+ * <style>. Page-specific inline styles still win (later in the cascade), so this
+ * file is safe to add without breaking any page — and from now on, global visual
+ * changes happen HERE once instead of across 32 files.
+ *
+ * Standard breakpoints (used across the product):
+ *   --bp-sm: 560px   (phone)
+ *   --bp-md: 900px   (tablet / small laptop)
+ *   --bp-lg: 1200px  (desktop)
+ * ========================================================================== */
+
+:root{
+  /* --- surfaces --- */
+  --bg:#0b1220; --panel:#0f172a; --panel2:#111c33; --line:#1e3a5f;
+  /* --- brand / accents --- */
+  --sky:#38bdf8; --sky2:#0ea5e9; --green:#22c55e; --amber:#f59e0b;
+  --red:#ef4444; --purple:#a855f7;
+  /* --- text --- */
+  --txt:#e2e8f0; --muted:#64748b; --muted2:#94a3b8;
+
+  /* --- 6 theme (category) colors --- */
+  --c1:#22c55e; --c1s:rgba(34,197,94,.14);   /* Temel Sürüş — yeşil */
+  --c2:#38bdf8; --c2s:rgba(56,189,248,.14);  /* Görev & Strateji — mavi */
+  --c3:#a855f7; --c3s:rgba(168,85,247,.16);  /* Kontrol Mühendisliği — mor */
+  --c4:#f59e0b; --c4s:rgba(245,158,11,.15);  /* Fabrika & Otomasyon — amber */
+  --c5:#2dd4bf; --c5s:rgba(45,212,191,.15);  /* Uzay & Telemetri — teal */
+  --c6:#f472b6; --c6s:rgba(244,114,182,.15); /* Sürü & Lokomosyon — pembe */
+  /* --- difficulty band colors --- */
+  --d1:#4ade80; --d2:#38bdf8; --d3:#fbbf24; --d4:#f87171;
+
+  /* --- spacing scale --- */
+  --sp1:4px; --sp2:8px; --sp3:12px; --sp4:16px; --sp5:24px; --sp6:32px; --sp7:48px;
+  /* --- radii --- */
+  --r-sm:8px; --r-md:11px; --r-lg:16px;
+  /* --- standard breakpoints (for reference in JS / documentation) --- */
+  --bp-sm:560px; --bp-md:900px; --bp-lg:1200px;
+}
+
+/* --- base --- */
+*{box-sizing:border-box}
+html{ -webkit-text-size-adjust:100%; }
+body{
+  margin:0; min-height:100vh; color:var(--txt);
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+  background:radial-gradient(1100px 700px at 75% -15%,#15294a 0%,var(--bg) 55%);
+}
+a{color:inherit;text-decoration:none}
+img,canvas,svg{max-width:100%}
+.mono{font-family:'Courier New',ui-monospace,monospace}
+
+/* --- accessibility: visible keyboard focus (was missing everywhere) --- */
+:focus-visible{ outline:2px solid var(--sky); outline-offset:2px; border-radius:4px; }
+/* respect users who ask for less motion */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important; animation-iteration-count:1 !important;
+    transition-duration:.001ms !important; scroll-behavior:auto !important;
+  }
+}
+
+/* --- shared button system (rf- prefixed so it never clashes with page CSS) --- */
+.rf-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:10px 18px;border-radius:var(--r-md);border:1px solid var(--line);
+  background:var(--panel);color:var(--txt);font-weight:800;font-size:.84rem;
+  letter-spacing:.3px;cursor:pointer;transition:.15s;line-height:1;min-height:40px;
+}
+.rf-btn:hover{border-color:var(--sky)}
+.rf-btn.primary{background:linear-gradient(180deg,var(--sky2),#0369a1);border-color:var(--sky);color:#eaf6ff}
+.rf-btn.go{background:linear-gradient(180deg,#16a34a,#15803d);border-color:var(--green);color:#eafff0}
+.rf-btn.ghost{background:transparent;color:var(--muted2)}
+.rf-btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+
+/* =============================================================================
+ * GLOBAL RESPONSIVE RULES
+ * These apply to the shared header/lab patterns used across pages. They target
+ * the existing class names (.bar, .layout, .top, .stage, .grid) so every page
+ * gets consistent phone behaviour without per-file edits.
+ * ========================================================================== */
+
+/* Tablet / small laptop */
+@media (max-width:900px){
+  .wrap{ padding-left:18px; padding-right:18px; }
+  /* lab two-column layout already collapses via its own 1040px rule; nothing needed */
+}
+
+/* Phone */
+@media (max-width:560px){
+  .wrap{ padding:20px 14px 64px; }
+
+  /* --- lab header bar: let it wrap tidily, shrink the tab track --- */
+  header.bar{ gap:8px; padding:9px 12px; }
+  header.bar .tabsTrack{ order:5; width:100%; max-width:100%; overflow-x:auto; }
+  header.bar .simspeed{ display:none; }        /* speed slider is desktop-nicety; hide on phone */
+
+  /* --- build wizard header --- */
+  header.top{ gap:10px; }
+
+  /* --- build wizard drawing stage: was a hard 440px → make it fluid --- */
+  .chstage{ width:100% !important; }
+  .stage{ width:100% !important; max-width:100%; height:auto; aspect-ratio:4 / 3; }
+  .shapegrid{ grid-template-columns:repeat(auto-fill,minmax(58px,1fr)) !important; }
+
+  /* --- catalog grid → single column, comfy --- */
+  .grid{ grid-template-columns:1fr !important; gap:14px !important; }
+
+  /* --- buttons a touch bigger for thumbs --- */
+  .rf-btn{ min-height:44px; }
+}
