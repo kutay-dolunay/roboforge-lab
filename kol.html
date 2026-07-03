@@ -125,6 +125,23 @@
     border:1px solid var(--line);padding:10px 18px;border-radius:11px;font-size:.8rem;font-weight:700;opacity:0;
     transition:.25s;pointer-events:none;z-index:99}
   #toast.show{opacity:1}
+
+  /* rf-labauth-v1 : compact Moodle SSO chip in the lab header */
+  .labauth{display:flex;align-items:center;gap:8px}
+  .labauth .lloginbtn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);
+    background:linear-gradient(180deg,#0ea5e9,#0369a1);color:#eaf6ff;font-weight:800;font-size:.72rem;
+    padding:6px 11px;border-radius:9px;cursor:pointer;white-space:nowrap}
+  .labauth .lloginbtn:hover{filter:brightness(1.08)}
+  .labauth .lchip{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--panel);
+    border-radius:10px;padding:4px 6px 4px 9px}
+  .labauth .lchip .lav{width:24px;height:24px;border-radius:50%;background:linear-gradient(145deg,#0ea5e9,#1e3a8a);
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.68rem;color:#eaf6ff}
+  .labauth .lchip .lwho{line-height:1.12}
+  .labauth .lchip .lwho b{font-size:.72rem}
+  .labauth .lchip .lwho small{display:block;font-size:.52rem;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
+  .labauth .lchip .lout{border:1px solid var(--line);background:transparent;color:var(--muted2);border-radius:7px;
+    font-size:.58rem;font-weight:700;padding:4px 7px;cursor:pointer}
+  .labauth .lchip .lout:hover{border-color:var(--red);color:#fca5a5}
 </style>
 </head>
 <body>
@@ -133,6 +150,7 @@
   <div class="ttl"><b>Robo<span>Forge</span> · Robot Kol</b><small id="buildLine">FABRİKA VARDİYASI</small></div>
   <div class="tabsTrack" id="trackTabs"></div>
   <div class="grow"></div>
+  <div class="labauth" id="labAuth"></div>
   <div class="simspeed">Sim Hızı <input type="range" id="simSpeed" min="0.5" max="3" step="0.5" value="1"><span id="simSpeedV" class="mono">1.0x</span></div>
   <button class="btn run" id="runBtn">▶ ÇALIŞTIR</button>
   <button class="btn ghost" id="resetBtn">⟲ Sıfırla</button>
@@ -638,5 +656,31 @@
   if(!seen) showTut(0);
 })();
 </script>
+
+<script>/* rf-labauth-v1 */
+(function(){
+  function initials(name){ if(!name) return '\u{1F464}'; var p=name.trim().split(/\s+/); return (((p[0]||'')[0]||'')+((p[1]||'')[0]||'')).toUpperCase(); }
+  function box(){ return document.getElementById('labAuth'); }
+  function loggedOut(){
+    var b=box(); if(!b) return;
+    b.innerHTML='<button class="lloginbtn" id="rfLabLogin">\u{1F393} Giri\u015F</button>';
+    var el=document.getElementById('rfLabLogin');
+    if(el) el.onclick=function(){ if(window.RFAuth) RFAuth.login(); };
+  }
+  function loggedIn(u){
+    var b=box(); if(!b) return;
+    var roleLabel={student:'\u00D6\u011Frenci',teacher:'\u00D6\u011Fretmen',admin:'Y\u00F6netici'}[u.role]||'\u00D6\u011Frenci';
+    b.innerHTML='<div class="lchip"><div class="lav">'+initials(u.name)+'</div>'+
+      '<div class="lwho"><b>'+(u.name||'\u00D6\u011Frenci')+'</b><small>'+roleLabel+'</small></div>'+
+      '<button class="lout" id="rfLabLogout">\u00C7\u0131k\u0131\u015F</button></div>';
+    var el=document.getElementById('rfLabLogout');
+    if(el) el.onclick=function(){ if(window.RFAuth){ RFAuth.logout(); loggedOut(); } };
+  }
+  if(window.RFAuth){
+    RFAuth.init().then(function(u){ u?loggedIn(u):loggedOut(); }).catch(function(){ loggedOut(); });
+  } else { loggedOut(); }
+})();
+</script>
+
 </body>
 </html>

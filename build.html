@@ -180,6 +180,23 @@
   .btn.ghost{background:transparent}
   .btn:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
   .hidden{display:none}
+
+  /* rf-labauth-v1 : compact Moodle SSO chip in the header */
+  .labauth{display:flex;align-items:center;gap:8px}
+  .labauth .lloginbtn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);
+    background:linear-gradient(180deg,#0ea5e9,#0369a1);color:#eaf6ff;font-weight:800;font-size:.72rem;
+    padding:6px 11px;border-radius:9px;cursor:pointer;white-space:nowrap}
+  .labauth .lloginbtn:hover{filter:brightness(1.08)}
+  .labauth .lchip{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--panel);
+    border-radius:10px;padding:4px 6px 4px 9px}
+  .labauth .lchip .lav{width:24px;height:24px;border-radius:50%;background:linear-gradient(145deg,#0ea5e9,#1e3a8a);
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.68rem;color:#eaf6ff}
+  .labauth .lchip .lwho{line-height:1.12}
+  .labauth .lchip .lwho b{font-size:.72rem}
+  .labauth .lchip .lwho small{display:block;font-size:.52rem;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
+  .labauth .lchip .lout{border:1px solid var(--line);background:transparent;color:var(--muted2);border-radius:7px;
+    font-size:.58rem;font-weight:700;padding:4px 7px;cursor:pointer}
+  .labauth .lchip .lout:hover{border-color:var(--red);color:#fca5a5}
 </style>
 </head>
 <body>
@@ -188,6 +205,7 @@
     <a href="./" class="back">← Katalog</a>
     <div class="logo"><div class="mark">🤖</div><b>Robo<span>Forge</span></b></div>
     <div class="grow"></div>
+    <div class="labauth" id="labAuth"></div>
     <div class="stepper" id="stepper"></div>
   </header>
 
@@ -508,39 +526,4 @@
       next.textContent = phase<ORDER.length-1 ? ('Devam → '+RD.COMPONENTS[ORDER[phase+1]].label) : 'Devam → Çizim';
     } else {
       prev.style.visibility='visible'; next.disabled=false;
-      if(step===2){ next.textContent='Devam → Rapor'; next.className='btn primary'; }
-      else if(step===3){ next.textContent='Testi Çalıştır →'; next.className='btn go'; }
-      else { next.classList.add('hidden'); }
-    }
-  }
-  function go(n){
-    step=n;
-    for(let i=1;i<=4;i++) document.getElementById('step'+i).classList.toggle('hidden', i!==step);
-    document.getElementById('bp').style.display = step===1 ? 'block' : 'none';
-    renderStepper();
-    if(step===1) renderPhase();
-    if(step===2) renderChassis();
-    if(step===3) renderReport();
-    if(step===4) runTest();
-    updateNav();
-    window.scrollTo(0,0);
-  }
-  document.getElementById('nextBtn').onclick=()=>{
-    if(step===1){ const cat=ORDER[phase]; if(!B[cat]) return;
-      if(phase<ORDER.length-1){ phase++; document.getElementById('confirm').classList.remove('show'); renderPhase(); updateNav(); window.scrollTo(0,0); }
-      else go(2);
-    } else if(step<4) go(step+1);
-  };
-  document.getElementById('prevBtn').onclick=()=>{
-    if(step===1){ if(phase>0){ phase--; renderPhase(); updateNav(); window.scrollTo(0,0); } }
-    else { if(step===2){ step=1; phase=ORDER.length-1; go(1); } else go(step-1); }
-  };
-  document.getElementById('chLen').oninput=e=>{ B.chassis.len=+e.target.value; save(); renderChassis(); };
-  document.getElementById('chWid').oninput=e=>{ B.chassis.wid=+e.target.value; save(); renderChassis(); };
-
-  // ---- init ----
-  go(1);
-})();
-</script>
-</body>
-</html>
+      if(step===2){ next.textContent='Devam → Rapor'
