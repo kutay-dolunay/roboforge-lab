@@ -146,6 +146,12 @@ if ($jwt === false) {
 // 6) Redirect back to RoboForge with the token in the URL fragment
 //    (fragment => never sent to any server, only readable by RoboForge JS).
 // ---------------------------------------------------------------------------
+// DEBUG: with &debug=1, print the raw token + payload as text instead of redirecting.
+if (isset($_GET['debug']) && $_GET['debug'] === '1') {
+    header('Content-Type: text/plain; charset=utf-8');
+    echo "JWT:\n" . $jwt . "\n\nPAYLOAD:\n" . json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\n";
+    exit;
+}
 $sep = (strpos($return, '#') === false) ? '#' : '&';
 header('Location: ' . $return . $sep . 'sso=' . rawurlencode($jwt));
 exit;
