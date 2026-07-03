@@ -246,6 +246,7 @@
 
 <script src="rf-auth.js?v=2"></script>
 <script src="rf-progress.js?v=1"></script>
+<script src="rf-result.js?v=1"></script>
 <script src="robot-data.js?v=2"></script>
 <script src="park-core.js?v=2"></script>
 <script>
@@ -425,7 +426,10 @@
           '<div class="rd-stat"><div class="l">AÇI SAPMASI</div><div class="v mono">'+(sc.aErr*57.3).toFixed(0)+'°</div></div>'+
           '<div class="rd-stat"><div class="l">DURUM</div><div class="v '+(win?'ok':'bad')+'">'+(win?'PARK ETTİ':'BAŞARISIZ')+'</div></div>'+
         '</div>'+
-        (tips.length?'<div class="rd-tip">💡 '+tips[0]+'</div>':'')+
+        '<div class="rf-graphwrap"><div class="cap">🅿️ Park hassasiyeti</div><canvas id="parkGauge" class="rf-graph" style="height:130px;border:none;background:transparent"></canvas><div style="font-size:.72rem;color:var(--muted2);margin-top:2px;text-align:center">Yerin ortasına düz açıyla girmek tam puan. Açı sapması ve merkez kayması puan yer.</div></div>'+
+        (window.RFResult
+          ? RFResult.coachHTML(tips, { win:win, headWin:'🎓 Ne öğrendik?', headLose:'🔍 Ne oldu, neden?', reason: win?null:(REASONS[sim.reason]||'') })
+          : (tips.length?'<div class="rd-tip">💡 '+tips[0]+'</div>':''))+
         '<div class="rd-btns">'+
           '<button class="btn run" id="againBtn">⟲ Tekrar Dene</button>'+
           '<button class="btn outline" id="replayBtn">▶ Manevrayı İzle</button>'+
@@ -434,6 +438,9 @@
       '</div>';
     document.getElementById('hint').style.display='none';
     dock.style.display='block';
+    if(document.getElementById('parkGauge') && window.RFResult && RFResult.gauge){ try{ var __gv=Math.max(0,Math.min(100,(PC.parkScore(sim,sim.pose).pct)||0));
+      RFResult.gauge(document.getElementById('parkGauge'), {value:__gv, max:100, unit:'%', label:'hassasiyet', zones:[{to:50,color:'var(--red)'},{to:80,color:'var(--amber)'},{to:100,color:'var(--green)'}]}); }catch(e){} }
+    if(win && window.RFResult) RFResult.celebrate({});
     document.getElementById('againBtn').onclick=()=>{ hideResult(); startRun(); };
     document.getElementById('replayBtn').onclick=replayRun;
     document.getElementById('reportBtn').onclick=openReport;
@@ -681,26 +688,4 @@
 (function(){
   function initials(name){ if(!name) return '\u{1F464}'; var p=name.trim().split(/\s+/); return (((p[0]||'')[0]||'')+((p[1]||'')[0]||'')).toUpperCase(); }
   function box(){ return document.getElementById('labAuth'); }
-  function loggedOut(){
-    var b=box(); if(!b) return;
-    b.innerHTML='<button class="lloginbtn" id="rfLabLogin">\u{1F393} Giri\u015F</button>';
-    var el=document.getElementById('rfLabLogin');
-    if(el) el.onclick=function(){ if(window.RFAuth) RFAuth.login(); };
-  }
-  function loggedIn(u){
-    var b=box(); if(!b) return;
-    var roleLabel={student:'\u00D6\u011Frenci',teacher:'\u00D6\u011Fretmen',admin:'Y\u00F6netici'}[u.role]||'\u00D6\u011Frenci';
-    b.innerHTML='<div class="lchip"><div class="lav">'+initials(u.name)+'</div>'+
-      '<div class="lwho"><b>'+(u.name||'\u00D6\u011Frenci')+'</b><small>'+roleLabel+'</small></div>'+
-      '<button class="lout" id="rfLabLogout">\u00C7\u0131k\u0131\u015F</button></div>';
-    var el=document.getElementById('rfLabLogout');
-    if(el) el.onclick=function(){ if(window.RFAuth){ RFAuth.logout(); loggedOut(); } };
-  }
-  if(window.RFAuth){
-    RFAuth.init().then(function(u){ u?loggedIn(u):loggedOut(); }).catch(function(){ loggedOut(); });
-  } else { loggedOut(); }
-})();
-</script>
-
-</body>
-</html>
+  function l

@@ -502,7 +502,8 @@
           '<div class="rd-stat"><div class="l">ÇİZGİDE</div><div class="v mono">%'+RC.accuracy(sim)+'</div></div>'+
           '<div class="rd-stat"><div class="l">DURUM</div><div class="v '+(win?'ok':'bad')+'">'+(win?'KURTARILDI':'BAŞARISIZ')+'</div></div>'+
         '</div>'+
-        (window.RFResult?RFResult.coachHTML(tips,{win:win,headWin:'🎓 Ne öğrendik?',headLose:'🔍 Ne oldu, neden?',reason:win?null:(REASONS[sim.reason]||'')}):(tips.length?'<div class="rd-tip">💡 '+tips[0]+'</div>':''))+
+        '<div class="rf-graphwrap"><div class="cap">🚑 Çizgide kalma</div><canvas id="rescueGauge" class="rf-graph" style="height:130px;border:none;background:transparent"></canvas><div style="font-size:.72rem;color:var(--muted2);margin-top:2px;text-align:center">Rota üzerinde ne kadar kaldın. Kayıp arttıkça puan düşer — sensör + hız dengesi kur.</div></div>'+
+                (window.RFResult?RFResult.coachHTML(tips,{win:win,headWin:'🎓 Ne öğrendik?',headLose:'🔍 Ne oldu, neden?',reason:win?null:(REASONS[sim.reason]||'')}):(tips.length?'<div class="rd-tip">💡 '+tips[0]+'</div>':''))+
         '<div class="rd-btns">'+
           '<button class="btn run" id="againBtn">⟲ Tekrar Dene</button>'+
           '<button class="btn outline" id="replayBtn">▶ Yolu İzle</button>'+
@@ -511,6 +512,7 @@
       '</div>';
     document.getElementById('hint').style.display='none';
     dock.style.display='block';
+    if(document.getElementById('rescueGauge') && window.RFResult && RFResult.gauge){ try{ var __gv=Math.max(0,Math.min(100,(RC.accuracy(sim))||0)); RFResult.gauge(document.getElementById('rescueGauge'), {value:__gv, max:100, unit:'%', label:'çizgide', zones:[{to:50,color:'var(--red)'},{to:80,color:'var(--amber)'},{to:100,color:'var(--green)'}]}); }catch(e){} }
     if(win && window.RFResult){ try{ RFResult.celebrate({}); }catch(e){} }
     document.getElementById('againBtn').onclick=()=>{ hideResult(); startRun(); };
     document.getElementById('replayBtn').onclick=replayRun;
