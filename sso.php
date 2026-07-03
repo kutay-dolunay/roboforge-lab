@@ -159,4 +159,16 @@ function rf_b64url($data) {
 function rf_jwt_rs256($payload, $privateKeyPem) {
     $header = array('alg' => 'RS256', 'typ' => 'JWT');
     $segments = array(
-        rf_b64url(json_
+        rf_b64url(json_encode($header, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)),
+        rf_b64url(json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)),
+    );
+    $signingInput = implode('.', $segments);
+    $signature = '';
+    $pkey = openssl_pkey_get_private($privateKeyPem);
+    if ($pkey === false) { return false; }
+    $ok = openssl_sign($signingInput, $signature, $pkey, OPENSSL_ALGO_SHA256);
+    if (function_exists('openssl_pkey_free')) { @openssl_pkey_free($pkey); }
+    if (!$ok) { return false; }
+    $segments[] = rf_b64url($signature);
+    return implode('.', $segments);
+}
