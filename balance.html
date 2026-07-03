@@ -399,6 +399,7 @@
   function startRun(){
     stopLoop(); hideResult();
     LAB.sim = BC.createSim(buildConfig());
+    LAB.tiltTrace=[];
     document.getElementById('runBtn').textContent='■ DURDUR';
     document.getElementById('runBtn').className='btn stop';
     LAB.lastTs=0; LAB.raf=requestAnimationFrame(loop);
@@ -409,7 +410,9 @@
     if(dt>0.1) dt=0.1;
     let last=null;
     const steps=Math.max(1,Math.round(dt*60*LAB.simSpeed));
-    for(let i=0;i<steps;i++){ last=BC.tickSim(LAB.sim,1/60); if(LAB.sim.status!=='running') break; }
+    for(let i=0;i<steps;i++){ last=BC.tickSim(LAB.sim,1/60);
+      if(LAB.tiltTrace && LAB.tiltTrace.length<3000) LAB.tiltTrace.push({x:+LAB.sim.t.toFixed(2), y:LAB.sim.th*57.3});
+      if(LAB.sim.status!=='running') break; }
     drawScene(last); updateHud(last);
     if(LAB.sim.status==='running') LAB.raf=requestAnimationFrame(loop);
     else { stopRunUi(); setTimeout(showResult,450); }
@@ -434,6 +437,12 @@
       try{ if(window.RFProgress){ var __rfwin=(sim.status==='success'||sim.status==='win'); var __rfmedal=null; try{ var __core=window['BalanceCore']; if(__core&&__core.robotClass){var __c=__core.robotClass(sim); if(__c)__rfmedal=__c.name;} }catch(e){} RFProgress.record('balance', LAB.levelIdx, {pass:__rfwin, time:(sim&&typeof sim.t==='number')?sim.t:null, medal:__rfmedal, mode:LAB.mode}); } }catch(e){}
     const cls=BC.robotClass(sim);
     const tips=BC.coach(sim);
+    var tiltGraph='';
+    if(window.RFResult && LAB.tiltTrace && LAB.tiltTrace.length>3){
+      tiltGraph='<div class="rf-graphwrap"><div class="cap">📐 Eğim açısı — zamana karşı</div>'+
+        '<canvas id="tiltGraph" class="rf-graph" style="height:140px"></canvas>'+
+        '<div style="font-size:.72rem;color:var(--muted2);margin-top:2px">0° = dimdik. Kırmızı çizgiler = düşme sınırı (±34°). Salınım küçülüp 0’a oturuyorsa denge sağlam; büyüyorsa Kp/Kd’yi ayarla.</div></div>';
+    }
     const dock=document.getElementById('resultDock');
     dock.className='rdock'+(win?'':' lose');
     dock.innerHTML =
@@ -447,6 +456,7 @@
           '<div class="rd-stat"><div class="l">MAKS EĞİM</div><div class="v mono">'+(sim.maxTilt*57.3).toFixed(0)+'°</div></div>'+
           '<div class="rd-stat"><div class="l">DURUM</div><div class="v '+(win?'ok':'bad')+'">'+(win?'AYAKTA':'BAŞARISIZ')+'</div></div>'+
         '</div>'+
+        tiltGraph+
         (window.RFResult?RFResult.coachHTML(tips,{win:win,headWin:'🎓 Ne öğrendik?',headLose:'🔍 Ne oldu, neden?',reason:win?null:(REASONS[sim.reason]||'')}):(tips.length?'<div class="rd-tip">💡 '+tips[0]+'</div>':''))+
         '<div class="rd-btns">'+
           '<button class="btn run" id="againBtn">⟲ Tekrar Dene</button>'+
@@ -455,6 +465,11 @@
       '</div>';
     document.getElementById('hint').style.display='none';
     dock.style.display='block';
+    if(tiltGraph){ var cv=document.getElementById('tiltGraph');
+      if(cv) RFResult.graph(cv, { series:[{data:LAB.tiltTrace, color:'var(--sky)', area:true}],
+        hline:{y:0, color:'var(--muted)'},
+        band:{from:-34, to:34, color:'rgba(34,197,94,.06)'},
+        yZero:true, xlabel:'süre (s)', ylabel:'eğim °' }); }
     if(win && window.RFResult){ try{ RFResult.celebrate({}); }catch(e){} }
     document.getElementById('againBtn').onclick=()=>{ hideResult(); startRun(); };
     document.getElementById('reportBtn').onclick=openReport;
@@ -725,25 +740,4 @@
   function initials(name){ if(!name) return '\u{1F464}'; var p=name.trim().split(/\s+/); return (((p[0]||'')[0]||'')+((p[1]||'')[0]||'')).toUpperCase(); }
   function box(){ return document.getElementById('labAuth'); }
   function loggedOut(){
-    var b=box(); if(!b) return;
-    b.innerHTML='<button class="lloginbtn" id="rfLabLogin">\u{1F393} Giri\u015F</button>';
-    var el=document.getElementById('rfLabLogin');
-    if(el) el.onclick=function(){ if(window.RFAuth) RFAuth.login(); };
-  }
-  function loggedIn(u){
-    var b=box(); if(!b) return;
-    var roleLabel={student:'\u00D6\u011Frenci',teacher:'\u00D6\u011Fretmen',admin:'Y\u00F6netici'}[u.role]||'\u00D6\u011Frenci';
-    b.innerHTML='<div class="lchip"><div class="lav">'+initials(u.name)+'</div>'+
-      '<div class="lwho"><b>'+(u.name||'\u00D6\u011Frenci')+'</b><small>'+roleLabel+'</small></div>'+
-      '<button class="lout" id="rfLabLogout">\u00C7\u0131k\u0131\u015F</button></div>';
-    var el=document.getElementById('rfLabLogout');
-    if(el) el.onclick=function(){ if(window.RFAuth){ RFAuth.logout(); loggedOut(); } };
-  }
-  if(window.RFAuth){
-    RFAuth.init().then(function(u){ u?loggedIn(u):loggedOut(); }).catch(function(){ loggedOut(); });
-  } else { loggedOut(); }
-})();
-</script>
-
-</body>
-</html>
+    var b=bo

@@ -536,6 +536,7 @@
   function startRun(){
     stopLoop(); hideResult();
     LAB.sim=CS.createSim(buildConfig());
+    LAB.telemetry=[];
     document.getElementById('runBtn').textContent='■ DURDUR';
     document.getElementById('runBtn').className='btn stop';
     LAB.lastTs=0; LAB.raf=requestAnimationFrame(loop);
@@ -546,7 +547,9 @@
     if(dt>0.1) dt=0.1;
     let last=null;
     const steps=Math.max(1,Math.round(dt*60*LAB.simSpeed));
-    for(let i=0;i<steps;i++){ last=CS.tickSim(LAB.sim,1/60); if(LAB.sim.status!=='running') break; }
+    for(let i=0;i<steps;i++){ last=CS.tickSim(LAB.sim,1/60);
+      if(LAB.telemetry && LAB.telemetry.length<3000) LAB.telemetry.push({t:+LAB.sim.t.toFixed(2), alt:LAB.sim.alt, v:LAB.sim.v});
+      if(LAB.sim.status!=='running') break; }
     drawScene(last); updateHud(); updateGs();
     if(LAB.sim.status==='running') LAB.raf=requestAnimationFrame(loop);
     else { stopRunUi(); setTimeout(showResult,450); }
@@ -573,6 +576,12 @@
     const cls=CS.robotClass(sim);
     const tips=CS.coach(sim);
     const sc=CS.score(sim);
+    var telGraph='';
+    if(window.RFResult && LAB.telemetry && LAB.telemetry.length>3){
+      telGraph='<div class="rf-graphwrap"><div class="cap">🛰️ İniş telemetrisi — irtifa &amp; iniş hızı</div>'+
+        '<canvas id="cansatGraph" class="rf-graph" style="height:150px"></canvas>'+
+        '<div style="font-size:.72rem;color:var(--muted2);margin-top:2px">Sağlıklı bir iniş: irtifa düzgün azalır, hız paraşüt açılınca sabit ve güvenli (&lt;10 m/s) kalır.</div></div>';
+    }
     const dock=document.getElementById('resultDock');
     dock.className='rdock'+(win?'':' lose');
     dock.innerHTML =
@@ -586,6 +595,7 @@
           '<div class="rd-stat"><div class="l">VERİ KAPSAMA</div><div class="v mono">%'+sc.coverage+'</div></div>'+
           '<div class="rd-stat"><div class="l">DURUM</div><div class="v '+(win?'ok':'bad')+'">'+(win?'TAMAM':'BAŞARISIZ')+'</div></div>'+
         '</div>'+
+        telGraph+
         (window.RFResult?RFResult.coachHTML(tips,{win:win,headWin:'🎓 Ne öğrendik?',headLose:'🔍 Ne oldu, neden?',reason:win?null:(REASONS[sim.reason]||'')}):(tips.length?'<div class="rd-tip">💡 '+tips[0]+'</div>':''))+
         '<div class="rd-btns">'+
           '<button class="btn run" id="againBtn">⟲ Tekrar Dene</button>'+
@@ -594,6 +604,11 @@
       '</div>';
     document.getElementById('hint').style.display='none';
     dock.style.display='block';
+    if(telGraph){ var cv=document.getElementById('cansatGraph');
+      if(cv) RFResult.graph(cv, {
+        series:[ {data:LAB.telemetry.map(function(p){return {x:p.t,y:p.alt};}), color:'var(--sky)', area:true, label:'irtifa (m)'},
+                 {data:LAB.telemetry.map(function(p){return {x:p.t,y:Math.abs(p.v)};}), color:'var(--amber)', label:'iniş hızı (m/s)'} ],
+        yZero:true, xlabel:'süre (s)' }); }
     if(win && window.RFResult){ try{ RFResult.celebrate({}); }catch(e){} }
     document.getElementById('againBtn').onclick=()=>{ hideResult(); startRun(); };
     document.getElementById('reportBtn').onclick=openReport;
@@ -826,27 +841,4 @@
 <script>/* rf-labauth-v1 */
 (function(){
   function initials(name){ if(!name) return '\u{1F464}'; var p=name.trim().split(/\s+/); return (((p[0]||'')[0]||'')+((p[1]||'')[0]||'')).toUpperCase(); }
-  function box(){ return document.getElementById('labAuth'); }
-  function loggedOut(){
-    var b=box(); if(!b) return;
-    b.innerHTML='<button class="lloginbtn" id="rfLabLogin">\u{1F393} Giri\u015F</button>';
-    var el=document.getElementById('rfLabLogin');
-    if(el) el.onclick=function(){ if(window.RFAuth) RFAuth.login(); };
-  }
-  function loggedIn(u){
-    var b=box(); if(!b) return;
-    var roleLabel={student:'\u00D6\u011Frenci',teacher:'\u00D6\u011Fretmen',admin:'Y\u00F6netici'}[u.role]||'\u00D6\u011Frenci';
-    b.innerHTML='<div class="lchip"><div class="lav">'+initials(u.name)+'</div>'+
-      '<div class="lwho"><b>'+(u.name||'\u00D6\u011Frenci')+'</b><small>'+roleLabel+'</small></div>'+
-      '<button class="lout" id="rfLabLogout">\u00C7\u0131k\u0131\u015F</button></div>';
-    var el=document.getElementById('rfLabLogout');
-    if(el) el.onclick=function(){ if(window.RFAuth){ RFAuth.logout(); loggedOut(); } };
-  }
-  if(window.RFAuth){
-    RFAuth.init().then(function(u){ u?loggedIn(u):loggedOut(); }).catch(function(){ loggedOut(); });
-  } else { loggedOut(); }
-})();
-</script>
-
-</body>
-</html>
+  function box(){ 

@@ -440,6 +440,12 @@
     const cls=DR.robotClass(sim);
     const tips=DR.coach(sim);
     const M=DR.MISSIONS[LAB.misIdx];
+    var altGraph='';
+    if(window.RFResult && sim.log && sim.log.length>3){
+      altGraph='<div class="rf-graphwrap"><div class="cap">🚁 İrtifa — hedef vs gerçek (Ki dersi!)</div>'+
+        '<canvas id="droneGraph" class="rf-graph" style="height:150px"></canvas>'+
+        '<div style="font-size:.72rem;color:var(--muted2);margin-top:2px">Kesikli = hedef irtifa, dolu = drone. P-only kontrolde ikisi arasında kalıcı bir boşluk kalır — bu boşluğu <b style="color:#7dd3fc">Ki (integral)</b> kapatır.</div></div>';
+    }
     const dock=document.getElementById('resultDock');
     dock.className='rdock'+(win?'':' lose');
     dock.innerHTML =
@@ -453,6 +459,7 @@
           '<div class="rd-stat"><div class="l">GÖREV</div><div class="v mono">'+sim.wpIdx+'/'+M.wps.length+'</div></div>'+
           '<div class="rd-stat"><div class="l">DURUM</div><div class="v '+(win?'ok':'bad')+'">'+(win?'TAMAM':'BAŞARISIZ')+'</div></div>'+
         '</div>'+
+        altGraph+
         (window.RFResult?RFResult.coachHTML(tips,{win:win,headWin:'🎓 Ne öğrendik?',headLose:'🔍 Ne oldu, neden?',reason:win?null:(REASONS[sim.reason]||'')}):(tips.length?'<div class="rd-tip">💡 '+tips[0]+'</div>':''))+
         '<div class="rd-btns">'+
           '<button class="btn run" id="againBtn">⟲ Tekrar Dene</button>'+
@@ -461,6 +468,11 @@
       '</div>';
     document.getElementById('hint').style.display='none';
     dock.style.display='block';
+    if(altGraph){ var cv=document.getElementById('droneGraph');
+      if(cv) RFResult.graph(cv, {
+        series:[ {data:sim.log.map(function(p){return {x:p[0],y:p[3]};}), color:'var(--green)', label:'hedef', dashed:true},
+                 {data:sim.log.map(function(p){return {x:p[0],y:p[1]};}), color:'var(--sky)', area:true, label:'drone'} ],
+        yZero:true, xlabel:'süre (s)', ylabel:'irtifa (m)' }); }
     if(win && window.RFResult){ try{ RFResult.celebrate({}); }catch(e){} }
     document.getElementById('againBtn').onclick=()=>{ hideResult(); startRun(); };
     document.getElementById('reportBtn').onclick=openReport;
@@ -703,24 +715,4 @@
   function box(){ return document.getElementById('labAuth'); }
   function loggedOut(){
     var b=box(); if(!b) return;
-    b.innerHTML='<button class="lloginbtn" id="rfLabLogin">\u{1F393} Giri\u015F</button>';
-    var el=document.getElementById('rfLabLogin');
-    if(el) el.onclick=function(){ if(window.RFAuth) RFAuth.login(); };
-  }
-  function loggedIn(u){
-    var b=box(); if(!b) return;
-    var roleLabel={student:'\u00D6\u011Frenci',teacher:'\u00D6\u011Fretmen',admin:'Y\u00F6netici'}[u.role]||'\u00D6\u011Frenci';
-    b.innerHTML='<div class="lchip"><div class="lav">'+initials(u.name)+'</div>'+
-      '<div class="lwho"><b>'+(u.name||'\u00D6\u011Frenci')+'</b><small>'+roleLabel+'</small></div>'+
-      '<button class="lout" id="rfLabLogout">\u00C7\u0131k\u0131\u015F</button></div>';
-    var el=document.getElementById('rfLabLogout');
-    if(el) el.onclick=function(){ if(window.RFAuth){ RFAuth.logout(); loggedOut(); } };
-  }
-  if(window.RFAuth){
-    RFAuth.init().then(function(u){ u?loggedIn(u):loggedOut(); }).catch(function(){ loggedOut(); });
-  } else { loggedOut(); }
-})();
-</script>
-
-</body>
-</html>
+    b.innerHTML='<button class=
