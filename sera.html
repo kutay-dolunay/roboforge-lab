@@ -550,6 +550,7 @@
           '<div class="rd-stat"><div class="l">BATARYA</div><div class="v mono">%'+Math.max(0,Math.round(sim.batt/sim.battMax*100))+'</div></div>'+
           '<div class="rd-stat"><div class="l">DURUM</div><div class="v '+(win?'ok':'bad')+'">'+(win?'HASAT':'BAŞARISIZ')+'</div></div>'+
         '</div>'+
+        '<div class="rf-graphwrap"><div class="cap">🌱 Bitki karnesi</div><canvas id="seraGraph" class="rf-graph" style="height:150px"></canvas><div style="font-size:.72rem;color:var(--muted2);margin-top:2px">Sağlık yüksekse büyüme hızlanır; batarya bitmeden iklimi dengede tut. Üçü birden yüksekse mükemmel sera!</div></div>'+
         (window.RFResult?RFResult.coachHTML(tips,{win:win,headWin:'🎓 Ne öğrendik?',headLose:'🔍 Ne oldu, neden?',reason:win?null:(REASONS[sim.reason]||'')}):(tips.length?'<div class="rd-tip">💡 '+tips[0]+'</div>':''))+
         '<div class="rd-btns">'+
           '<button class="btn run" id="againBtn">⟲ Tekrar Dene</button>'+
@@ -558,6 +559,11 @@
       '</div>';
     document.getElementById('hint').style.display='none';
     dock.style.display='block';
+    if(document.getElementById('seraGraph') && window.RFResult && RFResult.bars){ try{
+      RFResult.bars(document.getElementById('seraGraph'), { max:100, unit:'%',
+        data:[ {label:'Büyüme',value:Math.round(sim.growth),color:'var(--green)'},
+               {label:'Sağlık',value:Math.round(sim.health),color:'var(--sky)'},
+               {label:'Batarya',value:Math.max(0,Math.round(sim.batt/sim.battMax*100)),color:'var(--amber)'} ] }); }catch(e){} }
     if(win && window.RFResult){ try{ RFResult.celebrate({}); }catch(e){} }
     document.getElementById('againBtn').onclick=()=>{ hideResult(); startRun(); };
     document.getElementById('reportBtn').onclick=openReport;
@@ -791,22 +797,4 @@
     var b=box(); if(!b) return;
     b.innerHTML='<button class="lloginbtn" id="rfLabLogin">\u{1F393} Giri\u015F</button>';
     var el=document.getElementById('rfLabLogin');
-    if(el) el.onclick=function(){ if(window.RFAuth) RFAuth.login(); };
-  }
-  function loggedIn(u){
-    var b=box(); if(!b) return;
-    var roleLabel={student:'\u00D6\u011Frenci',teacher:'\u00D6\u011Fretmen',admin:'Y\u00F6netici'}[u.role]||'\u00D6\u011Frenci';
-    b.innerHTML='<div class="lchip"><div class="lav">'+initials(u.name)+'</div>'+
-      '<div class="lwho"><b>'+(u.name||'\u00D6\u011Frenci')+'</b><small>'+roleLabel+'</small></div>'+
-      '<button class="lout" id="rfLabLogout">\u00C7\u0131k\u0131\u015F</button></div>';
-    var el=document.getElementById('rfLabLogout');
-    if(el) el.onclick=function(){ if(window.RFAuth){ RFAuth.logout(); loggedOut(); } };
-  }
-  if(window.RFAuth){
-    RFAuth.init().then(function(u){ u?loggedIn(u):loggedOut(); }).catch(function(){ loggedOut(); });
-  } else { loggedOut(); }
-})();
-</script>
-
-</body>
-</html>
+    if(el) el.onclick=function(){ if(window.RFAuth)
