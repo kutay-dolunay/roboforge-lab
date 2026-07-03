@@ -526,4 +526,63 @@
       next.textContent = phase<ORDER.length-1 ? ('Devam → '+RD.COMPONENTS[ORDER[phase+1]].label) : 'Devam → Çizim';
     } else {
       prev.style.visibility='visible'; next.disabled=false;
-      if(step===2){ next.textContent='Devam → Rapor'
+      if(step===2){ next.textContent='Devam → Rapor'; next.className='btn primary'; }
+      else if(step===3){ next.textContent='Testi Çalıştır →'; next.className='btn go'; }
+      else { next.classList.add('hidden'); }
+    }
+  }
+  function go(n){
+    step=n;
+    for(let i=1;i<=4;i++) document.getElementById('step'+i).classList.toggle('hidden', i!==step);
+    document.getElementById('bp').style.display = step===1 ? 'block' : 'none';
+    renderStepper();
+    if(step===1) renderPhase();
+    if(step===2) renderChassis();
+    if(step===3) renderReport();
+    if(step===4) runTest();
+    updateNav();
+    window.scrollTo(0,0);
+  }
+  document.getElementById('nextBtn').onclick=()=>{
+    if(step===1){ const cat=ORDER[phase]; if(!B[cat]) return;
+      if(phase<ORDER.length-1){ phase++; document.getElementById('confirm').classList.remove('show'); renderPhase(); updateNav(); window.scrollTo(0,0); }
+      else go(2);
+    } else if(step<4) go(step+1);
+  };
+  document.getElementById('prevBtn').onclick=()=>{
+    if(step===1){ if(phase>0){ phase--; renderPhase(); updateNav(); window.scrollTo(0,0); } }
+    else { if(step===2){ step=1; phase=ORDER.length-1; go(1); } else go(step-1); }
+  };
+  document.getElementById('chLen').oninput=e=>{ B.chassis.len=+e.target.value; save(); renderChassis(); };
+  document.getElementById('chWid').oninput=e=>{ B.chassis.wid=+e.target.value; save(); renderChassis(); };
+
+  // ---- init ----
+  go(1);
+})();
+</script>
+<script>/* rf-labauth-v1 */
+(function(){
+  function initials(name){ if(!name) return '\u{1F464}'; var p=name.trim().split(/\s+/); return (((p[0]||'')[0]||'')+((p[1]||'')[0]||'')).toUpperCase(); }
+  function box(){ return document.getElementById('labAuth'); }
+  function loggedOut(){
+    var b=box(); if(!b) return;
+    b.innerHTML='<button class="lloginbtn" id="rfLabLogin">\u{1F393} Giriş</button>';
+    var el=document.getElementById('rfLabLogin');
+    if(el) el.onclick=function(){ if(window.RFAuth) RFAuth.login(); };
+  }
+  function loggedIn(u){
+    var b=box(); if(!b) return;
+    var roleLabel={student:'Öğrenci',teacher:'Öğretmen',admin:'Yönetici'}[u.role]||'Öğrenci';
+    b.innerHTML='<div class="lchip"><div class="lav">'+initials(u.name)+'</div>'+
+      '<div class="lwho"><b>'+(u.name||'Öğrenci')+'</b><small>'+roleLabel+'</small></div>'+
+      '<button class="lout" id="rfLabLogout">Çıkış</button></div>';
+    var el=document.getElementById('rfLabLogout');
+    if(el) el.onclick=function(){ if(window.RFAuth){ RFAuth.logout(); loggedOut(); } };
+  }
+  if(window.RFAuth){
+    RFAuth.init().then(function(u){ u?loggedIn(u):loggedOut(); }).catch(function(){ loggedOut(); });
+  } else { loggedOut(); }
+})();
+</script>
+</body>
+</html>
