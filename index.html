@@ -102,17 +102,38 @@
 
   footer{margin-top:52px;color:var(--muted);font-size:.72rem;text-align:center;line-height:1.6}
   footer b{color:var(--muted2)}
+
+  /* auth box (Moodle SSO) */
+  .logorow{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .authbox{display:flex;align-items:center;gap:10px;padding-top:4px}
+  .loginbtn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);
+    background:linear-gradient(180deg,#0ea5e9,#0369a1);color:#eaf6ff;font-weight:800;font-size:.82rem;
+    padding:9px 15px;border-radius:11px;cursor:pointer;box-shadow:0 0 16px rgba(56,189,248,.22);white-space:nowrap}
+  .loginbtn:hover{filter:brightness(1.08)}
+  .userchip{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--panel);
+    border-radius:12px;padding:6px 8px 6px 12px}
+  .userchip .av{width:30px;height:30px;border-radius:50%;background:linear-gradient(145deg,#0ea5e9,#1e3a8a);
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.82rem;color:#eaf6ff}
+  .userchip .who{line-height:1.15}
+  .userchip .who b{font-size:.82rem}
+  .userchip .who small{display:block;font-size:.6rem;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
+  .userchip .out{border:1px solid var(--line);background:transparent;color:var(--muted2);border-radius:8px;
+    font-size:.66rem;font-weight:700;padding:5px 9px;cursor:pointer}
+  .userchip .out:hover{border-color:var(--red);color:#fca5a5}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="hero">
-    <div class="logo">
-      <div class="mark">🤖</div>
-      <div>
-        <b>Robo<span>Forge</span></b>
-        <small>Simülasyon Kataloğu</small>
+    <div class="logorow">
+      <div class="logo">
+        <div class="mark">🤖</div>
+        <div>
+          <b>Robo<span>Forge</span></b>
+          <small>Simülasyon Kataloğu</small>
+        </div>
       </div>
+      <div class="authbox" id="authbox"><!-- filled by rf-auth --></div>
     </div>
     <p class="tagline">Bir simülasyon seç; <b>kendi robotunu kur, kodla ve test et.</b>
       30 senaryo, altı dünyada: temel sürüşten fabrika otomasyonuna, uzay görevlerinden sürü zekâsına.
@@ -307,6 +328,33 @@
     sec.appendChild(grid);
     host.appendChild(sec);
   });
+</script>
+<script src="rf-auth.js?v=1"></script>
+<script>
+  // ---- Moodle SSO auth box ----
+  (function(){
+    function initials(name){ if(!name) return '👤'; var p=name.trim().split(/\s+/); return ((p[0]||'')[0]||'')+((p[1]||'')[0]||''); }
+    function renderLoggedOut(){
+      var box=document.getElementById('authbox'); if(!box) return;
+      box.innerHTML='<button class="loginbtn" id="rfLogin">🎓 Moodle ile Giriş</button>';
+      document.getElementById('rfLogin').onclick=function(){ if(window.RFAuth) RFAuth.login(); };
+    }
+    function renderLoggedIn(u){
+      var box=document.getElementById('authbox'); if(!box) return;
+      var roleLabel={student:'Öğrenci',teacher:'Öğretmen',admin:'Yönetici'}[u.role]||'Öğrenci';
+      box.innerHTML=
+        '<div class="userchip">'+
+          '<div class="av">'+(initials(u.name).toUpperCase()||'👤')+'</div>'+
+          '<div class="who"><b>'+(u.name||'Öğrenci')+'</b><small>'+roleLabel+'</small></div>'+
+          '<button class="out" id="rfLogout">Çıkış</button>'+
+        '</div>';
+      document.getElementById('rfLogout').onclick=function(){ if(window.RFAuth){ RFAuth.logout(); renderLoggedOut(); } };
+    }
+    if(window.RFAuth){
+      RFAuth.init().then(function(u){ u?renderLoggedIn(u):renderLoggedOut(); })
+        .catch(function(){ renderLoggedOut(); });
+    } else { renderLoggedOut(); }
+  })();
 </script>
 </body>
 </html>
