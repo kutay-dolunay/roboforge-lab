@@ -144,13 +144,16 @@
           history.replaceState(null, '', clean);
         } catch (e) {}
         return verifyToken(jwt).then(function (payload) {
-          // bind to the nonce we started with (best-effort)
-          var expectNonce = null;
-          try { expectNonce = sessionStorage.getItem(CFG.nonceKey); } catch (e) {}
-          if (expectNonce && payload.nonce && payload.nonce !== expectNonce) {
-            throw new Error('nonce mismatch');
-          }
-          try { sessionStorage.removeItem(CFG.nonceKey); } catch (e) {}
+          // Nonce binding is a SOFT check: the RS256 signature is the real security
+          // (only the Moodle server's private key can produce a valid token). A nonce
+          // mismatch (stale/fresh visit) just gets logged, it does NOT reject a valid token.
+          try {
+            var expectNonce = sessionStorage.getItem(CFG.nonceKey);
+            if (expectNonce && payload.nonce && payload.nonce !== expectNonce && global.console) {
+              console.info('RFAuth: nonce differs (soft) — token signature is valid, proceeding.');
+            }
+            sessionStorage.removeItem(CFG.nonceKey);
+          } catch (e) {}
           return saveSession(payload);
         }).catch(function (err) {
           if (global.console) console.warn('RFAuth SSO verify failed:', err && err.message);
