@@ -250,6 +250,7 @@
 
 <script src="rf-auth.js?v=2"></script>
 <script src="rf-progress.js?v=1"></script>
+<script src="rf-result.js?v=1"></script>
 <script src="robot-data.js?v=2"></script>
 <script src="sim-core.js?v=2"></script>
 <script src="pid-core.js?v=2"></script>
@@ -339,7 +340,7 @@
   function buildConfig(){ return { track:LAB.track, sensors:LAB.sensors, rules:LAB.rules, defaultRule:LAB.defaultRule, params:LAB.params, mode:LAB.mode, pid:LAB.pid }; }
   function startRun(){
     if(LAB.running) return; stopLoop(); rebuildTrack();
-    LAB.sim=S.createSim(buildConfig()); LAB.frames=[]; setResultRunning();
+    LAB.sim=S.createSim(buildConfig()); LAB.frames=[]; LAB.errTrace=[]; setResultRunning();
     let n=3; const cd=document.getElementById('countdown'); cd.style.display='flex'; cd.textContent=n;
     const iv=setInterval(()=>{ n--; if(n>0){cd.textContent=n;} else if(n===0){cd.textContent='GİT!';} else { clearInterval(iv); cd.style.display='none'; beginMotion(); } },520);
   }
@@ -348,7 +349,8 @@
   function loop(ts){ const FIXED=1/60; let real=(ts-LAB.lastTs)/1000; LAB.lastTs=ts; if(real>0.1)real=0.1;
     LAB.acc+=real*LAB.simSpeed; let last=LAB.sim.last, steps=0;
     while(LAB.acc>=FIXED && LAB.sim.status==='running' && steps<8){ last=S.tickSim(LAB.sim,FIXED); LAB.acc-=FIXED; steps++;
-      if(LAB.frames.length<4000){ const rb=LAB.sim.robot; LAB.frames.push([rb.x,rb.y]); } }
+      if(LAB.frames.length<4000){ const rb=LAB.sim.robot; LAB.frames.push([rb.x,rb.y]);
+        if(last && last.error!=null) LAB.errTrace.push({x:+LAB.sim.t.toFixed(2), y:last.error}); } }
     render(last); updateHud(last);
     if(LAB.sim.status!=='running'){ finishRun(); return; } LAB.raf=requestAnimationFrame(loop); }
   function stopLoop(){ if(LAB.raf) cancelAnimationFrame(LAB.raf); LAB.raf=null; }
@@ -376,17 +378,40 @@
       else tips.push('Kural modu yarışta zorlanır — 📈 PID Modu\'na geçip Kp/Kd ile daha akıcı sür.');
       if(LAB.params.vMax>=4.6) tips.push('Motor hızın çok yüksek; teknik virajda aşıp çıkmış olabilir. Ya hızı düşür ya da çevikliği artır.'); }
     const body=document.getElementById('rbody'); body.style.display='block';
+    // --- rich coaching via shared toolkit (falls back to old tip style if unavailable) ---
+    var coachBlock;
+    if(window.RFResult){
+      coachBlock = RFResult.coachHTML(tips, { win:win,
+        headWin:'🎓 Ne öğrendik?', headLose:'🔍 Ne oldu, neden?',
+        reason: win?null:(REASONS[sim.reason]||'') });
+    } else {
+      coachBlock = tips.map(t=>`<div class="tip"><span class="ic">💡</span><span>${t}</span></div>`).join('');
+    }
+    // --- PID error-over-time graph: the whole lesson made visible ---
+    var graphBlock='';
+    if(window.RFResult && LAB.mode==='pid' && LAB.errTrace && LAB.errTrace.length>3){
+      graphBlock='<div class="rf-graphwrap"><div class="cap">📈 Hata eğrisi — robot çizgiden ne kadar saptı?</div>'+
+        '<canvas id="pidErrGraph" class="rf-graph" style="height:150px"></canvas>'+
+        '<div style="font-size:.72rem;color:var(--muted2);margin-top:2px">Kesikli çizgi = hedef (hata 0). Dalgalanma çoksa <b style="color:#7dd3fc">Kd</b> artır; yavaş toparlıyorsa <b style="color:#7dd3fc">Kp</b> artır.</div></div>';
+    }
     body.innerHTML=`<div class="rstats">
         <div class="big"><small>TUR SÜRESİ</small><b>${sim.status==='success'?sim.t.toFixed(1)+'s':'—'}</b></div>
         <div><small>EN İYİ (REKOR)</small><b style="color:#fbbf24">${fmt(best)}</b></div>
         <div><small>ÇİZGİDE KALMA</small><b>${acc}%</b></div>
       </div>`+
-      tips.map(t=>`<div class="tip"><span class="ic">💡</span><span>${t}</span></div>`).join('')+
+      graphBlock+
+      coachBlock+
       `<div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
         <button class="btn run" id="retry">⟲ Tekrar Yarış</button>
         <button class="btn ghost" id="replayBtn">▶ Turu İzle</button></div>`;
+    // draw the graph now that the canvas is in the DOM
+    if(graphBlock){ var cv=document.getElementById('pidErrGraph');
+      if(cv) RFResult.graph(cv, { series:[{data:LAB.errTrace, color:'var(--sky)', area:true}],
+        hline:{y:0, color:'var(--amber)', label:'hedef'},
+        xlabel:'süre (s)', ylabel:'hata' }); }
     document.getElementById('retry').onclick=resetSim;
     document.getElementById('replayBtn').onclick=replayRun;
+    if(win && window.RFResult) RFResult.celebrate({});
     setTimeout(()=>{ const el=document.getElementById('result'); if(el) el.scrollIntoView({behavior:'smooth',block:'center'}); },130);
   }
   function replayRun(){ if(!LAB.frames.length||LAB.running) return; stopLoop(); let i=0;
@@ -394,7 +419,7 @@
       for(let j=0;j<=i&&j<LAB.frames.length;j++){ const [x,y]=w2s(LAB.frames[j][0],LAB.frames[j][1]); j?ctx.lineTo(x,y):ctx.moveTo(x,y); } ctx.stroke();
       const f=LAB.frames[Math.min(i,LAB.frames.length-1)]; drawRobot({x:f[0],y:f[1],th:0},null);
       i+=3; if(i<LAB.frames.length) LAB.raf=requestAnimationFrame(stepR); }; stepR(); }
-  function resetSim(){ stopRun(); LAB.sim=null; LAB.acc=0; LAB.frames=[]; rebuildTrack(); setResultReady(); render(null); updateHud(null); }
+  function resetSim(){ stopRun(); LAB.sim=null; LAB.acc=0; LAB.frames=[]; LAB.errTrace=[]; rebuildTrack(); setResultReady(); render(null); updateHud(null); }
 
   // ---------- track tabs ----------
   function buildTrackTabs(){ const wrap=document.getElementById('tracktabs'); wrap.innerHTML='';

@@ -121,6 +121,33 @@ img,canvas,svg{max-width:100%}
 .rf-welcome .wbtns{display:flex;gap:10px;margin-top:18px}
 
 /* =============================================================================
+ * RESULT / COACHING / RUN-GRAPH  (rf-result.js) — shared across all labs
+ * ========================================================================== */
+.rf-graph{ display:block; width:100%; border:1px solid var(--line); border-radius:10px;
+  background:#0a0f1c; margin:2px 0 4px; }
+.rf-graphwrap{ margin:10px 0; }
+.rf-graphwrap .cap{ font-size:.6rem; letter-spacing:1.5px; text-transform:uppercase; font-weight:800;
+  color:var(--muted); margin-bottom:5px; }
+
+.rf-coach{ border-radius:11px; padding:11px 14px; margin:10px 0; border:1px solid var(--line); }
+.rf-coach.lose{ background:rgba(56,189,248,.05); border-color:rgba(56,189,248,.28); }
+.rf-coach.win{ background:rgba(34,197,94,.06); border-color:rgba(34,197,94,.30); }
+.rf-coach-h{ font-size:.74rem; font-weight:800; letter-spacing:.4px; margin-bottom:6px; }
+.rf-coach.lose .rf-coach-h{ color:#7dd3fc; }
+.rf-coach.win .rf-coach-h{ color:#86efac; }
+.rf-coach-why{ font-size:.82rem; color:#fca5a5; margin-bottom:8px; font-weight:600; }
+.rf-coach-tips{ margin:0; padding-left:18px; }
+.rf-coach-tips li{ font-size:.82rem; color:var(--muted2); line-height:1.55; margin:5px 0; }
+.rf-coach-tips li::marker{ color:var(--sky); }
+
+/* small stat pills a lab can reuse under a graph */
+.rf-statrow{ display:flex; gap:10px; flex-wrap:wrap; margin:8px 0; }
+.rf-stat{ background:var(--panel2); border:1px solid var(--line); border-radius:9px; padding:7px 11px; }
+.rf-stat .l{ font-size:.52rem; letter-spacing:1px; color:var(--muted); font-weight:700; text-transform:uppercase; }
+.rf-stat .v{ font-size:1.05rem; font-weight:800; margin-top:2px; }
+.rf-stat .v.ok{ color:var(--green); } .rf-stat .v.bad{ color:#fca5a5; }
+
+/* =============================================================================
  * GLOBAL RESPONSIVE RULES
  * These apply to the shared header/lab patterns used across pages. They target
  * the existing class names (.bar, .layout, .top, .stage, .grid) so every page
