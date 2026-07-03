@@ -692,4 +692,19 @@
     if(el) el.onclick=function(){ if(window.RFAuth) RFAuth.login(); };
   }
   function loggedIn(u){
-    va
+    var b=box(); if(!b) return;
+    var roleLabel={student:'\u00D6\u011Frenci',teacher:'\u00D6\u011Fretmen',admin:'Y\u00F6netici'}[u.role]||'\u00D6\u011Frenci';
+    b.innerHTML='<div class="lchip"><div class="lav">'+initials(u.name)+'</div>'+
+      '<div class="lwho"><b>'+(u.name||'\u00D6\u011Frenci')+'</b><small>'+roleLabel+'</small></div>'+
+      '<button class="lout" id="rfLabLogout">\u00C7\u0131k\u0131\u015F</button></div>';
+    var el=document.getElementById('rfLabLogout');
+    if(el) el.onclick=function(){ if(window.RFAuth){ RFAuth.logout(); loggedOut(); } };
+  }
+  if(window.RFAuth){
+    RFAuth.init().then(function(u){ u?loggedIn(u):loggedOut(); }).catch(function(){ loggedOut(); });
+  } else { loggedOut(); }
+})();
+</script>
+
+</body>
+</html>
