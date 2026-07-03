@@ -145,4 +145,15 @@
 
   global.RFProgress = RFProgress;
   if (typeof module !== 'undefined' && module.exports) module.exports = RFProgress;
+
+  // Auto-load the feedback widget on every page (avoids editing 32 HTML files).
+  // Safe no-op if rf-feedback.js is absent. Browser only.
+  try {
+    if (typeof document !== 'undefined' && !global.RFFeedback && !global.__rfFeedbackLoading) {
+      global.__rfFeedbackLoading = true;
+      var fb = document.createElement('script');
+      fb.src = 'rf-feedback.js?v=1'; fb.async = true;
+      (document.head || document.documentElement).appendChild(fb);
+    }
+  } catch (e) {}
 })(typeof window !== 'undefined' ? window : globalThis);
