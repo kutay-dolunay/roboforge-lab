@@ -154,6 +154,25 @@
       Başlangıç'tan Uzman'a 7 kademe var.</p>
   </header>
 
+  <!-- Buradan başla: önerilen sıradaki sim (rf-progress'e göre) -->
+  <a class="starthere" id="startHere" style="display:none"></a>
+
+  <!-- Arama + zorluk filtresi -->
+  <div class="filterbar" id="filterBar">
+    <div class="searchwrap">
+      <span class="si">🔍</span>
+      <input type="search" id="simSearch" placeholder="Simülasyon ara… (örn. çizgi, sensör, uzay)" autocomplete="off" aria-label="Simülasyon ara" />
+    </div>
+    <div class="dfilter" id="diffFilter" role="group" aria-label="Zorluk filtresi">
+      <button class="dchip on" data-band="0">Tümü</button>
+      <button class="dchip" data-band="1" style="--dc:var(--d1)">Başlangıç</button>
+      <button class="dchip" data-band="2" style="--dc:var(--d2)">Orta</button>
+      <button class="dchip" data-band="3" style="--dc:var(--d3)">İleri</button>
+      <button class="dchip" data-band="4" style="--dc:var(--d4)">Uzman</button>
+    </div>
+  </div>
+  <div class="noresult" id="noResult" style="display:none">Aramanla eşleşen simülasyon yok. <button class="linkbtn" id="clearFilter">Filtreyi temizle</button></div>
+
   <nav class="pathnav" id="pathnav"></nav>
 
   <div class="legend">
@@ -347,6 +366,88 @@
     sec.appendChild(grid);
     host.appendChild(sec);
   });
+
+  // ---- flat sim index for search / start-here ----
+  var ALLSIMS=[];
+  CATS.forEach(function(c){ c.sims.forEach(function(s){ ALLSIMS.push(Object.assign({cat:c.id,catTitle:c.title.replace(/<\/?em>/g,'')},s)); }); });
+
+  // ==== SEARCH + DIFFICULTY FILTER ====
+  (function(){
+    var q='', band=0;
+    var search=document.getElementById('simSearch');
+    var noRes=document.getElementById('noResult');
+    function norm(s){ return (s||'').toLocaleLowerCase('tr').replace(/[İ]/g,'i'); }
+    function apply(){
+      var qn=norm(q), any=false;
+      document.querySelectorAll('.cat').forEach(function(sec){
+        var shown=0;
+        sec.querySelectorAll('.card[data-sim]').forEach(function(card){
+          var sim=ALLSIMS.find(function(x){return x.id===card.getAttribute('data-sim');})||{};
+          var hay=norm((sim.title||'')+' '+(sim.en||'')+' '+(sim.desc||'')+' '+(sim.catTitle||''));
+          var okQ = !qn || hay.indexOf(qn)>=0;
+          var okB = !band || sim.band===band;
+          var show = okQ && okB;
+          card.classList.toggle('hidden', !show);
+          if(show){ shown++; any=true; }
+        });
+        sec.classList.toggle('hidden', shown===0);
+      });
+      noRes.style.display = any ? 'none' : 'block';
+    }
+    if(search) search.addEventListener('input', function(e){ q=e.target.value; apply(); });
+    document.querySelectorAll('#diffFilter .dchip').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        document.querySelectorAll('#diffFilter .dchip').forEach(function(b){b.classList.remove('on');});
+        btn.classList.add('on'); band=+btn.getAttribute('data-band'); apply();
+      });
+    });
+    var clr=document.getElementById('clearFilter');
+    if(clr) clr.addEventListener('click', function(){ q=''; band=0; if(search)search.value='';
+      document.querySelectorAll('#diffFilter .dchip').forEach(function(b){b.classList.toggle('on', b.getAttribute('data-band')==='0');}); apply(); });
+  })();
+
+  // ==== "BURADAN BAŞLA" — recommend next sim from progress ====
+  window.renderStartHere=function(){
+    var el=document.getElementById('startHere'); if(!el) return;
+    var pick=null;
+    if(window.RFProgress){
+      // first beginner (band 1) sim not yet fully cleared; else first anywhere not cleared
+      var order=ALLSIMS.slice().sort(function(a,b){return a.band-b.band;});
+      for(var i=0;i<order.length;i++){ var d=RFProgress.getSim(order[i].id); if(!d || d.cleared<7){ pick=order[i]; break; } }
+    }
+    if(!pick) pick=ALLSIMS[0];
+    var d = window.RFProgress ? RFProgress.getSim(pick.id) : null;
+    var started = d && d.played;
+    el.href=pick.href;
+    el.innerHTML='<div class="sh-ic">'+pick.icon+'</div>'+
+      '<div class="sh-txt"><div class="sh-k">'+(started?'Kaldığın yerden devam':'Buradan başla')+'</div>'+
+      '<div class="sh-t">'+pick.title+'</div>'+
+      '<div class="sh-d">'+(started?('İlerleme: '+d.cleared+'/7 kademe geçildi'):pick.desc)+'</div></div>'+
+      '<div class="sh-go">'+(started?'Devam →':'Başla →')+'</div>';
+    el.style.display='flex';
+  };
+
+  // ==== FIRST-VISIT WELCOME ====
+  (function(){
+    try{ if(localStorage.getItem('rf_seen_welcome')) return; }catch(e){ return; }
+    var ov=document.createElement('div'); ov.className='rf-welcome';
+    ov.innerHTML='<div class="card2" role="dialog" aria-modal="true" aria-label="Hoş geldin">'+
+      '<h3>🤖 RoboForge’a hoş geldin!</h3>'+
+      '<p>Burada gerçek bir robot kurar, kodlar ve test edersin — hepsi tarayıcında, donanım olmadan.</p>'+
+      '<div class="steps">'+
+        '<div class="stp"><span class="n">1</span><span>Bir simülasyon seç (aşağıdan ya da “Buradan başla” kartından).</span></div>'+
+        '<div class="stp"><span class="n">2</span><span>Robotunun parçalarını seç ve şasesini tasarla.</span></div>'+
+        '<div class="stp"><span class="n">3</span><span>Kural tabanlı veya PID ile kodla, çalıştır, 7 kademeyi geç!</span></div>'+
+      '</div>'+
+      '<p style="font-size:.8rem">İpucu: <b>Çizgi Takip</b> ile başlamak en kolayı.</p>'+
+      '<div class="wbtns"><button class="rf-btn go" id="wStart">Hadi başlayalım →</button></div>'+
+    '</div>';
+    document.body.appendChild(ov);
+    function close(){ try{localStorage.setItem('rf_seen_welcome','1');}catch(e){} ov.remove(); }
+    ov.querySelector('#wStart').onclick=close;
+    ov.addEventListener('click',function(e){ if(e.target===ov) close(); });
+    document.addEventListener('keydown',function esc(e){ if(e.key==='Escape'){ close(); document.removeEventListener('keydown',esc);} });
+  })();
 </script>
 <script src="rf-auth.js?v=2"></script>
 <script src="rf-progress.js?v=2"></script>
@@ -421,6 +522,7 @@
   }
   // renderProgress is now defined; render once and re-sync the auth chip too.
   try{ renderProgress(); }catch(e){}
+  try{ if(window.renderStartHere) window.renderStartHere(); }catch(e){}
   try{ if(window.__rfRenderAuth) window.__rfRenderAuth(); }catch(e){}
 </script>
 </body>
