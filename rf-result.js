@@ -172,6 +172,105 @@
   }
 
   // -------------------------------------------------------------------------
+  // bars(): draw a categorical bar chart. cfg = {
+  //   data: [{label, value, color?}], max?(auto), title?, unit?, target?{value,label}
+  // }  Each bar can also be a STACK: {label, parts:[{value,color,tag}]}.
+  // -------------------------------------------------------------------------
+  function bars(canvas, cfg) {
+    if (!canvas || !canvas.getContext) return;
+    cfg = cfg || {}; var P = PALETTE();
+    var dpr = Math.min(global.devicePixelRatio || 1, 2);
+    var cssW = canvas.clientWidth || 300, cssH = canvas.clientHeight || 150;
+    canvas.width = Math.round(cssW * dpr); canvas.height = Math.round(cssH * dpr);
+    var ctx = canvas.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cssW, cssH);
+    var data = cfg.data || [];
+    var padT = cfg.title ? 22 : 10, padB = 26, padL = 10, padR = 10;
+    var W = cssW - padL - padR, H = cssH - padT - padB;
+    var vals = data.map(function (d) { return d.parts ? d.parts.reduce(function (a, p) { return a + p.value; }, 0) : d.value; });
+    var max = cfg.max || Math.max.apply(null, vals.concat(cfg.target ? [cfg.target.value] : [0]).concat([1]));
+    if (cfg.title) { ctx.fillStyle = P.txt; ctx.font = '700 11px system-ui'; ctx.textAlign = 'left'; ctx.fillText(cfg.title, padL, 13); }
+    var n = data.length || 1, gap = 12, bw = Math.max(8, (W - gap * (n - 1)) / n);
+    var cols = [P.sky, P.green, P.amber, P.purple, P.red];
+    // target line
+    if (cfg.target) {
+      var ty = padT + (1 - cfg.target.value / max) * H;
+      ctx.strokeStyle = P.amber; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(padL, ty); ctx.lineTo(padL + W, ty); ctx.stroke(); ctx.setLineDash([]);
+      if (cfg.target.label) { ctx.fillStyle = P.amber; ctx.font = '9px system-ui'; ctx.textAlign = 'right'; ctx.fillText(cfg.target.label, padL + W, ty - 3); }
+    }
+    data.forEach(function (d, i) {
+      var x = padL + i * (bw + gap);
+      if (d.parts) {
+        var yb = padT + H;
+        d.parts.forEach(function (pt) {
+          var ph = pt.value / max * H; yb -= ph;
+          ctx.fillStyle = pt.color || cols[0]; roundRectFill(ctx, x, yb, bw, ph, 3);
+        });
+      } else {
+        var bh = Math.max(0, d.value / max * H), by = padT + H - bh;
+        ctx.fillStyle = d.color || cols[i % cols.length]; roundRectFill(ctx, x, by, bw, bh, 4);
+        ctx.fillStyle = P.txt; ctx.font = '700 10px system-ui'; ctx.textAlign = 'center';
+        ctx.fillText((Math.round(d.value * 10) / 10) + (cfg.unit || ''), x + bw / 2, by - 4);
+      }
+      ctx.fillStyle = P.axis; ctx.font = '9px system-ui'; ctx.textAlign = 'center';
+      wrapLabel(ctx, d.label, x + bw / 2, padT + H + 12, bw + gap);
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // gauge(): a semicircular gauge. cfg = { value, max, label, unit, zones?:[{to,color}] }
+  // Great for "how good was it" single-number results (accuracy, power, coverage).
+  // -------------------------------------------------------------------------
+  function gauge(canvas, cfg) {
+    if (!canvas || !canvas.getContext) return;
+    cfg = cfg || {}; var P = PALETTE();
+    var dpr = Math.min(global.devicePixelRatio || 1, 2);
+    var cssW = canvas.clientWidth || 220, cssH = canvas.clientHeight || 130;
+    canvas.width = Math.round(cssW * dpr); canvas.height = Math.round(cssH * dpr);
+    var ctx = canvas.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cssW, cssH);
+    var max = cfg.max || 100, val = Math.max(0, Math.min(max, cfg.value || 0));
+    var cx = cssW / 2, cy = cssH - 20, r = Math.min(cssW / 2 - 12, cssH - 34);
+    var A0 = Math.PI, A1 = 2 * Math.PI; // left→right, top half
+    // track
+    ctx.lineWidth = 13; ctx.lineCap = 'round';
+    ctx.strokeStyle = 'rgba(148,163,184,.16)'; ctx.beginPath(); ctx.arc(cx, cy, r, A0, A1); ctx.stroke();
+    // zones (optional colored arcs)
+    var zones = cfg.zones || [{ to: max, color: P.green }];
+    var prev = 0;
+    zones.forEach(function (z) {
+      var a = A0 + (prev / max) * Math.PI, b = A0 + (z.to / max) * Math.PI;
+      ctx.strokeStyle = hexA(z.color, .35); ctx.beginPath(); ctx.arc(cx, cy, r, a, b); ctx.stroke(); prev = z.to;
+    });
+    // value arc
+    var frac = val / max, col = P.sky;
+    zones.forEach(function (z) { if (val <= z.to && col === P.sky) col = z.color; });
+    ctx.strokeStyle = col; ctx.beginPath(); ctx.arc(cx, cy, r, A0, A0 + frac * Math.PI); ctx.stroke();
+    // needle dot
+    var na = A0 + frac * Math.PI;
+    ctx.fillStyle = col; ctx.beginPath(); ctx.arc(cx + Math.cos(na) * r, cy + Math.sin(na) * r, 5, 0, 7); ctx.fill();
+    // center number
+    ctx.fillStyle = P.txt; ctx.textAlign = 'center';
+    ctx.font = '800 22px system-ui'; ctx.fillText((Math.round(val * 10) / 10) + (cfg.unit || ''), cx, cy - 6);
+    if (cfg.label) { ctx.fillStyle = P.axis; ctx.font = '10px system-ui'; ctx.fillText(cfg.label, cx, cy + 12); }
+  }
+
+  function roundRectFill(ctx, x, y, w, h, r) {
+    r = Math.min(r, w / 2, h / 2); if (h <= 0) return;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, 0);
+    ctx.arcTo(x, y + h, x, y, 0); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); ctx.fill();
+  }
+  function wrapLabel(ctx, text, cx, y, maxw) {
+    text = String(text || '');
+    if (ctx.measureText(text).width <= maxw) { ctx.fillText(text, cx, y); return; }
+    var words = text.split(' '), line = '', lines = [];
+    words.forEach(function (w) { var t = line ? line + ' ' + w : w; if (ctx.measureText(t).width > maxw && line) { lines.push(line); line = w; } else line = t; });
+    if (line) lines.push(line);
+    lines.slice(0, 2).forEach(function (ln, i) { ctx.fillText(ln, cx, y + i * 10); });
+  }
+
+  // -------------------------------------------------------------------------
   // coachHTML(): structured coaching. tips = array of strings from core coach(sim).
   // opts = { win:bool, headWin, headLose, reason }
   // -------------------------------------------------------------------------
@@ -237,7 +336,8 @@
     return 'rgba(56,189,248,' + a + ')';
   }
 
-  var RFResult = { graph: graph, line: line, coachHTML: coachHTML, celebrate: celebrate, _palette: PALETTE };
+  var RFResult = { graph: graph, bars: bars, gauge: gauge, line: line, coachHTML: coachHTML, celebrate: celebrate, _palette: PALETTE };
   global.RFResult = RFResult;
   if (typeof module !== 'undefined' && module.exports) module.exports = RFResult;
 })(typeof window !== 'undefined' ? window : globalThis);
+/* rf-result v1.1 : + bars() + gauge() */

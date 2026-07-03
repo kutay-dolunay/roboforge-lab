@@ -406,6 +406,12 @@
       try{ if(window.RFProgress){ var __rfwin=(sim.status==='success'||sim.status==='win'); var __rfmedal=null; try{ var __core=window['BantCore']; if(__core&&__core.robotClass){var __c=__core.robotClass(sim); if(__c)__rfmedal=__c.name;} }catch(e){} RFProgress.record('bant', LAB.misIdx, {pass:__rfwin, time:(sim&&typeof sim.t==='number')?sim.t:null, medal:__rfmedal, mode:LAB.mode}); } }catch(e){}
     const cls=B.robotClass(sim);
     const tips=B.coach(sim);
+    var sortGraph='';
+    if(window.RFResult && RFResult.bars && sim.counts && sim.counts.length){
+      sortGraph='<div class="rf-graphwrap"><div class="cap">🏭 Kutulara ayrım — doğru vs yanlış</div>'+
+        '<canvas id="bantGraph" class="rf-graph" style="height:150px"></canvas>'+
+        '<div style="font-size:.72rem;color:var(--muted2);margin-top:2px">Her sütun bir kutu. Yeşil = doğru yerleşen, kırmızı = yanlış. Yanlışlar çoğaldıysa kural sıran ya da bant hızın sorunlu.</div></div>';
+    }
     const dock=document.getElementById('resultDock');
     dock.className='rdock'+(win?'':' lose');
     dock.innerHTML =
@@ -419,6 +425,7 @@
           '<div class="rd-stat"><div class="l">SENSÖR HATASI</div><div class="v mono">'+sim.misreads+'</div></div>'+
           '<div class="rd-stat"><div class="l">DURUM</div><div class="v '+(win?'ok':'bad')+'">'+(win?'TAMAM':'BAŞARISIZ')+'</div></div>'+
         '</div>'+
+        sortGraph+
         (window.RFResult?RFResult.coachHTML(tips,{win:win,headWin:'🎓 Ne öğrendik?',headLose:'🔍 Ne oldu, neden?',reason:win?null:(REASONS[sim.reason]||'')}):(tips.length?'<div class="rd-tip">💡 '+tips[0]+'</div>':''))+
         '<div class="rd-btns">'+
           '<button class="btn run" id="againBtn">⟲ Tekrar Dene</button>'+
@@ -427,6 +434,10 @@
       '</div>';
     document.getElementById('hint').style.display='none';
     dock.style.display='block';
+    if(sortGraph){ var cv=document.getElementById('bantGraph');
+      if(cv){ var bd=sim.counts.map(function(c,i){ return {label:(i<sim.counts.length-1?'Kapak '+(i+1):'Son'),
+        parts:[{value:c[0],color:'var(--green)'},{value:c[1],color:'var(--red)'}]}; });
+        RFResult.bars(cv, {data:bd}); } }
     if(win && window.RFResult){ try{ RFResult.celebrate({}); }catch(e){} }
     document.getElementById('againBtn').onclick=()=>{ hideResult(); startRun(); };
     document.getElementById('reportBtn').onclick=openReport;

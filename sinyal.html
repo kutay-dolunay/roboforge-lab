@@ -350,6 +350,12 @@
       try{ if(window.RFProgress){ var __rfwin=(sim.status==='success'||sim.status==='win'); var __rfmedal=null; try{ var __core=window['SinyalCore']; if(__core&&__core.robotClass){var __c=__core.robotClass(sim); if(__c)__rfmedal=__c.name;} }catch(e){} RFProgress.record('sinyal', LAB.misIdx, {pass:__rfwin, time:(sim&&typeof sim.t==='number')?sim.t:null, medal:__rfmedal, mode:LAB.mode}); } }catch(e){}
     const cls=R.robotClass(sim);
     const tips=R.coach(sim);
+    var accGauge='';
+    if(window.RFResult && RFResult.gauge && sim.bestErr!=null && sim.bestErr<900){
+      accGauge='<div class="rf-graphwrap"><div class="cap">🎯 Trilaterasyon isabeti</div>'+
+        '<canvas id="sinyalGauge" class="rf-graph" style="height:130px;border:none;background:transparent"></canvas>'+
+        '<div style="font-size:.72rem;color:var(--muted2);margin-top:2px;text-align:center">En iyi tahminin vericiye <b>'+sim.bestErr.toFixed(1)+' m</b> yakındı. Daha çok örnek ortalaması + gürültü filtresi = daha keskin kesişim.</div></div>';
+    }
     const dock=document.getElementById('resultDock');
     dock.className='rdock'+(win?'':' lose');
     dock.innerHTML =
@@ -362,6 +368,7 @@
           '<div class="rd-stat"><div class="l">EN İYİ TAHMİN</div><div class="v mono">'+(sim.bestErr<900?sim.bestErr.toFixed(1)+' m':'—')+'</div></div>'+
           '<div class="rd-stat"><div class="l">DURUM</div><div class="v '+(win?'ok':'bad')+'">'+(win?'BULUNDU':'KAYIP')+'</div></div>'+
         '</div>'+
+        accGauge+
         (window.RFResult?RFResult.coachHTML(tips,{win:win,headWin:'🎓 Ne öğrendik?',headLose:'🔍 Ne oldu, neden?',reason:win?null:(REASONS[sim.reason]||'')}):(tips.length?'<div class="rd-tip">💡 '+tips[0]+'</div>':''))+
         '<div class="rd-btns">'+
           '<button class="btn run" id="againBtn">⟲ Tekrar Dene</button>'+
@@ -370,6 +377,10 @@
       '</div>';
     document.getElementById('hint').style.display='none';
     dock.style.display='block';
+    if(accGauge){ var cv=document.getElementById('sinyalGauge');
+      if(cv){ var acc=Math.max(0,Math.min(100,Math.round(100*(1-Math.min(sim.bestErr,8)/8))));
+        RFResult.gauge(cv, {value:acc, max:100, unit:'%', label:'isabet',
+          zones:[{to:50,color:'var(--red)'},{to:80,color:'var(--amber)'},{to:100,color:'var(--green)'}]}); } }
     if(win && window.RFResult){ try{ RFResult.celebrate({}); }catch(e){} }
     document.getElementById('againBtn').onclick=()=>{ hideResult(); startRun(); };
     document.getElementById('reportBtn').onclick=openReport;
