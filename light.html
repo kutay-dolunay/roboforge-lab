@@ -363,6 +363,7 @@
 
 <script src="rf-auth.js?v=2"></script>
 <script src="rf-progress.js?v=1"></script>
+<script src="rf-result.js?v=1"></script>
 <script src="robot-data.js?v=2"></script>
 <script src="light-core.js?v=2"></script>
 <script>
@@ -564,6 +565,19 @@
       try{ if(window.RFProgress){ var __rfwin=(sim.status==='success'||sim.status==='win'); var __rfmedal=null; try{ if(typeof medal==='function'){var __c=medal(sim); if(__c)__rfmedal=__c.name;} }catch(e){} RFProgress.record('light', LAB.sceneIdx, {pass:__rfwin, time:(sim&&typeof sim.t==='number')?sim.t:null, medal:__rfmedal, mode:LAB.mode}); } }catch(e){} r.className='result '+(win?'win':'lose');
     document.getElementById('rhead').innerHTML = win ? '🏁 Işığı Yakaladın!' : '💥 '+(REASONS[sim.reason]||'Başarısız');
     const md=medal(sim); const tips=M.coach(sim);
+    // brightness-over-time series (max sensor reading per frame = "getting warmer")
+    var brightSeries=[];
+    if(LAB.frames && LAB.frames.length){ LAB.frames.forEach(function(f,i){
+      var b=(f.bright&&f.bright.length)?Math.max.apply(null,f.bright):0; brightSeries.push({x:i,y:b}); }); }
+    var graphBlock='';
+    if(window.RFResult && brightSeries.length>3){
+      graphBlock='<div class="rf-graphwrap"><div class="cap">💡 Algılanan parlaklık — zamana karşı</div>'+
+        '<canvas id="lightGraph" class="rf-graph" style="height:130px"></canvas>'+
+        '<div style="font-size:.72rem;color:var(--muted2);margin-top:2px">Eğri yükseldikçe robot ışığa yaklaşıyor demektir. Düz/inişli kalıyorsa yanlış yöne gidiyor.</div></div>';
+    }
+    var coachBlock = window.RFResult
+      ? RFResult.coachHTML(tips, { win:win, headWin:'🎓 Ne öğrendik?', headLose:'🔍 Ne oldu, neden?', reason: win?null:(REASONS[sim.reason]||'') })
+      : tips.map(t=>`<div class="tip"><span class="ic">💡</span><span>${t}</span></div>`).join('');
     const body=document.getElementById('rbody'); body.style.display='block';
     body.innerHTML =
       (win&&md?`<div class="rclass">${md.name}</div><div style="font-size:.8rem;color:var(--muted2);margin:-4px 0 10px">${md.d}</div>`:'')+
@@ -573,15 +587,19 @@
         <div><small>IŞIK EŞİĞİ</small><b>${LAB.threshold.toFixed(2)}</b></div>
         <div><small>SONUÇ</small><b style="color:${win?'var(--green)':'#fca5a5'}">${win?'YAKALANDI':'—'}</b></div>
       </div>`+
-      tips.map(t=>`<div class="tip"><span class="ic">💡</span><span>${t}</span></div>`).join('')+
+      graphBlock+
+      coachBlock+
       `<div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
          <button class="btn run" id="retry">⟲ Tekrar Dene</button>
          <button class="btn ghost" id="replayBtn">▶ Yolu İzle</button>
          ${win?'<button class="btn" id="reportBtn" style="border-color:#38bdf8;color:#38bdf8">📄 Raporu Önizle</button>':''}
        </div>`;
+    if(graphBlock){ var cv=document.getElementById('lightGraph');
+      if(cv) RFResult.graph(cv, { series:[{data:brightSeries, color:'var(--amber)', area:true}], yZero:true, xlabel:'zaman', ylabel:'parlaklık' }); }
     document.getElementById('retry').onclick=resetSim;
     document.getElementById('replayBtn').onclick=replayRun;
     if(win){ const rb=document.getElementById('reportBtn'); if(rb) rb.onclick=openReport; }
+    if(win && window.RFResult) RFResult.celebrate({});
     if(LAB.frames.length) drawFrame(LAB.frames.length-1);
     setTimeout(()=>{ const el=document.getElementById('result'); if(el) el.scrollIntoView({behavior:'smooth',block:'center'}); },130);
   }
