@@ -206,6 +206,9 @@
     <a href="./" class="back">← Katalog</a>
     <div class="logo"><div class="mark">🤖</div><b>Robo<span>Forge</span></b></div>
     <div class="grow"></div>
+    <button id="devSkip" title="Geçici test kısayolu: kurulumu atla, doğrudan simülasyona git"
+      style="border:1px dashed var(--amber);background:rgba(245,158,11,.1);color:var(--amber);font-weight:800;
+      font-size:.72rem;padding:6px 11px;border-radius:9px;cursor:pointer;white-space:nowrap">⏭️ Sime atla (test)</button>
     <div class="labauth" id="labAuth"></div>
     <div class="stepper" id="stepper"></div>
   </header>
@@ -329,6 +332,9 @@
   const LABS = { line:'line-follower.html', maze:'maze.html', sumo:'sumo.html', light:'light.html', obstacle:'obstacle.html', pid:'pid.html', rescue:'rescue.html', delivery:'delivery.html', soccer:'soccer.html', fire:'fire.html', convoy:'convoy.html', park:'park.html', balance:'balance.html', drone:'drone.html', hill:'hill.html', swarm:'swarm.html', sera:'sera.html', cansat:'cansat.html', kol:'kol.html', vinc:'vinc.html', rov:'rov.html', bant:'bant.html', cnc:'cnc.html', solar:'solar.html', roket:'roket.html', linemaze:'linemaze.html', fare:'fare.html', depo:'depo.html', sinyal:'sinyal.html', hexapod:'hexapod.html' };
   const SIM = (function(){ try{ const q=new URLSearchParams(location.search).get('sim'); return LABS[q]?q:'line'; }catch(e){ return 'line'; } })();
   const LAB_HREF = LABS[SIM];
+
+  // ---- TEMPORARY dev shortcut: skip the build wizard, go straight to the sim ----
+  (function(){ var b=document.getElementById('devSkip'); if(b) b.onclick=function(){ try{save();}catch(e){} location.href=LAB_HREF; }; })();
 
   // ---- state ----
   let step=1, phase=0;
