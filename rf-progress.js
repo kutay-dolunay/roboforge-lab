@@ -158,4 +158,15 @@
       (document.head || document.documentElement).appendChild(fb);
     }
   } catch (e) {}
+
+  // Auto-load the cloud-sync layer on every page (no-op for anonymous users).
+  // Mirrors progress + feedback to Supabase only for logged-in Moodle students.
+  try {
+    if (typeof document !== 'undefined' && !global.RFCloud && !global.__rfCloudLoading) {
+      global.__rfCloudLoading = true;
+      var cl = document.createElement('script');
+      cl.src = 'rf-cloud.js?v=1'; cl.async = true;
+      (document.head || document.documentElement).appendChild(cl);
+    }
+  } catch (e) {}
 })(typeof window !== 'undefined' ? window : globalThis);
