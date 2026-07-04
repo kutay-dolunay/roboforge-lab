@@ -271,6 +271,57 @@
   }
 
   // -------------------------------------------------------------------------
+  // starRate(): a quick inline ⭐⭐⭐⭐⭐ "Bu seviye nasıldı?" row.
+  // Shows ONCE per (sim,level) — remembers via localStorage 'rf_rated'. One tap,
+  // no submit. Records to RFFeedback if present (category 'rating').
+  // Auto-injected into the result panel by _autoStar() below (reads window.__rfLast
+  // that RFProgress.record sets). Returns '' if already rated or context unknown.
+  // -------------------------------------------------------------------------
+  function _ratedKey() { try { return JSON.parse(localStorage.getItem('rf_rated')) || {}; } catch (e) { return {}; } }
+  function _markRated(sim, level) {
+    try { var m = _ratedKey(); m[sim] = m[sim] || []; if (m[sim].indexOf(level) < 0) m[sim].push(level); localStorage.setItem('rf_rated', JSON.stringify(m)); } catch (e) {}
+  }
+  function _alreadyRated(sim, level) { var m = _ratedKey(); return !!(m[sim] && m[sim].indexOf(level) >= 0); }
+
+  function injectStarRow(container, sim, level) {
+    if (!container || sim == null || level == null) return;
+    if (_alreadyRated(sim, level)) return;
+    if (container.querySelector('.rf-star')) return; // already added
+    var wrap = document.createElement('div');
+    wrap.className = 'rf-star';
+    wrap.innerHTML = '<span class="rf-star-q">Bu seviye nasıldı?</span>'
+      + '<span class="rf-star-set">' + [1, 2, 3, 4, 5].map(function (n) {
+        return '<button type="button" class="rf-star-b" data-n="' + n + '" aria-label="' + n + ' yıldız">☆</button>';
+      }).join('') + '</span>';
+    container.appendChild(wrap);
+    var btns = wrap.querySelectorAll('.rf-star-b');
+    function paint(n) { btns.forEach(function (b, i) { b.textContent = (i < n) ? '★' : '☆'; b.classList.toggle('on', i < n); }); }
+    btns.forEach(function (b) {
+      b.addEventListener('mouseenter', function () { paint(+b.getAttribute('data-n')); });
+      b.addEventListener('click', function () {
+        var n = +b.getAttribute('data-n');
+        paint(n);
+        _markRated(sim, level);
+        try { if (global.RFFeedback) global.RFFeedback.add('rating', String(n), { sim: sim, level: level }); } catch (e) {}
+        wrap.querySelector('.rf-star-set').outerHTML = '<span class="rf-star-thx">Teşekkürler! ✓</span>';
+      });
+    });
+    wrap.querySelector('.rf-star-set').addEventListener('mouseleave', function () { paint(0); });
+  }
+
+  // Auto-inject the star row shortly after a result renders. Reads window.__rfLast
+  // ({sim, level}) that RFProgress.record sets. Scans for the standard result
+  // containers (.rf-coach, .rd-body, #rbody) and appends the star row.
+  function _autoStar() {
+    try {
+      var last = global.__rfLast;
+      if (!last || last.sim == null || last.level == null) return;
+      var host = document.querySelector('.rf-coach') || document.querySelector('.rdock .rd-body') || document.getElementById('rbody');
+      if (host) injectStarRow(host, last.sim, last.level);
+    } catch (e) {}
+  }
+
+  // -------------------------------------------------------------------------
   // coachHTML(): structured coaching. tips = array of strings from core coach(sim).
   // opts = { win:bool, headWin, headLose, reason }
   // -------------------------------------------------------------------------
@@ -336,8 +387,20 @@
     return 'rgba(56,189,248,' + a + ')';
   }
 
-  var RFResult = { graph: graph, bars: bars, gauge: gauge, line: line, coachHTML: coachHTML, celebrate: celebrate, _palette: PALETTE };
+  var RFResult = { graph: graph, bars: bars, gauge: gauge, line: line, coachHTML: coachHTML,
+    celebrate: celebrate, injectStarRow: injectStarRow, _autoStar: _autoStar, _palette: PALETTE };
   global.RFResult = RFResult;
   if (typeof module !== 'undefined' && module.exports) module.exports = RFResult;
+
+  // Watch for a result panel appearing anywhere and drop the star row in.
+  // Debounced; safe if run repeatedly (injectStarRow guards against duplicates).
+  try {
+    if (typeof MutationObserver !== 'undefined' && typeof document !== 'undefined') {
+      var _t = null;
+      var mo = new MutationObserver(function () { clearTimeout(_t); _t = setTimeout(_autoStar, 120); });
+      var start = function () { mo.observe(document.body, { childList: true, subtree: true }); };
+      if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
+    }
+  } catch (e) {}
 })(typeof window !== 'undefined' ? window : globalThis);
-/* rf-result v1.1 : + bars() + gauge() */
+/* rf-result v1.2 : + bars() + gauge() + inline star rating */

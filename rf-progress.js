@@ -69,6 +69,8 @@
     record: function (simId, levelIdx, result) {
       if (!simId || levelIdx == null) return;
       result = result || {};
+      // expose the current sim/level so the shared result toolkit can offer a rating
+      try { global.__rfLast = { sim: simId, level: levelIdx }; } catch (e) {}
       var all = loadAll();
       var uk = userKey();
       all[uk] = all[uk] || {};

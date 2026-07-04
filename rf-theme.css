@@ -140,6 +140,16 @@ img,canvas,svg{max-width:100%}
 .rf-coach-tips li{ font-size:.82rem; color:var(--muted2); line-height:1.55; margin:5px 0; }
 .rf-coach-tips li::marker{ color:var(--sky); }
 
+/* inline star rating row (rf-result injectStarRow) */
+.rf-star{ display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0 2px;
+  padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(56,189,248,.05); }
+.rf-star-q{ font-size:.8rem;font-weight:700;color:var(--muted2); }
+.rf-star-set{ display:flex;gap:2px; }
+.rf-star-b{ background:none;border:none;cursor:pointer;font-size:1.35rem;line-height:1;color:#475569;
+  padding:0 1px;transition:.08s;font-family:inherit; }
+.rf-star-b:hover,.rf-star-b.on{ color:#fbbf24;transform:scale(1.12); }
+.rf-star-thx{ font-size:.82rem;font-weight:800;color:#86efac; }
+
 /* small stat pills a lab can reuse under a graph */
 .rf-statrow{ display:flex; gap:10px; flex-wrap:wrap; margin:8px 0; }
 .rf-stat{ background:var(--panel2); border:1px solid var(--line); border-radius:9px; padding:7px 11px; }
