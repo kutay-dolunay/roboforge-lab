@@ -322,6 +322,7 @@
           </div>
           <div id="rules"></div>
           <button class="addrule" id="addRule">＋ Yeni Kural Ekle</button>
+          <button id="revealSolution" style="display:none;width:100%;margin-top:8px;padding:9px;border:1px dashed var(--amber);background:rgba(245,158,11,.08);color:var(--amber);font-weight:800;font-size:.78rem;border-radius:10px;cursor:pointer">🔑 En iyi çözümü göster (admin)</button>
           <div class="rule def" id="defRuleBox" style="margin-top:12px"></div>
           <div class="legend">
             <b>İpucu:</b> "Hiçbiri eşleşmezse" kuralı, hiçbir kural uymadığında çalışır — robot çizgiyi
@@ -372,6 +373,7 @@
 
 <script src="rf-auth.js?v=2"></script>
 <script src="rf-progress.js?v=1"></script>
+<script src="rf-feedback.js?v=1"></script>
 <script src="rf-result.js?v=1"></script>
 <script src="robot-data.js?v=2"></script>
 <script src="sim-core.js?v=2"></script>
@@ -385,8 +387,8 @@
   const LAB = {
     trackIdx: 0,
     track: null,
-    sensors: S.starterSensors(),
-    rules: S.starterRules(),
+    sensors: [],            // empty on open — student builds from scratch
+    rules: [],              // empty on open
     defaultRule: S.starterDefault(),
     params: S.defaultParams(),
     mode: 'rules',
@@ -1052,9 +1054,28 @@
     var el=document.getElementById('rfLabLogout');
     if(el) el.onclick=function(){ if(window.RFAuth){ RFAuth.logout(); loggedOut(); } };
   }
+  // Admin-only "reveal best solution": restores the working starter sensors + rules.
+  function setupReveal(u){
+    var rb=document.getElementById('revealSolution'); if(!rb) return;
+    if(u && u.role==='admin'){
+      rb.style.display='block';
+      rb.onclick=function(){
+        try{
+          if(LAB.running) stopRun();
+          LAB.sensors = S.starterSensors();
+          LAB.rules   = S.starterRules();
+          LAB.defaultRule = S.starterDefault();
+          LAB.pid     = S.starterPID();
+          refreshAll();
+          rb.textContent='✓ Çözüm yüklendi';
+          setTimeout(function(){ rb.textContent='🔑 En iyi çözümü göster (admin)'; }, 1600);
+        }catch(e){ console.warn('reveal failed', e); }
+      };
+    } else { rb.style.display='none'; }
+  }
   if(window.RFAuth){
-    RFAuth.init().then(function(u){ u?loggedIn(u):loggedOut(); }).catch(function(){ loggedOut(); });
-  } else { loggedOut(); }
+    RFAuth.init().then(function(u){ u?loggedIn(u):loggedOut(); setupReveal(u); }).catch(function(){ loggedOut(); setupReveal(null); });
+  } else { loggedOut(); setupReveal(null); }
 })();
 </script>
 
