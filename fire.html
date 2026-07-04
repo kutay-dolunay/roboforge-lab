@@ -226,6 +226,7 @@
             (ışık görününce aleve yönel). Işık kuralları üstte olmalı ki alev görülünce keşfi bıraksın!</p>
           <div id="rulesList"></div>
           <button class="addRule" id="addRule">+ Yeni Kural</button>
+          <button id="revealSolution" style="display:none;width:100%;margin-top:8px;padding:9px;border:1px dashed var(--amber);background:rgba(245,158,11,.08);color:var(--amber);font-weight:800;font-size:.78rem;border-radius:10px;cursor:pointer">🔑 En iyi çözümü göster (admin)</button>
           <div style="margin-top:12px">
             <div class="defTag">VARSAYILAN (hiçbiri eşleşmezse)</div>
             <div id="defRule"></div>
@@ -265,7 +266,7 @@
 
   const LAB = {
     houseIdx: 0, mode: 'rules',
-    rules: FC.starterRules(), defaultRule: FC.starterDefault(),
+    rules: [], defaultRule: FC.starterDefault(),
     pid: FC.defaultPID(), params: FC.defaultParams(),
     sim: null, raf: null, lastTs: 0, simSpeed: 1, replay: null,
     view: { scale: 30 },
@@ -567,6 +568,23 @@
     buildRules();
   };
 
+  function setupRevealSolution(){
+    var rb=document.getElementById('revealSolution'); if(!rb) return;
+    function show(){ rb.style.display='block';
+      rb.onclick=function(){
+        try{ try{ if(typeof stopRun==='function') stopRun(); }catch(e){}
+          LAB.rules=FC.starterRules(); LAB.defaultRule=FC.starterDefault();
+          buildRules();
+          rb.textContent='✓ Çözüm yüklendi'; setTimeout(function(){ rb.textContent='🔑 En iyi çözümü göster (admin)'; },1600);
+        }catch(e){ console.warn('reveal failed', e); }
+      };
+    }
+    try{
+      if(window.RFAuth && RFAuth.getUser && RFAuth.getUser() && RFAuth.getUser().role==='admin'){ show(); return; }
+      if(window.RFAuth && RFAuth.init){ RFAuth.init().then(function(u){ if(u&&u.role==='admin') show(); }).catch(function(){}); }
+    }catch(e){}
+  }
+
   // ---- mode / pid / params ----
   function setMode(m){
     LAB.mode=m;
@@ -703,6 +721,7 @@
   loadFromHash();
   applyRobotBuild();
   fitView(); buildTrackTabs(); buildRules(); bindPid(); bindParams(); fillKunye(); setMode(LAB.mode);
+  setupRevealSolution();
   drawScene(null); updateHud(null);
   // animate the flame while idle
   (function idle(){ if(!LAB.sim&&!LAB.replay){ drawScene(null); } requestAnimationFrame(idle); })();

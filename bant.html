@@ -201,6 +201,7 @@
           Eşleşmeyen ürün SON kutusuna gider. Görev standardı üstteki karttadır — kurallar onu birebir karşılamalı.</p>
         <div id="rulesList"></div>
         <button class="addRule" id="addRule">+ Yeni Kural</button>
+        <button id="revealSolution" style="display:none;width:100%;margin-top:8px;padding:9px;border:1px dashed var(--amber);background:rgba(245,158,11,.08);color:var(--amber);font-weight:800;font-size:.78rem;border-radius:10px;cursor:pointer">🔑 En iyi çözümü göster (admin)</button>
       </div>
       <div class="card" id="filtersCard" style="display:none">
         <h4>Kapak Filtreleri (kutu-merkezli)</h4>
@@ -538,6 +539,21 @@
     LAB.rules.push({ pattern:['any','any','any','any','any'], bin:0 });
     buildRules();
   };
+
+  function setupRevealSolution(){
+    var rb=document.getElementById('revealSolution'); if(!rb) return;
+    function show(){ rb.style.display='block';
+      rb.onclick=function(){
+        try{ loadShipped(); buildRules(); buildFilters();
+          rb.textContent='✓ Çözüm yüklendi'; setTimeout(function(){ rb.textContent='🔑 En iyi çözümü göster (admin)'; },1600);
+        }catch(e){ console.warn('reveal failed', e); }
+      };
+    }
+    try{
+      if(window.RFAuth && RFAuth.getUser && RFAuth.getUser() && RFAuth.getUser().role==='admin'){ show(); return; }
+      if(window.RFAuth && RFAuth.init){ RFAuth.init().then(function(u){ if(u&&u.role==='admin') show(); }).catch(function(){}); }
+    }catch(e){}
+  }
   function bindLine(){
     const sp=document.getElementById('sp');
     sp.value=LAB.line.speed;
@@ -631,7 +647,9 @@
   });
   const hadShared=loadFromHash();
   if(!hadShared) loadShipped();
+  LAB.rules=[]; // empty on open — student authors from scratch
   buildTrackTabs(); setMode(LAB.mode); buildRules(); buildFilters(); bindLine(); fillStandard(); fillKunye();
+  setupRevealSolution();
   drawScene(); updateHud();
   let seen=false; try{ seen=!!localStorage.getItem('rf_bant_tut'); }catch(e){}
   if(!seen) showTut(0);

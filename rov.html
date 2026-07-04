@@ -198,6 +198,7 @@
           SON HALİNDE KALIR — fren bırakma kuralını unutan sonsuza dek fren yapar!</p>
         <div id="rulesList"></div>
         <button class="addRule" id="addRule">+ Yeni Kural</button>
+          <button id="revealSolution" style="display:none;width:100%;margin-top:8px;padding:9px;border:1px dashed var(--amber);background:rgba(245,158,11,.08);color:var(--amber);font-weight:800;font-size:.78rem;border-radius:10px;cursor:pointer">🔑 En iyi çözümü göster (admin)</button>
       </div>
       <div class="card" id="pidCard" style="display:none">
         <h4>Derinlik PID Otopilotu</h4>
@@ -242,7 +243,7 @@
   const CVS = document.getElementById('arena'), CTX = CVS.getContext('2d');
   const LAB = {
     misIdx: 0, mode: 'rules',
-    rules: R.starterRules(), pid: R.defaultPID(),
+    rules: [], pid: R.defaultPID(),
     params: R.defaultParams(),
     sim: null, raf: null, lastTs: 0, simSpeed: 1,
   };
@@ -545,6 +546,23 @@
     LAB.rules.push({ pattern:['any','any','any','any','any','any','any'], device:'balast', act:0 });
     buildRules();
   };
+
+  function setupRevealSolution(){
+    var rb=document.getElementById('revealSolution'); if(!rb) return;
+    function show(){ rb.style.display='block';
+      rb.onclick=function(){
+        try{ try{ if(typeof stopRun==='function') stopRun(); }catch(e){}
+          LAB.rules=R.starterRules();
+          buildRules();
+          rb.textContent='✓ Çözüm yüklendi'; setTimeout(function(){ rb.textContent='🔑 En iyi çözümü göster (admin)'; },1600);
+        }catch(e){ console.warn('reveal failed', e); }
+      };
+    }
+    try{
+      if(window.RFAuth && RFAuth.getUser && RFAuth.getUser() && RFAuth.getUser().role==='admin'){ show(); return; }
+      if(window.RFAuth && RFAuth.init){ RFAuth.init().then(function(u){ if(u&&u.role==='admin') show(); }).catch(function(){}); }
+    }catch(e){}
+  }
   function setMode(m){
     LAB.mode=m;
     document.getElementById('modeRules').classList.toggle('on',m==='rules');
@@ -651,6 +669,7 @@
   };
   document.getElementById('resetBtn').onclick=()=>{ LAB.rules=R.starterRules(); LAB.pid=R.defaultPID();
     buildRules(); bindPid(); resetSim(); toast('Kod fabrika ayarlarına döndü.'); };
+  setupRevealSolution();
   document.getElementById('shareBtn').onclick=shareRobot;
   document.getElementById('helpBtn').onclick=()=>showTut(0);
   document.getElementById('simSpeed').oninput=e=>{ LAB.simSpeed=+e.target.value;

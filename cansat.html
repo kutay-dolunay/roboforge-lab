@@ -250,6 +250,7 @@
             olduğuna göre… sıralamayı sen bul.</p>
           <div id="rulesList"></div>
           <button class="addRule" id="addRule">+ Yeni Kural</button>
+          <button id="revealSolution" style="display:none;width:100%;margin-top:8px;padding:9px;border:1px dashed var(--amber);background:rgba(245,158,11,.08);color:var(--amber);font-weight:800;font-size:.78rem;border-radius:10px;cursor:pointer">🔑 En iyi çözümü göster (admin)</button>
         </div>
       </div>
       <div id="pidPanel" style="display:none">
@@ -304,7 +305,7 @@
   const CVS = document.getElementById('arena'), CTX = CVS.getContext('2d');
   const LAB = {
     misIdx: 0, mode: 'rules',
-    rules: CS.starterRules(), pid: CS.defaultPID(), sampleHz: 2,
+    rules: [], pid: CS.defaultPID(), sampleHz: 2,
     params: CS.defaultParams(),
     sim: null, raf: null, lastTs: 0, simSpeed: 1,
   };
@@ -706,6 +707,23 @@
     LAB.rules.push({ pattern:['off','any','any','any','any','any','any'], device:'drogue', state:1 });
     buildRules();
   };
+
+  function setupRevealSolution(){
+    var rb=document.getElementById('revealSolution'); if(!rb) return;
+    function show(){ rb.style.display='block';
+      rb.onclick=function(){
+        try{ try{ if(typeof stopRun==='function') stopRun(); }catch(e){}
+          LAB.rules=CS.starterRules();
+          buildRules();
+          rb.textContent='✓ Çözüm yüklendi'; setTimeout(function(){ rb.textContent='🔑 En iyi çözümü göster (admin)'; },1600);
+        }catch(e){ console.warn('reveal failed', e); }
+      };
+    }
+    try{
+      if(window.RFAuth && RFAuth.getUser && RFAuth.getUser() && RFAuth.getUser().role==='admin'){ show(); return; }
+      if(window.RFAuth && RFAuth.init){ RFAuth.init().then(function(u){ if(u&&u.role==='admin') show(); }).catch(function(){}); }
+    }catch(e){}
+  }
   // ---- mod / pid / hz ----
   function setMode(m){
     LAB.mode=m;
@@ -819,6 +837,7 @@
   };
   document.getElementById('resetBtn').onclick=()=>{ LAB.rules=CS.starterRules(); LAB.pid=CS.defaultPID(); LAB.sampleHz=2;
     buildRules(); bindPid(); bindHz(); resetSim(); toast('Kod fabrika ayarlarına döndü.'); };
+  setupRevealSolution();
   document.getElementById('shareBtn').onclick=shareRobot;
   document.getElementById('helpBtn').onclick=()=>showTut(0);
   document.getElementById('simSpeed').oninput=e=>{ LAB.simSpeed=+e.target.value;
