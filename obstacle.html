@@ -301,6 +301,7 @@
           </div>
           <div id="rules"></div>
           <button class="addrule" id="addRule">＋ Yeni Kural Ekle</button>
+          <button id="revealSolution" style="display:none;width:100%;margin-top:8px;padding:9px;border:1px dashed var(--amber);background:rgba(245,158,11,.08);color:var(--amber);font-weight:800;font-size:.78rem;border-radius:10px;cursor:pointer">🔑 En iyi çözümü göster (admin)</button>
           <div class="rule def" id="defRuleBox" style="margin-top:12px"></div>
           <div class="legend">
             <b>Motorlar → hareket:</b> iki motor İleri = düz git · bir motor daha hızlı = o yöne kır ·
@@ -363,9 +364,10 @@
 
   const LAB = {
     sceneIdx: 0, scene: null,
-    sensors: M.starterSensors(),
+    sensors: [],            // empty on open — student builds from scratch
     ctrl: M.starterCtrl(),
-    rules: M.starterRules(), defaultRule: M.starterDefault(), mode: 'pid',
+    rules: [],              // empty on open
+    defaultRule: M.starterDefault(), mode: 'pid',
     params: M.defaultParams(),
     sim: null, running:false, raf:null, acc:0, lastTs:0, simSpeed:1,
     frames:[], replaying:false,
@@ -811,10 +813,29 @@
     side.appendChild(card);
   }
 
+  // ---------- admin: reveal best solution (MAIN scope so LAB/M are visible) ----------
+  function setupRevealSolution(){
+    var rb=document.getElementById('revealSolution'); if(!rb) return;
+    function show(){ rb.style.display='block';
+      rb.onclick=function(){
+        try{ if(LAB.running) stopRun();
+          LAB.sensors=M.starterSensors(); LAB.rules=M.starterRules(); LAB.defaultRule=M.starterDefault(); LAB.ctrl=M.starterCtrl();
+          bindCtrl(); buildChassis(); buildRules(); setMode(LAB.mode);
+          rb.textContent='✓ Çözüm yüklendi'; setTimeout(function(){ rb.textContent='🔑 En iyi çözümü göster (admin)'; },1600);
+        }catch(e){ console.warn('reveal failed', e); }
+      };
+    }
+    try{
+      if(window.RFAuth && RFAuth.getUser && RFAuth.getUser() && RFAuth.getUser().role==='admin'){ show(); return; }
+      if(window.RFAuth && RFAuth.init){ RFAuth.init().then(function(u){ if(u&&u.role==='admin') show(); }).catch(function(){}); }
+    }catch(e){}
+  }
+
   function init(){
     applyRobotBuild(); fillRobotCard(); loadFromHash();
     rebuildScene(); buildSceneTabs(); bindTabs(); bindParams(); bindCtrl();
     buildChassis(); buildRules(); setMode(LAB.mode);
+    setupRevealSolution();
     document.getElementById('addRule').onclick=addRule;
     document.getElementById('mode-rules').onclick=()=>setMode('rules');
     document.getElementById('mode-pid').onclick=()=>setMode('pid');

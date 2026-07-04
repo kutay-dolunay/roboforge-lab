@@ -232,6 +232,7 @@
           <div class="hintbox">Kural modu 5 sensörle basit aç-kapa kontroldür. Yarışta PID kadar akıcı olmaz ama denemesi öğreticidir. Rozete tıkla: <b style="color:var(--green)">AÇIK</b> / <b style="color:var(--red)">KAPALI</b> / <b style="color:var(--muted2)">FARK ETMEZ</b>.</div>
           <div id="rules"></div>
           <button class="addrule" id="addRule">＋ Yeni Kural Ekle</button>
+          <button id="revealSolution" style="display:none;width:100%;margin-top:8px;padding:9px;border:1px dashed var(--amber);background:rgba(245,158,11,.08);color:var(--amber);font-weight:800;font-size:.78rem;border-radius:10px;cursor:pointer">🔑 En iyi çözümü göster (admin)</button>
           <div class="rule def" id="defRuleBox" style="margin-top:12px"></div>
         </div>
       </div>
@@ -258,7 +259,7 @@
 (function(){
   const S=window.SimCore, P=window.PidCore;
   const DIRS=[['fwd','İleri'],['stop','Dur'],['rev','Geri']];
-  const LAB={ trackIdx:0, track:null, sensors:P.starterSensors(), rules:P.starterRules(),
+  const LAB={ trackIdx:0, track:null, sensors:[], rules:[],
     defaultRule:P.starterDefault(), params:P.defaultParams(), mode:'pid', pid:P.starterPID(),
     sim:null, running:false, raf:null, acc:0, lastTs:0, simSpeed:1, selected:null, frames:[], ghost:{}, best:{} };
   try{ LAB.best=JSON.parse(localStorage.getItem('rf_pid_best'))||{}; }catch(e){ LAB.best={}; }
@@ -519,6 +520,26 @@
       card.innerHTML='<div style="font-size:.62rem;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:10px">🔧 Robotun Künyesi</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">'+chips+'</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">'+stat('Ağırlık',r.weightG,'g')+stat('Hız',r.topSpeedKmh,'km/s')+stat('Güç',r.powerRating,'/100')+'</div><div style="font-size:.7rem;color:var(--muted2);line-height:1.5;margin-bottom:10px">Güçlü motor = daha hızlı tur; çevik tekerlek = virajda tutunma.</div><a href="build.html?sim=pid" style="display:inline-block;border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:.74rem;font-weight:700;color:var(--muted2)">← Robotu yeniden kur</a>';
     } else { card.innerHTML='<div style="font-size:.62rem;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:8px">🤖 Kendi robotun</div><div style="font-size:.8rem;color:var(--muted2);line-height:1.55;margin-bottom:12px">Parçalarını seçip robotunu kurarsan, motorun ve tekerleğin tur süreni belirler — yarışta fark yaratır.</div><a href="build.html?sim=pid" style="display:inline-block;background:linear-gradient(180deg,#0ea5e9,#0369a1);border:1px solid #38bdf8;border-radius:9px;padding:9px 14px;font-size:.8rem;font-weight:700;color:#eaf6ff">Robotunu kur →</a>'; }
     side.appendChild(card); }
+
+  // ---------- admin: reveal best solution (MAIN scope so LAB/P are visible) ----------
+  function setupRevealSolution(){
+    var rb=document.getElementById('revealSolution'); if(!rb) return;
+    function show(){ rb.style.display='block';
+      rb.onclick=function(){
+        try{ if(LAB.running) stopRun();
+          LAB.sensors=P.starterSensors(); LAB.rules=P.starterRules(); LAB.defaultRule=P.starterDefault(); LAB.pid=P.starterPID();
+          LAB.selected = LAB.sensors.length?LAB.sensors[0].id:null;
+          buildChassis(); buildRules(); buildSensorHud(); setMode(LAB.mode);
+    setupRevealSolution();
+          rb.textContent='✓ Çözüm yüklendi'; setTimeout(function(){ rb.textContent='🔑 En iyi çözümü göster (admin)'; },1600);
+        }catch(e){ console.warn('reveal failed', e); }
+      };
+    }
+    try{
+      if(window.RFAuth && RFAuth.getUser && RFAuth.getUser() && RFAuth.getUser().role==='admin'){ show(); return; }
+      if(window.RFAuth && RFAuth.init){ RFAuth.init().then(function(u){ if(u&&u.role==='admin') show(); }).catch(function(){}); }
+    }catch(e){}
+  }
 
   function init(){
     applyRobotBuild(); fillRobotCard(); loadFromHash();

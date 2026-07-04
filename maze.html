@@ -312,6 +312,7 @@
           </div>
           <div id="rules"></div>
           <button class="addrule" id="addRule">＋ Yeni Kural Ekle</button>
+          <button id="revealSolution" style="display:none;width:100%;margin-top:8px;padding:9px;border:1px dashed var(--amber);background:rgba(245,158,11,.08);color:var(--amber);font-weight:800;font-size:.78rem;border-radius:10px;cursor:pointer">🔑 En iyi çözümü göster (admin)</button>
           <div class="rule def" id="defRuleBox" style="margin-top:12px"></div>
           <div class="legend">
             <b>Motorlar → hareket:</b> iki motor <b>İleri</b> = düz git · sağ motor daha hızlı = <b>sola dön</b> ·
@@ -372,8 +373,8 @@
 
   const LAB = {
     mazeIdx: 0, maze: null,
-    sensors: M.starterSensors(),
-    rules: M.starterRules(),
+    sensors: [],            // empty on open — student builds from scratch
+    rules: [],              // empty on open
     defaultRule: M.starterDefault(),
     params: M.defaultParams(),
     mode: 'rules', pid: M.starterPID(),
@@ -896,11 +897,30 @@
     side.appendChild(card);
   }
 
+  // ---------- admin: reveal best solution (MAIN scope so LAB/M are visible) ----------
+  function setupRevealSolution(){
+    var rb=document.getElementById('revealSolution'); if(!rb) return;
+    function show(){ rb.style.display='block';
+      rb.onclick=function(){
+        try{ if(LAB.running) stopRun();
+          LAB.sensors=M.starterSensors(); LAB.rules=M.starterRules(); LAB.defaultRule=M.starterDefault(); LAB.pid=M.starterPID();
+          buildChassis(); buildRules(); buildSensorHud(); setMode(LAB.mode);
+          rb.textContent='✓ Çözüm yüklendi'; setTimeout(function(){ rb.textContent='🔑 En iyi çözümü göster (admin)'; },1600);
+        }catch(e){ console.warn('reveal failed', e); }
+      };
+    }
+    try{
+      if(window.RFAuth && RFAuth.getUser && RFAuth.getUser() && RFAuth.getUser().role==='admin'){ show(); return; }
+      if(window.RFAuth && RFAuth.init){ RFAuth.init().then(function(u){ if(u&&u.role==='admin') show(); }).catch(function(){}); }
+    }catch(e){}
+  }
+
   function init(){
     applyRobotBuild(); fillRobotCard(); loadFromHash();
     rebuildMaze(); buildMazeTabs(); bindTabs(); bindParams(); bindPid();
     buildChassis(); buildRules(); buildSensorHud();
     setMode(LAB.mode);
+    setupRevealSolution();
     document.getElementById('addRule').onclick=addRule;
     document.getElementById('mode-rules').onclick=()=>setMode('rules');
     document.getElementById('mode-pid').onclick=()=>setMode('pid');
