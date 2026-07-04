@@ -99,15 +99,25 @@
     document.getElementById('app').style.display='block';
   }
 
+  function registerSelf(){
+    // Ensure the logged-in staff user exists in rf_students (with their role) so the
+    // role-guarded read RPCs will authorize them — even on their very first visit.
+    return rpc('rf_ingest',{
+      p_sub:USER.sub, p_name:USER.name||null, p_email:USER.email||null,
+      p_role:USER.role||null, p_idnumber:USER.idnumber||null,
+      p_event_type:'dashboard_open'
+    }).catch(function(){ /* non-fatal */ });
+  }
+
   function loadAll(){
     if(!USER) return;
     document.getElementById('whoami').textContent=(USER.name||USER.sub)+' · '+(USER.role||'');
-    Promise.all([
+    registerSelf().then(function(){ return Promise.all([
       rpc('rf_dash_stats',{p_sub:USER.sub}),
       rpc('rf_dash_roster',{p_sub:USER.sub}),
       rpc('rf_dash_progress',{p_sub:USER.sub}),
       rpc('rf_dash_feedback',{p_sub:USER.sub})
-    ]).then(function(res){
+    ]); }).then(function(res){
       CACHE={stats:(res[0]&&res[0][0])||null, roster:res[1]||[], progress:res[2]||[], feedback:res[3]||[]};
       // staff check: if roster query returns nothing AND stats null, likely not staff
       if(!CACHE.stats && !CACHE.roster.length){
