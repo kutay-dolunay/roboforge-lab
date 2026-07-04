@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="rf-theme.css?v=1" />
+<title>RoboForge · Öğretmen Paneli</title>
+<style>
+  body{margin:0;background:var(--bg,#0b1220);color:var(--txt,#e2e8f0);
+    font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+  header.top{display:flex;align-items:center;gap:14px;padding:14px 22px;border-bottom:1px solid var(--line,#1e3a5f);
+    background:rgba(10,16,30,.7);backdrop-filter:blur(8px);position:sticky;top:0;z-index:50;flex-wrap:wrap}
+  .brand b{font-size:1.05rem;letter-spacing:.5px}
+  .brand b span{color:var(--sky,#38bdf8)}
+  .brand small{display:block;color:var(--muted,#64748b);font-size:.6rem;letter-spacing:2px;text-transform:uppercase}
+  .grow{flex:1}
+  .btn{padding:8px 14px;border-radius:9px;border:1px solid var(--line,#1e3a5f);background:var(--panel,#0f172a);
+    color:var(--txt);font-weight:700;cursor:pointer;font-size:.78rem}
+  .btn:hover{border-color:var(--sky,#38bdf8)}
+  .wrap{max-width:1200px;margin:0 auto;padding:20px 22px}
+  .gate{max-width:520px;margin:80px auto;text-align:center;background:var(--panel,#0f172a);
+    border:1px solid var(--line,#1e3a5f);border-radius:16px;padding:34px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px}
+  .kpi{background:var(--panel,#0f172a);border:1px solid var(--line,#1e3a5f);border-radius:14px;padding:16px}
+  .kpi small{display:block;color:var(--muted,#64748b);font-size:.62rem;letter-spacing:1.4px;text-transform:uppercase}
+  .kpi b{font-size:1.9rem;color:var(--sky,#38bdf8);display:block;margin-top:4px}
+  .kpi.warn b{color:var(--amber,#f59e0b)}
+  .kpi.good b{color:var(--green,#22c55e)}
+  .tabs{display:flex;gap:8px;margin:8px 0 16px;flex-wrap:wrap}
+  .tab{padding:8px 16px;border:1px solid var(--line,#1e3a5f);background:var(--panel,#0f172a);color:var(--muted2,#94a3b8);
+    border-radius:9px;cursor:pointer;font-size:.8rem;font-weight:700}
+  .tab.on{border-color:var(--sky,#38bdf8);color:var(--sky,#38bdf8);background:#0c1a30}
+  table{width:100%;border-collapse:collapse;font-size:.82rem}
+  th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line,#1e3a5f)}
+  th{color:var(--muted,#64748b);font-size:.64rem;letter-spacing:1px;text-transform:uppercase;font-weight:700}
+  tr:hover td{background:rgba(56,189,248,.04)}
+  .pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.66rem;font-weight:700}
+  .pill.hata{background:rgba(239,68,68,.16);color:#fca5a5}
+  .pill.rating{background:rgba(245,158,11,.16);color:#fbbf24}
+  .pill.begendim{background:rgba(34,197,94,.16);color:#86efac}
+  .pill.def{background:rgba(148,163,184,.14);color:#cbd5e1}
+  .muted{color:var(--muted,#64748b)}
+  .empty{padding:40px;text-align:center;color:var(--muted,#64748b)}
+  .panel{background:var(--panel,#0f172a);border:1px solid var(--line,#1e3a5f);border-radius:14px;overflow:auto}
+  #err{color:#fca5a5;font-size:.8rem;margin-top:10px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><b>Robo<span>Forge</span></b><small>Öğretmen Paneli</small></div>
+  <div class="grow"></div>
+  <span id="whoami" class="muted" style="font-size:.78rem"></span>
+  <button class="btn" id="refreshBtn">↻ Yenile</button>
+  <div id="labAuth"></div>
+</header>
+
+<div id="gate" class="gate" style="display:none">
+  <h2 style="margin:0 0 8px">Öğretmen girişi gerekli</h2>
+  <p class="muted">Bu panel yalnızca öğretmen/yönetici hesaplarına açıktır. Lütfen Moodle ile giriş yapın.</p>
+  <button class="btn" id="loginBtn" style="margin-top:8px">🎓 Giriş yap</button>
+  <div id="err"></div>
+</div>
+
+<div id="app" class="wrap" style="display:none">
+  <div class="kpis" id="kpis"></div>
+  <div class="tabs">
+    <div class="tab on" data-tab="roster">👥 Öğrenciler</div>
+    <div class="tab" data-tab="progress">📊 İlerleme</div>
+    <div class="tab" data-tab="feedback">💬 Geri bildirim</div>
+  </div>
+  <div class="panel"><div id="view"></div></div>
+</div>
+
+<script src="rf-auth.js?v=1"></script>
+<script>
+(function(){
+  'use strict';
+  var SUPA_URL='https://qogjywlwbqsxoomjchpd.supabase.co';
+  var ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFvZ2p5d2x3YnFzeG9vbWpjaHBkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxNjg5MzMsImV4cCI6MjA4OTc0NDkzM30._kE54hfMix_8GAkXiyNhAI57G3x29TPLOUGD2yW69Hw';
+  var USER=null, TAB='roster', CACHE={};
+
+  function rpc(fn, args){
+    return fetch(SUPA_URL+'/rest/v1/rpc/'+fn, {
+      method:'POST',
+      headers:{'apikey':ANON,'Authorization':'Bearer '+ANON,'Content-Type':'application/json'},
+      body:JSON.stringify(args||{})
+    }).then(function(r){ if(!r.ok) throw new Error(fn+' HTTP '+r.status); return r.json(); });
+  }
+  function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function fmtDate(s){ if(!s) return '—'; try{ return new Date(s).toLocaleString('tr-TR',{dateStyle:'short',timeStyle:'short'}); }catch(e){ return s; } }
+
+  function showGate(msg){
+    document.getElementById('gate').style.display='block';
+    document.getElementById('app').style.display='none';
+    if(msg) document.getElementById('err').textContent=msg;
+  }
+  function showApp(){
+    document.getElementById('gate').style.display='none';
+    document.getElementById('app').style.display='block';
+  }
+
+  function loadAll(){
+    if(!USER) return;
+    document.getElementById('whoami').textContent=(USER.name||USER.sub)+' · '+(USER.role||'');
+    Promise.all([
+      rpc('rf_dash_stats',{p_sub:USER.sub}),
+      rpc('rf_dash_roster',{p_sub:USER.sub}),
+      rpc('rf_dash_progress',{p_sub:USER.sub}),
+      rpc('rf_dash_feedback',{p_sub:USER.sub})
+    ]).then(function(res){
+      CACHE={stats:(res[0]&&res[0][0])||null, roster:res[1]||[], progress:res[2]||[], feedback:res[3]||[]};
+      // staff check: if roster query returns nothing AND stats null, likely not staff
+      if(!CACHE.stats && !CACHE.roster.length){
+        showGate('Bu hesap öğretmen/yönetici değil ya da henüz veri yok.');
+        return;
+      }
+      showApp(); renderKpis(); renderTab();
+    }).catch(function(e){ showGate('Veri alınamadı: '+e.message+' (rf_dash_* fonksiyonları kurulu mu?)'); });
+  }
+
+  function renderKpis(){
+    var s=CACHE.stats||{};
+    var cards=[
+      {k:'Öğrenci', v:s.students||0},
+      {k:'Aktif (7g)', v:s.active_7d||0, cls:'good'},
+      {k:'Geçilen seviye', v:s.levels_cleared||0},
+      {k:'Toplam deneme', v:s.total_runs||0},
+      {k:'Geri bildirim', v:s.feedback_count||0},
+      {k:'🐞 Hata', v:s.bug_count||0, cls:'warn'},
+      {k:'Ort. puan', v:(s.avg_rating!=null?s.avg_rating+' ★':'—')}
+    ];
+    document.getElementById('kpis').innerHTML=cards.map(function(c){
+      return '<div class="kpi '+(c.cls||'')+'"><small>'+esc(c.k)+'</small><b>'+esc(c.v)+'</b></div>';
+    }).join('');
+  }
+
+  function renderTab(){
+    var v=document.getElementById('view');
+    if(TAB==='roster'){
+      var r=CACHE.roster;
+      if(!r.length){ v.innerHTML='<div class="empty">Henüz öğrenci verisi yok.</div>'; return; }
+      v.innerHTML='<table><thead><tr><th>Ad</th><th>Rol</th><th>No</th><th>Sınıf</th><th>Geçilen</th><th>Sim</th><th>Deneme</th><th>Son görülme</th></tr></thead><tbody>'+
+        r.map(function(x){ return '<tr><td>'+esc(x.name||x.sub)+'</td><td>'+esc(x.role||'')+'</td><td>'+esc(x.idnumber||'—')+
+          '</td><td>'+esc(x.school_class||'—')+'</td><td>'+esc(x.levels_cleared)+'</td><td>'+esc(x.sims_touched)+
+          '</td><td>'+esc(x.total_attempts)+'</td><td class="muted">'+fmtDate(x.last_seen)+'</td></tr>'; }).join('')+
+        '</tbody></table>';
+    } else if(TAB==='progress'){
+      var p=CACHE.progress;
+      if(!p.length){ v.innerHTML='<div class="empty">Henüz ilerleme verisi yok.</div>'; return; }
+      v.innerHTML='<table><thead><tr><th>Öğrenci</th><th>Sim</th><th>Seviye</th><th>Durum</th><th>En iyi</th><th>Madalya</th><th>Deneme</th><th>Mod</th><th>Güncelleme</th></tr></thead><tbody>'+
+        p.map(function(x){ return '<tr><td>'+esc(x.name||x.sub)+'</td><td>'+esc(x.sim)+'</td><td>'+esc(x.level)+
+          '</td><td>'+(x.cleared?'<span class="pill begendim">✓ geçti</span>':'<span class="pill def">—</span>')+
+          '</td><td>'+(x.best_time!=null?esc(x.best_time):'—')+'</td><td>'+esc(x.best_medal||'—')+
+          '</td><td>'+esc(x.attempts)+'</td><td>'+esc(x.last_mode||'—')+'</td><td class="muted">'+fmtDate(x.updated_at)+'</td></tr>'; }).join('')+
+        '</tbody></table>';
+    } else {
+      var f=CACHE.feedback;
+      if(!f.length){ v.innerHTML='<div class="empty">Henüz geri bildirim yok.</div>'; return; }
+      v.innerHTML='<table><thead><tr><th>Tarih</th><th>Öğrenci</th><th>Tür</th><th>Mesaj</th><th>Sim/Sayfa</th></tr></thead><tbody>'+
+        f.map(function(x){
+          var cls = x.category==='hata'?'hata':x.category==='rating'?'rating':x.category==='beğendim'?'begendim':'def';
+          var txt = x.category==='rating' ? ('★ '+esc(x.text)) : esc(x.text||'');
+          return '<tr><td class="muted">'+fmtDate(x.created_at)+'</td><td>'+esc(x.name||x.sub||'—')+
+            '</td><td><span class="pill '+cls+'">'+esc(x.category||'—')+'</span></td><td>'+txt+
+            '</td><td class="muted">'+esc(x.sim||x.page||'—')+'</td></tr>'; }).join('')+
+        '</tbody></table>';
+    }
+  }
+
+  // tabs
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'), function(t){
+    t.onclick=function(){
+      document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on');});
+      t.classList.add('on'); TAB=t.dataset.tab; renderTab();
+    };
+  });
+  document.getElementById('refreshBtn').onclick=loadAll;
+  document.getElementById('loginBtn').onclick=function(){ if(window.RFAuth) RFAuth.login(); };
+
+  // auth
+  function start(u){
+    USER=u;
+    if(!u){ showGate('Giriş yapılmadı.'); return; }
+    if(u.role!=='teacher' && u.role!=='admin'){ showGate('Bu panel yalnızca öğretmen/yönetici içindir. (Rolünüz: '+esc(u.role||'?')+')'); return; }
+    loadAll();
+  }
+  try{
+    if(window.RFAuth && RFAuth.getUser && RFAuth.getUser()){ start(RFAuth.getUser()); }
+    else if(window.RFAuth && RFAuth.init){ RFAuth.init().then(function(u){ start(u); }).catch(function(){ showGate('Giriş kontrol edilemedi.'); }); }
+    else { showGate('Auth yüklenemedi.'); }
+  }catch(e){ showGate('Hata: '+e.message); }
+})();
+</script>
+</body>
+</html>
