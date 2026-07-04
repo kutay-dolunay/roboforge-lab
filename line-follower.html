@@ -963,6 +963,25 @@
     document.getElementById('addSensor').disabled=LAB.sensors.length>=5;
     if(!LAB.running) render(null); updateHud(LAB.sim?LAB.sim.last:null); }
 
+  // ---------- admin: reveal best solution (defined in MAIN scope so LAB/S are visible) ----------
+  function setupRevealSolution(){
+    var rb=document.getElementById('revealSolution'); if(!rb) return;
+    function show(){ rb.style.display='block';
+      rb.onclick=function(){
+        try{ if(LAB.running) stopRun();
+          LAB.sensors=S.starterSensors(); LAB.rules=S.starterRules(); LAB.defaultRule=S.starterDefault(); LAB.pid=S.starterPID();
+          LAB.selected = LAB.sensors.length?LAB.sensors[0].id:null;
+          refreshAll();
+          rb.textContent='✓ Çözüm yüklendi'; setTimeout(function(){ rb.textContent='🔑 En iyi çözümü göster (admin)'; },1600);
+        }catch(e){ console.warn('reveal failed', e); }
+      };
+    }
+    try{
+      if(window.RFAuth && RFAuth.getUser && RFAuth.getUser() && RFAuth.getUser().role==='admin'){ show(); return; }
+      if(window.RFAuth && RFAuth.init){ RFAuth.init().then(function(u){ if(u&&u.role==='admin') show(); }).catch(function(){}); }
+    }catch(e){}
+  }
+
   // ---------- tabs ----------
   function bindTabs(){
     document.querySelectorAll('.sidetab').forEach(t=>t.onclick=()=>switchTab(t.dataset.tab));
@@ -1011,6 +1030,7 @@
     buildTrackTabs(); bindTabs(); bindParams(); bindPid();
     buildChassis(); buildRules(); buildSensorHud();
     setMode(LAB.mode);
+    setupRevealSolution();
     document.getElementById('addSensor').onclick=addSensor;
     document.getElementById('delSensor').onclick=()=>removeSensor(LAB.selected);
     document.getElementById('addRule').onclick=addRule;
@@ -1054,28 +1074,9 @@
     var el=document.getElementById('rfLabLogout');
     if(el) el.onclick=function(){ if(window.RFAuth){ RFAuth.logout(); loggedOut(); } };
   }
-  // Admin-only "reveal best solution": restores the working starter sensors + rules.
-  function setupReveal(u){
-    var rb=document.getElementById('revealSolution'); if(!rb) return;
-    if(u && u.role==='admin'){
-      rb.style.display='block';
-      rb.onclick=function(){
-        try{
-          if(LAB.running) stopRun();
-          LAB.sensors = S.starterSensors();
-          LAB.rules   = S.starterRules();
-          LAB.defaultRule = S.starterDefault();
-          LAB.pid     = S.starterPID();
-          refreshAll();
-          rb.textContent='✓ Çözüm yüklendi';
-          setTimeout(function(){ rb.textContent='🔑 En iyi çözümü göster (admin)'; }, 1600);
-        }catch(e){ console.warn('reveal failed', e); }
-      };
-    } else { rb.style.display='none'; }
-  }
   if(window.RFAuth){
-    RFAuth.init().then(function(u){ u?loggedIn(u):loggedOut(); setupReveal(u); }).catch(function(){ loggedOut(); setupReveal(null); });
-  } else { loggedOut(); setupReveal(null); }
+    RFAuth.init().then(function(u){ u?loggedIn(u):loggedOut(); }).catch(function(){ loggedOut(); });
+  } else { loggedOut(); }
 })();
 </script>
 
