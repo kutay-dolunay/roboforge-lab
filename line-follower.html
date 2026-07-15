@@ -293,6 +293,8 @@
           <div class="ed-side">
             <button class="minibtn" id="addSensor">＋ Sensör Ekle</button>
             <button class="minibtn danger" id="delSensor" disabled style="margin-top:8px">✕ Seçili Sensörü Sil</button>
+            <input id="senName" maxlength="14" placeholder="Seçili sensörün adı" disabled style="width:100%;margin-top:8px;background:#0b1526;border:1px solid var(--line);color:var(--txt);border-radius:6px;padding:6px 8px;font-size:.72rem" />
+            <div style="font-size:.6rem;color:var(--muted2);margin-top:6px;line-height:1.45">💡 <b>Örnek isim:</b> soldaki sensöre <b>Sol</b>, ortadakine <b>Orta</b>, sağdakine <b>Sağ</b> de. Sensörler <b>çizgiyi</b> algılamak içindir; sol/orta/sağ çizgiyi görünce farklı kurallar çalıştırırsın.</div>
             <div class="param" style="margin-top:18px">
               <label>Motor Hızı <b id="vLabel">Orta</b></label>
               <input type="range" id="vmax" min="2.4" max="5.2" step="0.2" value="3.6" />
@@ -855,9 +857,17 @@
     return box;
   }
   function ruleEl(rule,ri,isDef){
+    if(rule.name==null) rule.name='Kural '+(ri+1);
     const el=document.createElement('div'); el.className='rule';
     const head=document.createElement('div'); head.className='rulehead';
     head.innerHTML=`<span class="when">EĞER ↓</span>`;
+    const nameIn=document.createElement('input');
+    nameIn.className='rulename'; nameIn.maxLength=24; nameIn.value=rule.name;
+    nameIn.placeholder='kural adı';
+    nameIn.title='Bu kurala bir isim ver — hangi kuralın ne yaptığını karıştırmamak için (ör. "Sağa dön", "Düz git").';
+    nameIn.style.cssText='flex:1;min-width:70px;max-width:170px;margin:0 8px;background:#0b1526;border:1px solid var(--line);color:var(--txt);border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700';
+    nameIn.oninput=()=>{ rule.name=nameIn.value; };
+    head.appendChild(nameIn);
     const ord=document.createElement('div'); ord.className='ruleord';
     const up=ib('▲',()=>moveRule(ri,-1)); const dn=ib('▼',()=>moveRule(ri,1));
     const rm=ib('✕',()=>{LAB.rules.splice(ri,1);buildRules();},'x');
@@ -880,7 +890,7 @@
   }
   function ib(txt,fn,cls){ const b=document.createElement('button'); b.className='iconbtn'+(cls?' '+cls:''); b.textContent=txt; b.onclick=fn; return b; }
   function moveRule(ri,d){ const ni=ri+d; if(ni<0||ni>=LAB.rules.length)return; const t=LAB.rules[ri];LAB.rules[ri]=LAB.rules[ni];LAB.rules[ni]=t;buildRules(); }
-  function addRule(){ const pat=LAB.sensors.map(()=>'any'); LAB.rules.push({pattern:pat,left:{dir:'fwd',speed:60},right:{dir:'fwd',speed:60}}); buildRules(); }
+  function addRule(){ const pat=LAB.sensors.map(()=>'any'); LAB.rules.push({name:'Kural '+(LAB.rules.length+1),pattern:pat,left:{dir:'fwd',speed:60},right:{dir:'fwd',speed:60}}); buildRules(); }
 
   // ---------- mode toggle ----------
   function setMode(m){
@@ -982,7 +992,14 @@
   function refreshAll(){ buildChassis(); buildRules(); buildSensorHud();
     document.getElementById('delSensor').disabled=(LAB.selected==null)||LAB.sensors.length<=1;
     document.getElementById('addSensor').disabled=LAB.sensors.length>=5;
+    reflectSenName();
     if(!LAB.running) render(null); updateHud(LAB.sim?LAB.sim.last:null); }
+  function reflectSenName(){
+    const sn=document.getElementById('senName'); if(!sn) return;
+    const s=LAB.sensors.find(x=>x.id===LAB.selected);
+    if(s){ sn.disabled=false; if(document.activeElement!==sn) sn.value=s.label; }
+    else { sn.disabled=true; sn.value=''; }
+  }
 
   // ---------- admin: reveal best solution (defined in MAIN scope so LAB/S are visible) ----------
   function setupRevealSolution(){
@@ -1054,6 +1071,7 @@
     setupRevealSolution();
     document.getElementById('addSensor').onclick=addSensor;
     document.getElementById('delSensor').onclick=()=>removeSensor(LAB.selected);
+    document.getElementById('senName').oninput=(e)=>{ const s=LAB.sensors.find(x=>x.id===LAB.selected); if(s){ s.label=e.target.value.slice(0,14); buildChassis(); buildRules(); } };
     document.getElementById('addRule').onclick=addRule;
     document.getElementById('mode-rules').onclick=()=>setMode('rules');
     document.getElementById('mode-pid').onclick=()=>setMode('pid');
