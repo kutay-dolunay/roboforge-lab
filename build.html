@@ -198,6 +198,28 @@
   .labauth .lchip .lout{border:1px solid var(--line);background:transparent;color:var(--muted2);border-radius:7px;
     font-size:.58rem;font-weight:700;padding:4px 7px;cursor:pointer}
   .labauth .lchip .lout:hover{border-color:var(--red);color:#fca5a5}
+
+/* --- build v2: ratings, rpm board, pros/cons --- */
+.pc{font-size:.65rem;line-height:1.4;margin-top:5px;padding:5px 7px;border-radius:6px;border:1px solid var(--line)}
+.pc.plus{color:#8ff0b0;background:rgba(34,197,94,.07);border-color:rgba(34,197,94,.25)}
+.pc.minus{color:#ffc1c1;background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.22)}
+.rpmboard{margin:14px 0 4px;padding:12px 14px;border:1px solid var(--brand-lt);border-radius:12px;background:rgba(0,102,162,.08)}
+.rpmh{font-size:.72rem;font-weight:800;color:var(--brand-lt);letter-spacing:.3px;margin-bottom:9px}
+.rpmrow{display:flex;gap:9px;flex-wrap:wrap}
+.rpmchip{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:96px;padding:9px 12px;border-radius:10px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--txt);font-family:inherit;transition:.14s}
+.rpmchip:hover{border-color:var(--brand-lt)}
+.rpmchip.on{border-color:var(--brand-lt);background:#0c2036;box-shadow:0 0 0 1px var(--brand-lt),0 0 14px var(--brand-glow)}
+.rpmchip b{font-size:1.15rem;line-height:1}.rpmchip small{font-size:.5rem;color:var(--muted);letter-spacing:1px}
+.rpmchip .rpmspec{font-size:.56rem;color:var(--muted2);margin-top:3px;text-align:center}
+.mpc{margin-top:10px}
+.ratewrap{display:flex;flex-direction:column;gap:8px;margin:4px 0 14px}
+.rate{display:flex;align-items:center;gap:10px}
+.rate .rk{flex:none;width:82px;font-size:.72rem;font-weight:700;color:var(--muted2)}
+.rate .rtrack{flex:1;height:11px;border-radius:6px;background:#0c1728;border:1px solid var(--line);overflow:hidden}
+.rate .rfill{display:block;height:100%;background:linear-gradient(90deg,var(--brand),var(--brand-lt))}
+.rate .rv10{flex:none;width:26px;text-align:right;font-weight:800;font-size:.8rem;color:var(--brand-lt)}
+.factgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+@media(max-width:560px){.factgrid{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -290,25 +312,32 @@
     driver:'Sürücü kartı, beyinin zayıf sinyalini motorları döndürecek güce çevirir - beyin motoru doğrudan süremez, arada bu köprü olmalı. Sürücünün taşıyabildiği akım motorun ihtiyacını karşılamazsa motor zorlanır ve sürücü ısınır. Verimli bir sürücü pili daha az yorar.',
     motor:'Motorlar tekerlekleri döndürür. RPM (devir) ne kadar hızlı gideceğini, tork ise viraj/tırmanma gücünü belirler. Yüksek RPM düz pistte uçar ama kontrolü zorlaştırır; yüksek tork virajı kazır ama genelde daha yavaştır. İki motor birlikte çalışır.',
     wheel:'Tekerlek, robotun yere değen tek noktasıdır. Çap büyüdükçe robot aynı devirde daha hızlı gider; tutuş (grip) arttıkça virajda daha az kayar. Yarış lastiği hızlıdır ama tutuşu düşüktür; silikon yavaştır ama virajda güven verir.',
-    battery:'Batarya tüm sisteme enerji verir. Voltaj motorların ne kadar sert döneceğini, kapasite (mAh) ise robotun ne kadar süre çalışacağını belirler. Düşük voltaj motorları güçsüz bırakır; ağır batarya robotu yavaşlatır. Dengeyi bulmak önemli.',
+    battery:'Batarya tüm sisteme enerji verir. Voltaj motorların ne kadar sert döneceğini, kapasite (mAh) ise robotun ne kadar süre çalışacağını belirler. Deşarj akımı, ani kalkışta voltajın çökmemesini sağlar. Düşük voltaj motorları güçsüz bırakır; ağır batarya robotu yavaşlatır.',
+    caster:'Sarhoş tekerlek, robotun serbest dönen denge noktasıdır - tahrik etmez, sadece taşır. Ağırlığı ve sürtünmesi keskin virajlardaki çevikliği etkiler. Ağır metal bilye pürüzsüz döner ama ön dengeyi bozabilir; hafif plastik alan kazandırır ama çabuk aşınır.',
+    sensor:'Çizgi sensörü robotun gözüdür; zemindeki siyah çizgiyi görür. Çözünürlüğü yüksek sensör pürüzsüz PID kurar; mantık voltajı beyinle uyumlu olmalı. Sensör yerden ne kadar yükseğe kalkarsa çizgiyi o kadar zor görür - büyük tekerlek burada risklidir.',
   };
   const clamp=x=>Math.max(0.05,Math.min(1,x));
   function bars(cat,o){
-    if(cat==='brain')   return [['İşlem',o.power/10],['Hafiflik',clamp(1-o.weightG/30)]];
-    if(cat==='driver')  return [['Akım',clamp(o.maxA/12)],['Verim',o.eff],['Hafiflik',clamp(1-o.weightG/35)]];
-    if(cat==='motor')   return [['Hız',clamp(o.rpm/1000)],['Tork',o.torque/10],['Hafiflik',clamp(1-o.weightG/30)]];
-    if(cat==='wheel')   return [['Hız',clamp(o.diaMM/70)],['Tutuş',o.grip],['Hafiflik',clamp(1-o.weightG/40)]];
-    if(cat==='battery') return [['Kapasite',clamp(o.mAh/2600)],['Voltaj',clamp(o.voltage/7.4)]];
+    if(cat==='brain')   return [['İşlem',clamp(o.cpu/10)],['Hafiflik',clamp(1-o.weightG/30)]];
+    if(cat==='driver')  return [['Akım',clamp(o.maxOutAperCh/12)],['Maks V',clamp(o.maxMotorV/36)],['Hafiflik',clamp(1-o.weightG/45)]];
+    if(cat==='motor')   return [['Hız',clamp(o.rpm/5000)],['Tork',clamp(o.torque/10)],['Hafiflik',clamp(1-o.weightG/30)]];
+    if(cat==='wheel')   return [['Çap',clamp(o.diaMM/70)],['Tutuş',clamp(o.grip/10)],['Hafiflik',clamp(1-o.weightG/40)]];
+    if(cat==='caster')  return [['Sürtünme',clamp(1-o.weightG/45)],['Denge',clamp((o.k.stab+5)/10)]];
+    if(cat==='battery') return [['Kapasite',clamp(o.mAh/2600)],['Voltaj',clamp(o.voltage/11.1)],['Akım',clamp(o.dischargeA/30)]];
+    if(cat==='sensor')  return [['Çözünürlük',clamp(o.quality)],['Hafiflik',clamp(1-o.weightG/4)]];
     return [];
   }
   function specLine(cat,o){
-    if(cat==='brain')   return `İşlem ${o.power}/10 · ${o.weightG}g · ${o.voltage}V`;
-    if(cat==='driver')  return `${o.maxA}A · verim %${Math.round(o.eff*100)} · ${o.weightG}g`;
+    if(cat==='brain')   return `İşlem ${o.cpu}/10 · ${o.logicV}V mantık · ${o.weightG}g`;
+    if(cat==='driver')  return `maks ${o.maxMotorV}V · ~${o.maxOutAperCh}A/kanal · ${o.weightG}g`;
     if(cat==='motor')   return `${o.rpm} RPM · tork ${o.torque}/10 · ${o.weightG}g`;
-    if(cat==='wheel')   return `${o.diaMM}mm · tutuş ${o.grip} · ${o.weightG}g`;
-    if(cat==='battery') return `${o.voltage}V · ${o.mAh}mAh · ${o.weightG}g`;
+    if(cat==='wheel')   return `${o.diaMM}mm · tutuş ${o.grip}/10 · ${o.weightG}g`;
+    if(cat==='caster')  return `${o.weightG}g · zorluk ${o.difficulty}/10`;
+    if(cat==='battery') return `${o.voltage}V · ${o.mAh}mAh · ${o.dischargeA}A deşarj`;
+    if(cat==='sensor')  return `${o.logicVmin}${(o.logicVmax&&o.logicVmax!==o.logicVmin)?('-'+o.logicVmax):''}V · ${o.drawMA}mA · ${o.weightG}g`;
     return '';
   }
+  function proConHtml(o){ return (o.pros?`<div class="pc plus" title="${esc(o.pros)}">➕ ${esc(shortT(o.pros))}</div>`:'')+(o.cons?`<div class="pc minus" title="${esc(o.cons)}">➖ ${esc(shortT(o.cons))}</div>`:''); }
 
   // chassis shapes - many figures
   const SHAPES=[
@@ -339,11 +368,14 @@
   // ---- state ----
   let step=1, phase=0;
   // Always start a FRESH build when the page opens (do not resume the saved one).
-  const B = { sim:SIM, brain:null,driver:null,motor:null,wheel:null,battery:null,
+  const B = { sim:SIM, brain:null,driver:null,motor:null,wheel:null,caster:null,battery:null,sensor:null,
     chassis:{ shape:'rect', len:1, wid:1, place:{} } };
+  function isChosen(cat){ const v=B[cat]; if(cat==='motor') return !!(v&&v.type&&v.rpm!=null); return !!v; }
+  function esc(x){ return String(x==null?'':x).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+  function shortT(t){ t=t||''; return t.length>112?t.slice(0,110)+'…':t; }
   function save(){ try{ localStorage.setItem('rf_robot', JSON.stringify(B)); }catch(e){} }
   function load(){ try{ return JSON.parse(localStorage.getItem('rf_robot')); }catch(e){ return null; } }
-  function selectedCount(){ return ORDER.filter(c=>B[c]).length; }
+  function selectedCount(){ return ORDER.filter(c=>isChosen(c)).length; }
 
   function renderStepper(){
     const el=document.getElementById('stepper'); el.innerHTML='';
@@ -358,7 +390,7 @@
     document.getElementById('bpFill').style.width=pct+'%';
     document.getElementById('bpPct').textContent='%'+pct;
     const dots=document.getElementById('bpDots'); dots.innerHTML='';
-    ORDER.forEach(c=>{ const d=document.createElement('div'); d.className='bp-dot'+(B[c]?' on':''); dots.appendChild(d); });
+    ORDER.forEach(c=>{ const d=document.createElement('div'); d.className='bp-dot'+(isChosen(c)?' on':''); dots.appendChild(d); });
   }
 
   // ---- STEP 1: one component at a time ----
@@ -368,23 +400,57 @@
     host.innerHTML=`<div class="ph-head"><div class="ph-ic">${c.icon}</div>
         <h2 class="ph-title"><small>Faz ${phase+1} / ${ORDER.length} · ${c.sub}</small>${c.label}</h2></div>
       <div class="ph-intro">${EDU[cat]||c.help}</div>`;
+    if(c.typed){ renderMotorBody(host,c); }
+    else {
+      const grid=document.createElement('div'); grid.className='opts';
+      c.options.forEach(o=>{
+        const card=document.createElement('div'); card.className='opt'+(B[cat]===o.id?' sel':'');
+        const barHtml=bars(cat,o).map(([l,v])=>`<div class="bar"><span class="bl">${l}</span><span class="bt"><span class="bf" style="width:${Math.round(v*100)}%"></span></span></div>`).join('');
+        card.innerHTML=`<div class="oh"><span class="oi">${o.icon}</span><span class="on">${esc(o.name)}</span></div>
+          <div class="spec">${specLine(cat,o)}</div>${barHtml}${proConHtml(o)}`;
+        card.onclick=()=>{ B[cat]=o.id; save(); renderPhase(); renderProgress(); showConfirm(cat,o); updateNav(); };
+        grid.appendChild(card);
+      });
+      host.appendChild(grid);
+    }
+    renderProgress();
+    const cur=isChosen(cat)?RD.opt(cat,B[cat]):null;
+    if(cur) showConfirm(cat,cur); else document.getElementById('confirm').classList.remove('show');
+  }
+  function renderMotorBody(host,c){
+    const sel=B.motor||{};
     const grid=document.createElement('div'); grid.className='opts';
-    c.options.forEach(o=>{
-      const card=document.createElement('div'); card.className='opt'+(B[cat]===o.id?' sel':'');
-      const barHtml=bars(cat,o).map(([l,v])=>`<div class="bar"><span class="bl">${l}</span><span class="bt"><span class="bf" style="width:${Math.round(v*100)}%"></span></span></div>`).join('');
-      card.innerHTML=`<div class="oh"><span class="oi">${o.icon}</span><span class="on">${o.name}</span></div>
-        <div class="spec">${specLine(cat,o)}</div><div class="od">${o.desc}</div>${barHtml}`;
-      card.onclick=()=>{ B[cat]=o.id; save(); renderPhase(); renderProgress(); showConfirm(cat,o); updateNav(); };
+    c.types.forEach(t=>{
+      const rpms=t.variants.map(v=>v.rpm), rng=rpms.length>1?(Math.min.apply(null,rpms)+'-'+Math.max.apply(null,rpms)):(''+rpms[0]);
+      const card=document.createElement('div'); card.className='opt'+(sel.type===t.id?' sel':'');
+      const barHtml=bars('motor',t.variants[0]).map(([l,v])=>`<div class="bar"><span class="bl">${l}</span><span class="bt"><span class="bf" style="width:${Math.round(v*100)}%"></span></span></div>`).join('');
+      card.innerHTML=`<div class="oh"><span class="oi">${t.icon}</span><span class="on">${esc(t.type)}</span></div>
+        <div class="spec">${rng} RPM · ${t.variants.length} seçenek</div>${barHtml}`;
+      card.onclick=()=>{ const one=t.variants.length===1?t.variants[0].rpm:null; B.motor={type:t.id,rpm:(sel.type===t.id?sel.rpm:one)}; save(); renderPhase(); renderProgress(); updateNav(); };
       grid.appendChild(card);
     });
     host.appendChild(grid);
-    renderProgress();
-    const cur=B[cat]?RD.opt(cat,B[cat]):null;
-    if(cur) showConfirm(cat,cur); else document.getElementById('confirm').classList.remove('show');
+    if(sel.type){
+      const t=RD.motorType(sel.type);
+      const board=document.createElement('div'); board.className='rpmboard';
+      const h=document.createElement('div'); h.className='rpmh'; h.textContent='⚙️ '+t.type+' - RPM (devir) seç'; board.appendChild(h);
+      const row=document.createElement('div'); row.className='rpmrow';
+      t.variants.forEach(v=>{
+        const chip=document.createElement('button'); chip.className='rpmchip'+(sel.rpm===v.rpm?' on':'');
+        chip.innerHTML=`<b>${v.rpm}</b><small>RPM</small><span class="rpmspec">tork ${v.torque}/10 · ${v.weightG}g</span>`;
+        chip.onclick=()=>{ B.motor={type:t.id,rpm:v.rpm}; save(); renderPhase(); renderProgress(); showConfirm('motor',RD.opt('motor',B.motor)); updateNav(); };
+        row.appendChild(chip);
+      });
+      board.appendChild(row);
+      if(sel.rpm!=null){ const v=RD.opt('motor',{type:sel.type,rpm:sel.rpm});
+        if(v){ const pc=document.createElement('div'); pc.className='mpc'; pc.innerHTML=proConHtml(v); board.appendChild(pc); } }
+      host.appendChild(board);
+    }
   }
   function showConfirm(cat,o){
     const el=document.getElementById('confirm');
-    el.innerHTML=`<span style="font-size:1.2rem">${o.icon}</span><div><b>${o.name}</b> seçildi. <span style="color:var(--muted2)">${o.desc}</span></div>`;
+    const nm=(cat==='motor')?(o.typeName+' · '+o.rpm+' RPM'):o.name;
+    el.innerHTML=`<span style="font-size:1.2rem">${o.icon}</span><div><b>${esc(nm)}</b> seçildi. <span style="color:var(--muted2)">${esc(shortT(o.pros||''))}</span></div>`;
     el.classList.add('show');
   }
 
@@ -418,7 +484,7 @@
     ft.style.top=(cy-h/2-16)+'px'; stage.appendChild(ft);
     [[-w/2-6],[w/2-6]].forEach(([wx])=>{ const wm=document.createElement('div'); wm.className='wheelmark';
       wm.style.left=(cx+wx)+'px'; wm.style.top=(cy-20)+'px'; stage.appendChild(wm); });
-    const DEFPOS={brain:{x:0.5,y:0.16},driver:{x:0.5,y:0.42},motor:{x:0.24,y:0.62},wheel:{x:0.76,y:0.62},battery:{x:0.5,y:0.85}};
+    const DEFPOS={brain:{x:0.5,y:0.18},driver:{x:0.5,y:0.4},motor:{x:0.26,y:0.6},wheel:{x:0.74,y:0.6},caster:{x:0.5,y:0.9},battery:{x:0.5,y:0.76},sensor:{x:0.5,y:0.08}};
     ORDER.forEach((cat,i)=>{ if(!B[cat])return; const o=RD.opt(cat,B[cat]);
       if(!B.chassis.place[cat]) B.chassis.place[cat]=Object.assign({},DEFPOS[cat]||{x:0.5,y:0.5});
       const p=B.chassis.place[cat];
@@ -458,13 +524,19 @@
   function bctx(){ return Object.assign({},B,{chassis:{weightG:chassisWeight(),widthU:1+(B.chassis.wid-1)*0.4}}); }
   function renderReport(){
     const bl=document.getElementById('buildList'); bl.innerHTML='';
-    ORDER.forEach(cat=>{ const o=RD.opt(cat,B[cat]);
-      bl.innerHTML+=`<div class="bchip">${RD.COMPONENTS[cat].icon} ${RD.COMPONENTS[cat].label}: <b>${o?o.name:'- yok -'}</b></div>`; });
+    ORDER.forEach(cat=>{ const o=isChosen(cat)?RD.opt(cat,B[cat]):null;
+      let nm=o?o.name:'- yok -'; if(cat==='motor'&&o) nm=o.typeName+' · '+o.rpm+' RPM';
+      bl.innerHTML+=`<div class="bchip">${RD.COMPONENTS[cat].icon} ${RD.COMPONENTS[cat].label}: <b>${esc(nm)}</b></div>`; });
     const r=RD.computeReport(bctx());
-    const cards=[['Ağırlık',r.weightG,'g'],['En Yüksek Hız',r.topSpeedKmh,'km/s'],['Güç',r.powerRating,'/100'],
-      ['Tork',r.torque,'/10'],['Tutuş',r.grip,''],['Batarya Ömrü',r.batteryMin,'dk']];
     const g=document.getElementById('reportGrid'); g.innerHTML='';
-    cards.forEach(([l,v,u])=>{ g.innerHTML+=`<div class="rcard"><div class="rl">${l}</div><div class="rv">${v}</div><div class="ru">${u}</div></div>`; });
+    const rw=document.createElement('div'); rw.className='ratewrap';
+    RD.RATING_KEYS.forEach(k=>{ const val=r.ratings[k];
+      rw.innerHTML+=`<div class="rate"><span class="rk">${RD.RATING_LABEL[k]}</span><span class="rtrack"><span class="rfill" style="width:${val*10}%"></span></span><span class="rv10">${val}</span></div>`; });
+    g.appendChild(rw);
+    const facts=[['Ağırlık',r.weightG,'g'],['Tepe Hız',r.topSpeedKmh,'km/s'],['Çalışma',r.batteryMin,'dk'],['Maliyet',r.cost,'/70']];
+    const fg=document.createElement('div'); fg.className='factgrid';
+    facts.forEach(([l,v,u])=>{ fg.innerHTML+=`<div class="rcard"><div class="rl">${l}</div><div class="rv">${v}</div><div class="ru">${u}</div></div>`; });
+    g.appendChild(fg);
   }
 
   // ---- STEP 4: test ----
@@ -484,7 +556,7 @@
         '<div class="rig-roller"><div class="roller"></div><div class="roller"></div></div>'+
       '</div>'+
       '<div class="rig-status" id="rigStatus">Test yapılıyor…</div>'+
-      '<div class="rig-stats">'+stat('Ağırlık',r.weightG,'g')+stat('Hız',r.topSpeedKmh,'km/s')+stat('Güç',r.powerRating,'')+'</div>'+
+      '<div class="rig-stats">'+stat('Ağırlık',r.weightG,'g')+stat('Hız',r.topSpeedKmh,'km/s')+stat('Maliyet',r.cost,'')+'</div>'+
       '<div class="rig-parts">'+parts+'</div>'+
     '</div>';
   }
@@ -528,7 +600,7 @@
     if(step===1){
       prev.style.visibility = phase===0 ? 'hidden' : 'visible';
       const cat=ORDER[phase];
-      next.disabled = !B[cat];
+      next.disabled = !isChosen(cat);
       next.className='btn primary';
       next.textContent = phase<ORDER.length-1 ? ('Devam → '+RD.COMPONENTS[ORDER[phase+1]].label) : 'Devam → Çizim';
     } else {
@@ -551,7 +623,7 @@
     window.scrollTo(0,0);
   }
   document.getElementById('nextBtn').onclick=()=>{
-    if(step===1){ const cat=ORDER[phase]; if(!B[cat]) return;
+    if(step===1){ const cat=ORDER[phase]; if(!isChosen(cat)) return;
       if(phase<ORDER.length-1){ phase++; document.getElementById('confirm').classList.remove('show'); renderPhase(); updateNav(); window.scrollTo(0,0); }
       else go(2);
     } else if(step<4) go(step+1);

@@ -528,11 +528,25 @@
       mode:LAB.mode, pid:LAB.pid,
     };
   }
+  function showBuildFaultNote(){
+    if(!LAB.buildFaultMsg) return; const m=String(LAB.buildFaultMsg).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+    let t=document.getElementById('buildFaultToast');
+    if(!t){ t=document.createElement('div'); t.id='buildFaultToast';
+      t.style.cssText='position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:9997;max-width:470px;width:calc(100vw - 32px);background:#2a1512;border:1px solid #7f1d1d;border-radius:12px;padding:12px 15px;box-shadow:0 12px 40px rgba(0,0,0,.5);font-size:.8rem;line-height:1.5;color:#fecaca';
+      document.body.appendChild(t); }
+    t.innerHTML='<b style="color:#fca5a5">⚠ Kurulum testi geçmedi</b><br>'+m+' <a href="build.html" style="color:#93c5fd;font-weight:700;white-space:nowrap">Robotu düzelt →</a>';
+    t.style.display='block'; clearTimeout(LAB._bft); LAB._bft=setTimeout(()=>{ if(t) t.style.display='none'; },6500);
+  }
   function startRun(){
     if(LAB.running) return;
     stopLoop();
     rebuildTrack();
     LAB.sim = S.createSim(buildConfig());
+    if(LAB.buildFault){ const pr=Object.assign({},LAB.sim.cfg.params);
+      if(LAB.buildFault==='dead') pr.vMax=0.02;
+      else if(LAB.buildFault==='stall') pr.vMax=(LAB.buildBaseVMax||pr.vMax)*0.35;
+      else if(LAB.buildFault==='blind') pr.turnGain=pr.turnGain*0.45;
+      LAB.sim.cfg.params=pr; showBuildFaultNote(); }
     LAB.frames = [];
     setResultIdle();
     let n=3; const cd=document.getElementById('countdown'); cd.style.display='flex'; cd.textContent=n;
@@ -1101,11 +1115,15 @@
     try{
       const raw=localStorage.getItem('rf_robot'); if(!raw || !window.RobotData) return;
       const b=JSON.parse(raw); const sp=window.RobotData.toSimParams(b);
-      if(sp && sp.vMax){ LAB.params.vMax=sp.vMax; LAB.params.turnGain=sp.turnGain;
+      if(sp && sp.vMax){ LAB.params.vMax=sp.vMax;
+        const sq=(sp.sensorQ!=null?sp.sensorQ:1);
+        LAB.params.turnGain=+(sp.turnGain*(0.7+0.3*sq)).toFixed(2);   // sensor quality -> correction sharpness
         if(sp.wheelBase) LAB.params.wheelBase=sp.wheelBase; }
+      LAB.buildFault=sp?sp.fault:null; LAB.buildFaultMsg=sp?sp.faultMsg:null; LAB.buildBaseVMax=LAB.params.vMax;
       const m=window.RobotData.opt('motor',b.motor), w=window.RobotData.opt('wheel',b.wheel);
+      const mName=m?(m.typeName+' '+m.rpm+' RPM'):'?';
       const small=document.querySelector('.brand small');
-      if(small && (m||w)) small.textContent='🔧 '+(m?m.name:'?')+' · '+(w?w.name:'?');
+      if(small && (m||w)) small.textContent='🔧 '+mName+' · '+(w?w.name:'?');
     }catch(e){}
   }
   function fillRobotCard(){
@@ -1116,14 +1134,15 @@
     card.style.cssText='border-top:1px solid var(--line);padding:16px;background:#0c1526';
     if(build && RD){
       const esc=(t)=>String(t||'').replace(/"/g,'&quot;');
+      const nameOf=(cat,o)=>!o?'-':(cat==='motor'?(o.typeName+' '+o.rpm+'RPM'):o.name);
       const chips=RD.ORDER.map(cat=>{ const o=RD.opt(cat,build[cat]);
-        const tip=esc((RD.COMPONENTS[cat].help||'')+((o&&o.desc)?' - '+o.desc:''));
-        return '<span class="rf-hoverable" style="border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:4px 8px;font-size:.68rem;color:var(--muted2)">'+RD.COMPONENTS[cat].icon+' <b style="color:var(--txt)">'+(o?o.name:'-')+'</b>'+(tip?' <span class="infq" data-tip="'+tip+'">?</span>':'')+'</span>'; }).join('');
+        const tip=esc((RD.COMPONENTS[cat].help||'')+((o&&o.pros)?' | + '+o.pros:''));
+        return '<span class="rf-hoverable" style="border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:4px 8px;font-size:.68rem;color:var(--muted2)">'+RD.COMPONENTS[cat].icon+' <b style="color:var(--txt)">'+nameOf(cat,o)+'</b>'+(tip?' <span class="infq" data-tip="'+tip+'">?</span>':'')+'</span>'; }).join('');
       const r=RD.computeReport(build);
       const stat=(l,v,u,tip)=>'<div style="background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:8px 6px;text-align:center"><div style="font-size:.52rem;letter-spacing:1px;color:var(--muted);text-transform:uppercase">'+l+(tip?' <span class="infq" data-tip="'+esc(tip)+'">?</span>':'')+'</div><div style="font-size:1.1rem;font-weight:800;margin-top:2px">'+v+'</div><div style="font-size:.55rem;color:var(--muted2)">'+u+'</div></div>';
       card.innerHTML='<div style="font-size:.62rem;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:10px">🔧 Robotun Künyesi <span class="infq" data-tip="Buradaki tüm değerler “Robotu Kur” bölümünde seçtiğin parçalardan otomatik hesaplanır. Parçaları değiştirince künye de, simülasyon davranışı da değişir. Her parçanın yanındaki ? ile teknik detayına bak.">?</span></div>'+
         '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">'+chips+'</div>'+
-        '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px">'+stat('Ağırlık',r.weightG,'g','Motor, tekerlek, batarya ve şasinin toplam ağırlığı. Ağır robot yavaşlar ama savrulması zorlaşır.')+stat('Hız',r.topSpeedKmh,'km/s','Seçtiğin motor devri ve tekerlek çapından hesaplanan tahmini en yüksek hız.')+stat('Güç',r.powerRating,'/100','Motor torku ile batarya gücünden türetilen genel güç puanı.')+stat('Çalışma',r.batteryMin,'dk','Seçtiğin bataryanın robotu yaklaşık kaç dakika çalıştırabileceği (tahmini).')+'</div>'+
+        '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px">'+stat('Ağırlık',r.weightG,'g','Motor, tekerlek, batarya ve şasinin toplam ağırlığı. Ağır robot yavaşlar ama savrulması zorlaşır.')+stat('Hız',r.topSpeedKmh,'km/s','Seçtiğin motor devri ve tekerlek çapından hesaplanan tahmini en yüksek hız.')+stat('Maliyet',r.cost,'/70','Seçtiğin parçaların toplam maliyet puanı; düşük = ucuz, yüksek = pahalı.')+stat('Çalışma',r.batteryMin,'dk','Seçtiğin bataryanın robotu yaklaşık kaç dakika çalıştırabileceği (tahmini).')+'</div>'+
         '<div style="font-size:.7rem;color:var(--muted2);line-height:1.5;margin-bottom:10px">Bu parça seçimlerin, soldaki simülasyonun hızını ve tutuşunu belirledi.</div>'+
         '<a href="build.html" style="display:inline-block;border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:.74rem;font-weight:700;color:var(--muted2)">← Robotu yeniden kur</a>';
     } else {
