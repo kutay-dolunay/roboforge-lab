@@ -580,6 +580,8 @@
     const win = sim.status==='success';
       try{ if(window.RFProgress){ var __rfwin=(sim.status==='success'||sim.status==='win'); var __rfmedal=null; try{ var __core=window['SimCore']; if(__core&&__core.robotClass){var __c=__core.robotClass(sim); if(__c)__rfmedal=__c.name;} }catch(e){} RFProgress.record('line', LAB.trackIdx, {pass:__rfwin, time:(sim&&typeof sim.t==='number')?sim.t:null, medal:__rfmedal, mode:LAB.mode}); } }catch(e){}
     r.className='result '+(win?'win':'lose');
+    // help popup after repeated failed attempts (once)
+    if(!win){ LAB.fails=(LAB.fails||0)+1; try{ if(LAB.fails>=3 && !localStorage.getItem('rf_lf_help')) setTimeout(showHelpPopup,600); }catch(e){} }
     const cls = S.robotClass(sim);
     document.getElementById('rhead').innerHTML = win
       ? '🏁 Tur Tamamlandı!'
@@ -986,7 +988,72 @@
     document.getElementById('tutwrap').style.display='flex';
   }
   function nextTut(){ if(tutI<TUT.length-1) showTut(tutI+1); else endTut(); }
-  function endTut(){ document.getElementById('tutwrap').style.display='none'; try{localStorage.setItem('rf_lf_tut','1');}catch(e){} }
+  function endTut(){ document.getElementById('tutwrap').style.display='none'; try{localStorage.setItem('rf_lf_tut','1');}catch(e){}
+    // after the welcome modal, launch the spotlight tour that points at the real buttons
+    try{ if(!localStorage.getItem('rf_lf_coach')) setTimeout(startCoach,250); }catch(e){ setTimeout(startCoach,250); }
+  }
+
+  // ---------- guided spotlight tour (HubSpot/ClickUp style: highlights real elements) ----------
+  const COACH=[
+    {tab:'robot', sel:'#addSensor', title:'1) Önce göz ekle 👀', text:'Robot çizgiyi görebilsin diye SENSÖR gerekir. Bu butona bas — sonra sensörü sürükleyip şasinin önüne koy.'},
+    {tab:'kod',   sel:'#addRule',   title:'2) Kural ekle 🧩', text:'“Sensör çizgiyi ALGILAYINCA ne yapsın?” Buradan kural ekle. Kurala bir isim ver (ör. “Sağa dön”) ki karışmasın.'},
+    {tab:null,    sel:'#runbtn',    title:'3) Çalıştır & izle ▶', text:'Hazırsan ÇALIŞTIR’a bas, robotu izle. Çizgiden çıkarsa alttaki ipuçlarını oku, düzelt ve tekrar dene.'}
+  ];
+  let coachI=0, coachEls=null;
+  function ensureCoachDom(){
+    if(coachEls) return coachEls;
+    const st=document.createElement('style');
+    st.textContent='#coachHole{position:fixed;z-index:9998;border-radius:12px;box-shadow:0 0 0 9999px rgba(2,6,23,.74),0 0 0 2px var(--brand-lt),0 0 22px var(--brand-glow);pointer-events:none;transition:left .25s,top .25s,width .25s,height .25s}#coachBub{position:fixed;z-index:9999;width:290px;max-width:calc(100vw - 16px);background:var(--panel);border:1px solid var(--brand-lt);border-radius:12px;padding:14px 16px;box-shadow:0 12px 40px rgba(0,0,0,.55)}#coachBub h4{margin:0 0 6px;font-size:.9rem;color:var(--brand-lt)}#coachBub p{margin:0 0 11px;font-size:.8rem;color:var(--txt);line-height:1.5}#coachBub .cbtns{display:flex;gap:8px;justify-content:space-between;align-items:center}#coachBub button{border:none;border-radius:8px;padding:7px 14px;font-weight:800;font-size:.76rem;cursor:pointer}#coachNext{background:var(--brand);color:#fff}#coachSkip{background:transparent;color:var(--muted2);font-weight:600;padding-left:2px}';
+    document.head.appendChild(st);
+    const hole=document.createElement('div'); hole.id='coachHole'; hole.style.display='none';
+    const bub=document.createElement('div'); bub.id='coachBub'; bub.style.display='none';
+    bub.innerHTML='<h4 id="coachTitle"></h4><p id="coachText"></p><div class="cbtns"><button id="coachSkip">Turu atla</button><button id="coachNext">İleri →</button></div>';
+    document.body.append(hole,bub);
+    bub.querySelector('#coachNext').onclick=()=>{ coachI++; if(coachI>=COACH.length) endCoach(); else showCoachStep(coachI); };
+    bub.querySelector('#coachSkip').onclick=endCoach;
+    window.addEventListener('resize',()=>{ if(coachEls && coachEls.hole.style.display!=='none') showCoachStep(coachI); });
+    return coachEls={hole,bub};
+  }
+  function showCoachStep(i){
+    const s=COACH[i]; const c=ensureCoachDom();
+    if(s.tab) switchTab(s.tab);
+    const tgt=document.querySelector(s.sel);
+    if(!tgt){ coachI++; if(coachI>=COACH.length) endCoach(); else showCoachStep(coachI); return; }
+    try{ tgt.scrollIntoView({block:'center',behavior:'smooth'}); }catch(e){}
+    const r=tgt.getBoundingClientRect(), pad=8;
+    c.hole.style.display='block';
+    c.hole.style.left=(r.left-pad)+'px'; c.hole.style.top=(r.top-pad)+'px';
+    c.hole.style.width=(r.width+pad*2)+'px'; c.hole.style.height=(r.height+pad*2)+'px';
+    c.bub.querySelector('#coachTitle').textContent=s.title;
+    c.bub.querySelector('#coachText').textContent=s.text;
+    c.bub.querySelector('#coachNext').textContent = i===COACH.length-1?'Bitir 🚀':'İleri →';
+    c.bub.style.display='block';
+    const bh=c.bub.offsetHeight||150;
+    let bx=Math.min(Math.max(8,r.left), window.innerWidth-298);
+    let by=r.bottom+14; if(by+bh>window.innerHeight-8) by=Math.max(8,r.top-bh-14);
+    c.bub.style.left=bx+'px'; c.bub.style.top=by+'px';
+  }
+  function startCoach(){ coachI=0; ensureCoachDom(); showCoachStep(0); }
+  function endCoach(){ if(coachEls){ coachEls.hole.style.display='none'; coachEls.bub.style.display='none'; } try{localStorage.setItem('rf_lf_coach','1');}catch(e){} }
+
+  // ---------- help popup after repeated failed attempts ----------
+  function showHelpPopup(){
+    if(document.getElementById('rfHelp')) return;
+    const ov=document.createElement('div'); ov.id='rfHelp';
+    ov.style.cssText='position:fixed;inset:0;z-index:9997;background:rgba(2,6,23,.7);display:flex;align-items:center;justify-content:center;padding:16px';
+    ov.innerHTML='<div style="max-width:420px;background:var(--panel);border:1px solid var(--brand-lt);border-radius:16px;padding:22px 24px;box-shadow:0 16px 50px rgba(0,0,0,.6)">'+
+      '<h3 style="margin:0 0 4px;color:var(--brand-lt);font-size:1.05rem">🛟 Takıldın mı? İşte 3 ipucu</h3>'+
+      '<p style="margin:0 0 12px;font-size:.72rem;color:var(--muted2)">Birkaç denemede geçemedin — sık yapılan hataları hızlıca gözden geçirelim.</p>'+
+      '<ol style="margin:0;padding-left:18px;font-size:.82rem;color:var(--txt);line-height:1.65">'+
+        '<li><b>3 sensör kullan</b> (sol-orta-sağ). Tek sensör yönü ayırt edemez.</li>'+
+        '<li>Sensörleri <b>öne ve yana</b> yay — virajı erken görsün.</li>'+
+        '<li><b>Viraj kuralları:</b> bir sensör çizgiyi görünce o tarafın motorunu yavaşlat, diğerini hızlandır → o yöne döner.</li>'+
+      '</ol>'+
+      '<button id="rfHelpClose" style="margin-top:16px;width:100%;background:var(--brand);color:#fff;border:none;border-radius:10px;padding:10px;font-weight:800;cursor:pointer">Anladım, tekrar deneyeceğim 💪</button>'+
+    '</div>';
+    document.body.appendChild(ov);
+    ov.querySelector('#rfHelpClose').onclick=()=>{ ov.remove(); try{localStorage.setItem('rf_lf_help','1');}catch(e){} };
+  }
 
   // ---------- refresh ----------
   function refreshAll(){ buildChassis(); buildRules(); buildSensorHud();
