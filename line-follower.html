@@ -339,11 +339,11 @@
             <b style="color:var(--sky)">Kp</b> ne kadar sert düzelteceğini,
             <b style="color:var(--sky)">Kd</b> savrulmayı (zikzak) ne kadar bastıracağını belirler.
           </div>
-          <div class="pidrow"><label>Temel Hız <b id="pidBaseV">60%</b></label>
+          <div class="pidrow"><label>Temel Hız <span class="infq" data-tip="Robotun düz giderken temel ilerleme hızı. PID bunun ÜSTÜNE sağ/sol düzeltme ekler. Gerçek hayat: otoyolda sabit gaz — yüksek hız daha çabuk tur attırır ama virajda savrulma riskini artırır.">?</span> <b id="pidBaseV">60%</b></label>
             <input type="range" id="pidBase" min="20" max="100" step="5" value="60" /></div>
-          <div class="pidrow"><label>Kp — Orantı (sertlik) <b id="pidKpV">1.4</b></label>
+          <div class="pidrow"><label>Kp — Orantı (sertlik) <span class="infq" data-tip="Kp = orantı katsayısı. Çizgiden ne kadar SAPARSA o oranda sert düzeltir. Gerçek hayat: direksiyonu ne kadar çevireceğin. Yüksek Kp = sert direksiyon (zikzak/savrulma riski); düşük Kp = yumuşak ama keskin virajı kaçırır.">?</span> <b id="pidKpV">1.4</b></label>
             <input type="range" id="pidKp" min="0" max="4" step="0.1" value="1.4" /></div>
-          <div class="pidrow"><label>Kd — Sönümleme (sakinlik) <b id="pidKdV">0.5</b></label>
+          <div class="pidrow"><label>Kd — Sönümleme (sakinlik) <span class="infq" data-tip="Kd = türev katsayısı. Sapmanın NE HIZLA değiştiğine bakıp erkenden frenler, savrulmayı azaltır. Gerçek hayat: viraja girmeden önce yavaşlamak. Yüksek Kd = daha sakin, kararlı; çok yüksek olursa robot tembelleşir.">?</span> <b id="pidKdV">0.5</b></label>
             <input type="range" id="pidKd" min="0" max="2" step="0.1" value="0.5" /></div>
           <div class="piderr">
             <div class="lab">ÇİZGİ HATASI&nbsp;&nbsp;sol ◄ ─────── ► sağ</div>
@@ -416,7 +416,7 @@
       ctx.beginPath();ctx.moveTo(0,sy);ctx.lineTo(600,sy);ctx.stroke(); }
     const sm = LAB.track.samples;
     ctx.strokeStyle = '#f6f8fb';
-    ctx.lineWidth = S.LINE_HALF_WIDTH*2*view.scale;
+    ctx.lineWidth = S.LINE_HALF_WIDTH*1.55*view.scale;  // slimmer line so the robot reads as bigger than the line
     ctx.lineJoin='round'; ctx.lineCap='round';
     // gap-aware: lift the pen over absent (gap / dashed) stretches
     const N=sm.length; ctx.beginPath(); let pen=false;
@@ -444,7 +444,7 @@
   }
 
   function drawRobot(robot, last){
-    const HL=0.95, HW=0.62;
+    const HL=1.18, HW=0.82;  // bigger robot body so it clearly out-sizes the line (team feedback)
     const corners=[[HL,-HW],[HL,HW],[-HL,HW],[-HL,-HW]].map(([f,r])=>{
       const [wx,wy]=localToWorld(robot,f,r); return w2s(wx,wy);
     });
@@ -773,7 +773,7 @@
     [[-HW-6],[HW-6]].forEach(([wx])=>{ const w=document.createElement('div'); w.className='wheel';
       w.style.left=(cx+wx)+'px'; w.style.top=(cy-17)+'px'; ch.appendChild(w); });
     LAB.sensors.forEach(sen=>{
-      const el=document.createElement('div'); el.className='sensor'+(LAB.selected===sen.id?' sel':'');
+      const el=document.createElement('div'); el.className='sensor rf-hoverable'+(LAB.selected===sen.id?' sel':'');
       el.style.background=sen.color; el.dataset.id=sen.id; el.textContent=sen.label.slice(0,1);
       el.title=sen.label;
       const p=edPos(sen); el.style.left=p.x+'px'; el.style.top=p.y+'px';
@@ -1111,13 +1111,15 @@
     const card=document.createElement('div');
     card.style.cssText='border-top:1px solid var(--line);padding:16px;background:#0c1526';
     if(build && RD){
+      const esc=(t)=>String(t||'').replace(/"/g,'&quot;');
       const chips=RD.ORDER.map(cat=>{ const o=RD.opt(cat,build[cat]);
-        return '<span style="border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:4px 8px;font-size:.68rem;color:var(--muted2)">'+RD.COMPONENTS[cat].icon+' <b style="color:var(--txt)">'+(o?o.name:'—')+'</b></span>'; }).join('');
+        const tip=esc((RD.COMPONENTS[cat].help||'')+((o&&o.desc)?' — '+o.desc:''));
+        return '<span class="rf-hoverable" style="border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:4px 8px;font-size:.68rem;color:var(--muted2)">'+RD.COMPONENTS[cat].icon+' <b style="color:var(--txt)">'+(o?o.name:'—')+'</b>'+(tip?' <span class="infq" data-tip="'+tip+'">?</span>':'')+'</span>'; }).join('');
       const r=RD.computeReport(build);
-      const stat=(l,v,u)=>'<div style="background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:8px 6px;text-align:center"><div style="font-size:.52rem;letter-spacing:1px;color:var(--muted);text-transform:uppercase">'+l+'</div><div style="font-size:1.1rem;font-weight:800;margin-top:2px">'+v+'</div><div style="font-size:.55rem;color:var(--muted2)">'+u+'</div></div>';
-      card.innerHTML='<div style="font-size:.62rem;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:10px">🔧 Robotun Künyesi</div>'+
+      const stat=(l,v,u,tip)=>'<div style="background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:8px 6px;text-align:center"><div style="font-size:.52rem;letter-spacing:1px;color:var(--muted);text-transform:uppercase">'+l+(tip?' <span class="infq" data-tip="'+esc(tip)+'">?</span>':'')+'</div><div style="font-size:1.1rem;font-weight:800;margin-top:2px">'+v+'</div><div style="font-size:.55rem;color:var(--muted2)">'+u+'</div></div>';
+      card.innerHTML='<div style="font-size:.62rem;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:10px">🔧 Robotun Künyesi <span class="infq" data-tip="Buradaki tüm değerler “Robotu Kur” bölümünde seçtiğin parçalardan otomatik hesaplanır. Parçaları değiştirince künye de, simülasyon davranışı da değişir. Her parçanın yanındaki ? ile teknik detayına bak.">?</span></div>'+
         '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">'+chips+'</div>'+
-        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">'+stat('Ağırlık',r.weightG,'g')+stat('Hız',r.topSpeedKmh,'km/s')+stat('Güç',r.powerRating,'/100')+'</div>'+
+        '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px">'+stat('Ağırlık',r.weightG,'g','Motor, tekerlek, batarya ve şasinin toplam ağırlığı. Ağır robot yavaşlar ama savrulması zorlaşır.')+stat('Hız',r.topSpeedKmh,'km/s','Seçtiğin motor devri ve tekerlek çapından hesaplanan tahmini en yüksek hız.')+stat('Güç',r.powerRating,'/100','Motor torku ile batarya gücünden türetilen genel güç puanı.')+stat('Çalışma',r.batteryMin,'dk','Seçtiğin bataryanın robotu yaklaşık kaç dakika çalıştırabileceği (tahmini).')+'</div>'+
         '<div style="font-size:.7rem;color:var(--muted2);line-height:1.5;margin-bottom:10px">Bu parça seçimlerin, soldaki simülasyonun hızını ve tutuşunu belirledi.</div>'+
         '<a href="build.html" style="display:inline-block;border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:.74rem;font-weight:700;color:var(--muted2)">← Robotu yeniden kur</a>';
     } else {

@@ -59,9 +59,12 @@
     },
     {
       id: 'nightmare', name: 'Kâbus', difficulty: 'Uzman',
-      // tight triple serpentine — Kural kuralları yetmez, iyi bir PID + güçlü robot ister
-      points: [[-8, -6], [-8, 6], [-4.5, 6], [-4.5, -4], [-1, -4], [-1, 6], [2.5, 6], [2.5, -4], [6, -4], [6, 6], [8, 6], [8, -6]],
-      tension: 0.15, closed: true,
+      // varied-angle serpentine: sharp hairpins + gentle S + diagonal cut, PLUS kesikli (dashed) stretch.
+      // Kural kuralları yetmez; iyi bir PID + güçlü robot ister.
+      points: [[-8, -6], [-8, 5], [-5, 6], [-5, -3], [-2, -4], [-1, 3], [1.5, 5], [3, 1], [5.5, 5], [7, 2], [6, -3], [8, -4], [8, -6]],
+      tension: 0.18, closed: true,
+      // dashed stretch (~30–37% boyunca kesik kesik) + tek bir boşluk (~64%)
+      gaps: [[0.30, 0.32], [0.345, 0.365], [0.39, 0.41], [0.635, 0.66]],
     },
   ];
 

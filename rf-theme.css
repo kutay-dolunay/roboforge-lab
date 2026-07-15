@@ -63,6 +63,16 @@ img,canvas,svg{max-width:100%}
 /* --- header safety: a crowded header must wrap, never overlap itself at odd zoom --- */
 header{ flex-wrap:wrap; row-gap:8px; }
 header .grow,header .brand{ min-width:0; }
+
+/* --- reusable "?" info badge with rich hover tooltip (data-tip="...") --- */
+.infq{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;
+  background:var(--brand);color:#fff;font-size:.62rem;font-weight:800;cursor:help;margin-left:5px;position:relative;vertical-align:middle}
+.infq:hover::after{content:attr(data-tip);position:absolute;left:50%;bottom:135%;transform:translateX(-50%);
+  width:240px;max-width:70vw;background:#0b1526;border:1px solid var(--brand-lt);border-radius:9px;padding:9px 11px;
+  font-size:.68rem;font-weight:400;line-height:1.5;color:var(--txt);z-index:120;box-shadow:0 8px 26px rgba(0,0,0,.55);
+  white-space:normal;text-align:left;letter-spacing:0}
+.infq:hover::before{content:'';position:absolute;left:50%;bottom:125%;transform:translateX(-50%);
+  border:6px solid transparent;border-top-color:var(--brand-lt);z-index:121}
 /* respect users who ask for less motion */
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{
