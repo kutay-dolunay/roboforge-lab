@@ -1,6 +1,6 @@
 <?php
 /**
- * RoboForge SSO endpoint  —  RoboFabrik Akademi (Moodle) → RoboForge
+ * RoboForge SSO endpoint  -  RoboFabrik Akademi (Moodle) → RoboForge
  * -----------------------------------------------------------------------------
  * Purpose: let a student who is logged into Moodle (akademi.robofabrik.tech)
  * open RoboForge (roboforge.robofabrik.tech) already authenticated.
@@ -20,24 +20,24 @@
  *   - Token is short-lived (RF_SSO_TTL). RoboForge issues its own long session after.
  *   - `return` URL is validated against an allow-list (no open redirect).
  *   - nonce is echoed back so RoboForge can bind the token to the request it started.
- *   - We DO NOT bypass Moodle login or KVKK — require_login() enforces both.
+ *   - We DO NOT bypass Moodle login or KVKK - require_login() enforces both.
  *
  * DEPLOY: place under your existing custom code, e.g.
  *     /var/www/akademi/local/roboforge/sso.php     (adjust CFG path below)
  *   and generate keys on the server (see DEPLOY_SSO.md). Do NOT paste secrets
- *   into any chat/doc — generate them with openssl on the VPS.
+ *   into any chat/doc - generate them with openssl on the VPS.
  * -----------------------------------------------------------------------------
  */
 
 // ---------------------------------------------------------------------------
-// 1) CONFIG — adjust these to your server paths/values.
+// 1) CONFIG - adjust these to your server paths/values.
 // ---------------------------------------------------------------------------
 
 // Absolute path to Moodle's config.php (bootstraps Moodle + $USER + $CFG).
 // Verified on this VPS: nginx root = /var/www/html/moodle (moodle44_old is the inactive 4.4 install).
 $RF_MOODLE_CONFIG = '/var/www/html/moodle/config.php';
 
-// Absolute path to the RS256 PRIVATE key — MUST be OUTSIDE the web root so it
+// Absolute path to the RS256 PRIVATE key - MUST be OUTSIDE the web root so it
 // can never be served over HTTP. Generate on the server (see DEPLOY_SSO.md).
 $RF_SSO_PRIVATE_KEY_PATH = '/var/rf-secrets/roboforge_sso_private.pem';
 
@@ -45,7 +45,7 @@ $RF_SSO_PRIVATE_KEY_PATH = '/var/rf-secrets/roboforge_sso_private.pem';
 $RF_SSO_ISS = 'akademi.robofabrik.tech';
 $RF_SSO_AUD = 'roboforge.robofabrik.tech';
 
-// Token time-to-live in seconds (short — RoboForge mints its own session after).
+// Token time-to-live in seconds (short - RoboForge mints its own session after).
 $RF_SSO_TTL = 120;
 
 // Allow-list of return URLs (prefixes). Prevents open-redirect abuse.
