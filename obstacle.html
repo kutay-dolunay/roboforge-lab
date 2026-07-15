@@ -296,7 +296,7 @@
         <div id="kod-rules" style="display:none">
           <div class="hintbox">
             Kural modunda robot sensör okumalarına (<b style="color:var(--red)">ENGEL</b> /
-            <b style="color:var(--green)">AÇIK</b>) göre <b>yukarıdan aşağıya</b> ilk uyan kurala göre hareket eder.
+            <b style="color:var(--green)">ENGEL YOK</b>) göre <b>yukarıdan aşağıya</b> ilk uyan kurala göre hareket eder.
             Basit ama dar geçitlerde köşeyi sıyırabilir — o zaman PID modunu dene.
           </div>
           <div id="rules"></div>
@@ -482,7 +482,7 @@
   }
   // ---------- rules editor (Kural mode) ----------
   const PAT_CYCLE={any:'on',on:'off',off:'any'};
-  const PAT_STYLE={ on:{bg:'#2e0b0b',tx:'#fca5a5',label:'ENGEL'}, off:{bg:'#0b2e16',tx:'#4ade80',label:'AÇIK'}, any:{bg:'#13203a',tx:'#94a3b8',label:'FARK ETMEZ'} };
+  const PAT_STYLE={ on:{bg:'#2e0b0b',tx:'#fca5a5',label:'ENGEL'}, off:{bg:'#0b2e16',tx:'#4ade80',label:'ENGEL YOK'}, any:{bg:'#13203a',tx:'#94a3b8',label:'FARK ETMEZ'} };
   function moveLabel(mL,mR){ if(Math.abs(mL)<0.02&&Math.abs(mR)<0.02) return 'DUR'; const spd=(mL+mR)/2, diff=mR-mL;
     if(spd<-0.02&&Math.abs(diff)<0.35) return 'GERİ'; if(diff>0.2) return '◄ SOL'; if(diff<-0.2) return 'SAĞ ►'; return 'İLERİ'; }
   function moveActionLabel(rule){ return '→ '+moveLabel(M.motorFraction(rule.left),M.motorFraction(rule.right)); }
@@ -494,7 +494,7 @@
   function motorEl(rule,side){ const m=rule[side]; const box=document.createElement('div'); box.className='motorctl';
     box.innerHTML=`<div class="ml">${side==='left'?'SOL MOTOR':'SAĞ MOTOR'}</div>`;
     const sel=document.createElement('select'); DIRS.forEach(([v,t])=>{ const o=document.createElement('option'); o.value=v; o.textContent=t; if(m.dir===v)o.selected=true; sel.appendChild(o); }); sel.onchange=()=>{ m.dir=sel.value; buildRules(); };
-    const sp=document.createElement('input'); sp.type='number'; sp.min=0; sp.max=100; sp.step=5; sp.value=m.speed; sp.oninput=()=>{ m.speed=Math.max(0,Math.min(100,+sp.value||0)); };
+    const sp=document.createElement('input'); sp.type='number'; sp.min=0; sp.max=100; sp.step=5; sp.value=m.speed; sp.oninput=()=>{ m.speed=Math.max(0,Math.min(100,+sp.value||0)); if(+sp.value>100) sp.value=100; };
     box.appendChild(sel); box.appendChild(sp); const u=document.createElement('div'); u.style.cssText='font-size:.55rem;color:#475569;text-align:right'; u.textContent='hız %'; box.appendChild(u); return box; }
   function ruleEl(rule,ri){ const el=document.createElement('div'); el.className='rule';
     const head=document.createElement('div'); head.className='rulehead'; head.innerHTML=`<span class="when">EĞER ↓</span>`;

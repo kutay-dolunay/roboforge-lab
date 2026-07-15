@@ -720,7 +720,7 @@
     DIRS.forEach(([v,t])=>{ const o=document.createElement('option'); o.value=v; o.textContent=t; if(m.dir===v)o.selected=true; sel.appendChild(o); });
     sel.onchange=()=>{ m.dir=sel.value; buildRules(); };
     const sp=document.createElement('input'); sp.type='number'; sp.min=0; sp.max=100; sp.step=5; sp.value=m.speed;
-    sp.oninput=()=>{ m.speed=Math.max(0,Math.min(100,+sp.value||0)); };
+    sp.oninput=()=>{ m.speed=Math.max(0,Math.min(100,+sp.value||0)); if(+sp.value>100) sp.value=100; };
     box.appendChild(sel); box.appendChild(sp);
     const u=document.createElement('div'); u.style.cssText='font-size:.55rem;color:#475569;text-align:right'; u.textContent='hız %';
     box.appendChild(u); return box;

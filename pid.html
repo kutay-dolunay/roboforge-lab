@@ -229,7 +229,7 @@
           <div class="legend"><b>Yarış ipucu:</b> Düz pistte Temel Hız'ı artır; virajlı pistte Kp/Kd'yi ince ayarla. Çok hızlı + çok sert = savrulup pistten çıkarsın.</div>
         </div>
         <div id="kod-rules" style="display:none">
-          <div class="hintbox">Kural modu 5 sensörle basit aç-kapa kontroldür. Yarışta PID kadar akıcı olmaz ama denemesi öğreticidir. Rozete tıkla: <b style="color:var(--green)">AÇIK</b> / <b style="color:var(--red)">KAPALI</b> / <b style="color:var(--muted2)">FARK ETMEZ</b>.</div>
+          <div class="hintbox">Kural modu 5 sensörle basit aç-kapa kontroldür. Yarışta PID kadar akıcı olmaz ama denemesi öğreticidir. Rozete tıkla: <b style="color:var(--green)">ALGILIYOR</b> / <b style="color:var(--red)">ALGILAMIYOR</b> / <b style="color:var(--muted2)">FARK ETMEZ</b>.</div>
           <div id="rules"></div>
           <button class="addrule" id="addRule">＋ Yeni Kural Ekle</button>
           <button id="revealSolution" style="display:none;width:100%;margin-top:8px;padding:9px;border:1px dashed var(--amber);background:rgba(245,158,11,.08);color:var(--amber);font-weight:800;font-size:.78rem;border-radius:10px;cursor:pointer">🔑 En iyi çözümü göster (admin)</button>
@@ -448,7 +448,7 @@
 
   // ---------- rules editor (Kural) ----------
   const PAT_CYCLE={any:'on',on:'off',off:'any'};
-  const PAT_STYLE={ on:{bg:'#0b2e16',tx:'#4ade80',label:'AÇIK'}, off:{bg:'#2e0b0b',tx:'#fca5a5',label:'KAPALI'}, any:{bg:'#13203a',tx:'#94a3b8',label:'FARK'} };
+  const PAT_STYLE={ on:{bg:'#0b2e16',tx:'#4ade80',label:'ALGILIYOR'}, off:{bg:'#2e0b0b',tx:'#fca5a5',label:'ALGILAMIYOR'}, any:{bg:'#13203a',tx:'#94a3b8',label:'FARK ETMEZ'} };
   function buildRules(){ const wrap=document.getElementById('rules'); if(!wrap) return; wrap.innerHTML='';
     LAB.rules.forEach((rule,ri)=>wrap.appendChild(ruleEl(rule,ri))); document.getElementById('defRuleBox').replaceWith(defRuleEl()); }
   function chipEl(rule,sen,si){ const st=rule.pattern[si]||'any', sty=PAT_STYLE[st]; const c=document.createElement('div'); c.className='schip';
@@ -457,7 +457,7 @@
   function motorEl(rule,side){ const m=rule[side]; const box=document.createElement('div'); box.className='motorctl';
     box.innerHTML=`<div class="ml">${side==='left'?'SOL':'SAĞ'}</div>`;
     const sel=document.createElement('select'); DIRS.forEach(([v,t])=>{ const o=document.createElement('option'); o.value=v; o.textContent=t; if(m.dir===v)o.selected=true; sel.appendChild(o); }); sel.onchange=()=>{ m.dir=sel.value; };
-    const sp=document.createElement('input'); sp.type='number'; sp.min=0; sp.max=100; sp.step=5; sp.value=m.speed; sp.oninput=()=>{ m.speed=Math.max(0,Math.min(100,+sp.value||0)); };
+    const sp=document.createElement('input'); sp.type='number'; sp.min=0; sp.max=100; sp.step=5; sp.value=m.speed; sp.oninput=()=>{ m.speed=Math.max(0,Math.min(100,+sp.value||0)); if(+sp.value>100) sp.value=100; };
     box.appendChild(sel); box.appendChild(sp); return box; }
   function ruleEl(rule,ri){ const el=document.createElement('div'); el.className='rule';
     const head=document.createElement('div'); head.className='rulehead'; head.innerHTML=`<span class="when">EĞER ↓</span>`;

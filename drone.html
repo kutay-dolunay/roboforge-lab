@@ -544,7 +544,7 @@
     const wrap=document.createElement('div'); wrap.className='mot';
     wrap.innerHTML='<b>İTKİ %</b>';
     const inp=document.createElement('input'); inp.type='number'; inp.min=0; inp.max=100; inp.value=m.speed;
-    inp.onchange=()=>{ m.speed=Math.max(0,Math.min(100,+inp.value||0)); m.dir='fwd'; };
+    inp.onchange=()=>{ m.speed=Math.max(0,Math.min(100,+inp.value||0)); if(+inp.value>100) inp.value=100; m.dir='fwd'; };
     wrap.appendChild(inp);
     mot.appendChild(wrap);
     if(!isDef){

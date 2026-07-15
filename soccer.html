@@ -518,7 +518,7 @@
         const o=document.createElement('option'); o.value=v; o.textContent=l; if(m.dir===v)o.selected=true; sel.appendChild(o); });
       sel.onchange=()=>{ m.dir=sel.value; };
       const inp=document.createElement('input'); inp.type='number'; inp.min=0; inp.max=100; inp.value=m.speed;
-      inp.onchange=()=>{ m.speed=Math.max(0,Math.min(100,+inp.value||0)); };
+      inp.onchange=()=>{ m.speed=Math.max(0,Math.min(100,+inp.value||0)); if(+inp.value>100) inp.value=100; };
       wrap.appendChild(sel); wrap.appendChild(inp);
       mot.appendChild(wrap);
     });

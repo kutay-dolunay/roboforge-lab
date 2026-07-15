@@ -278,8 +278,12 @@
     sim.timeStalled = Math.abs(v) < 0.05 ? sim.timeStalled + dt : 0;
 
     const prog = near.progress;
-    if (prog > 0.5) sim.passedHalf = true;
-    if (sim.passedHalf && sim.prevProg > 0.75 && prog < 0.2 && v > 0) { sim.laps++; sim.passedHalf = false; }
+    // Lap detection only counts when the robot is actually ON the line and moving
+    // forward — a robot spinning in a circle OFF the line must not falsely "complete".
+    if (near.dist <= ON_LINE_TIGHT) {
+      if (prog > 0.5) sim.passedHalf = true;
+      if (sim.passedHalf && sim.prevProg > 0.75 && prog < 0.2 && v > 0.03 && sim.t > 2) { sim.laps++; sim.passedHalf = false; }
+    }
     sim.prevProg = prog;
 
     if (sim.totalTicks % 3 === 0) {
@@ -287,9 +291,11 @@
       if (sim.trail.length > 400) sim.trail.shift();
     }
 
-    if (near.dist > OFF_TRACK_DIST) { sim.status = 'failed'; sim.reason = 'off_track'; }
-    else if (sim.timeOffLine > LINE_LOST_GRACE) { sim.status = 'failed'; sim.reason = 'line_lost'; }
-    else if (sim.timeStalled > STALL_GRACE) { sim.status = 'failed'; sim.reason = 'stalled'; }
+    // With NO sensors the robot is blind — never report "line lost" (it never had
+    // a way to see the line). Report 'no_sensors' so the coaching says "add sensors".
+    if (near.dist > OFF_TRACK_DIST) { sim.status = 'failed'; sim.reason = sensors.length ? 'off_track' : 'no_sensors'; }
+    else if (sensors.length && sim.timeOffLine > LINE_LOST_GRACE) { sim.status = 'failed'; sim.reason = 'line_lost'; }
+    else if (sim.timeStalled > STALL_GRACE) { sim.status = 'failed'; sim.reason = sensors.length ? 'stalled' : 'no_sensors'; }
     else if (sim.laps >= 1) { sim.status = 'success'; sim.reason = 'lap_complete'; }
 
     sim.last = { states, cmd, near, v, anyOn, readings, error };
@@ -318,6 +324,10 @@
     const acc = accuracy(sim);
     const hasGaps = sim.cfg.track.gapRanges && sim.cfg.track.gapRanges.length;
 
+    if (sim.reason === 'no_sensors') {
+      tips.push('Robotta hiç sensör yok — çizgiyi göremediği için takip edemez (bu yüzden durdu, çizgiyi "kaybetmedi"). Önce “＋ Sensör Ekle” ile sensör ekle; klasik başlangıç 3 sensördür (sol-orta-sağ) ve şasinin önüne yerleştirilir.');
+      return tips;
+    }
     if (sim.reason === 'line_lost' || sim.reason === 'off_track') {
       if (hasGaps) {
         tips.push('Bu pistte çizgide boşluklar/kesikler var. Robot boşlukta düz gitmeli — boşluk öncesi iyi hizalanmış olmalı. Hızı biraz düşürmek boşlukları aşmayı kolaylaştırır.');
@@ -327,7 +337,7 @@
         if (spread < 0.5 && cfg.sensors.length >= 2) tips.push('Sensörlerin birbirine çok yakın (' + spread.toFixed(2) + ' birim). Daha geniş diziye yayarsan hata ölçümü daha hassas olur.');
       } else {
         const covered = cfg.rules.some((r) => r.pattern.every((p) => p === 'off' || p === 'any') && r.pattern.some((p) => p === 'off'));
-        if (!covered && !defaultRuleMoves(cfg.defaultRule)) tips.push('Hiçbir sensör çizgiyi görmediğinde robot durdu/sürüklendi. "Hepsi KAPALI" durumu için bir kurtarma kuralı ekle (ör. düz devam et ya da yavaşça ara).');
+        if (!covered && !defaultRuleMoves(cfg.defaultRule)) tips.push('Hiçbir sensör çizgiyi görmediğinde robot durdu/sürüklendi. "Hepsi ALGILAMIYOR" durumu için bir kurtarma kuralı ekle (ör. düz devam et ya da yavaşça ara).');
         else tips.push('Robot çizgiden çıktı. Sensörlerini biraz daha öne ya da yana taşıyıp köşeyi daha erken yakalamayı dene.');
         if (spread < 0.5 && cfg.sensors.length >= 2) tips.push('Sensörlerin birbirine çok yakın (' + spread.toFixed(2) + ' birim). Daha geniş yerleştirirsen keskin virajları daha erken fark eder.');
         if (cfg.params.vMax >= 4.5) tips.push('Motor hızın yüksek; köşelerde aşıp çıkmış olabilir. Viraj kurallarında hızı düşürmeyi dene.');

@@ -307,7 +307,7 @@
           <div class="hintbox">
             Robot her karede bulunduğu <b>gözden</b> etrafındaki duvarları okur ve <b>yukarıdan aşağıya</b>
             ilk uyan kurala göre hareket eder. Rozete tıklayarak koşulu değiştir:
-            <b style="color:var(--red)">DUVAR</b> (o yön kapalı), <b style="color:var(--green)">AÇIK</b> (yol var),
+            <b style="color:var(--red)">DUVAR</b> (o yön kapalı), <b style="color:var(--green)">YOL</b> (o yön açık),
             <b style="color:var(--muted2)">FARK ETMEZ</b>.
           </div>
           <div id="rules"></div>
@@ -727,7 +727,7 @@
   const PAT_CYCLE={any:'on',on:'off',off:'any'};
   const PAT_STYLE={
     on:{bg:'#2e0b0b',tx:'#fca5a5',label:'DUVAR'},
-    off:{bg:'#0b2e16',tx:'#4ade80',label:'AÇIK'},
+    off:{bg:'#0b2e16',tx:'#4ade80',label:'YOL'},
     any:{bg:'#13203a',tx:'#94a3b8',label:'FARK ETMEZ'},
   };
   function actionLabel(rule){
@@ -754,7 +754,7 @@
     DIRS.forEach(([v,t])=>{ const o=document.createElement('option'); o.value=v; o.textContent=t; if(m.dir===v)o.selected=true; sel.appendChild(o); });
     sel.onchange=()=>{ m.dir=sel.value; buildRules(); };
     const sp=document.createElement('input'); sp.type='number'; sp.min=0; sp.max=100; sp.step=5; sp.value=m.speed;
-    sp.oninput=()=>{ m.speed=Math.max(0,Math.min(100,+sp.value||0)); };
+    sp.oninput=()=>{ m.speed=Math.max(0,Math.min(100,+sp.value||0)); if(+sp.value>100) sp.value=100; };
     box.appendChild(sel); box.appendChild(sp);
     const u=document.createElement('div'); u.style.cssText='font-size:.55rem;color:#475569;text-align:right'; u.textContent='hız %';
     box.appendChild(u); return box;
