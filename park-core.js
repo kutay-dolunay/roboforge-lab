@@ -1,15 +1,15 @@
 /* =============================================================================
- * RoboForge — Otonom Park (Autonomous Parking) :: Simulation Core
+ * RoboForge - Otonom Park (Autonomous Parking) :: Simulation Core
  * -----------------------------------------------------------------------------
  * Pure, dependency-free. Browser (window.ParkCore) + Node (module.exports).
  *
- * A CAR-LIKE robot (can't spin in place — min turn radius!) must park into
+ * A CAR-LIKE robot (can't spin in place - min turn radius!) must park into
  * the marked bay without touching parked cars or walls. The student writes a
  * MANEUVER PLAN: ordered steps of [İleri/Geri] + [Sol/Düz/Sağ] + mesafe.
  * This is the maneuver-sequencing / state-machine lesson.
  *
  * Steering convention: SOL/SAĞ = the direction the PATH curves (curvature),
- * both forward and reverse — like turning the wheel and holding it.
+ * both forward and reverse - like turning the wheel and holding it.
  * ========================================================================== */
 (function (global) {
   'use strict';
@@ -180,7 +180,7 @@
     const tips = [];
     const sc = parkScore(sim, sim.pose);
     if (sim.reason === 'dis') {
-      if (!sc.inside && sc.posErr > 1.5) tips.push('Araç park yerinin epey dışında kaldı. İlk düz gidiş mesafesini haritaya bakarak ayarla — manevra tam doğru noktada başlamalı.');
+      if (!sc.inside && sc.posErr > 1.5) tips.push('Araç park yerinin epey dışında kaldı. İlk düz gidiş mesafesini haritaya bakarak ayarla - manevra tam doğru noktada başlamalı.');
       else if (!sc.inside) tips.push('Az kaldı! Araç park cebine tam oturmadı (' + sc.posErr.toFixed(1) + ' birim sapma). Son adımların mesafelerini küçük adımlarla oynat.');
       else tips.push('Yer doğru ama açı yamuk (' + (sc.aErr * 57.3).toFixed(0) + '°). Kavisli adımların mesafesi dönüş açısını belirler: çeyrek dönüş ≈ 2.51 birim.');
     }
@@ -196,10 +196,10 @@
   function robotClass(sim) {
     if (sim.status !== 'success') return null;
     const sc = parkScore(sim, sim.pose);
-    if (sc.pct >= 88) return { key: 'park_ustasi', name: '🏆 Park Ustası', cmt: 'Cetvelle çizilmiş gibi — vale bile bu kadar iyi park edemez.' };
+    if (sc.pct >= 88) return { key: 'park_ustasi', name: '🏆 Park Ustası', cmt: 'Cetvelle çizilmiş gibi - vale bile bu kadar iyi park edemez.' };
     if (sc.pct >= 70) return { key: 'usta_sofor', name: '🥇 Usta Şoför', cmt: 'Temiz park. Bir tık daha ortalayabilirsin.' };
     if (sc.pct >= 50) return { key: 'ehliyetli', name: '🧭 Ehliyetli', cmt: 'Cebe girdin! Açıyı düzeltirsen usta olursun.' };
-    return { key: 'caylak_sofor', name: '🎓 Çaylak Şoför', cmt: 'Park edildi — sınırda ama sayılır!' };
+    return { key: 'caylak_sofor', name: '🎓 Çaylak Şoför', cmt: 'Park edildi - sınırda ama sayılır!' };
   }
 
   function runHeadless(cfg, maxTime, dt) {

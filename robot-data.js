@@ -1,5 +1,5 @@
 /* =============================================================================
- * RoboForge — Robot Data (component library + report + pre-test + continuity)
+ * RoboForge - Robot Data (component library + report + pre-test + continuity)
  * -----------------------------------------------------------------------------
  * Pure, dependency-free. Runs in the browser (window.RobotData) and Node.
  *
@@ -122,35 +122,35 @@
     const add = (label, ok, msg) => steps.push({ label, ok, msg });
 
     // 1) power
-    if (!bat) add('Güç kaynağı bağlanıyor…', false, 'Batarya yok — sisteme hiç güç gelmiyor. Bir batarya ekle.');
+    if (!bat) add('Güç kaynağı bağlanıyor…', false, 'Batarya yok - sisteme hiç güç gelmiyor. Bir batarya ekle.');
     else add('Güç kaynağı bağlanıyor…', true, bat.voltage + 'V hazır.');
 
     // 2) brain
     if (steps[steps.length - 1].ok) {
-      if (!b) add('Beyin başlatılıyor…', false, 'Beyin (kontrolcü) yok — robot hiçbir karar veremez.');
+      if (!b) add('Beyin başlatılıyor…', false, 'Beyin (kontrolcü) yok - robot hiçbir karar veremez.');
       else add('Beyin başlatılıyor…', true, b.name + ' uyandı.');
     }
     // 3) driver
     if (steps[steps.length - 1].ok) {
-      if (!d) add('Sürücü kontrol ediliyor…', false, 'Motor sürücü yok — beyin motoru doğrudan süremez, motor dönmez.');
+      if (!d) add('Sürücü kontrol ediliyor…', false, 'Motor sürücü yok - beyin motoru doğrudan süremez, motor dönmez.');
       else add('Sürücü kontrol ediliyor…', true, d.name + ' bağlı.');
     }
     // 4) motor
     if (steps[steps.length - 1].ok) {
-      if (!m) add('Motorlar deneniyor…', false, 'Motor yok — robot hareket edemez.');
+      if (!m) add('Motorlar deneniyor…', false, 'Motor yok - robot hareket edemez.');
       else if (d && d.maxA * 1.5 < m.peakA) add('Motorlar deneniyor…', false,
-        'Sürücü (' + d.name + ', ' + d.maxA + 'A) motorun kalkış akımını (' + m.peakA + 'A) karşılayamıyor — motor zorlanıp duruyor.');
+        'Sürücü (' + d.name + ', ' + d.maxA + 'A) motorun kalkış akımını (' + m.peakA + 'A) karşılayamıyor - motor zorlanıp duruyor.');
       else add('Motorlar deneniyor…', true, m.name + ' dönüyor.');
     }
     // 5) wheels
     if (steps[steps.length - 1].ok) {
-      if (!w) add('Tekerleklere bakılıyor…', false, 'Tekerlek yok — motorlar dönse de robot ilerleyemez.');
+      if (!w) add('Tekerleklere bakılıyor…', false, 'Tekerlek yok - motorlar dönse de robot ilerleyemez.');
       else add('Tekerleklere bakılıyor…', true, w.name + ' takılı.');
     }
     // 6) voltage sanity
     if (steps[steps.length - 1].ok) {
       if (m && bat && bat.voltage < m.voltage - 1.5) add('Hız ölçülüyor…', false,
-        'Batarya voltajı (' + bat.voltage + 'V) motor için düşük (' + m.voltage + 'V) — robot çok güçsüz, kalkamıyor.');
+        'Batarya voltajı (' + bat.voltage + 'V) motor için düşük (' + m.voltage + 'V) - robot çok güçsüz, kalkamıyor.');
       else if (d && bat && (bat.voltage < d.minV || bat.voltage > d.maxV)) add('Hız ölçülüyor…', false,
         'Batarya voltajı ' + d.name + ' sürücünün çalışma aralığı dışında (' + d.minV + '–' + d.maxV + 'V).');
       else {
@@ -163,9 +163,9 @@
     const rep = pass ? computeReport(build) : null;
     const notes = [];
     if (pass && rep) {
-      if (rep.topSpeed < 0.6) notes.push('Robot çalışıyor ama çok yavaş — daha hızlı motor ya da büyük tekerlek dene.');
-      if (rep.topSpeed > 3.0 && rep.grip < 0.45) notes.push('Çok hızlı ama tutuşu düşük — viraj/pistte savrulabilir.');
-      if (rep.weightG > 400) notes.push('Robot ağır — hızlanması ve dönmesi yavaş olabilir.');
+      if (rep.topSpeed < 0.6) notes.push('Robot çalışıyor ama çok yavaş - daha hızlı motor ya da büyük tekerlek dene.');
+      if (rep.topSpeed > 3.0 && rep.grip < 0.45) notes.push('Çok hızlı ama tutuşu düşük - viraj/pistte savrulabilir.');
+      if (rep.weightG > 400) notes.push('Robot ağır - hızlanması ve dönmesi yavaş olabilir.');
     }
     return { pass, steps, report: rep, notes };
   }

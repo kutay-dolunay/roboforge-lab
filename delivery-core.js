@@ -1,10 +1,10 @@
 /* =============================================================================
- * RoboForge — Teslimat Robotu (Delivery Robot) :: Simulation Core
+ * RoboForge - Teslimat Robotu (Delivery Robot) :: Simulation Core
  * -----------------------------------------------------------------------------
  * Pure, dependency-free. Browser (window.DeliveryCore) + Node (module.exports).
  *
  * A city grid of line "streets". The robot line-follows automatically between
- * intersections; the STUDENT writes the ROUTE PLAN — an ordered list of
+ * intersections; the STUDENT writes the ROUTE PLAN - an ordered list of
  * directives (SOL / SAĞ / DÜZ), one consumed at every intersection (kavşak).
  * This is the state-machine / sequencing lesson.
  *
@@ -350,15 +350,15 @@
     const tips = [];
     const plan = sim.cfg.plan || [];
     if (sim.reason === 'off_city') {
-      if (sim.planIdx >= plan.length) tips.push('Rota planın bitti ama teslimat tamamlanmadı — robot plansız kavşakta DÜZ gider ve şehir dışına çıkabilir. Plana adım ekle.');
-      else tips.push('Robot şehir dışına çıktı. Kavşak yönlerini kontrol et — bir dönüş ters olabilir.');
+      if (sim.planIdx >= plan.length) tips.push('Rota planın bitti ama teslimat tamamlanmadı - robot plansız kavşakta DÜZ gider ve şehir dışına çıkabilir. Plana adım ekle.');
+      else tips.push('Robot şehir dışına çıktı. Kavşak yönlerini kontrol et - bir dönüş ters olabilir.');
     }
     if (sim.reason === 'crash') tips.push('Yol bariyerine çarptın! Kapalı yolu haritadan gör ve rotanı etrafından planla.');
     if (sim.reason === 'timeout') {
-      if (sim.pending.length && sim.delivered.length) tips.push('İlk paket teslim edildi ama ikincisine süre yetmedi — daha kısa bir rota dene.');
-      else tips.push('Süre doldu. Rota çok uzun ya da yanlış — kavşak sayısını haritadan takip ederek planı yeniden yaz.');
+      if (sim.pending.length && sim.delivered.length) tips.push('İlk paket teslim edildi ama ikincisine süre yetmedi - daha kısa bir rota dene.');
+      else tips.push('Süre doldu. Rota çok uzun ya da yanlış - kavşak sayısını haritadan takip ederek planı yeniden yaz.');
     }
-    if (sim.reason === 'line_lost') tips.push('Robot çizgiyi kaybetti. Bu genelde yanlış yöne dönmekle olur — plandaki SOL/SAĞ yönlerini kontrol et.');
+    if (sim.reason === 'line_lost') tips.push('Robot çizgiyi kaybetti. Bu genelde yanlış yöne dönmekle olur - plandaki SOL/SAĞ yönlerini kontrol et.');
     if (sim.status === 'success') {
       const T = sim.city.meta.time || 90;
       if (sim.t < T * 0.5) tips.push('Hızlı teslimat! Daha zor şehirlerde bu planlama becerisi altın değerinde.');
@@ -371,10 +371,10 @@
   function robotClass(sim) {
     if (sim.status !== 'success') return null;
     const T = sim.city.meta.time || 90, t = sim.t;
-    if (t < T * 0.45) return { key: 'simsek_kurye', name: '🏆 Şimşek Kurye', cmt: 'Adres şaşmadı, süre uçtu — kusursuz rota.' };
+    if (t < T * 0.45) return { key: 'simsek_kurye', name: '🏆 Şimşek Kurye', cmt: 'Adres şaşmadı, süre uçtu - kusursuz rota.' };
     if (t < T * 0.6) return { key: 'usta_kurye', name: '🥇 Usta Kurye', cmt: 'Temiz teslimat. Daha kısa rota var mı, haritaya bak.' };
     if (t < T * 0.8) return { key: 'mahalle_kuryesi', name: '🧭 Mahalle Kuryesi', cmt: 'Paket sahibinde! Rota biraz daha kısalabilir.' };
-    return { key: 'caylak_kurye', name: '🎓 Çaylak Kurye', cmt: 'Teslim edildi — şimdi süreyi kısaltma zamanı.' };
+    return { key: 'caylak_kurye', name: '🎓 Çaylak Kurye', cmt: 'Teslim edildi - şimdi süreyi kısaltma zamanı.' };
   }
 
   function runHeadless(cfg, maxTime, dt) {

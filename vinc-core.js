@@ -1,12 +1,12 @@
 /*
- * RoboForge — Kule Vinci Simülasyon Çekirdeği
+ * RoboForge - Kule Vinci Simülasyon Çekirdeği
  * Pure, dependency-free. Browser (window.VincCore) + Node (module.exports).
  *
  * Liman vinci: ray üzerinde araba (trolley) + halatta yük = SARKAÇ.
- * Dersler: (1) hızlanma sarkacı tetikler — kademeli hız = az salınım,
+ * Dersler: (1) hızlanma sarkacı tetikler - kademeli hız = az salınım,
  * (2) sallanan yüke kanca TAKAMAZSIN, sallanırken BIRAKIRSAN yük kayar/devrilir,
  * (3) anti-sway: sarkaç açısını geri besleyen otopilot salınımı aktif söndürür,
- * (4) uzun halat = yavaş sarkaç (T=2π√(L/g)) — istife inerken fizik değişir.
+ * (4) uzun halat = yavaş sarkaç (T=2π√(L/g)) - istife inerken fizik değişir.
  */
 (function () {
   'use strict';
@@ -24,23 +24,23 @@
   const MISSIONS = [
     { id: 'ilkyuk', name: 'İlk Yük', difficulty: 'Başlangıç', dur: 55, wind: 0,
       boxes: [{ x: 1.6, w: 1 }], zones: [{ x: -1.5, tol: 0.20 }], walls: [], stackGoal: null,
-      desc: 'Tek konteyner: sağdan al, sola bırak. Hızlı gidersen yük sallanır — sallanan yük tutulmaz, bırakılmaz!' },
+      desc: 'Tek konteyner: sağdan al, sola bırak. Hızlı gidersen yük sallanır - sallanan yük tutulmaz, bırakılmaz!' },
     { id: 'ikikonteyner', name: 'İki Konteyner', difficulty: 'Başlangıç', dur: 90, wind: 0,
       boxes: [{ x: 1.4, w: 1 }, { x: 1.9, w: 1 }], zones: [{ x: -1.2, tol: 0.18 }, { x: -1.8, tol: 0.18 }],
       walls: [], stackGoal: null,
-      desc: 'İki yük, iki bölge. Salınımı söndürmeden ikinci yüke geçersen zaman kaybedersin — ritmi bul.' },
+      desc: 'İki yük, iki bölge. Salınımı söndürmeden ikinci yüke geçersen zaman kaybedersin - ritmi bul.' },
     { id: 'istif', name: 'Yüksek İstif', difficulty: 'Orta', dur: 90, wind: 0,
       boxes: [{ x: 1.5, w: 1 }, { x: 1.95, w: 1 }], zones: [{ x: -1.5, tol: 0.18 }],
       walls: [], stackGoal: 2,
-      desc: 'İki konteyneri üst üste koy. Üsttekini bırakırken halat KISA — sarkaç hızlı! Nazik ve sabırlı ol.' },
+      desc: 'İki konteyneri üst üste koy. Üsttekini bırakırken halat KISA - sarkaç hızlı! Nazik ve sabırlı ol.' },
     { id: 'darbosluk', name: 'Dar Boşluk', difficulty: 'Orta', dur: 90, wind: 0,
       boxes: [{ x: 1.7, w: 1 }], zones: [{ x: -1.35, tol: 0.14 }],
       walls: [{ x: -0.85, h: 1.15 }, { x: -1.85, h: 1.15 }], stackGoal: null,
-      desc: 'Hedef iki duvarın ARASINDA. Sallanan yük duvara çarpar — boşluğun üstünde tam dur, söndür, dik indir.' },
+      desc: 'Hedef iki duvarın ARASINDA. Sallanan yük duvara çarpar - boşluğun üstünde tam dur, söndür, dik indir.' },
     { id: 'ruzgarli', name: 'Rüzgârlı Liman', difficulty: 'İleri', dur: 95, wind: 0.55,
       boxes: [{ x: 1.6, w: 1 }, { x: 2.0, w: 1 }], zones: [{ x: -1.3, tol: 0.16 }, { x: -1.85, tol: 0.16 }],
       walls: [], stackGoal: null,
-      desc: 'Rüzgâr yükü sürekli itiyor — salınım kendiliğinden sönmüyor. Aktif söndürme olmadan liman kilitlenir.' },
+      desc: 'Rüzgâr yükü sürekli itiyor - salınım kendiliğinden sönmüyor. Aktif söndürme olmadan liman kilitlenir.' },
     { id: 'agiryuk', name: 'Ağır Yük', difficulty: 'İleri', dur: 95, wind: 0.25,
       boxes: [{ x: 1.75, w: 2.2 }], zones: [{ x: -1.55, tol: 0.15 }],
       walls: [{ x: 0.1, h: 0.85 }], stackGoal: null,
@@ -95,7 +95,7 @@
           sim.xtg = Math.max(X_MIN, Math.min(X_MAX, st[1]));
           sim.spd = Math.max(0.1, Math.min(1, (st[2] || 60) / 100));
           const err = sim.xtg - sim.x;
-          const vMax = 1.5 * sim.spd;                                   // hız% mutlak — program her vinçte aynı davranır
+          const vMax = 1.5 * sim.spd;                                   // hız% mutlak - program her vinçte aynı davranır
           const vDes = Math.max(-vMax, Math.min(vMax, err * 3));
           const aCap = 4.5 * sim.spd * (p.motor || 1);                  // motor gücü = ivme otoritesi
           accel = Math.max(-aCap, Math.min(aCap, (vDes - sim.v) / Math.max(dt, 0.016)));
@@ -156,7 +156,7 @@
       }
     }
 
-    // ---- istasyon tutuşu: konumu kilitle + rüzgâr pompalamasını engelle (TAM söndürme değil — o SONDUR'un işi) ----
+    // ---- istasyon tutuşu: konumu kilitle + rüzgâr pompalamasını engelle (TAM söndürme değil - o SONDUR'un işi) ----
     if (accel === 0) {
       accel = Math.max(-5, Math.min(5, -2.4 * (sim.x - sim.xtg) - 3.0 * sim.v + 1.3 * sim.phi + 0.7 * sim.om));
     }
@@ -197,7 +197,7 @@
       // yere sürtme
       if (b.y - BOX / 2 < 0.01 && Math.abs(sim.v) + Math.abs(sim.om) * sim.L > 0.3) {
         sim.status = 'failed'; sim.reason = 'surtme';
-        pushEvt(sim, 'drag', '💥 Yük yerde sürüklendi — halat çok uzun!');
+        pushEvt(sim, 'drag', '💥 Yük yerde sürüklendi - halat çok uzun!');
         return;
       }
     }
@@ -227,7 +227,7 @@
         if (slide > 0.55 || (floor > BOX && dropH > 0.16) || dropH > 0.5) {
           b.toppled = true; b.x += Math.sign(b.vx || 1) * 0.3;
           if (floor > BOX) b.y = BOX / 2;
-          pushEvt(sim, 'top' + i, '🫨 Konteyner ' + (slide > 0.55 ? 'KAYDI ve devrildi — sallanırken bırakıldı (yatay hız ' + slide.toFixed(1) + ' m/s)' : 'DEVRİLDİ — ' + Math.round(dropH * 100) + ' cm yüksekten düştü'));
+          pushEvt(sim, 'top' + i, '🫨 Konteyner ' + (slide > 0.55 ? 'KAYDI ve devrildi - sallanırken bırakıldı (yatay hız ' + slide.toFixed(1) + ' m/s)' : 'DEVRİLDİ - ' + Math.round(dropH * 100) + ' cm yüksekten düştü'));
         } else {
           pushEvt(sim, 'set' + i + '_' + Math.round(sim.t), '📦 Konteyner yerleşti (x=' + b.x.toFixed(2) + ')');
         }
@@ -266,7 +266,7 @@
       if (d < bd) { bd = d; best = i; }
     });
     if (best >= 0) { sim.hooked = best; pushEvt(sim, 'h' + best, '🪝 Konteyner ' + (best + 1) + ' kancada'); }
-    else pushEvt(sim, 'hm' + sim.stepIdx + '_' + Math.round(sim.t), '🫳 Kanca boş döndü — konteynerin tam üstünde ve doğru halat boyunda mısın?');
+    else pushEvt(sim, 'hm' + sim.stepIdx + '_' + Math.round(sim.t), '🫳 Kanca boş döndü - konteynerin tam üstünde ve doğru halat boyunda mısın?');
   }
   function release(sim) {
     if (sim.hooked < 0) return;
@@ -313,19 +313,19 @@
     const tScore = Math.max(0, 100 - sim.t / sim.mission.dur * 85);
     const total = pr * 0.4 + sw * 0.3 + tScore * 0.3;
     if (total > 68) return { name: '🏆 Liman Kaptanı', cmt: 'Yük hiç sallanmadı, milimetrik indi, vardiya erken bitti. Vinç senin uzuvun!' };
-    if (total > 48) return { name: '🥈 Vinç Operatörü', cmt: 'İş tamam. Madalya için: tepe salınımı ' + Math.round(sim.maxSwing * 57.3) + '° — daha kademeli hızlan, sönümü bekle.' };
-    return { name: '🥉 Çırak', cmt: 'Yükler yerinde ama liman sallandı durdu. Anti-sway modunu incele — sarkacı fizik değil, geri besleme yener.' };
+    if (total > 48) return { name: '🥈 Vinç Operatörü', cmt: 'İş tamam. Madalya için: tepe salınımı ' + Math.round(sim.maxSwing * 57.3) + '° - daha kademeli hızlan, sönümü bekle.' };
+    return { name: '🥉 Çırak', cmt: 'Yükler yerinde ama liman sallandı durdu. Anti-sway modunu incele - sarkacı fizik değil, geri besleme yener.' };
   }
   function coach(sim) {
     const tips = [];
     const r = sim.reason || '';
     if (r === 'devrildi') tips.push('Konteyner kaydı/devrildi. Bırakma anında yükün YATAY hızı vardı: v_yük = araba hızı + sarkaç ucu hızı. İkisi de sıfıra yakın olmadan BIRAKMA. SONDUR adımı ya da anti-sway tam bunun için.');
     if (r === 'duvar') tips.push('Yük duvara çarptı. Duvar bölgesinden geçerken halatı KISA tut (yüksek taşı), boşluğun tam üstünde dur, salınımı söndür, sonra dik indir.');
-    if (r === 'surtme') tips.push('Yük yerde sürüklendi. Taşıma sırasında halat uzunluğu + kutu boyu ray yüksekliğini aşmamalı — taşımadan önce HALAT ile yükü kaldır.');
-    if (r === 'eksik') tips.push('Yükler hedefte değil. Kanca boş dönmüş olabilir: TAK anında |açı| < 6° ve kancanın kutunun ÜSTÜNDE olması şart. Olay kaydına bak — hangi TAK boş döndü?');
-    if (r === 'istif') tips.push('Kutular üst üste oturmadı. İkinciyi ilkinin TAM üstüne, kısa halat sarkacının hızlı olduğunu unutmadan bırak: T = 2π√(L/g) — kısa halat = hızlı salınım.');
+    if (r === 'surtme') tips.push('Yük yerde sürüklendi. Taşıma sırasında halat uzunluğu + kutu boyu ray yüksekliğini aşmamalı - taşımadan önce HALAT ile yükü kaldır.');
+    if (r === 'eksik') tips.push('Yükler hedefte değil. Kanca boş dönmüş olabilir: TAK anında |açı| < 6° ve kancanın kutunun ÜSTÜNDE olması şart. Olay kaydına bak - hangi TAK boş döndü?');
+    if (r === 'istif') tips.push('Kutular üst üste oturmadı. İkinciyi ilkinin TAM üstüne, kısa halat sarkacının hızlı olduğunu unutmadan bırak: T = 2π√(L/g) - kısa halat = hızlı salınım.');
     if (r === 'sure') tips.push('Süre doldu. Paradoks: YAVAŞ hızlanmak toplamda HIZLIDIR çünkü sönüm beklemezsin. %40 hızla akıcı bir tur, %100 hızla dur-kalk turundan öndedir.');
-    if (!tips.length && sim.maxSwing > 0.3) tips.push('Tepe salınım ' + Math.round(sim.maxSwing * 57.3) + '° — bu bir liman değil salıncak! GIT hızlarını düşür ya da anti-sway kazançlarını (ks, kw) artır.');
+    if (!tips.length && sim.maxSwing > 0.3) tips.push('Tepe salınım ' + Math.round(sim.maxSwing * 57.3) + '° - bu bir liman değil salıncak! GIT hızlarını düşür ya da anti-sway kazançlarını (ks, kw) artır.');
     if (!tips.length) tips.push('Halat uzunluğu sarkaç periyodunu değiştirir: T = 2π√(L/g). Uzun halat yavaş ve tembel, kısa halat hızlı ve sinirli. İstifte bunu hissedeceksin.');
     return tips;
   }

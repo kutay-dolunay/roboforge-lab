@@ -246,7 +246,7 @@
         </div>
         <div class="tr">
           <div class="sensbar" id="hudSensors"></div>
-          <div class="actionchip">HAREKET<b id="hudAction">—</b></div>
+          <div class="actionchip">HAREKET<b id="hudAction">-</b></div>
           <div class="motorbars">
             <div class="mrow"><span>SOL</span><div class="mtrack"><div class="mfill" id="mfL"></div></div></div>
             <div class="mrow"><span>SAĞ</span><div class="mtrack"><div class="mfill" id="mfR"></div></div></div>
@@ -257,7 +257,7 @@
     </div>
 
     <div class="result idle" id="result">
-      <div class="rhead" id="rhead">🧩 Robotunu kur, kodla ve <b style="color:var(--green);margin:0 4px">ÇALIŞTIR</b> — çıkışı bulmayı dene.</div>
+      <div class="rhead" id="rhead">🧩 Robotunu kur, kodla ve <b style="color:var(--green);margin:0 4px">ÇALIŞTIR</b> - çıkışı bulmayı dene.</div>
       <div class="rbody" id="rbody" style="display:none"></div>
     </div>
   </div>
@@ -323,13 +323,13 @@
 
         <div id="kod-pid" style="display:none">
           <div class="hintbox">
-            PID modunda robot <b>sol duvarı</b> sabit bir mesafede takip eder — koridorları akıcı sürer, önü
+            PID modunda robot <b>sol duvarı</b> sabit bir mesafede takip eder - koridorları akıcı sürer, önü
             kapanınca sağa kırar. <b style="color:var(--sky)">Kp</b> düzeltmenin sertliğini,
             <b style="color:var(--sky)">Kd</b> savrulmayı bastırmayı belirler.
           </div>
-          <div class="pidrow"><label>Kp — Düzeltme Sertliği <b id="pidKpV">2.8</b></label>
+          <div class="pidrow"><label>Kp - Düzeltme Sertliği <b id="pidKpV">2.8</b></label>
             <input type="range" id="pidKp" min="0" max="6" step="0.1" value="2.8" /></div>
-          <div class="pidrow"><label>Kd — Sönümleme (sakinlik) <b id="pidKdV">0.7</b></label>
+          <div class="pidrow"><label>Kd - Sönümleme (sakinlik) <b id="pidKdV">0.7</b></label>
             <input type="range" id="pidKd" min="0" max="3" step="0.1" value="0.7" /></div>
           <div class="pidrow"><label>Taban Hız <b id="pidBaseV">100%</b></label>
             <input type="range" id="pidBase" min="40" max="120" step="5" value="100" /></div>
@@ -373,7 +373,7 @@
 
   const LAB = {
     mazeIdx: 0, maze: null,
-    sensors: [],            // empty on open — student builds from scratch
+    sensors: [],            // empty on open - student builds from scratch
     rules: [],              // empty on open
     defaultRule: M.starterDefault(),
     params: M.defaultParams(),
@@ -496,13 +496,13 @@
       d.style.background=on?d.style.color:'#0b1220'; });
     if(LAB.mode==='pid'){
       const e = LAB.sim ? (LAB.sim.lastError||0) : 0;   // lD - target ; >0 = far from left wall
-      document.getElementById('hudAction').textContent = LAB.sim ? (e>0.15?'◄ SOL':e<-0.15?'SAĞ ►':'İLERİ') : '—';
+      document.getElementById('hudAction').textContent = LAB.sim ? (e>0.15?'◄ SOL':e<-0.15?'SAĞ ►':'İLERİ') : '-';
       const turn=Math.max(-0.6,Math.min(0.6,e*(LAB.pid.kp||0)*0.2));
       setBar('mfL', 0.6-turn); setBar('mfR', 0.6+turn);
       const ef=document.getElementById('errFill'); if(ef){ const ee=Math.max(-1,Math.min(1,e/1.2)); ef.style.left=(50+ee*48)+'%'; }
     } else {
       const act=LAB.sim?LAB.sim.lastAction:null;
-      document.getElementById('hudAction').textContent = act?ACT_TXT[act]:'—';
+      document.getElementById('hudAction').textContent = act?ACT_TXT[act]:'-';
       let mL=0,mR=0;
       if(states){ const cmd=M.evalRules(LAB.rules,LAB.defaultRule,states); mL=cmd.mL; mR=cmd.mR; }
       setBar('mfL',mL); setBar('mfR',mR);
@@ -579,14 +579,14 @@
   }
   function setResultReady(){
     const r=document.getElementById('result'); r.className='result idle';
-    document.getElementById('rhead').innerHTML='🧩 Robotunu kur, kodla ve <b style="color:var(--green);margin:0 4px">ÇALIŞTIR</b> — çıkışı bulmayı dene.';
+    document.getElementById('rhead').innerHTML='🧩 Robotunu kur, kodla ve <b style="color:var(--green);margin:0 4px">ÇALIŞTIR</b> - çıkışı bulmayı dene.';
     document.getElementById('rbody').style.display='none';
   }
   function medal(sim){
     if(sim.status!=='success') return null;
     const s=sim.steps;
     if(s<=22) return {name:'🏆 Usta Kâşif', d:'Neredeyse en kısa yoldan çıktın!'};
-    if(s<=40) return {name:'🥈 Çevik Robot', d:'Güzel bir rota — biraz daha kısaltılabilir.'};
+    if(s<=40) return {name:'🥈 Çevik Robot', d:'Güzel bir rota - biraz daha kısaltılabilir.'};
     return {name:'🥉 Sabırlı Kâşif', d:'Çıkışı buldun! Gereksiz dönüşleri azaltmayı dene.'};
   }
   function showResult(){
@@ -602,7 +602,7 @@
         <div><small>SÜRE</small><b>${sim.t.toFixed(1)}s</b></div>
         <div><small>ADIM</small><b>${sim.steps}</b></div>
         <div><small>KEŞFEDİLEN GÖZ</small><b>${M.exploredCount(sim)}</b></div>
-        <div><small>DURUM</small><b style="color:${win?'var(--green)':'#fca5a5'}">${win?'ÇÖZÜLDÜ':'—'}</b></div>
+        <div><small>DURUM</small><b style="color:${win?'var(--green)':'#fca5a5'}">${win?'ÇÖZÜLDÜ':'-'}</b></div>
       </div>`+
       (window.RFResult
         ? RFResult.coachHTML(tips, { win:win, headWin:'🎓 Ne öğrendik?', headLose:'🔍 Ne oldu, neden?', reason: win?null:(REASONS[sim.reason]||'') })
@@ -838,7 +838,7 @@
     {tab:null,t:'Labirent Lab’a hoş geldin! 🧩',p:'Robotun duvarları algılayıp çıkışı bulacak. Onu sen kodlayacaksın. 4 adımda gösterelim.'},
     {tab:'robot',t:'1) Sensörleri tanı',p:'🤖 Robot sekmesinde robotun ön/sol/sağ mesafe sensörleri var. Her biri o yönde duvar olup olmadığını görür.'},
     {tab:'kod',t:'2) Kararları kodla',p:'🧩 Kod sekmesinde "duvar/açık" okumalarına göre motorları sür. Klasik strateji: sol duvarı takip et.'},
-    {tab:null,t:'3) Çalıştır ve öğren',p:'▶ ÇALIŞTIR’a bas. Robot duvara sürer ya da kaybolursa ipuçları çıkar — düzelt, tekrar dene. 🔗 Paylaş ile arkadaşına gönder!'},
+    {tab:null,t:'3) Çalıştır ve öğren',p:'▶ ÇALIŞTIR’a bas. Robot duvara sürer ya da kaybolursa ipuçları çıkar - düzelt, tekrar dene. 🔗 Paylaş ile arkadaşına gönder!'},
   ];
   let tutI=0;
   function switchTab(name){
@@ -881,7 +881,7 @@
     card.style.cssText='border-top:1px solid var(--line);padding:16px;background:#0c1526';
     if(build && RD){
       const chips=RD.ORDER.map(cat=>{ const o=RD.opt(cat,build[cat]);
-        return '<span style="border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:4px 8px;font-size:.68rem;color:var(--muted2)">'+RD.COMPONENTS[cat].icon+' <b style="color:var(--txt)">'+(o?o.name:'—')+'</b></span>'; }).join('');
+        return '<span style="border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:4px 8px;font-size:.68rem;color:var(--muted2)">'+RD.COMPONENTS[cat].icon+' <b style="color:var(--txt)">'+(o?o.name:'-')+'</b></span>'; }).join('');
       const r=RD.computeReport(build);
       const stat=(l,v,u)=>'<div style="background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:8px 6px;text-align:center"><div style="font-size:.52rem;letter-spacing:1px;color:var(--muted);text-transform:uppercase">'+l+'</div><div style="font-size:1.1rem;font-weight:800;margin-top:2px">'+v+'</div><div style="font-size:.55rem;color:var(--muted2)">'+u+'</div></div>';
       card.innerHTML='<div style="font-size:.62rem;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:10px">🔧 Robotun Künyesi</div>'+

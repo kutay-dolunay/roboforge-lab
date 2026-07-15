@@ -1,5 +1,5 @@
 /* =============================================================================
- * RoboForge — Sürü Robotları (Swarm Robotics) :: Simulation Core
+ * RoboForge - Sürü Robotları (Swarm Robotics) :: Simulation Core
  * -----------------------------------------------------------------------------
  * Pure, dependency-free. Browser (window.SwarmCore) + Node (module.exports).
  *
@@ -7,7 +7,7 @@
  * its sensing radius and blends four instincts (the student's sliders):
  *   AYRILMA (separation) · HİZALANMA (alignment) · TOPLANMA (cohesion) ·
  *   HEDEF ÇEKİMİ (goal attraction)
- * From these local rules, flock behaviour EMERGES — the swarm lesson.
+ * From these local rules, flock behaviour EMERGES - the swarm lesson.
  * ========================================================================== */
 (function (global) {
   'use strict';
@@ -103,7 +103,7 @@
       }
       return { label: minD.toFixed(1) + '/' + task.d, done: minD >= task.d, frac: Math.min(1, minD / task.d) };
     }
-    return { label: '—', done: false, frac: 0 };
+    return { label: '-', done: false, frac: 0 };
   }
 
   function motorFraction(m) {
@@ -268,16 +268,16 @@
     const task = sim.level.task;
     if (sim.reason === 'timeout') {
       if (task.type === 'gather') {
-        if ((w.goal || 0) < 0.6) tips.push('Sürü hedefe gitmedi — Hedef Çekimi çok zayıf. Ama dikkat: çok yüksek yaparsan geçitlerde birbirlerini ezerler, Ayrılma da lazım.');
+        if ((w.goal || 0) < 0.6) tips.push('Sürü hedefe gitmedi - Hedef Çekimi çok zayıf. Ama dikkat: çok yüksek yaparsan geçitlerde birbirlerini ezerler, Ayrılma da lazım.');
         else if ((w.sep || 0) > 2.2) tips.push('Robotlar birbirini o kadar itiyor ki bölgeye sığamıyorlar! Ayrılmayı azalt ya da Toplanmayı artır.');
         else tips.push('Az kaldı! Dar geçitlerde sürü sıkışır: Ayrılma + Hedef dengesi geçiş sırasını kendiliğinden oluşturur. Hizalanma da akışı düzleştirir.');
       }
-      if (task.type === 'cover') tips.push('Alan yeterince taranamadı. Ayrılmayı artır — birbirini iten robotlar doğal olarak farklı bölgelere dağılır. Toplanma bu görevde düşmanın!');
-      if (task.type === 'spread') tips.push('Eşit dağılım sağlanamadı. Ayrılmayı artır, Toplanmayı kıs — bu görev yalnızlık ister!');
+      if (task.type === 'cover') tips.push('Alan yeterince taranamadı. Ayrılmayı artır - birbirini iten robotlar doğal olarak farklı bölgelere dağılır. Toplanma bu görevde düşmanın!');
+      if (task.type === 'spread') tips.push('Eşit dağılım sağlanamadı. Ayrılmayı artır, Toplanmayı kıs - bu görev yalnızlık ister!');
     }
     if (sim.status === 'success') {
       const T = sim.level.time || 45;
-      if (sim.t < T * 0.5) tips.push('Kusursuz sürü! Tek tek aptal, birlikte akıllı — sürü zekâsının özü bu.');
+      if (sim.t < T * 0.5) tips.push('Kusursuz sürü! Tek tek aptal, birlikte akıllı - sürü zekâsının özü bu.');
       else tips.push('Görev tamam! Ağırlıkların dansını ince ayarlayarak süreyi kısaltabilirsin.');
     }
     return tips;
@@ -288,8 +288,8 @@
     const T = sim.level.time || 45, t = sim.t;
     if (t < T * 0.45) return { key: 'suru_beyni', name: '🏆 Sürü Beyni', cmt: 'Altı robot tek organizma gibi aktı.' };
     if (t < T * 0.65) return { key: 'koloni_sefi', name: '🥇 Koloni Şefi', cmt: 'Uyumlu sürü. Ağırlık dengesini biraz daha oturt.' };
-    if (t < T * 0.85) return { key: 'cobanbasi', name: '🧭 Çobanbaşı', cmt: 'Sürü görevi tamamladı — biraz dağınık ama tamamladı.' };
-    return { key: 'caylak_coban', name: '🎓 Çaylak Çoban', cmt: 'Son anda toparlandılar — ağırlıklarla oyna.' };
+    if (t < T * 0.85) return { key: 'cobanbasi', name: '🧭 Çobanbaşı', cmt: 'Sürü görevi tamamladı - biraz dağınık ama tamamladı.' };
+    return { key: 'caylak_coban', name: '🎓 Çaylak Çoban', cmt: 'Son anda toparlandılar - ağırlıklarla oyna.' };
   }
 
   function runHeadless(cfg, maxTime, dt) {

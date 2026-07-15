@@ -1,9 +1,9 @@
 /* =============================================================================
- * RoboForge — Denge Robotu (Self-Balancing Robot) :: Simulation Core
+ * RoboForge - Denge Robotu (Self-Balancing Robot) :: Simulation Core
  * -----------------------------------------------------------------------------
  * Pure, dependency-free. Browser (window.BalanceCore) + Node (module.exports).
  *
- * SIDE-VIEW inverted pendulum on wheels — the first UNSTABLE system in the
+ * SIDE-VIEW inverted pendulum on wheels - the first UNSTABLE system in the
  * catalog. Do nothing and it falls. This is the real reason PID exists.
  *
  * State: x (position), v, th (tilt, + = leaning RIGHT), om (tilt rate).
@@ -11,7 +11,7 @@
  * the body the opposite way (cart-pole coupling).
  *
  * PID mode (DEFAULT): m = Kp·th + Kd·om, with a target-seeking tilt reference
- * (to move right you must LEAN right — position control goes through angle).
+ * (to move right you must LEAN right - position control goes through angle).
  * Kural mode: tilt bands (ÇOK SOL / SOL / DİK / SAĞ / ÇOK SAĞ) + HEDEF side.
  * ========================================================================== */
 (function (global) {
@@ -28,7 +28,7 @@
   // ---- levels (7-ladder) ---------------------------------------------------------
   // dur: survive this long · targets: [{t:afterSec, x}] visit in order (within TARGET_R,
   // while |tilt|<FALL) · pokes: [{t, imp}] impulse on om · wind: {base, gustT, gustImp}
-  // mass: tilt inertia multiplier (yük) — heavier = slower, harder recovery
+  // mass: tilt inertia multiplier (yük) - heavier = slower, harder recovery
   const LEVELS = [
     { id: 'ayakta', name: 'Ayakta Kal', difficulty: 'Başlangıç', dur: 12,
       init: 0.09, targets: [], pokes: [], mass: 1 },
@@ -208,15 +208,15 @@
     const mode = sim.cfg.mode || 'pid';
     if (sim.reason === 'fell') {
       if (mode === 'pid') {
-        if ((sim.cfg.pid.kd || 0) < 0.15) tips.push("Robot devrildi. Kd çok düşük — açı DÜZELİRKEN bile hız kazanır ve öbür tarafa aşar. Kd devrilme hızını görür ve erken frenler; önce Kd değerini artır.");
-        else if ((sim.cfg.pid.kp || 0) < 1.2) tips.push("Robot devrildi. Kp yetersiz — eğim büyüyünce yeterince sert tepki veremiyor. Kp değerini artır.");
+        if ((sim.cfg.pid.kd || 0) < 0.15) tips.push("Robot devrildi. Kd çok düşük - açı DÜZELİRKEN bile hız kazanır ve öbür tarafa aşar. Kd devrilme hızını görür ve erken frenler; önce Kd değerini artır.");
+        else if ((sim.cfg.pid.kp || 0) < 1.2) tips.push("Robot devrildi. Kp yetersiz - eğim büyüyünce yeterince sert tepki veremiyor. Kp değerini artır.");
         else tips.push("Devrildi! Kp/Kd oranını dengele: çok Kp titretir, çok Kd uyuşuk yapar. Dürtmelerden hemen sonra ne olduğuna denge grafiğinden bak.");
       } else {
-        tips.push('Devrildi! Bant kuralları kesiklidir: DİK bandında motor 0 iken robot yine de hız kazanmış olabilir. ÇOK eğik bantlarda tam güç, az eğik bantlarda orta güç ver — ya da PID moduna geçip sürekli kontrolü dene (bu senaryonun asıl dersi!).');
+        tips.push('Devrildi! Bant kuralları kesiklidir: DİK bandında motor 0 iken robot yine de hız kazanmış olabilir. ÇOK eğik bantlarda tam güç, az eğik bantlarda orta güç ver - ya da PID moduna geçip sürekli kontrolü dene (bu senaryonun asıl dersi!).');
       }
     }
-    if (sim.reason === 'out') tips.push("Robot dengede ama sahneden kaçtı! Konumu geri çeken terim zayıf — Hedef Çekimi kazancını artır.");
-    if (sim.reason === 'targets_missed') tips.push('Ayakta kaldın ama hedeflere uğramadın (' + sim.reached.length + '/' + (sim.level.targets || []).length + '). Hedefe gitmek için robot hedefe DOĞRU hafifçe eğilmeli — Hedef Çekimi kazancını artır.');
+    if (sim.reason === 'out') tips.push("Robot dengede ama sahneden kaçtı! Konumu geri çeken terim zayıf - Hedef Çekimi kazancını artır.");
+    if (sim.reason === 'targets_missed') tips.push('Ayakta kaldın ama hedeflere uğramadın (' + sim.reached.length + '/' + (sim.level.targets || []).length + '). Hedefe gitmek için robot hedefe DOĞRU hafifçe eğilmeli - Hedef Çekimi kazancını artır.');
     if (sim.status === 'success') {
       const st = steadiness(sim);
       if (st >= 85) tips.push('Heykel gibi! Segway mühendisleri seninle gurur duyar.');
@@ -228,10 +228,10 @@
   function robotClass(sim) {
     if (sim.status !== 'success') return null;
     const st = steadiness(sim);
-    if (st >= 85) return { key: 'denge_ustasi', name: '🏆 Denge Ustası', cmt: 'Fırtınada bile kıpırdamadı — kontrol mühendisliği bu.' };
+    if (st >= 85) return { key: 'denge_ustasi', name: '🏆 Denge Ustası', cmt: 'Fırtınada bile kıpırdamadı - kontrol mühendisliği bu.' };
     if (st >= 68) return { key: 'ip_cambazi', name: '🥇 İp Cambazı', cmt: 'Sağlam duruş. Salınımı biraz daha söndürebilirsin.' };
     if (st >= 50) return { key: 'dengeci', name: '🧭 Dengeci', cmt: 'Ayakta kaldın! Şimdi daha az sallanma zamanı.' };
-    return { key: 'caylak_cambaz', name: '🎓 Çaylak Cambaz', cmt: 'Düşe kalka ama başardın — Kd seni bekliyor.' };
+    return { key: 'caylak_cambaz', name: '🎓 Çaylak Cambaz', cmt: 'Düşe kalka ama başardın - Kd seni bekliyor.' };
   }
 
   function runHeadless(cfg, maxTime, dt) {

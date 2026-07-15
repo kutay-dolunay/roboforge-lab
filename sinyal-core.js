@@ -1,11 +1,11 @@
 /*
- * RoboForge — Sinyal Avcısı (RSSI Trilateration) Simülasyon Çekirdeği
+ * RoboForge - Sinyal Avcısı (RSSI Trilateration) Simülasyon Çekirdeği
  * Pure, dependency-free. Browser (window.SinyalCore) + Node (module.exports).
  *
  * Gizli bir verici (hedef "işaretçi") sahada bir yerde. Robotun 3 sabit baz
  * istasyonundan (verici) aldığı SİNYAL GÜCÜYLE (RSSI) her birine olan mesafesini
- * TAHMİN eder — ama ölçüm GÜRÜLTÜLÜdür. Üç mesafe çemberinin kesişimi (trilaterasyon)
- * hedefi verir. Dersler: (1) RSSI → mesafe: d = d0·10^((P0−RSSI)/(10·n)) — sinyal
+ * TAHMİN eder - ama ölçüm GÜRÜLTÜLÜdür. Üç mesafe çemberinin kesişimi (trilaterasyon)
+ * hedefi verir. Dersler: (1) RSSI → mesafe: d = d0·10^((P0−RSSI)/(10·n)) - sinyal
  * uzaklıkla ÜSTEL zayıflar, (2) tek ölçüm yalan söyler → ORTALAMA al (gürültü filtresi),
  * (3) üç çember bir noktada kesişmez, en iyi tahmin = en küçük kareler, (4) hareket
  * ettikçe tahmin güncellenir: yaklaştıkça netleşir (gradyan tırmanışı).
@@ -19,7 +19,7 @@
   const D0 = 1.0;
   const REACH = 1.0;   // hedefe bu kadar yaklaşınca "bulundu"
   const ARENA = 20;    // 0..20 kare saha
-  const VBASE = 2.6;   // robot temel hızı (birim/sn) — trilaterasyon lehine yavaş
+  const VBASE = 2.6;   // robot temel hızı (birim/sn) - trilaterasyon lehine yavaş
 
   // rssi(dbm) → tahmini mesafe
   function rssiToDist(rssi) {
@@ -34,19 +34,19 @@
   const MISSIONS = [
     { id: 'ilkiz', name: 'İlk İz', difficulty: 'Başlangıç', dur: 45, noise: 1.2, avg: 6,
       bx: [[2, 2], [18, 2], [10, 18]], target: [10, 9], move: null,
-      desc: 'Üç anten, gizli bir verici. Sinyal gücünden mesafeyi kestir, üç çemberi kes, kaynağa yürü. Gürültü az — sinyali tanı.' },
+      desc: 'Üç anten, gizli bir verici. Sinyal gücünden mesafeyi kestir, üç çemberi kes, kaynağa yürü. Gürültü az - sinyali tanı.' },
     { id: 'ucgen', name: 'Üçgen Kilit', difficulty: 'Başlangıç', dur: 50, noise: 1.6, avg: 6,
       bx: [[2, 3], [18, 3], [10, 18]], target: [6, 13], move: null,
-      desc: 'Hedef üçgenin kenarına yakın. Trilaterasyon üç antenden eşit uzaklaşınca en isabetli — geometriyi hisset.' },
+      desc: 'Hedef üçgenin kenarına yakın. Trilaterasyon üç antenden eşit uzaklaşınca en isabetli - geometriyi hisset.' },
     { id: 'gurultu', name: 'Parazit', difficulty: 'Orta', dur: 55, noise: 3.2, avg: 10,
       bx: [[2, 2], [18, 2], [10, 18]], target: [13, 12], move: null,
-      desc: 'Ortam gürültülü: tek ölçüm metrelerce şaşırtır. Sırrı ORTALAMA: çok örnek al, gürültü sönümlensin — acele eden kaybeder.' },
+      desc: 'Ortam gürültülü: tek ölçüm metrelerce şaşırtır. Sırrı ORTALAMA: çok örnek al, gürültü sönümlensin - acele eden kaybeder.' },
     { id: 'kenar', name: 'Kör Nokta', difficulty: 'Orta', dur: 60, noise: 3.4, avg: 10,
       bx: [[3, 3], [17, 4], [9, 16]], target: [17, 15], move: null,
       desc: 'Hedef antenlerin dışında bir köşede: çemberler dar açıyla kesişir, küçük ölçüm hatası büyür. Sabırla ortala, yaklaştıkça güncelle.' },
     { id: 'kacan', name: 'Kaçan Verici', difficulty: 'İleri', dur: 75, noise: 3.0, avg: 10,
       bx: [[2, 2], [18, 2], [10, 18]], target: [8, 8], move: { ax: 5, ay: 4, sx: 0.85, sy: 0.7 },
-      desc: 'Verici hareketli! Sabit bir tahmin işe yaramaz — sürekli yeniden ölç, yeniden trilatere et, peşinden git. Ama gürültüde tek ölçüme koşarsan hayalet kovalarsın.' },
+      desc: 'Verici hareketli! Sabit bir tahmin işe yaramaz - sürekli yeniden ölç, yeniden trilatere et, peşinden git. Ama gürültüde tek ölçüme koşarsan hayalet kovalarsın.' },
     { id: 'derin', name: 'Derin Saha', difficulty: 'İleri', dur: 80, noise: 5.0, avg: 12,
       bx: [[3, 2], [17, 3], [10, 17]], target: [15, 6], move: { ax: 3.5, ay: 3.5, sx: 0.7, sy: 0.85 },
       desc: 'Yüksek gürültü + hareketli hedef + uzak köşe. Ortalama penceresini genişlet, güvenini oturt, sonra yaklaş.' },
@@ -248,17 +248,17 @@
     const total = tScore * 0.6 + errScore * 0.4;
     if (total > 60) return { name: '🏆 Sinyal Dedektifi', cmt: 'Gürültüyü ezdin, üç çemberi tek noktada kesiştirdin, doğruca kaynağa gittin. Arama-kurtarma ekibi seni istiyor!' };
     if (total > 38) return { name: '🥈 Telemetri Uzmanı', cmt: 'Vericiyi buldun. Daha isabetli için: ortalama penceresini artır, tahmin oturmadan koşma.' };
-    return { name: '🥉 Frekans Çırağı', cmt: 'Ucu ucuna kıstırdın. Gürültü seni çok savurdu — daha çok örnek al, tahmin netleşsin.' };
+    return { name: '🥉 Frekans Çırağı', cmt: 'Ucu ucuna kıstırdın. Gürültü seni çok savurdu - daha çok örnek al, tahmin netleşsin.' };
   }
   function coach(sim) {
     const tips = [];
     const r = sim.reason || '';
     if (r === 'sure') {
-      if (sim.mission.move) tips.push('Süre doldu. Verici HAREKETLİydi — sabit bir tahmine kilitlenmek işe yaramaz. Sürekli yeniden ölç, trilaterasyonu her an güncelle, tahminin peşinden git. Gürültü yüzünden yavaşladıysan ortalama penceresini biraz artır.');
+      if (sim.mission.move) tips.push('Süre doldu. Verici HAREKETLİydi - sabit bir tahmine kilitlenmek işe yaramaz. Sürekli yeniden ölç, trilaterasyonu her an güncelle, tahminin peşinden git. Gürültü yüzünden yavaşladıysan ortalama penceresini biraz artır.');
       else tips.push('Süre doldu. Muhtemelen gürültülü tek ölçümlerin peşinden savruldun. RSSI tek başına 3 metre yalan söyler; çok örneğin ORTALAMASI gerçeği verir. Yeterli veri toplanmadan koşma.');
     }
     if (sim.status === 'success' && sim.bestErr > 3) tips.push('Buldun ama trilaterasyon tahminin ' + sim.bestErr.toFixed(1) + ' m kadar şaştı. Antenlerin dışındaki köşelerde çemberler dar açıyla kesişir; ortalama penceresi büyükse hata küçülür.');
-    if (!tips.length) tips.push('RSSI → mesafe üsteldir: d = d0·10^((P0−RSSI)/(10·n)). Sinyal 6 dB düşerse mesafe İKİYE katlanır. Bu yüzden uzakta küçük gürültü büyük mesafe hatası yapar — yaklaştıkça tahminin doğallaşır.');
+    if (!tips.length) tips.push('RSSI → mesafe üsteldir: d = d0·10^((P0−RSSI)/(10·n)). Sinyal 6 dB düşerse mesafe İKİYE katlanır. Bu yüzden uzakta küçük gürültü büyük mesafe hatası yapar - yaklaştıkça tahminin doğallaşır.');
     return tips;
   }
 

@@ -1,5 +1,5 @@
 /*
- * RoboForge — Auth module (Moodle SSO client side)
+ * RoboForge - Auth module (Moodle SSO client side)
  * -----------------------------------------------------------------------------
  * Handles "Moodle ile Giriş": redirects to the Moodle SSO endpoint, then on
  * return verifies the RS256 token with the PUBLIC key (safe to ship here) and
@@ -21,7 +21,7 @@
     ssoUrl: 'https://akademi.robofabrik.tech/local/roboforge/sso.php',
     iss: 'akademi.robofabrik.tech',
     aud: 'roboforge.robofabrik.tech',
-    // PUBLIC key (SPKI DER, base64). Safe to be here — it can only VERIFY, not sign.
+    // PUBLIC key (SPKI DER, base64). Safe to be here - it can only VERIFY, not sign.
     // Paired with the private key on the VPS at /var/rf-secrets/roboforge_sso_private.pem
     publicKeyB64: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApS+F0Goy4CQqC8+Qx1mLiriwBY8a4cEBVXDJ0UpJTF5atccYoyi6UppZJ5HTVjMpGjysQtXeT2+ykI7OzG2g5iHFRqYgefP/kTaownY8iDEO+7cURGOPzUh53qZ3XRQ+KPMs+A1twHEUsSWAvbMcWKiQxjsJEPEVj1BimK4WNFV3l7cM/IWnMbIr/e3s2qG1lzA7fnNR/BeHTmJFV7AgGLgwtS/UogAoy6vxsG6qbUXOrjVAzfyOqDG7yRb+P6DIGTLC2LtCH357AwpTaTrF9iB3DHpqTfLjDV/AJ/AmdCNM6BC98/xEEGh5Zh/JSAgBsfdEqpv5ZxFri8gD4nwn5QIDAQAB',
     sessionKey: 'rf_session',      // localStorage key for the RoboForge session
@@ -150,7 +150,7 @@
           try {
             var expectNonce = sessionStorage.getItem(CFG.nonceKey);
             if (expectNonce && payload.nonce && payload.nonce !== expectNonce && global.console) {
-              console.info('RFAuth: nonce differs (soft) — token signature is valid, proceeding.');
+              console.info('RFAuth: nonce differs (soft) - token signature is valid, proceeding.');
             }
             sessionStorage.removeItem(CFG.nonceKey);
           } catch (e) {}

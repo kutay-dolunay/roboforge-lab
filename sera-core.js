@@ -1,5 +1,5 @@
 /*
- * RoboForge — Akıllı Sera (Telemetri Kiti) Simülasyon Çekirdeği
+ * RoboForge - Akıllı Sera (Telemetri Kiti) Simülasyon Çekirdeği
  * Pure, dependency-free. Browser (window.SeraCore) + Node (module.exports).
  *
  * Fiction: ESP32'li mini sera → öğrencinin telefonuna Wi-Fi telemetri.
@@ -29,11 +29,11 @@
     { id: 'kurak', name: 'Kurak Hafta', difficulty: 'Başlangıç', days: 1,
       base: 22, swing: 8, outH: 22, evap: 1.8, sunMul: 1.05, tank: 55, batt: 100, startS: 40,
       drops: [], winds: [], stuck: null, minHealth: 45, minGrowth: 32,
-      desc: 'Toprak hızla kuruyor, depo yarım. Pompayı akıllı kullan — su israfı = kuruyan bitki.' },
+      desc: 'Toprak hızla kuruyor, depo yarım. Pompayı akıllı kullan - su israfı = kuruyan bitki.' },
     { id: 'sicak', name: 'Sıcak Dalga', difficulty: 'Orta', days: 1,
       base: 26, swing: 10, outH: 30, evap: 1.5, sunMul: 1.3, tank: 80, batt: 100,
       drops: [], winds: [], stuck: null, minHealth: 45, minGrowth: 32,
-      desc: 'Öğlen dışarısı 36°. Kapalı sera fırına döner — sera etkisini yönet.' },
+      desc: 'Öğlen dışarısı 36°. Kapalı sera fırına döner - sera etkisini yönet.' },
     { id: 'don', name: 'Don Gecesi', difficulty: 'Orta', days: 1,
       base: 13, swing: 12, outH: 50, evap: 0.7, sunMul: 1.25, tank: 100, batt: 100,
       drops: [], winds: [], stuck: null, minHealth: 55, minGrowth: 26,
@@ -45,7 +45,7 @@
     { id: 'sinyal', name: 'Sinyal Kâbusu', difficulty: 'İleri', days: 1,
       base: 24, swing: 9, outH: 35, evap: 1.4, sunMul: 1.15, tank: 75, batt: 95,
       drops: [[8, 10], [24, 12], [40, 8]], winds: [], stuck: [30, 8], minHealth: 45, minGrowth: 28,
-      desc: 'Günün yarısında bağlantı yok + sıcaklık sensörü bir ara donuyor. Telefon kumandası seni KURTARAMAZ — cihaz üstü kurallar kurtarır.' },
+      desc: 'Günün yarısında bağlantı yok + sıcaklık sensörü bir ara donuyor. Telefon kumandası seni KURTARAMAZ - cihaz üstü kurallar kurtarır.' },
     { id: 'kabus', name: 'Kâbus Serası', difficulty: 'Uzman', days: 2,
       base: 19, swing: 13, outH: 30, evap: 1.6, sunMul: 1.2, tank: 60, batt: 85, startS: 46,
       drops: [[14, 8], [43, 9], [68, 10], [88, 6]], winds: [[52, 8, 1.0]], stuck: [70, 7],
@@ -166,7 +166,7 @@
       sim.act.led = sn.L < 0.25 ? 1 : 0;
       if (sn.shake > 0.5) { sim.act.kapak = 0; sim.act.fan = 0; }   // güvenlik firmware'i
     }
-    // manuel kilitler (UI komutları kuralı ezher — kısa süreli)
+    // manuel kilitler (UI komutları kuralı ezher - kısa süreli)
     for (const d of DEVICES) {
       if (sim.manual[d] !== undefined) {
         if (sim.t < sim.manual[d].until) sim.act[d] = sim.manual[d].state;
@@ -188,7 +188,7 @@
     const evap = (0.50 + Math.max(0, sim.T - 24) * 0.06) * level.evap;
     let pump = 0;
     if (sim.act.pompa && sim.tank > 0) { pump = 5.5 * pw; sim.tank = Math.max(0, sim.tank - 1.8 * dt); }
-    if (sim.act.pompa && sim.tank <= 0) pushEvt(sim, 'depo', '🪣 Su deposu BOŞ — pompa kuru çalışıyor');
+    if (sim.act.pompa && sim.tank <= 0) pushEvt(sim, 'depo', '🪣 Su deposu BOŞ - pompa kuru çalışıyor');
     sim.S = Math.max(0, Math.min(100, sim.S + (pump - evap) * dt));
     sim.L = env.sun * 0.85 + sim.act.led * 0.45;
 
@@ -196,7 +196,7 @@
     if (!sim.battOut) {
       const drain = 0.14 + 0.14 * hz + sim.act.fan * 0.7 + (sim.act.pompa && sim.tank > 0 ? 0.8 : 0.2 * sim.act.pompa) + sim.act.led * 0.5;
       sim.batt = Math.min(sim.battMax, sim.batt - drain * dt + env.sun * 0.45 * dt);
-      if (sim.batt <= 0) { sim.batt = 0; sim.battOut = true; pushEvt(sim, 'batt', '🪫 Batarya bitti — sera KÖR ve SAĞIR'); }
+      if (sim.batt <= 0) { sim.batt = 0; sim.battOut = true; pushEvt(sim, 'batt', '🪫 Batarya bitti - sera KÖR ve SAĞIR'); }
     }
 
     // ---- bitki ----
@@ -205,7 +205,7 @@
     if (sim.T > T_MAX) { stress += (sim.T - T_MAX) * 0.42; sim.stressNote = 'sicak'; }
     if (sim.S < S_MIN) { stress += (S_MIN - sim.S) * 0.09; if (!sim.stressNote) sim.stressNote = 'kuru'; }
     if (sim.S > 94) { stress += (sim.S - 94) * 0.55; sim.stressNote = 'sel'; }
-    if (env.wind > 0.5 && kp > 0.35) { stress += 6.0; sim.stressNote = 'firtina'; pushEvt(sim, 'wstress', '🌪️ Fırtına açık kapaktan giriyor — bitki hırpalanıyor!'); }
+    if (env.wind > 0.5 && kp > 0.35) { stress += 6.0; sim.stressNote = 'firtina'; pushEvt(sim, 'wstress', '🌪️ Fırtına açık kapaktan giriyor - bitki hırpalanıyor!'); }
     sim.health = Math.max(0, Math.min(100, sim.health - stress * dt + (stress === 0 ? 0.35 * dt : 0)));
     const comfy = sim.T >= T_MIN && sim.T <= T_MAX && sim.S >= S_MIN && sim.S <= S_MAX && sim.L >= L_NEED;
     if (comfy && env.isDay) sim.growth = Math.min(100, sim.growth + dt * (100 / (level.days * DAY * 0.42)));
@@ -229,9 +229,9 @@
     return sim.lastOut;
   }
 
-  // UI: telefon komutu — sadece bağlantı varken! Kural motoru 6 sn sonra devralır.
+  // UI: telefon komutu - sadece bağlantı varken! Kural motoru 6 sn sonra devralır.
   function sendCommand(sim, device, state) {
-    if (!sim.link) return { ok: false, msg: 'SİNYAL YOK — komut ulaşmadı!' };
+    if (!sim.link) return { ok: false, msg: 'SİNYAL YOK - komut ulaşmadı!' };
     if (sim.battOut) return { ok: false, msg: 'Cihaz kapalı (batarya).' };
     sim.manual[device] = { state: state ? 1 : 0, until: sim.t + 6 };
     sim.events.push([+sim.t.toFixed(1), '📱 Manuel: ' + device.toUpperCase() + (state ? ' AÇ' : ' KAPAT')]);
@@ -243,7 +243,7 @@
     if (sim.status !== 'success') return null;
     const g = sim.growth, h = sim.health, b = sim.batt / sim.battMax * 100;
     const score = g * 0.5 + h * 0.3 + b * 0.2;
-    if (score > 72 && h > 70) return { name: '🏆 Usta Bahçıvan', cmt: 'Bitki mutlu, batarya dolu, telemetri pürüzsüz — gerçek kiti hak ettin!' };
+    if (score > 72 && h > 70) return { name: '🏆 Usta Bahçıvan', cmt: 'Bitki mutlu, batarya dolu, telemetri pürüzsüz - gerçek kiti hak ettin!' };
     if (score > 58) return { name: '🥈 Sera Teknisyeni', cmt: 'Sağlam otomasyon. Büyüme skorunu artırmak için konfor bandında daha uzun kal.' };
     return { name: '🥉 Çaylak Bahçıvan', cmt: 'Bitki hayatta ama zor günler geçirdi. Kuralların tepki eşiklerini gözden geçir.' };
   }
@@ -252,13 +252,13 @@
     const tips = [];
     const r = sim.reason || '';
     if (r === 'bitki_sicak') tips.push('Bitki SICAKTAN gitti. Sera etkisi: kapak kapalıyken güneş içeriyi dışarıdan 10° daha sıcak yapar. SICAK bitinde kapağı aç, ÇOK SICAK bitinde fanı ekle.');
-    if (r === 'bitki_soguk') tips.push('Bitki DONDU. Gece dışarısı buz gibi — SOĞUK bitinde kapağı VE fanı kapat. LED minik bir ısıtıcıdır: karanlıkta açık tutmak geceyi atlatır.');
-    if (r === 'bitki_kuru') tips.push('Toprak çöl oldu. TOPRAK KURU → POMPA AÇ kuralın var mı? Depo boşsa pompa kuru çalışır — depo seviyesini telemetriden izle.');
+    if (r === 'bitki_soguk') tips.push('Bitki DONDU. Gece dışarısı buz gibi - SOĞUK bitinde kapağı VE fanı kapat. LED minik bir ısıtıcıdır: karanlıkta açık tutmak geceyi atlatır.');
+    if (r === 'bitki_kuru') tips.push('Toprak çöl oldu. TOPRAK KURU → POMPA AÇ kuralın var mı? Depo boşsa pompa kuru çalışır - depo seviyesini telemetriden izle.');
     if (r === 'bitki_sel') tips.push('Bitkiyi boğdun! Pompa latch kalır: TOPRAK ISLAK → POMPA KAPAT kuralı olmadan pompa sonsuza dek basar.');
-    if (r === 'bitki_firtina') tips.push('Fırtına açık kapaktan girdi. IMU sarsıntıyı görür: FIRTINA → KAPAK KAPAT kuralını EN ÜSTE koy — öncelik yukarıdan aşağı!');
+    if (r === 'bitki_firtina') tips.push('Fırtına açık kapaktan girdi. IMU sarsıntıyı görür: FIRTINA → KAPAK KAPAT kuralını EN ÜSTE koy - öncelik yukarıdan aşağı!');
     if (r === 'buyume') tips.push('Bitki hayatta ama yeterince BÜYÜMEDİ. Büyüme sadece konfor bandında (sıcaklık+toprak+ışık) işler. Bandın kıyısında gezinmek yerine ortasında tut.');
-    if (r === 'sagliksiz') tips.push('Gün bitti ama bitki yorgun. Stres anlarını rapordaki sağlık çizgisinden bul — hangi saatte ne ters gitti?');
-    if (sim.battOut) tips.push('Batarya öldü ve sera kör kaldı. Örnekleme hızını düşür (her ölçüm enerji!), fanı gereksiz çalıştırma, LED’i gündüz kapat. Güneş paneli gündüz şarj eder — geceyi planla.');
+    if (r === 'sagliksiz') tips.push('Gün bitti ama bitki yorgun. Stres anlarını rapordaki sağlık çizgisinden bul - hangi saatte ne ters gitti?');
+    if (sim.battOut) tips.push('Batarya öldü ve sera kör kaldı. Örnekleme hızını düşür (her ölçüm enerji!), fanı gereksiz çalıştırma, LED’i gündüz kapat. Güneş paneli gündüz şarj eder - geceyi planla.');
     if (sim.level.drops.length && !tips.length) tips.push('Wi-Fi koptuğunda telefon komutları ULAŞMAZ ama cihaz üstü kurallar çalışmaya devam eder. Gerçek IoT dersi: otomasyonu cihaza göm, telefona değil.');
     if (!tips.length) tips.push('Örnekleme hızıyla oyna: 0.5 Hz’te grafikler taşlaşır ve kurallar geç tepki verir; 10 Hz’te batarya erir. Tatlı nokta görevin temposuna bağlı.');
     return tips;

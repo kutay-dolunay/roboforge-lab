@@ -183,11 +183,11 @@
     <div class="hud">
       <div class="hudbox"><div class="l">SÜRE</div><div class="v mono" id="hudT">0.0s</div></div>
       <div class="hudbox"><div class="l">İRTİFA</div><div class="v mono" id="hudH">0.0</div></div>
-      <div class="hudbox"><div class="l">GÖREV</div><div class="v mono" id="hudW">—</div></div>
+      <div class="hudbox"><div class="l">GÖREV</div><div class="v mono" id="hudW">-</div></div>
       <div class="hudbox"><div class="l">BATARYA</div><div class="v mono" id="hudB">%100</div></div>
       <div class="hudbox"><div class="l">DURUM</div><div class="v" id="hudS">HAZIR</div></div>
     </div>
-    <div class="hint" id="hint">🚁 İtki yerçekimiyle savaşır! Görev noktalarında <b>1 saniye sabit dur</b>, sonra pistte yumuşak in. Sadece Kp ile dene: drone hedefin hep <b>biraz altında</b> kalır — işte Ki bunun için var.</div>
+    <div class="hint" id="hint">🚁 İtki yerçekimiyle savaşır! Görev noktalarında <b>1 saniye sabit dur</b>, sonra pistte yumuşak in. Sadece Kp ile dene: drone hedefin hep <b>biraz altında</b> kalır - işte Ki bunun için var.</div>
     <div class="rdock" id="resultDock" style="display:none"></div>
   </div>
 
@@ -201,13 +201,13 @@
       <div class="card">
         <h4>Quadcopter</h4>
         <p class="exp">İrtifa sensörü yüksekliği, IMU dikey hızı ölçer. Motorlar itki üretir; yerçekimi hiç durmaz.
-          <b>Askıda kalmak bile sürekli kontrol ister</b> — bu yüzden dronelar PID olmadan uçamaz.</p>
+          <b>Askıda kalmak bile sürekli kontrol ister</b> - bu yüzden dronelar PID olmadan uçamaz.</p>
       </div>
       <div class="card">
         <h4>Sürüş (robotundan gelir)</h4>
         <div class="sliderRow"><label>Motor Gücü <b id="vLabel">Orta</b></label>
           <input type="range" id="vMax" min="2.2" max="6" step="0.1" value="3.6"></div>
-        <p class="exp" style="margin-top:6px">Zayıf motor ağır kargoyu kaldıramaz — fizik affetmez!</p>
+        <p class="exp" style="margin-top:6px">Zayıf motor ağır kargoyu kaldıramaz - fizik affetmez!</p>
       </div>
       <div class="card kunye" id="kunye"></div>
     </div>
@@ -221,7 +221,7 @@
         <div class="card">
           <h4>İrtifa PID</h4>
           <p class="exp">itki = Kp·hata + Kd·(−dikey hız) + <b>Ki·∫hata</b>. Ki = integral: küçük ama
-            İNATÇI — yerçekiminin yarattığı kalıcı açığı zamanla sıfırlar. Ki olmadan drone hedefin altında süzülür durur!</p>
+            İNATÇI - yerçekiminin yarattığı kalıcı açığı zamanla sıfırlar. Ki olmadan drone hedefin altında süzülür durur!</p>
           <div class="sliderRow"><label>Kp (irtifa tepkisi) <b id="pKpV">1.6</b></label>
             <input type="range" id="pKp" min="0.2" max="3.5" step="0.1" value="1.6"></div>
           <div class="sliderRow"><label>Kd (alçalma freni) <b id="pKdV">1.1</b></label>
@@ -236,7 +236,7 @@
         <div class="card">
           <h4>İrtifa Bandı Kuralları</h4>
           <p class="exp">Her irtifa bandına bir itki yüzdesi. Unutma: askıda durmak için bile ~%45 itki gerekir!
-            Bantlarla uçmak zıplamalı olur — PID ile karşılaştır.</p>
+            Bantlarla uçmak zıplamalı olur - PID ile karşılaştır.</p>
           <div id="rulesList"></div>
           <button class="addRule" id="addRule">+ Yeni Kural</button>
           <button id="revealSolution" style="display:none;width:100%;margin-top:8px;padding:9px;border:1px dashed var(--amber);background:rgba(245,158,11,.08);color:var(--amber);font-weight:800;font-size:.78rem;border-radius:10px;cursor:pointer">🔑 En iyi çözümü göster (admin)</button>
@@ -433,7 +433,7 @@
 
   const REASONS={ landed:'Yumuşak iniş, görev tamam!', hovered:'Askı görevi tamamlandı!',
     crash_ground:'Sert çakılma! 💥', crash_gate:'Kuleye çarptın! 💥', wrong_pad:'Pist dışına indin!',
-    out:'Sahne dışına savruldun!', timeout:'Süre doldu.', battery:'Batarya bitti — pervaneler durdu! 🪫' };
+    out:'Sahne dışına savruldun!', timeout:'Süre doldu.', battery:'Batarya bitti - pervaneler durdu! 🪫' };
   function showResult(){
     const sim=LAB.sim; if(!sim) return;
     const win=sim.status==='success';
@@ -443,9 +443,9 @@
     const M=DR.MISSIONS[LAB.misIdx];
     var altGraph='';
     if(window.RFResult && sim.log && sim.log.length>3){
-      altGraph='<div class="rf-graphwrap"><div class="cap">🚁 İrtifa — hedef vs gerçek (Ki dersi!)</div>'+
+      altGraph='<div class="rf-graphwrap"><div class="cap">🚁 İrtifa - hedef vs gerçek (Ki dersi!)</div>'+
         '<canvas id="droneGraph" class="rf-graph" style="height:150px"></canvas>'+
-        '<div style="font-size:.72rem;color:var(--muted2);margin-top:2px">Kesikli = hedef irtifa, dolu = drone. P-only kontrolde ikisi arasında kalıcı bir boşluk kalır — bu boşluğu <b style="color:#7dd3fc">Ki (integral)</b> kapatır.</div></div>';
+        '<div style="font-size:.72rem;color:var(--muted2);margin-top:2px">Kesikli = hedef irtifa, dolu = drone. P-only kontrolde ikisi arasında kalıcı bir boşluk kalır - bu boşluğu <b style="color:#7dd3fc">Ki (integral)</b> kapatır.</div></div>';
     }
     const dock=document.getElementById('resultDock');
     dock.className='rdock'+(win?'':' lose');
@@ -492,10 +492,10 @@
     const M=DR.MISSIONS[LAB.misIdx];
     const box=document.getElementById('resultBox');
     box.innerHTML =
-      '<h3 class="'+(win?'win':'lose')+'">📄 Uçuş Raporu — '+M.name+'</h3>'+
+      '<h3 class="'+(win?'win':'lose')+'">📄 Uçuş Raporu - '+M.name+'</h3>'+
       '<div style="margin:8px 0;font-size:.8rem;color:var(--muted2)">'+chips+'</div>'+
       '<div style="font-size:.76rem;color:var(--sky);margin-bottom:8px">'+
-        (LAB.mode==='pid'?'📈 PID — Kp '+LAB.pid.kp.toFixed(1)+' · Kd '+LAB.pid.kd.toFixed(2)+' · Ki '+LAB.pid.ki.toFixed(2):'🧩 Bant Kuralları')+'</div>'+
+        (LAB.mode==='pid'?'📈 PID - Kp '+LAB.pid.kp.toFixed(1)+' · Kd '+LAB.pid.kd.toFixed(2)+' · Ki '+LAB.pid.ki.toFixed(2):'🧩 Bant Kuralları')+'</div>'+
       '<div class="rstats">'+
         '<div class="rstat"><div class="l">HASSASİYET</div><div class="v mono">%'+DR.precision(sim)+'</div></div>'+
         '<div class="rstat"><div class="l">GÖREV</div><div class="v mono">'+sim.wpIdx+'/'+M.wps.length+'</div></div>'+
@@ -503,8 +503,8 @@
         '<div class="rstat"><div class="l">DURUM</div><div class="v" style="color:'+(win?'var(--green)':'#fca5a5')+'">'+(win?'TAMAM':'BAŞARISIZ')+'</div></div>'+
       '</div>'+
       '<canvas id="repMap" width="460" height="200" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#0a0d12"></canvas>'+
-      '<div style="font-size:.68rem;color:var(--muted);margin-top:4px">İrtifa grafiği — mavi çizgi yeşil kesikli hedefi ne kadar iyi izledi?</div>'+
-      '<div style="font-size:.74rem;color:var(--muted2);margin-top:8px">🔋 Enerji: '+Math.round(sim.battMax-sim.batt)+' / '+Math.round(sim.battMax)+' birim harcandı. Gaz maliyeti kareseldir — titrek (salınan) gaz, sakin gazdan çok daha fazla yakar. Salınımı Kd bastırır.</div>'+
+      '<div style="font-size:.68rem;color:var(--muted);margin-top:4px">İrtifa grafiği - mavi çizgi yeşil kesikli hedefi ne kadar iyi izledi?</div>'+
+      '<div style="font-size:.74rem;color:var(--muted2);margin-top:8px">🔋 Enerji: '+Math.round(sim.battMax-sim.batt)+' / '+Math.round(sim.battMax)+' birim harcandı. Gaz maliyeti kareseldir - titrek (salınan) gaz, sakin gazdan çok daha fazla yakar. Salınımı Kd bastırır.</div>'+
       '<div class="rbtns"><button class="btn ghost" id="repClose">Kapat</button></div>';
     document.getElementById('resultWrap').classList.add('show');
     document.getElementById('repClose').onclick=()=>document.getElementById('resultWrap').classList.remove('show');
@@ -683,10 +683,10 @@
   const TUT=[
     ['🚁 Yerçekimine Karşı','Drone uçuşu bitmeyen bir savaştır: itki yukarı, yerçekimi aşağı. Motorları kapatırsan taş gibi düşer. Görev noktalarına uğra, sonra piste yumuşak in.'],
     ['📉 Kalıcı Hata (Ki dersi!)','Sadece Kp ile uç ve gözle: drone hedefin hep BİRAZ ALTINDA süzülür. Neden? Denge itki=yerçekimi noktasında kurulur ve o itki için hata gerekir! Ki (integral) bu inatçı açığı zamanla sıfırlar. Bu görevin en büyük dersi.'],
-    ['🌬️ Rüzgâr ve Kargo','Rüzgâr seni iter, kargo ağırlaştırır. Zayıf motorlu robot ağır kargoyu kaldıramaz bile — fizik pazarlık etmez. Güçlü motor kur!'],
+    ['🌬️ Rüzgâr ve Kargo','Rüzgâr seni iter, kargo ağırlaştırır. Zayıf motorlu robot ağır kargoyu kaldıramaz bile - fizik pazarlık etmez. Güçlü motor kur!'],
     ['🛬 İniş','Pistin üstüne gel, otopilot yumuşak alçalır. İrtifa grafiğini izle: mavi çizgi yeşil hedefe ne kadar yapışıksa o kadar iyi pilotsun.'],
-    ['🔋 Batarya Gerçeği','Her gaz vuruşu enerji yakar — hem de KARESEL: %90 gaz, %45 gazın 4 katı yakar! Salınan (titrek) drone bataryayı kavurur. Robotuna büyük batarya tak ya da uçuşunu sakinleştir.'],
-    ['🏁 Kalkış!','Havalan ve Dur ile başla, Fırtına Kurtarma’ya kadar tırman. Bant kuralları modunu da dene — zıplamalı uçuşu görünce PID’e âşık olacaksın!'],
+    ['🔋 Batarya Gerçeği','Her gaz vuruşu enerji yakar - hem de KARESEL: %90 gaz, %45 gazın 4 katı yakar! Salınan (titrek) drone bataryayı kavurur. Robotuna büyük batarya tak ya da uçuşunu sakinleştir.'],
+    ['🏁 Kalkış!','Havalan ve Dur ile başla, Fırtına Kurtarma’ya kadar tırman. Bant kuralları modunu da dene - zıplamalı uçuşu görünce PID’e âşık olacaksın!'],
   ];
   let tutI=0;
   function showTut(i){

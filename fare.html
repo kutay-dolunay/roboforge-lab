@@ -182,7 +182,7 @@
       <div class="hudbox"><div class="l">HARİTA</div><div class="v mono" id="hudE">%0</div></div>
       <div class="hudbox"><div class="l">DURUM</div><div class="v" id="hudS">HAZIR</div></div>
     </div>
-    <div class="hint" id="hint">🐭 Micromouse: hedef labirentin MERKEZİNDE. <b>Flood-fill</b>: her hücreye "hedefe kaç adım?" değeri yayılır, fare hep küçüğe yürür — bilinmeyeni iyimser sayar, gördükçe düzeltir. Duvar takibi modunu Ada Merkez seviyesinde dene: matematiksel imkânsızlıkla tanış!</div>
+    <div class="hint" id="hint">🐭 Micromouse: hedef labirentin MERKEZİNDE. <b>Flood-fill</b>: her hücreye "hedefe kaç adım?" değeri yayılır, fare hep küçüğe yürür - bilinmeyeni iyimser sayar, gördükçe düzeltir. Duvar takibi modunu Ada Merkez seviyesinde dene: matematiksel imkânsızlıkla tanış!</div>
     <div class="rdock" id="resultDock" style="display:none"></div>
   </div>
   <div class="side">
@@ -198,7 +198,7 @@
       <div class="card" id="floodCard">
         <h4>Flood-Fill Beyni</h4>
         <p class="exp">Hedef hücreye 0 yaz; sayılar dalga gibi dışa yayılır. Fare her hücrede tek soru sorar:
-          <b>"hangi komşu daha küçük?"</b> Bilinmeyen hücreler iyimser (duvarsız) sayılır — keşif ilerledikçe
+          <b>"hangi komşu daha küçük?"</b> Bilinmeyen hücreler iyimser (duvarsız) sayılır - keşif ilerledikçe
           harita gerçekleşir, sayılar güncellenir. Sahadaki sayıları izle!</p>
         <div class="ract" style="margin:8px 0">
           <span style="font-size:.72rem;color:var(--muted2)">Sayıları göster</span>
@@ -208,7 +208,7 @@
       <div class="card" id="duvarCard" style="display:none">
         <h4>Duvar Takibi (tuzaklı!)</h4>
         <p class="exp">Elini duvara koy, hiç çekme. Ağaç labirentte %100 çalışır… ama merkez dış duvara
-          bağlı DEĞİLSE (Ada Merkez!) elin merkeze asla dokunmaz — sonsuz tur atarsın.
+          bağlı DEĞİLSE (Ada Merkez!) elin merkeze asla dokunmaz - sonsuz tur atarsın.
           Bu bir ayar eksiği değil, matematiksel imkânsızlıktır.</p>
         <div class="ract" style="margin:8px 0">
           <span style="font-size:.72rem;color:var(--muted2)">El seçimi</span>
@@ -217,7 +217,7 @@
       </div>
       <div class="card">
         <h4>Görev Akışı</h4>
-        <p class="exp mono" id="ledger" style="font-size:.74rem">Faz 1 — KEŞİF: merkezi bul, haritala.<br>Faz 2 — HIZ TURU: bilinen en kısa yoldan %25 hızlı uç.</p>
+        <p class="exp mono" id="ledger" style="font-size:.74rem">Faz 1 - KEŞİF: merkezi bul, haritala.<br>Faz 2 - HIZ TURU: bilinen en kısa yoldan %25 hızlı uç.</p>
       </div>
     </div>
     <div id="tab-robot" style="display:none">
@@ -328,7 +328,7 @@
     const sim=LAB.sim;
     const m=F.MISSIONS[LAB.misIdx];
     document.getElementById('hudT').textContent=(sim?sim.t:0).toFixed(1)+'s';
-    document.getElementById('hudA').textContent=sim?(sim.phase==='kesif'?'KEŞİF':'HIZ'):'—';
+    document.getElementById('hudA').textContent=sim?(sim.phase==='kesif'?'KEŞİF':'HIZ'):'-';
     document.getElementById('hudE').textContent=sim?'%'+Math.round(sim.cellsSeen/(sim.mz.n*sim.mz.n)*100):'%0';
     const s=document.getElementById('hudS');
     if(!sim){ s.textContent='HAZIR'; s.className='v'; }
@@ -385,8 +385,8 @@
         (cls?'<div class="rd-medal">'+cls.name+'</div><div class="rd-cmt">'+(cls.cmt||'')+'</div>'
             :'<div class="rd-cmt">'+(REASONS[sim.reason]||'')+'</div>')+
         '<div class="rd-stats">'+
-          '<div class="rd-stat"><div class="l">KEŞİF</div><div class="v mono">'+(sim.lapTimes[0]!==undefined?sim.lapTimes[0].toFixed(1)+'s':'—')+'</div></div>'+
-          '<div class="rd-stat"><div class="l">HIZ TURU</div><div class="v mono">'+(sim.lapTimes[1]!==undefined?sim.lapTimes[1].toFixed(1)+'s':'—')+'</div></div>'+
+          '<div class="rd-stat"><div class="l">KEŞİF</div><div class="v mono">'+(sim.lapTimes[0]!==undefined?sim.lapTimes[0].toFixed(1)+'s':'-')+'</div></div>'+
+          '<div class="rd-stat"><div class="l">HIZ TURU</div><div class="v mono">'+(sim.lapTimes[1]!==undefined?sim.lapTimes[1].toFixed(1)+'s':'-')+'</div></div>'+
           '<div class="rd-stat"><div class="l">HARİTA</div><div class="v mono">%'+Math.round(sim.cellsSeen/(sim.mz.n*sim.mz.n)*100)+'</div></div>'+
           '<div class="rd-stat"><div class="l">DURUM</div><div class="v '+(win?'ok':'bad')+'">'+(win?'PEYNİR':'BAŞARISIZ')+'</div></div>'+
         '</div>'+
@@ -408,13 +408,13 @@
     const m=sim.mission;
     const box=document.getElementById('resultBox');
     box.innerHTML =
-      '<h3 class="'+(win?'win':'lose')+'">📄 Fare Raporu — '+m.name+'</h3>'+
+      '<h3 class="'+(win?'win':'lose')+'">📄 Fare Raporu - '+m.name+'</h3>'+
       '<div style="font-size:.76rem;color:var(--sky);margin:8px 0">'+
         (LAB.mode==='flood'?'🧠 Flood-fill':'🧩 Duvar takibi ('+(LAB.hand==='L'?'sol':'sağ')+' el)')+
         ' · '+m.n+'×'+m.n+' labirent</div>'+
       '<div class="rstats">'+
-        '<div class="rstat"><div class="l">KEŞİF</div><div class="v mono">'+(sim.lapTimes[0]!==undefined?sim.lapTimes[0].toFixed(1):'—')+'</div></div>'+
-        '<div class="rstat"><div class="l">HIZ TURU</div><div class="v mono">'+(sim.lapTimes[1]!==undefined?sim.lapTimes[1].toFixed(1):'—')+'</div></div>'+
+        '<div class="rstat"><div class="l">KEŞİF</div><div class="v mono">'+(sim.lapTimes[0]!==undefined?sim.lapTimes[0].toFixed(1):'-')+'</div></div>'+
+        '<div class="rstat"><div class="l">HIZ TURU</div><div class="v mono">'+(sim.lapTimes[1]!==undefined?sim.lapTimes[1].toFixed(1):'-')+'</div></div>'+
         '<div class="rstat"><div class="l">HARİTA</div><div class="v mono">%'+Math.round(sim.cellsSeen/(sim.mz.n*sim.mz.n)*100)+'</div></div>'+
         '<div class="rstat"><div class="l">TOPLAM</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
       '</div>'+
@@ -488,12 +488,12 @@
   function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show');
     clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2400); }
   const TUT=[
-    ['🐭 Micromouse Finali','1977’den beri koşulan efsane yarışma: duvarlı labirent, hedef MERKEZDE. Katalogdaki son sınav — buradaki fikirler gerçek şampiyonların fikirleridir.'],
+    ['🐭 Micromouse Finali','1977’den beri koşulan efsane yarışma: duvarlı labirent, hedef MERKEZDE. Katalogdaki son sınav - buradaki fikirler gerçek şampiyonların fikirleridir.'],
     ['🧠 Flood-Fill','Hedefe 0 yaz; komşulara 1, onların komşularına 2… Sayılar dalga gibi yayılır. Fare her hücrede tek soru sorar: hangi komşu daha KÜÇÜK? Küresel zekâ, yerel karar.'],
-    ['🔮 İyimser Harita','Fare görmediği hücreyi DUVARSIZ sayar — bu yüzden bazen çıkmaz umutlara dalar. Sorun değil: her yeni duvar haritayı düzeltir, sayılar yeniden akar.'],
-    ['🏝️ Ada Merkez Tuzağı','Duvar takibi modunu dene: ağaç labirentte çalışır ama merkez dış duvara bağlı değilse eli merkeze ASLA değmez. Ayar meselesi değil — matematiksel imkânsızlık!'],
+    ['🔮 İyimser Harita','Fare görmediği hücreyi DUVARSIZ sayar - bu yüzden bazen çıkmaz umutlara dalar. Sorun değil: her yeni duvar haritayı düzeltir, sayılar yeniden akar.'],
+    ['🏝️ Ada Merkez Tuzağı','Duvar takibi modunu dene: ağaç labirentte çalışır ama merkez dış duvara bağlı değilse eli merkeze ASLA değmez. Ayar meselesi değil - matematiksel imkânsızlık!'],
     ['🏁 İki Faz','Faz 1 keşif: merkezi bul, haritala. Faz 2 hız turu: bilinen en kısa yoldan %25 hızlı. Keşif yatırım, hız turu hasattır.'],
-    ['🧀 Sal Fareyi!','Minik Kutudan Kâbus Faresine 7 labirent. Sahadaki flood sayılarını izle — algoritmanın düşünüşünü ÇIPLAK GÖZLE göreceksin. Peynir İmparatoru ol!'],
+    ['🧀 Sal Fareyi!','Minik Kutudan Kâbus Faresine 7 labirent. Sahadaki flood sayılarını izle - algoritmanın düşünüşünü ÇIPLAK GÖZLE göreceksin. Peynir İmparatoru ol!'],
   ];
   let tutI=0;
   function showTut(i){

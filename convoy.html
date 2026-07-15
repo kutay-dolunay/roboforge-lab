@@ -195,7 +195,7 @@
       <div class="hudbox"><div class="l">LİDER HIZI</div><div class="v mono" id="hudL">0.0</div></div>
       <div class="hudbox"><div class="l">DURUM</div><div class="v" id="hudS">HAZIR</div></div>
     </div>
-    <div class="hint" id="hint">🚚 Öndeki kamyonu takip et: <b>çok yaklaşma (çarpma!), çok açılma (kaybolursun!)</b>. Lider hızlanır, yavaşlar, aniden durur — sen mesafeyi koru.</div>
+    <div class="hint" id="hint">🚚 Öndeki kamyonu takip et: <b>çok yaklaşma (çarpma!), çok açılma (kaybolursun!)</b>. Lider hızlanır, yavaşlar, aniden durur - sen mesafeyi koru.</div>
     <div class="rdock" id="resultDock" style="display:none"></div>
   </div>
 
@@ -208,7 +208,7 @@
     <div id="tab-robot">
       <div class="card">
         <h4>Takip Robotu</h4>
-        <p class="exp">Ön mesafe sensörü aradaki boşluğu ölçer ve 4 banda ayırır. Direksiyon otomatik —
+        <p class="exp">Ön mesafe sensörü aradaki boşluğu ölçer ve 4 banda ayırır. Direksiyon otomatik -
           bu görev <b>tamamen hız kontrolü</b>: gerçek araçlardaki adaptif hız sabitleyicinin (ACC) ta kendisi.</p>
         <div class="bandbar" id="bandbar">
           <div class="b-cok" id="bb0">ÇOK YAKIN<br>&lt;1.4</div>
@@ -248,7 +248,7 @@
         <div class="card">
           <h4>PID Hız Kontrolü</h4>
           <p class="exp">motor = Kp·(mesafe − hedef) + Kd·kapanma hızı. <b>Kd, lider frene bastığı ANDA seni
-            yavaşlatır</b> — çarpışmayı asıl önleyen odur. Bantsız, salınımsız, pürüzsüz takip.</p>
+            yavaşlatır</b> - çarpışmayı asıl önleyen odur. Bantsız, salınımsız, pürüzsüz takip.</p>
           <div class="sliderRow"><label>Hedef Mesafe <b id="pHedefV">2.8</b></label>
             <input type="range" id="pHedef" min="1.5" max="5" step="0.1" value="2.8"></div>
           <div class="sliderRow"><label>Kp (mesafe tepkisi) <b id="pKpV">0.55</b></label>
@@ -414,7 +414,7 @@
     document.getElementById('resultWrap').classList.remove('show');
   }
 
-  const REASONS={ arrived:'Konvoy hedefe vardı!', crash:'Öndeki araca çarptın! 💥', lost:'Konvoyu kaybettin — arayı çok açtın.' };
+  const REASONS={ arrived:'Konvoy hedefe vardı!', crash:'Öndeki araca çarptın! 💥', lost:'Konvoyu kaybettin - arayı çok açtın.' };
   function showResult(){
     const sim=LAB.sim; if(!sim) return;
     const win=sim.status==='success';
@@ -463,10 +463,10 @@
     const route=CC.ROUTES[LAB.routeIdx];
     const box=document.getElementById('resultBox');
     box.innerHTML =
-      '<h3 class="'+(win?'win':'lose')+'">📄 Konvoy Raporu — '+route.name+'</h3>'+
+      '<h3 class="'+(win?'win':'lose')+'">📄 Konvoy Raporu - '+route.name+'</h3>'+
       '<div style="margin:8px 0;font-size:.8rem;color:var(--muted2)">'+chips+'</div>'+
       '<div style="font-size:.76rem;color:var(--sky);margin-bottom:8px">'+
-        (LAB.mode==='pid'?'📈 PID — Hedef '+LAB.pid.hedef.toFixed(1)+' · Kp '+LAB.pid.kp.toFixed(2)+' · Kd '+LAB.pid.kd.toFixed(2):'🧩 Bant Kuralları — '+LAB.rules.length+' kural')+'</div>'+
+        (LAB.mode==='pid'?'📈 PID - Hedef '+LAB.pid.hedef.toFixed(1)+' · Kp '+LAB.pid.kp.toFixed(2)+' · Kd '+LAB.pid.kd.toFixed(2):'🧩 Bant Kuralları - '+LAB.rules.length+' kural')+'</div>'+
       '<div class="rstats">'+
         '<div class="rstat"><div class="l">İDEALDE</div><div class="v mono">%'+CC.accuracy(sim)+'</div></div>'+
         '<div class="rstat"><div class="l">EN YAKIN</div><div class="v mono">'+sim.minGap.toFixed(1)+'</div></div>'+
@@ -618,7 +618,7 @@
       '<div class="kstat"><div class="l">Hız</div><div class="v">'+r.topSpeedKmh+'<small>km/s</small></div></div>'+
       '<div class="kstat"><div class="l">Güç</div><div class="v">'+r.powerRating+'</div></div>'+
       '</div>'+
-      '<p class="exp" style="margin-top:9px">Lider en çok 3.0 hız yapar — robotun bundan hızlıysa yetişebilirsin.</p>';
+      '<p class="exp" style="margin-top:9px">Lider en çok 3.0 hız yapar - robotun bundan hızlıysa yetişebilirsin.</p>';
   }
 
   function buildTrackTabs(){

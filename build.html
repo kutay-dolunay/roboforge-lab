@@ -287,7 +287,7 @@
   // educational intro per component (long + educative)
   const EDU = {
     brain:'Beyin, robotunun karar veren parçasıdır. Sensörlerden gelen bilgiyi okur ve motorlara ne yapacaklarını söyler. Hızlı bir beyin çizgiyi daha sık kontrol eder; ama güç tüketimi ve öğrenme kolaylığı da önemlidir. Eğitimde sağlam ve affedici bir beyin çoğu zaman en iyisidir.',
-    driver:'Sürücü kartı, beyinin zayıf sinyalini motorları döndürecek güce çevirir — beyin motoru doğrudan süremez, arada bu köprü olmalı. Sürücünün taşıyabildiği akım motorun ihtiyacını karşılamazsa motor zorlanır ve sürücü ısınır. Verimli bir sürücü pili daha az yorar.',
+    driver:'Sürücü kartı, beyinin zayıf sinyalini motorları döndürecek güce çevirir - beyin motoru doğrudan süremez, arada bu köprü olmalı. Sürücünün taşıyabildiği akım motorun ihtiyacını karşılamazsa motor zorlanır ve sürücü ısınır. Verimli bir sürücü pili daha az yorar.',
     motor:'Motorlar tekerlekleri döndürür. RPM (devir) ne kadar hızlı gideceğini, tork ise viraj/tırmanma gücünü belirler. Yüksek RPM düz pistte uçar ama kontrolü zorlaştırır; yüksek tork virajı kazır ama genelde daha yavaştır. İki motor birlikte çalışır.',
     wheel:'Tekerlek, robotun yere değen tek noktasıdır. Çap büyüdükçe robot aynı devirde daha hızlı gider; tutuş (grip) arttıkça virajda daha az kayar. Yarış lastiği hızlıdır ama tutuşu düşüktür; silikon yavaştır ama virajda güven verir.',
     battery:'Batarya tüm sisteme enerji verir. Voltaj motorların ne kadar sert döneceğini, kapasite (mAh) ise robotun ne kadar süre çalışacağını belirler. Düşük voltaj motorları güçsüz bırakır; ağır batarya robotu yavaşlatır. Dengeyi bulmak önemli.',
@@ -310,7 +310,7 @@
     return '';
   }
 
-  // chassis shapes — many figures
+  // chassis shapes - many figures
   const SHAPES=[
     {id:'rect',name:'Dikdörtgen',br:'9%'},
     {id:'round',name:'Elips',br:'50%'},
@@ -451,7 +451,7 @@
     const com=den?num/den:0.5, off=com-0.5;
     document.getElementById('balFill').style.left=(50-off*90)+'%';
     const bn=document.getElementById('balNote');
-    bn.textContent=Math.abs(off)<0.12?'Denge iyi görünüyor.':(off>0?'Arkaya ağır — ön tekerlek hafif kalabilir.':'Öne ağır — sert virajda burun dalabilir.');
+    bn.textContent=Math.abs(off)<0.12?'Denge iyi görünüyor.':(off>0?'Arkaya ağır - ön tekerlek hafif kalabilir.':'Öne ağır - sert virajda burun dalabilir.');
   }
 
   // ---- STEP 3: report ----
@@ -459,7 +459,7 @@
   function renderReport(){
     const bl=document.getElementById('buildList'); bl.innerHTML='';
     ORDER.forEach(cat=>{ const o=RD.opt(cat,B[cat]);
-      bl.innerHTML+=`<div class="bchip">${RD.COMPONENTS[cat].icon} ${RD.COMPONENTS[cat].label}: <b>${o?o.name:'— yok —'}</b></div>`; });
+      bl.innerHTML+=`<div class="bchip">${RD.COMPONENTS[cat].icon} ${RD.COMPONENTS[cat].label}: <b>${o?o.name:'- yok -'}</b></div>`; });
     const r=RD.computeReport(bctx());
     const cards=[['Ağırlık',r.weightG,'g'],['En Yüksek Hız',r.topSpeedKmh,'km/s'],['Güç',r.powerRating,'/100'],
       ['Tork',r.torque,'/10'],['Tutuş',r.grip,''],['Batarya Ömrü',r.batteryMin,'dk']];
@@ -515,7 +515,7 @@
       document.getElementById('toLab').onclick=()=>{ save(); location.href=LAB_HREF; };
     } else { const fail=res.steps.find(s=>!s.ok); v.className='verdict lose';
       v.innerHTML=`<h3>❌ Robot çalışmadı</h3><p>${fail?fail.msg:'Bir şeyler eksik.'}</p>
-        <p style="color:var(--muted)">Sorun değil — mühendislik denemekle öğrenilir. Parçalarını düzelt ve tekrar dene.</p>
+        <p style="color:var(--muted)">Sorun değil - mühendislik denemekle öğrenilir. Parçalarını düzelt ve tekrar dene.</p>
         <button class="btn primary" id="fixIt" style="margin-top:12px">← Geri dön ve düzelt</button>`;
       document.getElementById('fixIt').onclick=()=>{ step=1; phase=0; go(1); };
     }

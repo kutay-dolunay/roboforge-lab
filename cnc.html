@@ -187,11 +187,11 @@
     <canvas id="arena" width="920" height="560"></canvas>
     <div class="hud">
       <div class="hudbox"><div class="l">SÜRE</div><div class="v mono" id="hudT">0.0s</div></div>
-      <div class="hudbox"><div class="l">ADIM</div><div class="v mono" id="hudA">—</div></div>
+      <div class="hudbox"><div class="l">ADIM</div><div class="v mono" id="hudA">-</div></div>
       <div class="hudbox"><div class="l">KALEM</div><div class="v" id="hudE">YUKARI</div></div>
       <div class="hudbox"><div class="l">DURUM</div><div class="v" id="hudS">HAZIR</div></div>
     </div>
-    <div class="hint" id="hint">✏️ G-code mantığı: makine adım listesi yürütür — GİT (x,y) ve KALEM (aşağı/yukarı). Gri hayalet hedef şekil; senin mürekkebin ona ne kadar oturacak? <b>Hız köşeleri yuvarlar, dişli boşluğu (backlash) çizgiyi kaydırır</b> — kalibrasyon sanattır.</div>
+    <div class="hint" id="hint">✏️ G-code mantığı: makine adım listesi yürütür - GİT (x,y) ve KALEM (aşağı/yukarı). Gri hayalet hedef şekil; senin mürekkebin ona ne kadar oturacak? <b>Hız köşeleri yuvarlar, dişli boşluğu (backlash) çizgiyi kaydırır</b> - kalibrasyon sanattır.</div>
     <div class="rdock" id="resultDock" style="display:none"></div>
   </div>
   <div class="side">
@@ -207,7 +207,7 @@
       <div class="card" id="progCard">
         <h4 id="progTitle">Çizim Programı (G-code)</h4>
         <p class="exp" id="progExp">Adımlar sırayla: GİT hedef koordinat, KALEM aşağı/yukarı. Parçalar arasında
-          kalemi KALDIRMAYI unutma — yoksa seyahat çizgileri kağıdı kirletir.</p>
+          kalemi KALDIRMAYI unutma - yoksa seyahat çizgileri kağıdı kirletir.</p>
         <div id="stepList"></div>
         <button class="addRule" id="addStep">+ Adım Ekle</button>
       </div>
@@ -306,7 +306,7 @@
     const sim=LAB.sim;
     document.getElementById('hudT').textContent=(sim?sim.t:0).toFixed(1)+'s';
     const P=sim?(sim.cfg.program||[]):activeProg();
-    document.getElementById('hudA').textContent=sim?Math.min(sim.stepIdx+1,P.length)+'/'+P.length:'—';
+    document.getElementById('hudA').textContent=sim?Math.min(sim.stepIdx+1,P.length)+'/'+P.length:'-';
     const E=document.getElementById('hudE');
     E.textContent=sim&&sim.pen?'AŞAĞI ✏️':'YUKARI';
     E.className='v '+(sim&&sim.pen?'ok':'');
@@ -351,8 +351,8 @@
     document.getElementById('hint').style.display='block';
     document.getElementById('resultWrap').classList.remove('show');
   }
-  const REASONS={ tamam:'Çizim standartları karşılıyor!', kapsama:'Şekil eksik/bozuk çizildi — kapsama yetersiz.',
-    fazlalik:'Kağıtta fazla mürekkep var — kalem seyahatte aşağı kalmış.', kagit_disi:'Kağıt dışına çizim komutu!',
+  const REASONS={ tamam:'Çizim standartları karşılıyor!', kapsama:'Şekil eksik/bozuk çizildi - kapsama yetersiz.',
+    fazlalik:'Kağıtta fazla mürekkep var - kalem seyahatte aşağı kalmış.', kagit_disi:'Kağıt dışına çizim komutu!',
     sure:'Süre doldu.' };
   function showResult(){
     const sim=LAB.sim; if(!sim) return;
@@ -395,9 +395,9 @@
     const sc=C.score(sim);
     const box=document.getElementById('resultBox');
     box.innerHTML =
-      '<h3 class="'+(win?'win':'lose')+'">📄 Atölye Raporu — '+m.name+'</h3>'+
+      '<h3 class="'+(win?'win':'lose')+'">📄 Atölye Raporu - '+m.name+'</h3>'+
       '<div style="font-size:.76rem;color:var(--sky);margin:8px 0">'+
-        (LAB.mode==='manual'?'🧩 El programı — '+activeProg().length+' adım':'⚙️ Oto-rota')+
+        (LAB.mode==='manual'?'🧩 El programı - '+activeProg().length+' adım':'⚙️ Oto-rota')+
         ' · hız '+LAB.cal.hiz.toFixed(1)+' · köşe yavaşlama '+(LAB.cal.koseYavas?'AÇIK':'KAPALI')+' · backlash telafisi '+(LAB.cal.blTelafi?'AÇIK':'KAPALI')+'</div>'+
       '<div class="rstats">'+
         '<div class="rstat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
@@ -459,7 +459,7 @@
     if(LAB.mode==='manual') LAB.prog.forEach((s,i)=>list.appendChild(stepEl(s,i)));
     else {
       const info=document.createElement('p'); info.className='exp';
-      info.innerHTML='Oto-rota şekli kendisi çizer — senin işin <b>kalibrasyon</b>: hız, köşe yavaşlama, backlash telafisi. Üç ayarla hem hızlı hem keskin olmayı bul.';
+      info.innerHTML='Oto-rota şekli kendisi çizer - senin işin <b>kalibrasyon</b>: hız, köşe yavaşlama, backlash telafisi. Üç ayarla hem hızlı hem keskin olmayı bul.';
       list.appendChild(info);
     }
     document.getElementById('addStep').style.display=LAB.mode==='manual'?'block':'none';
@@ -530,10 +530,10 @@
   function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show');
     clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2400); }
   const TUT=[
-    ['✏️ G-code Zihni','CNC ve 3D yazıcılar adım listesi yürütür: GİT (x,y), KALEM aşağı/yukarı. Sen programlarsın, makine körü körüne uygular — hataların da harfiyen!'],
-    ['🌀 Hız Köşeleri Yuvarlar','Komut anında hedefe atlar ama MEKANİK takip eder. Hızlıysan kalem köşeyi içeriden keser — yıldızın sivri uçları pataese döner.'],
-    ['🔩 Backlash: Dişli Boşluğu','Bu tezgah yıpranmış: yön değişince ilk 0.15 birim BOŞA gider — çizgi kayar. Telafi aç: firmware boşluğu önceden alır. Gerçek atölye kalibrasyonu!'],
-    ['🐢🐇 Köşe Yavaşlama','Akıllı hız profili: düzlükte uçar, köşeye yaklaşınca frenler. AÇIKKEN yüksek hız güvenlidir — hem hızlı hem keskin olmanın sırrı.'],
+    ['✏️ G-code Zihni','CNC ve 3D yazıcılar adım listesi yürütür: GİT (x,y), KALEM aşağı/yukarı. Sen programlarsın, makine körü körüne uygular - hataların da harfiyen!'],
+    ['🌀 Hız Köşeleri Yuvarlar','Komut anında hedefe atlar ama MEKANİK takip eder. Hızlıysan kalem köşeyi içeriden keser - yıldızın sivri uçları pataese döner.'],
+    ['🔩 Backlash: Dişli Boşluğu','Bu tezgah yıpranmış: yön değişince ilk 0.15 birim BOŞA gider - çizgi kayar. Telafi aç: firmware boşluğu önceden alır. Gerçek atölye kalibrasyonu!'],
+    ['🐢🐇 Köşe Yavaşlama','Akıllı hız profili: düzlükte uçar, köşeye yaklaşınca frenler. AÇIKKEN yüksek hız güvenlidir - hem hızlı hem keskin olmanın sırrı.'],
     ['📐 İki Mod','El Programı: adımları sen yaz, koordinat hesabı senin. Oto-Rota: makine çizer, sen kalibre et. İkisi de Usta Gravürcü yolu.'],
     ['🏁 Çiz!','Kareden RF İmzasına 7 şekil. Raporda hedefle çizimini üst üste gör: kaymalar backlash, yuvarlanmalar hızdır. Atölye senin!'],
   ];

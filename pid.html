@@ -176,8 +176,8 @@
       <div class="hud">
         <div class="tl">
           <div class="chip">SÜRE<b id="hudTime" class="mono">0.0s</b></div>
-          <div class="chip best">EN İYİ<b id="hudBest" class="mono">—</b></div>
-          <div class="chip" id="hudAccChip">ÇİZGİDE<b id="hudAcc" class="mono">—</b></div>
+          <div class="chip best">EN İYİ<b id="hudBest" class="mono">-</b></div>
+          <div class="chip" id="hudAccChip">ÇİZGİDE<b id="hudAcc" class="mono">-</b></div>
           <div class="chip" id="hudLockChip">DURUM<b id="hudLock">HAZIR</b></div>
         </div>
         <div class="tr">
@@ -191,7 +191,7 @@
       <div class="countdown" id="countdown"></div>
     </div>
     <div class="result idle" id="result">
-      <div class="rhead" id="rhead">🏁 Robotunu ayarla ve <b style="color:var(--green);margin:0 4px">YARIŞ</b> — en hızlı temiz turu at.</div>
+      <div class="rhead" id="rhead">🏁 Robotunu ayarla ve <b style="color:var(--green);margin:0 4px">YARIŞ</b> - en hızlı temiz turu at.</div>
       <div class="rbody" id="rbody" style="display:none"></div>
     </div>
   </div>
@@ -204,7 +204,7 @@
     <div class="sidebody">
       <div id="panel-robot">
         <div class="sectlabel">Sensör Dizisi (5'li) · sürükle-bırak</div>
-        <div class="hintbox">Yarış robotu <b>5 sensörlük sık bir dizi</b> kullanır — çizgiyi daha hassas ölçer, PID daha yumuşak sürer. Sürükleyerek yerlerini değiştirebilirsin.</div>
+        <div class="hintbox">Yarış robotu <b>5 sensörlük sık bir dizi</b> kullanır - çizgiyi daha hassas ölçer, PID daha yumuşak sürer. Sürükleyerek yerlerini değiştirebilirsin.</div>
         <div class="editorwrap">
           <div class="chassis" id="chassis"></div>
           <div class="ed-side">
@@ -223,8 +223,8 @@
         <div id="kod-pid">
           <div class="hintbox">PID modu yarışın kalbidir: robot çizgiye olan <b>hatayı</b> ölçüp orantılı düzeltir. <b style="color:var(--sky)">Kp</b> sertlik, <b style="color:var(--sky)">Kd</b> savrulmayı bastırır. Hızlı + temiz tur için ikisini dengele.</div>
           <div class="pidrow"><label>Temel Hız <b id="pidBaseV">70%</b></label><input type="range" id="pidBase" min="20" max="100" step="5" value="70" /></div>
-          <div class="pidrow"><label>Kp — Orantı (sertlik) <b id="pidKpV">1.6</b></label><input type="range" id="pidKp" min="0" max="4" step="0.1" value="1.6" /></div>
-          <div class="pidrow"><label>Kd — Sönümleme (sakinlik) <b id="pidKdV">0.6</b></label><input type="range" id="pidKd" min="0" max="2" step="0.1" value="0.6" /></div>
+          <div class="pidrow"><label>Kp - Orantı (sertlik) <b id="pidKpV">1.6</b></label><input type="range" id="pidKp" min="0" max="4" step="0.1" value="1.6" /></div>
+          <div class="pidrow"><label>Kd - Sönümleme (sakinlik) <b id="pidKdV">0.6</b></label><input type="range" id="pidKd" min="0" max="2" step="0.1" value="0.6" /></div>
           <div class="piderr"><div class="lab">ÇİZGİ HATASI&nbsp;&nbsp;sol ◄ ─── ► sağ</div><div class="errtrack"><div class="errmid"></div><div class="errfill" id="errFill"></div></div></div>
           <div class="legend"><b>Yarış ipucu:</b> Düz pistte Temel Hız'ı artır; virajlı pistte Kp/Kd'yi ince ayarla. Çok hızlı + çok sert = savrulup pistten çıkarsın.</div>
         </div>
@@ -243,7 +243,7 @@
 <div class="tutwrap" id="tutwrap">
   <div class="tutcard">
     <h3>🏁 PID Çizgi Yarışı</h3>
-    <p>Amacın <b>en hızlı temiz turu</b> atmak. 5 sensörlü diziyle çizgiyi takip et, <b>PID Modu</b>'nda Kp/Kd ve Temel Hız'ı ayarla. Hızlı git — ama virajda savrulup pistten çıkma! Her pistin en iyi süren <b>rekor</b> olarak kaydedilir; hayaletin (soluk çizgi) seni kovalar.</p>
+    <p>Amacın <b>en hızlı temiz turu</b> atmak. 5 sensörlü diziyle çizgiyi takip et, <b>PID Modu</b>'nda Kp/Kd ve Temel Hız'ı ayarla. Hızlı git - ama virajda savrulup pistten çıkma! Her pistin en iyi süren <b>rekor</b> olarak kaydedilir; hayaletin (soluk çizgi) seni kovalar.</p>
     <div style="text-align:right"><button class="btn run" id="tutClose">Başla! 🚀</button></div>
   </div>
 </div>
@@ -317,12 +317,12 @@
   // ---------- HUD ----------
   function buildSensorHud(){ const wrap=document.getElementById('hudSensors'); wrap.innerHTML='';
     LAB.sensors.forEach(sen=>{ const d=document.createElement('div'); d.className='sdot'; d.style.color=sen.color; wrap.appendChild(d); }); }
-  function fmt(t){ return t==null?'—':t.toFixed(1)+'s'; }
+  function fmt(t){ return t==null?'-':t.toFixed(1)+'s'; }
   function updateHud(last){
     document.getElementById('hudTime').textContent=(LAB.sim?LAB.sim.t:0).toFixed(1)+'s';
     document.getElementById('hudBest').textContent=fmt(LAB.best[trackId()]);
     const acc=LAB.sim?S.accuracy(LAB.sim):null;
-    document.getElementById('hudAcc').textContent=acc==null?'—':acc+'%';
+    document.getElementById('hudAcc').textContent=acc==null?'-':acc+'%';
     const lock=document.getElementById('hudLock'), lc=document.getElementById('hudLockChip');
     if(!LAB.sim){ lock.textContent='HAZIR'; lc.className='chip'; }
     else if(LAB.sim.status==='success'){ lock.textContent='TUR TAMAM ✓'; lc.className='chip ok'; }
@@ -362,7 +362,7 @@
   function setResultRunning(){ const r=document.getElementById('result'); r.className='result idle';
     document.getElementById('rhead').innerHTML='🏁 Robot pistte… tur atıyor.'; document.getElementById('rbody').style.display='none'; }
   function setResultReady(){ const r=document.getElementById('result'); r.className='result idle';
-    document.getElementById('rhead').innerHTML='🏁 Robotunu ayarla ve <b style="color:var(--green);margin:0 4px">YARIŞ</b> — en hızlı temiz turu at.'; document.getElementById('rbody').style.display='none'; }
+    document.getElementById('rhead').innerHTML='🏁 Robotunu ayarla ve <b style="color:var(--green);margin:0 4px">YARIŞ</b> - en hızlı temiz turu at.'; document.getElementById('rbody').style.display='none'; }
   function showResult(){
     const sim=LAB.sim, r=document.getElementById('result'); const win=sim.status==='success';
       try{ if(window.RFProgress){ var __rfwin=(sim.status==='success'||sim.status==='win'); var __rfmedal=null; try{ var __core=window['SimCore']; if(__core&&__core.robotClass){var __c=__core.robotClass(sim); if(__c)__rfmedal=__c.name;} }catch(e){} RFProgress.record('pid', LAB.trackIdx, {pass:__rfwin, time:(sim&&typeof sim.t==='number')?sim.t:null, medal:__rfmedal, mode:LAB.mode}); } }catch(e){}
@@ -374,9 +374,9 @@
     const acc=S.accuracy(sim), best=LAB.best[trackId()];
     const tips=[];
     if(win){ if(acc>=95) tips.push('Kusursuz çizgi! Şimdi Temel Hız\'ı biraz artırıp süreyi düşürmeyi dene.');
-      else tips.push('Temiz bitirdin ama zikzak var. Kd\'yi biraz artır, Kp\'yi hafif düşür — daha stabil ve hızlı olur.'); }
-    else { if(LAB.mode==='pid') tips.push('Pistten çıktın. Kp çok yüksekse savrulursun, Temel Hız virajlar için çok yüksek olabilir — ikisini de biraz düşür.');
-      else tips.push('Kural modu yarışta zorlanır — 📈 PID Modu\'na geçip Kp/Kd ile daha akıcı sür.');
+      else tips.push('Temiz bitirdin ama zikzak var. Kd\'yi biraz artır, Kp\'yi hafif düşür - daha stabil ve hızlı olur.'); }
+    else { if(LAB.mode==='pid') tips.push('Pistten çıktın. Kp çok yüksekse savrulursun, Temel Hız virajlar için çok yüksek olabilir - ikisini de biraz düşür.');
+      else tips.push('Kural modu yarışta zorlanır - 📈 PID Modu\'na geçip Kp/Kd ile daha akıcı sür.');
       if(LAB.params.vMax>=4.6) tips.push('Motor hızın çok yüksek; teknik virajda aşıp çıkmış olabilir. Ya hızı düşür ya da çevikliği artır.'); }
     const body=document.getElementById('rbody'); body.style.display='block';
     // --- rich coaching via shared toolkit (falls back to old tip style if unavailable) ---
@@ -391,12 +391,12 @@
     // --- PID error-over-time graph: the whole lesson made visible ---
     var graphBlock='';
     if(window.RFResult && LAB.mode==='pid' && LAB.errTrace && LAB.errTrace.length>3){
-      graphBlock='<div class="rf-graphwrap"><div class="cap">📈 Hata eğrisi — robot çizgiden ne kadar saptı?</div>'+
+      graphBlock='<div class="rf-graphwrap"><div class="cap">📈 Hata eğrisi - robot çizgiden ne kadar saptı?</div>'+
         '<canvas id="pidErrGraph" class="rf-graph" style="height:150px"></canvas>'+
         '<div style="font-size:.72rem;color:var(--muted2);margin-top:2px">Kesikli çizgi = hedef (hata 0). Dalgalanma çoksa <b style="color:#7dd3fc">Kd</b> artır; yavaş toparlıyorsa <b style="color:#7dd3fc">Kp</b> artır.</div></div>';
     }
     body.innerHTML=`<div class="rstats">
-        <div class="big"><small>TUR SÜRESİ</small><b>${sim.status==='success'?sim.t.toFixed(1)+'s':'—'}</b></div>
+        <div class="big"><small>TUR SÜRESİ</small><b>${sim.status==='success'?sim.t.toFixed(1)+'s':'-'}</b></div>
         <div><small>EN İYİ (REKOR)</small><b style="color:#fbbf24">${fmt(best)}</b></div>
         <div><small>ÇİZGİDE KALMA</small><b>${acc}%</b></div>
       </div>`+
@@ -515,10 +515,10 @@
     if(small&&(m||w)) small.textContent='🔧 '+(m?m.name:'?')+' · '+(w?w.name:'?'); }catch(e){} }
   function fillRobotCard(){ const side=document.querySelector('.side'); if(!side) return; let build=null; try{ build=JSON.parse(localStorage.getItem('rf_robot')); }catch(e){}
     const RD=window.RobotData; const card=document.createElement('div'); card.style.cssText='border-top:1px solid var(--line);padding:16px;background:#0c1526';
-    if(build&&RD){ const chips=RD.ORDER.map(cat=>{ const o=RD.opt(cat,build[cat]); return '<span style="border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:4px 8px;font-size:.68rem;color:var(--muted2)">'+RD.COMPONENTS[cat].icon+' <b style="color:var(--txt)">'+(o?o.name:'—')+'</b></span>'; }).join('');
+    if(build&&RD){ const chips=RD.ORDER.map(cat=>{ const o=RD.opt(cat,build[cat]); return '<span style="border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:4px 8px;font-size:.68rem;color:var(--muted2)">'+RD.COMPONENTS[cat].icon+' <b style="color:var(--txt)">'+(o?o.name:'-')+'</b></span>'; }).join('');
       const r=RD.computeReport(build); const stat=(l,v,u)=>'<div style="background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:8px 6px;text-align:center"><div style="font-size:.52rem;letter-spacing:1px;color:var(--muted);text-transform:uppercase">'+l+'</div><div style="font-size:1.1rem;font-weight:800;margin-top:2px">'+v+'</div><div style="font-size:.55rem;color:var(--muted2)">'+u+'</div></div>';
       card.innerHTML='<div style="font-size:.62rem;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:10px">🔧 Robotun Künyesi</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">'+chips+'</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">'+stat('Ağırlık',r.weightG,'g')+stat('Hız',r.topSpeedKmh,'km/s')+stat('Güç',r.powerRating,'/100')+'</div><div style="font-size:.7rem;color:var(--muted2);line-height:1.5;margin-bottom:10px">Güçlü motor = daha hızlı tur; çevik tekerlek = virajda tutunma.</div><a href="build.html?sim=pid" style="display:inline-block;border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:.74rem;font-weight:700;color:var(--muted2)">← Robotu yeniden kur</a>';
-    } else { card.innerHTML='<div style="font-size:.62rem;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:8px">🤖 Kendi robotun</div><div style="font-size:.8rem;color:var(--muted2);line-height:1.55;margin-bottom:12px">Parçalarını seçip robotunu kurarsan, motorun ve tekerleğin tur süreni belirler — yarışta fark yaratır.</div><a href="build.html?sim=pid" style="display:inline-block;background:linear-gradient(180deg,#0ea5e9,#0369a1);border:1px solid #38bdf8;border-radius:9px;padding:9px 14px;font-size:.8rem;font-weight:700;color:#eaf6ff">Robotunu kur →</a>'; }
+    } else { card.innerHTML='<div style="font-size:.62rem;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:8px">🤖 Kendi robotun</div><div style="font-size:.8rem;color:var(--muted2);line-height:1.55;margin-bottom:12px">Parçalarını seçip robotunu kurarsan, motorun ve tekerleğin tur süreni belirler - yarışta fark yaratır.</div><a href="build.html?sim=pid" style="display:inline-block;background:linear-gradient(180deg,#0ea5e9,#0369a1);border:1px solid #38bdf8;border-radius:9px;padding:9px 14px;font-size:.8rem;font-weight:700;color:#eaf6ff">Robotunu kur →</a>'; }
     side.appendChild(card); }
 
   // ---------- admin: reveal best solution (MAIN scope so LAB/P are visible) ----------

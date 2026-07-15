@@ -1,5 +1,5 @@
 /* =============================================================================
- * RoboForge — Feedback capture  (rf-feedback.js) v1.0.0
+ * RoboForge - Feedback capture  (rf-feedback.js) v1.0.0
  * -----------------------------------------------------------------------------
  * A small floating "🐞 Geri bildirim" button on every page. Opens a quick form
  * (category + free text), auto-captures context (page, sim, level, user, device,
@@ -25,7 +25,7 @@
     try {
       var page = (location.pathname.split('/').pop() || 'index.html');
       sim = page.replace('.html', '');
-      // many labs expose a current level index on a global LAB — can't read (IIFE), so leave null
+      // many labs expose a current level index on a global LAB - can't read (IIFE), so leave null
     } catch (e) {}
     return {
       page: (location.pathname.split('/').pop() || 'index.html'),
@@ -108,7 +108,7 @@
     ov.innerHTML =
       '<div class="rf-fb-card" role="dialog" aria-modal="true" aria-label="Geri bildirim">'
       + '<h3>🐞 Geri bildirim</h3>'
-      + '<p>Ne oldu? Hangisi olduğunu seç, birkaç kelime yaz — bize çok yardımcı olur.</p>'
+      + '<p>Ne oldu? Hangisi olduğunu seç, birkaç kelime yaz - bize çok yardımcı olur.</p>'
       + '<div class="rf-fb-cats">' + CATS.map(function (c, i) { return '<button type="button" class="rf-fb-cat' + (i === 0 ? ' on' : '') + '" data-c="' + c.id + '">' + c.label + '</button>'; }).join('') + '</div>'
       + '<textarea placeholder="Kısaca anlat (örn. \'PID modunda buton çalışmadı\')"></textarea>'
       + '<div class="rf-fb-body"></div>'

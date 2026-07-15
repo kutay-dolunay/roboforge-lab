@@ -1,10 +1,10 @@
 /* =============================================================================
- * RoboForge — Shared theme  (rf-theme.css)  v1.0.0
+ * RoboForge - Shared theme  (rf-theme.css)  v1.0.0
  * -----------------------------------------------------------------------------
  * ONE source of truth for design tokens, base styles, shared components and the
  * standard responsive breakpoints. Linked from EVERY page BEFORE its inline
  * <style>. Page-specific inline styles still win (later in the cascade), so this
- * file is safe to add without breaking any page — and from now on, global visual
+ * file is safe to add without breaking any page - and from now on, global visual
  * changes happen HERE once instead of across 32 files.
  *
  * Standard breakpoints (used across the product):
@@ -21,16 +21,16 @@
   --red:#ef4444; --purple:#a855f7;
   /* RoboForge main brand color (#0066a2) + on-dark readable tint + hover glow */
   --brand:#0066a2; --brand-lt:#3aa0d8; --brand-glow:rgba(0,102,162,.45);
-  /* --- text (lifted for readability — faint gray was hard to read) --- */
+  /* --- text (lifted for readability - faint gray was hard to read) --- */
   --txt:#e6edf5; --muted:#8aa0bb; --muted2:#b7c6da;
 
   /* --- 6 theme (category) colors --- */
-  --c1:#22c55e; --c1s:rgba(34,197,94,.14);   /* Temel Sürüş — yeşil */
-  --c2:#38bdf8; --c2s:rgba(56,189,248,.14);  /* Görev & Strateji — mavi */
-  --c3:#a855f7; --c3s:rgba(168,85,247,.16);  /* Kontrol Mühendisliği — mor */
-  --c4:#f59e0b; --c4s:rgba(245,158,11,.15);  /* Fabrika & Otomasyon — amber */
-  --c5:#2dd4bf; --c5s:rgba(45,212,191,.15);  /* Uzay & Telemetri — teal */
-  --c6:#f472b6; --c6s:rgba(244,114,182,.15); /* Sürü & Lokomosyon — pembe */
+  --c1:#22c55e; --c1s:rgba(34,197,94,.14);   /* Temel Sürüş - yeşil */
+  --c2:#38bdf8; --c2s:rgba(56,189,248,.14);  /* Görev & Strateji - mavi */
+  --c3:#a855f7; --c3s:rgba(168,85,247,.16);  /* Kontrol Mühendisliği - mor */
+  --c4:#f59e0b; --c4s:rgba(245,158,11,.15);  /* Fabrika & Otomasyon - amber */
+  --c5:#2dd4bf; --c5s:rgba(45,212,191,.15);  /* Uzay & Telemetri - teal */
+  --c6:#f472b6; --c6s:rgba(244,114,182,.15); /* Sürü & Lokomosyon - pembe */
   /* --- difficulty band colors --- */
   --d1:#4ade80; --d2:#38bdf8; --d3:#fbbf24; --d4:#f87171;
 
@@ -70,7 +70,7 @@ header .grow,header .brand{ min-width:0; }
 .infq:hover::after{content:attr(data-tip);position:absolute;left:50%;bottom:135%;transform:translateX(-50%);
   width:240px;max-width:70vw;background:#0b1526;border:1px solid var(--brand-lt);border-radius:9px;padding:9px 11px;
   font-size:.68rem;font-weight:400;line-height:1.5;color:var(--txt);z-index:120;box-shadow:0 8px 26px rgba(0,0,0,.55);
-  white-space:normal;text-align:left;letter-spacing:0}
+  white-space:normal;text-align:left;letter-spacing:0;text-transform:none;font-weight:400}
 .infq:hover::before{content:'';position:absolute;left:50%;bottom:125%;transform:translateX(-50%);
   border:6px solid transparent;border-top-color:var(--brand-lt);z-index:121}
 /* respect users who ask for less motion */
@@ -95,7 +95,7 @@ header .grow,header .brand{ min-width:0; }
 .rf-btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
 
 /* =============================================================================
- * CATALOG UX  (search/filter, "start here", welcome) — used by index.html
+ * CATALOG UX  (search/filter, "start here", welcome) - used by index.html
  * ========================================================================== */
 .starthere{
   display:flex;align-items:center;gap:14px;margin:22px 0 4px;padding:16px 20px;border-radius:var(--r-lg);
@@ -140,7 +140,7 @@ header .grow,header .brand{ min-width:0; }
 .rf-welcome .wbtns{display:flex;gap:10px;margin-top:18px}
 
 /* =============================================================================
- * RESULT / COACHING / RUN-GRAPH  (rf-result.js) — shared across all labs
+ * RESULT / COACHING / RUN-GRAPH  (rf-result.js) - shared across all labs
  * ========================================================================== */
 .rf-graph{ display:block; width:100%; border:1px solid var(--line); border-radius:10px;
   background:#0a0f1c; margin:2px 0 4px; }

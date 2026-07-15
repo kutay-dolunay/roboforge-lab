@@ -245,7 +245,7 @@
         </div>
         <div class="tr">
           <div class="sensbar" id="hudSensors"></div>
-          <div class="actionchip">HAREKET<b id="hudAction">—</b></div>
+          <div class="actionchip">HAREKET<b id="hudAction">-</b></div>
           <div class="motorbars">
             <div class="mrow"><span>SOL</span><div class="mtrack"><div class="mfill" id="mfL"></div></div></div>
             <div class="mrow"><span>SAĞ</span><div class="mtrack"><div class="mfill" id="mfR"></div></div></div>
@@ -256,7 +256,7 @@
     </div>
 
     <div class="result idle" id="result">
-      <div class="rhead" id="rhead">💡 Robotunu kur, kodla ve <b style="color:var(--green);margin:0 4px">ÇALIŞTIR</b> — ışığı bulup yakala.</div>
+      <div class="rhead" id="rhead">💡 Robotunu kur, kodla ve <b style="color:var(--green);margin:0 4px">ÇALIŞTIR</b> - ışığı bulup yakala.</div>
       <div class="rbody" id="rbody" style="display:none"></div>
     </div>
   </div>
@@ -273,7 +273,7 @@
         <div class="hintbox">
           Robotun üç ışık sensörü var: <b style="color:#f59e0b">ÖN</b>, <b style="color:#22c55e">SOL</b> ve
           <b style="color:#38bdf8">SAĞ</b>. Her biri o yöndeki <b>parlaklığı</b> ölçer.
-          <b>Işık Eşiği</b> ayarı, "ışık var" saymak için ne kadar parlaklık gerektiğini belirler —
+          <b>Işık Eşiği</b> ayarı, "ışık var" saymak için ne kadar parlaklık gerektiğini belirler -
           bu senaryonun en önemli ayarı!
         </div>
         <div class="editorwrap">
@@ -326,12 +326,12 @@
 
         <div id="kod-pid" style="display:none">
           <div class="hintbox">
-            PID modunda robot, <b>sol ve sağ parlaklığın farkına</b> göre orantılı döner — ışığa doğru yumuşakça süzülür.
+            PID modunda robot, <b>sol ve sağ parlaklığın farkına</b> göre orantılı döner - ışığa doğru yumuşakça süzülür.
             <b style="color:var(--sky)">Kp</b> dönüşün sertliğini, <b style="color:var(--sky)">Kd</b> savrulmayı bastırmayı belirler.
           </div>
-          <div class="pidrow"><label>Kp — Dönüş Sertliği <b id="pidKpV">2.6</b></label>
+          <div class="pidrow"><label>Kp - Dönüş Sertliği <b id="pidKpV">2.6</b></label>
             <input type="range" id="pidKp" min="0" max="6" step="0.1" value="2.6" /></div>
-          <div class="pidrow"><label>Kd — Sönümleme (sakinlik) <b id="pidKdV">0.8</b></label>
+          <div class="pidrow"><label>Kd - Sönümleme (sakinlik) <b id="pidKdV">0.8</b></label>
             <input type="range" id="pidKd" min="0" max="3" step="0.1" value="0.8" /></div>
           <div class="pidrow"><label>Taban Hız <b id="pidBaseV">70%</b></label>
             <input type="range" id="pidBase" min="20" max="100" step="5" value="70" /></div>
@@ -375,7 +375,7 @@
 
   const LAB = {
     sceneIdx: 0, scene: null,
-    sensors: [],            // empty on open — student builds from scratch
+    sensors: [],            // empty on open - student builds from scratch
     rules: [],              // empty on open
     defaultRule: M.starterDefault(),
     params: M.defaultParams(),
@@ -471,13 +471,13 @@
     dots.forEach((d,i)=>{ const on=states&&states[i]; d.classList.toggle('on',!!on); d.style.background=on?d.style.color:'#0b1220'; });
     if(LAB.mode==='pid'){
       const e = LAB.sim ? (LAB.sim.lastError||0) : 0;
-      document.getElementById('hudAction').textContent = LAB.sim ? (e>0.04?'◄ SOL':e<-0.04?'SAĞ ►':'İLERİ') : '—';
+      document.getElementById('hudAction').textContent = LAB.sim ? (e>0.04?'◄ SOL':e<-0.04?'SAĞ ►':'İLERİ') : '-';
       const base=LAB.pid.base/100, turn=Math.max(-0.6,Math.min(0.6,e*LAB.pid.kp*0.4));
       setBar('mfL', base-turn); setBar('mfR', base+turn);
       const ef=document.getElementById('errFill'); if(ef){ const ee=Math.max(-1,Math.min(1,e/0.4)); ef.style.left=(50 - ee*48)+'%'; }
     } else {
       let mL=0,mR=0; if(states){ const cmd=M.evalRules(LAB.rules,LAB.defaultRule,states); mL=cmd.mL; mR=cmd.mR; }
-      document.getElementById('hudAction').textContent = states ? moveLabel(mL,mR) : '—';
+      document.getElementById('hudAction').textContent = states ? moveLabel(mL,mR) : '-';
       setBar('mfL',mL); setBar('mfR',mR);
     }
   }
@@ -543,7 +543,7 @@
   function finishRun(){ stopRun(); showResult(); }
 
   // ---------- result ----------
-  const REASONS={lost:'Robot ışığı kaybetti',timeout:'Süre doldu — ışığa varamadı'};
+  const REASONS={lost:'Robot ışığı kaybetti',timeout:'Süre doldu - ışığa varamadı'};
   function setResultRunning(){
     const r=document.getElementById('result'); r.className='result idle';
     document.getElementById('rhead').innerHTML='💡 Robot ışığı arıyor…';
@@ -551,7 +551,7 @@
   }
   function setResultReady(){
     const r=document.getElementById('result'); r.className='result idle';
-    document.getElementById('rhead').innerHTML='💡 Robotunu kur, kodla ve <b style="color:var(--green);margin:0 4px">ÇALIŞTIR</b> — ışığı bulup yakala.';
+    document.getElementById('rhead').innerHTML='💡 Robotunu kur, kodla ve <b style="color:var(--green);margin:0 4px">ÇALIŞTIR</b> - ışığı bulup yakala.';
     document.getElementById('rbody').style.display='none';
   }
   function medal(sim){
@@ -572,7 +572,7 @@
       var b=(f.bright&&f.bright.length)?Math.max.apply(null,f.bright):0; brightSeries.push({x:i,y:b}); }); }
     var graphBlock='';
     if(window.RFResult && brightSeries.length>3){
-      graphBlock='<div class="rf-graphwrap"><div class="cap">💡 Algılanan parlaklık — zamana karşı</div>'+
+      graphBlock='<div class="rf-graphwrap"><div class="cap">💡 Algılanan parlaklık - zamana karşı</div>'+
         '<canvas id="lightGraph" class="rf-graph" style="height:130px"></canvas>'+
         '<div style="font-size:.72rem;color:var(--muted2);margin-top:2px">Eğri yükseldikçe robot ışığa yaklaşıyor demektir. Düz/inişli kalıyorsa yanlış yöne gidiyor.</div></div>';
     }
@@ -586,7 +586,7 @@
         <div><small>SÜRE</small><b>${sim.t.toFixed(1)}s</b></div>
         <div><small>SENARYO</small><b>${M.SCENES[LAB.sceneIdx].name}</b></div>
         <div><small>IŞIK EŞİĞİ</small><b>${LAB.threshold.toFixed(2)}</b></div>
-        <div><small>SONUÇ</small><b style="color:${win?'var(--green)':'#fca5a5'}">${win?'YAKALANDI':'—'}</b></div>
+        <div><small>SONUÇ</small><b style="color:${win?'var(--green)':'#fca5a5'}">${win?'YAKALANDI':'-'}</b></div>
       </div>`+
       graphBlock+
       coachBlock+
@@ -825,7 +825,7 @@
     {tab:null,t:'Işık Takibi Lab’a hoş geldin! 💡',p:'Robotun ışık sensörleriyle bir ışık kaynağını bulup ona ulaşacak. Onu sen kodlayacaksın.'},
     {tab:'robot',t:'1) Eşiği ayarla',p:'🤖 Robot sekmesinde en önemli ayar "Işık Eşiği". Robot bir yönü ne zaman "aydınlık" sayacağını buradan öğrenir.'},
     {tab:'kod',t:'2) Takibi kodla',p:'🧩 Kod sekmesinde ışık soldaysa sola, sağdaysa sağa kır; öndeyse düz git; hiç ışık yoksa yerinde dönüp ara.'},
-    {tab:null,t:'3) Çalıştır ve öğren',p:'▶ ÇALIŞTIR’a bas. Işığı kaybederse ya da varamazsa ipuçları çıkar — eşiği ve kuralları ayarla, tekrar dene!'},
+    {tab:null,t:'3) Çalıştır ve öğren',p:'▶ ÇALIŞTIR’a bas. Işığı kaybederse ya da varamazsa ipuçları çıkar - eşiği ve kuralları ayarla, tekrar dene!'},
   ];
   let tutI=0;
   function switchTab(name){
@@ -867,7 +867,7 @@
     card.style.cssText='border-top:1px solid var(--line);padding:16px;background:#0c1526';
     if(build && RD){
       const chips=RD.ORDER.map(cat=>{ const o=RD.opt(cat,build[cat]);
-        return '<span style="border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:4px 8px;font-size:.68rem;color:var(--muted2)">'+RD.COMPONENTS[cat].icon+' <b style="color:var(--txt)">'+(o?o.name:'—')+'</b></span>'; }).join('');
+        return '<span style="border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:4px 8px;font-size:.68rem;color:var(--muted2)">'+RD.COMPONENTS[cat].icon+' <b style="color:var(--txt)">'+(o?o.name:'-')+'</b></span>'; }).join('');
       const r=RD.computeReport(build);
       const stat=(l,v,u)=>'<div style="background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:8px 6px;text-align:center"><div style="font-size:.52rem;letter-spacing:1px;color:var(--muted);text-transform:uppercase">'+l+'</div><div style="font-size:1.1rem;font-weight:800;margin-top:2px">'+v+'</div><div style="font-size:.55rem;color:var(--muted2)">'+u+'</div></div>';
       card.innerHTML='<div style="font-size:.62rem;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:10px">🔧 Robotun Künyesi</div>'+

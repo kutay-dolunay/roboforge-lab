@@ -1,9 +1,9 @@
 /* =============================================================================
- * RoboForge — Drone Görevi (Altitude & Waypoint Flight) :: Simulation Core
+ * RoboForge - Drone Görevi (Altitude & Waypoint Flight) :: Simulation Core
  * -----------------------------------------------------------------------------
  * Pure, dependency-free. Browser (window.DroneCore) + Node (module.exports).
  *
- * SIDE-VIEW quadcopter. Thrust fights gravity — hover control is the purest
+ * SIDE-VIEW quadcopter. Thrust fights gravity - hover control is the purest
  * altitude PID… and the home of the Ki lesson: with P-only control the drone
  * hovers BELOW the target (steady-state error, gravity offset). Ki erases it.
  *
@@ -148,7 +148,7 @@
       }
     }
 
-    // battery: thrust costs energy (quadratic — hovering hot burns fast)
+    // battery: thrust costs energy (quadratic - hovering hot burns fast)
     if (sim.batt > 0) sim.batt -= (2.2 * thr * thr + 0.45) * dt;
     if (sim.batt <= 0) { sim.batt = 0; sim.battOut = true; thr = 0; }
 
@@ -215,25 +215,25 @@
     const tips = [];
     const mode = sim.cfg.mode || 'pid';
     if (sim.reason === 'battery') {
-      tips.push('Enerji bitti ve drone gökten düştü! İtki maliyeti kareseldir: %90 itki, %45 itkinin DÖRT katı yakar. Daha alçak uç, salınımı azalt (Kd/Ki) — pürüzsüz uçuş = verimli uçuş.');
+      tips.push('Enerji bitti ve drone gökten düştü! İtki maliyeti kareseldir: %90 itki, %45 itkinin DÖRT katı yakar. Daha alçak uç, salınımı azalt (Kd/Ki) - pürüzsüz uçuş = verimli uçuş.');
     }
     if (sim.reason === 'crash_ground') {
       tips.push(mode === 'pid'
-        ? 'Sert çakılma! İnişte Kd hayat kurtarır — alçalma hızını görüp itkiyi artırır. Kd değerini yükselt.'
-        : 'Sert çakılma! ÇOK ALÇAK bandında güçlü itki (85+) olmalı; TAMAM bandında bile askı için ~%45 itki gerekir — sıfır itki = taş gibi düşersin.');
+        ? 'Sert çakılma! İnişte Kd hayat kurtarır - alçalma hızını görüp itkiyi artırır. Kd değerini yükselt.'
+        : 'Sert çakılma! ÇOK ALÇAK bandında güçlü itki (85+) olmalı; TAMAM bandında bile askı için ~%45 itki gerekir - sıfır itki = taş gibi düşersin.');
     }
     if (sim.reason === 'wrong_pad') tips.push('Yumuşak indin ama pistin dışına! Görev bitmeden ya da hedef pist üstüne gelmeden alçalma.');
     if (sim.reason === 'crash_gate') tips.push('Kuleye çarptın! Geçitten geçmek için önce geçit yüksekliğine hizalan, sonra yatay ilerle.');
     if (sim.reason === 'out') tips.push('Rüzgâr seni sahneden attı! Yatay Kazanç hedefe daha sıkı tutunmanı sağlar.');
     if (sim.reason === 'timeout') {
       if (mode === 'pid' && (sim.cfg.pid.ki || 0) < 0.05 && sim.wpIdx < sim.mission.wps.length)
-        tips.push('Süre doldu — drone hedefin hep BİRAZ ALTINDA asılı kaldı, değil mi? Bu kalıcı hata (steady-state error) yerçekimi yüzünden: P tek başına yetmez. Ki değerini artır — integral terimi bu açığı zamanla kapatır. Bu, bu görevin en büyük dersi!');
-      else tips.push('Süre doldu. Hedef noktalarında 1 saniye sabit durman gerekiyor — salınımı azalt (Kd) ve rotayı hızlandır.');
+        tips.push('Süre doldu - drone hedefin hep BİRAZ ALTINDA asılı kaldı, değil mi? Bu kalıcı hata (steady-state error) yerçekimi yüzünden: P tek başına yetmez. Ki değerini artır - integral terimi bu açığı zamanla kapatır. Bu, bu görevin en büyük dersi!');
+      else tips.push('Süre doldu. Hedef noktalarında 1 saniye sabit durman gerekiyor - salınımı azalt (Kd) ve rotayı hızlandır.');
     }
     if (sim.status === 'success') {
       const p = precision(sim);
       if (p >= 85) tips.push('Kusursuz uçuş! Gerçek drone otopilotları tam böyle çalışır.');
-      else tips.push('Görev tamam! İrtifa takibi biraz dalgalıydı (%' + p + ') — Ki/Kd ince ayarıyla çizgiyi düzleştir.');
+      else tips.push('Görev tamam! İrtifa takibi biraz dalgalıydı (%' + p + ') - Ki/Kd ince ayarıyla çizgiyi düzleştir.');
     }
     return tips;
   }
@@ -241,7 +241,7 @@
   function robotClass(sim) {
     if (sim.status !== 'success') return null;
     const p = precision(sim);
-    if (p >= 85) return { key: 'hava_kurdu', name: '🏆 Hava Kurdu', cmt: 'İrtifa çizgisi cetvel gibi — otopilot mühendisliği.' };
+    if (p >= 85) return { key: 'hava_kurdu', name: '🏆 Hava Kurdu', cmt: 'İrtifa çizgisi cetvel gibi - otopilot mühendisliği.' };
     if (p >= 70) return { key: 'pilot', name: '🥇 Pilot', cmt: 'Temiz uçuş. Ki ile son salınımları da söndür.' };
     if (p >= 55) return { key: 'amator_pilot', name: '🧭 Amatör Pilot', cmt: 'Görev tamam! İrtifa takibin gelişebilir.' };
     return { key: 'caylak_pilot', name: '🎓 Çaylak Pilot', cmt: 'İndin ya, gerisi ayrıntı!' };

@@ -145,11 +145,11 @@
     <canvas id="arena" width="720" height="720"></canvas>
     <div class="hud">
       <div class="hudbox"><div class="l">SÜRE</div><div class="v mono" id="hudT">0.0s</div></div>
-      <div class="hudbox"><div class="l">TAHMİN HATASI</div><div class="v mono" id="hudE">—</div></div>
-      <div class="hudbox"><div class="l">HEDEFE</div><div class="v mono" id="hudD">—</div></div>
+      <div class="hudbox"><div class="l">TAHMİN HATASI</div><div class="v mono" id="hudE">-</div></div>
+      <div class="hudbox"><div class="l">HEDEFE</div><div class="v mono" id="hudD">-</div></div>
       <div class="hudbox"><div class="l">DURUM</div><div class="v" id="hudS">HAZIR</div></div>
     </div>
-    <div class="hint" id="hint">📡 Üç anten sürekli sinyal yayıyor. Robotun her birine olan mesafesini <b>sinyal gücünden</b> (RSSI) tahmin eder — ama ölçüm gürültülü! Üç mesafe çemberinin kesişimi (<b>trilaterasyon</b>) gizli vericiyi verir. Sırrı: tek ölçüme güvenme, çok örneğin <b>ortalamasını</b> al.</div>
+    <div class="hint" id="hint">📡 Üç anten sürekli sinyal yayıyor. Robotun her birine olan mesafesini <b>sinyal gücünden</b> (RSSI) tahmin eder - ama ölçüm gürültülü! Üç mesafe çemberinin kesişimi (<b>trilaterasyon</b>) gizli vericiyi verir. Sırrı: tek ölçüme güvenme, çok örneğin <b>ortalamasını</b> al.</div>
     <div class="rdock" id="resultDock" style="display:none"></div>
   </div>
   <div class="side">
@@ -178,16 +178,16 @@
         <p class="exp">Robot her an trilaterasyon tahminine yönelir. <b>Kp</b> ne kadar sert dönsün,
           <b>Kd</b> gürültülü tahmindeki zıplamaları sönümler (çok düşükse hedefin etrafında salınır),
           <b>yaklaşma</b> ne kadar erken yavaşlasın. Hareketli vericide sürekli güncelleme şart.</p>
-        <div class="sliderRow"><label>Kp — Dönüş Sertliği <b id="pKpV">2.4</b></label>
+        <div class="sliderRow"><label>Kp - Dönüş Sertliği <b id="pKpV">2.4</b></label>
           <input type="range" id="pKp" min="0.5" max="4" step="0.1" value="2.4"></div>
-        <div class="sliderRow"><label>Kd — Sönümleme <b id="pKdV">0.4</b></label>
+        <div class="sliderRow"><label>Kd - Sönümleme <b id="pKdV">0.4</b></label>
           <input type="range" id="pKd" min="0" max="1.5" step="0.05" value="0.4"></div>
         <div class="sliderRow"><label>Yaklaşma Mesafesi <b id="pYkV">3.0</b></label>
           <input type="range" id="pYk" min="1" max="6" step="0.5" value="3.0"></div>
       </div>
       <div class="card">
         <h4>Telemetri Paneli</h4>
-        <p class="exp mono" id="ledger" style="font-size:.72rem">—</p>
+        <p class="exp mono" id="ledger" style="font-size:.72rem">-</p>
       </div>
     </div>
     <div id="tab-robot" style="display:none">
@@ -195,7 +195,7 @@
         <h4>RSSI → Mesafe</h4>
         <p class="exp">Sinyal gücü uzaklıkla ÜSTEL zayıflar: <b>d = d₀·10^((P₀−RSSI)/10n)</b>.
           Sinyal 6 dB düşerse mesafe İKİYE katlanır! Bu yüzden uzakta küçük bir gürültü büyük bir mesafe
-          hatasına dönüşür — ve tek ölçüm asla yeterince güvenilir değildir.</p>
+          hatasına dönüşür - ve tek ölçüm asla yeterince güvenilir değildir.</p>
       </div>
       <div class="card kunye" id="kunye"></div>
     </div>
@@ -241,7 +241,7 @@
       const [,gy]=W2S([0,i]); CTX.beginPath(); CTX.moveTo(0,gy); CTX.lineTo(Wd,gy); CTX.stroke(); }
     const tgt = sim?sim.target:m.target;
     const est = sim?sim.est:null;
-    // sinyal çemberleri (tahmini mesafe) — antenler etrafında
+    // sinyal çemberleri (tahmini mesafe) - antenler etrafında
     if(sim && sim.samples){
       const ds = R.estDists(sim);
       m.bx.forEach((b,i)=>{
@@ -260,7 +260,7 @@
       CTX.fillText('📡',bx,by+4);
       CTX.fillStyle='#64748b'; CTX.font='9px Segoe UI'; CTX.fillText('A'+(i+1),bx,by-15);
     });
-    // gerçek hedef (verici) — canlı yayan nokta
+    // gerçek hedef (verici) - canlı yayan nokta
     const [tx,ty]=W2S(tgt);
     const pulse = sim&&sim.status==='running'?(1+Math.sin(sim.t*6)*0.3):1;
     const gr=CTX.createRadialGradient(tx,ty,0,tx,ty,26*pulse);
@@ -293,11 +293,11 @@
     const sim=LAB.sim; const m=R.MISSIONS[LAB.misIdx];
     document.getElementById('hudT').textContent=(sim?sim.t:0).toFixed(1)+'s';
     const E=document.getElementById('hudE');
-    E.textContent = sim&&sim.estErr!=null?sim.estErr.toFixed(1)+' m':'—';
+    E.textContent = sim&&sim.estErr!=null?sim.estErr.toFixed(1)+' m':'-';
     E.className='v mono '+(sim&&sim.estErr!=null?(sim.estErr<1.5?'ok':sim.estErr<4?'hot':'bad'):'');
     const D=document.getElementById('hudD');
     const rd = sim?R.dist([sim.rx,sim.ry],sim.target):null;
-    D.textContent = rd!=null?rd.toFixed(1)+' m':'—';
+    D.textContent = rd!=null?rd.toFixed(1)+' m':'-';
     const s=document.getElementById('hudS');
     if(!sim){ s.textContent='HAZIR'; s.className='v'; }
     else if(sim.status==='running'){ s.textContent='ARIYOR 📡'; s.className='v hot'; }
@@ -305,7 +305,7 @@
     else { s.textContent='SÜRE DOLDU'; s.className='v bad'; }
     const led=document.getElementById('ledger');
     if(sim){
-      led.innerHTML='ölçüm: 12 Hz · gürültü ±'+m.noise+' dB<br>ortalama penceresi: <b>'+m.avg+'</b> örnek<br>tahmin hatası: <b style="color:var(--amber)">'+(sim.estErr!=null?sim.estErr.toFixed(1)+' m':'—')+'</b> · en iyi: <b>'+(sim.bestErr<900?sim.bestErr.toFixed(1)+' m':'—')+'</b>';
+      led.innerHTML='ölçüm: 12 Hz · gürültü ±'+m.noise+' dB<br>ortalama penceresi: <b>'+m.avg+'</b> örnek<br>tahmin hatası: <b style="color:var(--amber)">'+(sim.estErr!=null?sim.estErr.toFixed(1)+' m':'-')+'</b> · en iyi: <b>'+(sim.bestErr<900?sim.bestErr.toFixed(1)+' m':'-')+'</b>';
     } else {
       led.innerHTML='ölçüm: 12 Hz · gürültü ±'+m.noise+' dB<br>ortalama penceresi: <b>'+m.avg+'</b> örnek<br>verici '+(m.move?'<b style="color:#fca5a5">HAREKETLİ</b>':'sabit')+' · bulma yarıçapı '+R.REACH+' m';
     }
@@ -343,7 +343,7 @@
     document.getElementById('hint').style.display='block';
     document.getElementById('resultWrap').classList.remove('show');
   }
-  const REASONS={ bulundu:'Verici bulundu!', sure:'Süre doldu — vericiyi kıstıramadın.' };
+  const REASONS={ bulundu:'Verici bulundu!', sure:'Süre doldu - vericiyi kıstıramadın.' };
   function showResult(){
     const sim=LAB.sim; if(!sim) return;
     const win=sim.status==='success';
@@ -365,7 +365,7 @@
             :'<div class="rd-cmt">'+(REASONS[sim.reason]||'')+'</div>')+
         '<div class="rd-stats">'+
           '<div class="rd-stat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
-          '<div class="rd-stat"><div class="l">EN İYİ TAHMİN</div><div class="v mono">'+(sim.bestErr<900?sim.bestErr.toFixed(1)+' m':'—')+'</div></div>'+
+          '<div class="rd-stat"><div class="l">EN İYİ TAHMİN</div><div class="v mono">'+(sim.bestErr<900?sim.bestErr.toFixed(1)+' m':'-')+'</div></div>'+
           '<div class="rd-stat"><div class="l">DURUM</div><div class="v '+(win?'ok':'bad')+'">'+(win?'BULUNDU':'KAYIP')+'</div></div>'+
         '</div>'+
         accGauge+
@@ -391,13 +391,13 @@
     const m=sim.mission;
     const box=document.getElementById('resultBox');
     box.innerHTML =
-      '<h3 class="'+(win?'win':'lose')+'">📄 Arama Raporu — '+m.name+'</h3>'+
+      '<h3 class="'+(win?'win':'lose')+'">📄 Arama Raporu - '+m.name+'</h3>'+
       '<div style="font-size:.76rem;color:var(--sky);margin:8px 0">'+
-        (LAB.mode==='rules'?'🧩 Arama kuralı — güven '+LAB.policy.guven+' · yavaşla '+LAB.policy.yavasla:'📈 Sürekli takip — Kp '+LAB.pid.kp+' · Kd '+LAB.pid.kd)+
+        (LAB.mode==='rules'?'🧩 Arama kuralı - güven '+LAB.policy.guven+' · yavaşla '+LAB.policy.yavasla:'📈 Sürekli takip - Kp '+LAB.pid.kp+' · Kd '+LAB.pid.kd)+
         ' · gürültü ±'+m.noise+' dB · pencere '+m.avg+'</div>'+
       '<div class="rstats">'+
         '<div class="rstat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'</div></div>'+
-        '<div class="rstat"><div class="l">EN İYİ HATA</div><div class="v mono">'+(sim.bestErr<900?sim.bestErr.toFixed(1):'—')+'</div></div>'+
+        '<div class="rstat"><div class="l">EN İYİ HATA</div><div class="v mono">'+(sim.bestErr<900?sim.bestErr.toFixed(1):'-')+'</div></div>'+
         '<div class="rstat"><div class="l">HEDEF</div><div class="v mono">'+(m.move?'HAREKETLİ':'SABİT')+'</div></div>'+
       '</div>'+
       '<canvas id="repMap" width="500" height="230" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#0a0d12"></canvas>'+
@@ -452,7 +452,7 @@
       (bc?'<div class="chipsRow">'+bc+'</div>':'')+
       '<p class="exp" style="margin:0">Bu görevde 3 anten sabit, verici '+(m.move?'<b>hareketli</b>':'sabit')+'. '+
       'Gürültü ±'+m.noise+' dB, ortalama penceresi '+m.avg+' örnek. Motorun ne kadar hızlıysa o kadar çabuk '+
-      'yaklaşırsın — ama önce doğru yeri bulmalısın. <a style="color:var(--sky)" href="build.html?sim=sinyal">Robotunu kur →</a></p>';
+      'yaklaşırsın - ama önce doğru yeri bulmalısın. <a style="color:var(--sky)" href="build.html?sim=sinyal">Robotunu kur →</a></p>';
   }
   function buildTrackTabs(){
     const el=document.getElementById('trackTabs'); el.innerHTML='';
@@ -489,11 +489,11 @@
   function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show');
     clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2400); }
   const TUT=[
-    ['📡 Sinyal Avcısı Nedir','Gizli bir verici sahada bir yerde. Onu göremezsin — ama üç antenin aldığı SİNYAL GÜCÜNDEN (RSSI) her antene olan mesafeni tahmin edebilirsin. WiFi\'nin gücünden uzaklığını kestirmek gibi.'],
+    ['📡 Sinyal Avcısı Nedir','Gizli bir verici sahada bir yerde. Onu göremezsin - ama üç antenin aldığı SİNYAL GÜCÜNDEN (RSSI) her antene olan mesafeni tahmin edebilirsin. WiFi\'nin gücünden uzaklığını kestirmek gibi.'],
     ['📐 Trilaterasyon','Üç mesafe = üç çember. Üçünün kesiştiği nokta = verici. İki çember iki noktada kesişir, üçüncüsü belirsizliği kaldırır. Bu, GPS\'in çalışma prensibinin ta kendisi!'],
-    ['🌫️ Gürültü Tuzağı','RSSI ölçümü GÜRÜLTÜLÜdür: tek ölçüm metrelerce şaşırtır. Sırrı ORTALAMA — çok örnek al, rastgele gürültü sönümlensin. Acele eden hayalet kovalar.'],
+    ['🌫️ Gürültü Tuzağı','RSSI ölçümü GÜRÜLTÜLÜdür: tek ölçüm metrelerce şaşırtır. Sırrı ORTALAMA - çok örnek al, rastgele gürültü sönümlensin. Acele eden hayalet kovalar.'],
     ['🎯 Güven Eşiği','Arama kuralı modunda tahmine güvenmeden önce yeterince örnek bekle (güven eşiği). Sürekli takip modunda Kd tahmindeki zıplamaları sönümler. İkisi de aynı derdin çaresi: gürültü.'],
-    ['🏃 Kaçan Verici','İleri görevlerde verici HAREKETLİ! Sabit bir tahmine kilitlenmek işe yaramaz — sürekli yeniden ölç, trilateri güncelle, peşinden git. Gerçek arama-kurtarma böyledir.'],
+    ['🏃 Kaçan Verici','İleri görevlerde verici HAREKETLİ! Sabit bir tahmine kilitlenmek işe yaramaz - sürekli yeniden ölç, trilateri güncelle, peşinden git. Gerçek arama-kurtarma böyledir.'],
     ['🏁 Aramaya Başla!','İlk İz\'den Kâbus Frekansı\'na 7 görev. Rapordaki sarı çizgi tahmin hatan, mavi çizgi hedefe uzaklığın: iyi arama önce sarıyı düşürür. Sinyal Dedektifi ol!'],
   ];
   let tutI=0;

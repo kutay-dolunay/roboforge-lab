@@ -1,13 +1,13 @@
 /* =============================================================================
- * RoboForge — Shared result / coaching / run-graph toolkit  (rf-result.js) v1.0.0
+ * RoboForge - Shared result / coaching / run-graph toolkit  (rf-result.js) v1.0.0
  * -----------------------------------------------------------------------------
  * Reusable pieces for a DEEP end-of-run experience. Labs keep their own result
  * panel; they just CALL these helpers to render rich, teaching-focused content.
  *
- *   RFResult.graph(canvas, cfg)   — draw a themed line/area chart on a canvas
- *   RFResult.coachHTML(tips,opts) — structured "ne oldu → neden → ne yapmalı" block
- *   RFResult.celebrate(opts)      — win personality (confetti burst + medal shine)
- *   RFResult.line(series,cfg)     — returns an <canvas> element pre-drawn (convenience)
+ *   RFResult.graph(canvas, cfg)   - draw a themed line/area chart on a canvas
+ *   RFResult.coachHTML(tips,opts) - structured "ne oldu → neden → ne yapmalı" block
+ *   RFResult.celebrate(opts)      - win personality (confetti burst + medal shine)
+ *   RFResult.line(series,cfg)     - returns an <canvas> element pre-drawn (convenience)
  *
  * NO external libraries. Pure canvas. Themeable via CSS variables (reads them off
  * :root at call time so it always matches rf-theme.css).
@@ -272,7 +272,7 @@
 
   // -------------------------------------------------------------------------
   // starRate(): a quick inline ⭐⭐⭐⭐⭐ "Bu seviye nasıldı?" row.
-  // Shows ONCE per (sim,level) — remembers via localStorage 'rf_rated'. One tap,
+  // Shows ONCE per (sim,level) - remembers via localStorage 'rf_rated'. One tap,
   // no submit. Records to RFFeedback if present (category 'rating').
   // Auto-injected into the result panel by _autoStar() below (reads window.__rfLast
   // that RFProgress.record sets). Returns '' if already rated or context unknown.

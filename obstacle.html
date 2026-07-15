@@ -248,7 +248,7 @@
     </div>
 
     <div class="result idle" id="result">
-      <div class="rhead" id="rhead">🚧 Robotunu kur, ayarla ve <b style="color:var(--green);margin:0 4px">ÇALIŞTIR</b> — çarpmadan hedefe ulaş.</div>
+      <div class="rhead" id="rhead">🚧 Robotunu kur, ayarla ve <b style="color:var(--green);margin:0 4px">ÇALIŞTIR</b> - çarpmadan hedefe ulaş.</div>
       <div class="rbody" id="rbody" style="display:none"></div>
     </div>
   </div>
@@ -297,7 +297,7 @@
           <div class="hintbox">
             Kural modunda robot sensör okumalarına (<b style="color:var(--red)">ENGEL</b> /
             <b style="color:var(--green)">ENGEL YOK</b>) göre <b>yukarıdan aşağıya</b> ilk uyan kurala göre hareket eder.
-            Basit ama dar geçitlerde köşeyi sıyırabilir — o zaman PID modunu dene.
+            Basit ama dar geçitlerde köşeyi sıyırabilir - o zaman PID modunu dene.
           </div>
           <div id="rules"></div>
           <button class="addrule" id="addRule">＋ Yeni Kural Ekle</button>
@@ -312,7 +312,7 @@
 
         <div id="kod-pid">
           <div class="hintbox">
-            PID (orantılı) modunda robot sensör <b>farklarına</b> göre yumuşakça kırar ve yaklaşınca yavaşlar —
+            PID (orantılı) modunda robot sensör <b>farklarına</b> göre yumuşakça kırar ve yaklaşınca yavaşlar -
             engelli pistin doğal yöntemi. Üç ayarla dengeyi sen kurarsın: bu <b>hız-güvenlik</b> seçimidir.
           </div>
           <div class="pidrow">
@@ -364,7 +364,7 @@
 
   const LAB = {
     sceneIdx: 0, scene: null,
-    sensors: [],            // empty on open — student builds from scratch
+    sensors: [],            // empty on open - student builds from scratch
     ctrl: M.starterCtrl(),
     rules: [],              // empty on open
     defaultRule: M.starterDefault(), mode: 'pid',
@@ -539,7 +539,7 @@
   function finishRun(){ stopRun(); showResult(); }
 
   // ---------- result ----------
-  const REASONS={crash:'Robot engele çarptı',timeout:'Süre doldu — hedefe varamadı'};
+  const REASONS={crash:'Robot engele çarptı',timeout:'Süre doldu - hedefe varamadı'};
   function setResultRunning(){
     const r=document.getElementById('result'); r.className='result idle';
     document.getElementById('rhead').innerHTML='🚧 Robot ilerliyor… engellerden kaçıyor.';
@@ -547,12 +547,12 @@
   }
   function setResultReady(){
     const r=document.getElementById('result'); r.className='result idle';
-    document.getElementById('rhead').innerHTML='🚧 Robotunu kur, ayarla ve <b style="color:var(--green);margin:0 4px">ÇALIŞTIR</b> — çarpmadan hedefe ulaş.';
+    document.getElementById('rhead').innerHTML='🚧 Robotunu kur, ayarla ve <b style="color:var(--green);margin:0 4px">ÇALIŞTIR</b> - çarpmadan hedefe ulaş.';
     document.getElementById('rbody').style.display='none';
   }
   function medal(sim){
     if(sim.status!=='success') return null;
-    if(sim.t<=6.5) return {name:'🏆 Usta Sürücü', d:'Hızlı ve temiz — mükemmel denge!'};
+    if(sim.t<=6.5) return {name:'🏆 Usta Sürücü', d:'Hızlı ve temiz - mükemmel denge!'};
     if(sim.t<=10) return {name:'🥈 Güvenli Sürücü', d:'Çarpmadan vardın, güzel.'};
     return {name:'🥉 Temkinli Robot', d:'Vardın! Biraz daha hız deneyebilirsin.'};
   }
@@ -569,7 +569,7 @@
         <div><small>SÜRE</small><b>${sim.t.toFixed(1)}s</b></div>
         <div><small>PİST</small><b>${M.SCENES[LAB.sceneIdx].name}</b></div>
         <div><small>İLERLEME</small><b>${progPct(sim.robot)}%</b></div>
-        <div><small>SONUÇ</small><b style="color:${win?'var(--green)':'#fca5a5'}">${win?'BAŞARILI':(sim.reason==='crash'?'ÇARPMA':'—')}</b></div>
+        <div><small>SONUÇ</small><b style="color:${win?'var(--green)':'#fca5a5'}">${win?'BAŞARILI':(sim.reason==='crash'?'ÇARPMA':'-')}</b></div>
       </div>`+
       (function(){
         // min distance-to-obstacle over time: dips = near-misses
@@ -579,7 +579,7 @@
         if(window.RFResult && ds.length>3){
           setTimeout(function(){ var cv=document.getElementById('obsGraph'); if(cv) RFResult.graph(cv,{
             series:[{data:ds, color:'var(--sky)', area:true}], hline:{y:0.35,color:'var(--red)',label:'çarpma eşiği'}, yZero:true, xlabel:'zaman', ylabel:'en yakın engel' }); },0);
-          return '<div class="rf-graphwrap"><div class="cap">🚧 En yakın engele mesafe — zamana karşı</div>'+
+          return '<div class="rf-graphwrap"><div class="cap">🚧 En yakın engele mesafe - zamana karşı</div>'+
             '<canvas id="obsGraph" class="rf-graph" style="height:130px"></canvas>'+
             '<div style="font-size:.72rem;color:var(--muted2);margin-top:2px">Eğri kırmızı çizgiye ne kadar yaklaşırsa o kadar tehlikeli. İyi bir robot engellerden pay bırakır.</div></div>';
         }
@@ -755,7 +755,7 @@
     {tab:null,t:'Engelden Kaçış Lab’a hoş geldin! 🚧',p:'Robotun engellere çarpmadan aşağıdan yukarıdaki hedefe ulaşacak. Dengeyi sen kuracaksın.'},
     {tab:'robot',t:'1) Robotu tanı',p:'🤖 Robot sekmesinde hız ve dönüş çevikliğini gör. Hızlı ama hantal bir robot dar geçitte çarpar.'},
     {tab:'kod',t:'2) Kaçınmayı ayarla',p:'🎛️ Ayar sekmesinde Kaçınma Gücü, Güvenli Mesafe ve Hedef Çekimi ile davranışı ayarla. Hız-güvenlik dengesini bul.'},
-    {tab:null,t:'3) Çalıştır ve öğren',p:'▶ ÇALIŞTIR’a bas. Çarparsa ya da varamıyorsa ipuçları çıkar — ayarları ve robotu değiştir, tekrar dene!'},
+    {tab:null,t:'3) Çalıştır ve öğren',p:'▶ ÇALIŞTIR’a bas. Çarparsa ya da varamıyorsa ipuçları çıkar - ayarları ve robotu değiştir, tekrar dene!'},
   ];
   let tutI=0;
   function switchTab(name){
@@ -797,13 +797,13 @@
     card.style.cssText='border-top:1px solid var(--line);padding:16px;background:#0c1526';
     if(build && RD){
       const chips=RD.ORDER.map(cat=>{ const o=RD.opt(cat,build[cat]);
-        return '<span style="border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:4px 8px;font-size:.68rem;color:var(--muted2)">'+RD.COMPONENTS[cat].icon+' <b style="color:var(--txt)">'+(o?o.name:'—')+'</b></span>'; }).join('');
+        return '<span style="border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:4px 8px;font-size:.68rem;color:var(--muted2)">'+RD.COMPONENTS[cat].icon+' <b style="color:var(--txt)">'+(o?o.name:'-')+'</b></span>'; }).join('');
       const r=RD.computeReport(build);
       const stat=(l,v,u)=>'<div style="background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:8px 6px;text-align:center"><div style="font-size:.52rem;letter-spacing:1px;color:var(--muted);text-transform:uppercase">'+l+'</div><div style="font-size:1.1rem;font-weight:800;margin-top:2px">'+v+'</div><div style="font-size:.55rem;color:var(--muted2)">'+u+'</div></div>';
       card.innerHTML='<div style="font-size:.62rem;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:10px">🔧 Robotun Künyesi</div>'+
         '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">'+chips+'</div>'+
         '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">'+stat('Ağırlık',r.weightG,'g')+stat('Hız',r.topSpeedKmh,'km/s')+stat('Güç',r.powerRating,'/100')+'</div>'+
-        '<div style="font-size:.7rem;color:var(--muted2);line-height:1.5;margin-bottom:10px">Bu parça seçimlerin, robotun hızını ve dönüş çevikliğini belirledi — dar geçitlerde belirleyici.</div>'+
+        '<div style="font-size:.7rem;color:var(--muted2);line-height:1.5;margin-bottom:10px">Bu parça seçimlerin, robotun hızını ve dönüş çevikliğini belirledi - dar geçitlerde belirleyici.</div>'+
         '<a href="build.html?sim=obstacle" style="display:inline-block;border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:.74rem;font-weight:700;color:var(--muted2)">← Robotu yeniden kur</a>';
     } else {
       card.innerHTML='<div style="font-size:.62rem;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:8px">🤖 Kendi robotun</div>'+

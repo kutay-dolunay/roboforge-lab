@@ -1,5 +1,5 @@
 /*
- * RoboForge — CanSat Kapsülü (Model Uydu) Simülasyon Çekirdeği
+ * RoboForge - CanSat Kapsülü (Model Uydu) Simülasyon Çekirdeği
  * Pure, dependency-free. Browser (window.CansatCore) + Node (module.exports).
  *
  * Fiction: TEKNOFEST tarzı model uydu görevi. Taşıyıcı roket kapsülü bırakma
@@ -13,7 +13,7 @@
  * (2) açılma şoku fiziği (hızlıyken büyük paraşüt açılmaz),
  * (3) cihaz-üstü otonomi > yer istasyonu komutu (RF karartma),
  * (4) parafoil modunda Ki = rüzgâr kompanzasyonu,
- * (5) veri kapsama: jüri veri ister — örnekleme hızı görevin parçası.
+ * (5) veri kapsama: jüri veri ister - örnekleme hızı görevin parçası.
  */
 (function () {
   'use strict';
@@ -31,20 +31,20 @@
 
   // ---- görevler --------------------------------------------------------------
   // wind katmanları: üstten alta [üstSınır, altSınır, rüzgâr m/s (+ = sağa)]
-  // blackouts: [başlangıç_irtifa, bitiş_irtifa] arası RF yok (inişte irtifaya bağlı — gerçekçi: mesafe/anten)
+  // blackouts: [başlangıç_irtifa, bitiş_irtifa] arası RF yok (inişte irtifaya bağlı - gerçekçi: mesafe/anten)
   const MISSIONS = [
     { id: 'ilkucus', startX: 0, name: 'İlk Uçuş', difficulty: 'Başlangıç', drop: 500,
       layers: [[9999, 0, 0]], turb: 0, noise: 1.2, blackouts: [], batt: 100,
       targetR: 120, coverageMin: 40, dur: 95,
-      desc: 'Rüzgârsız deneme günü. Tepe noktasında drogue, alçakta ana paraşüt — zamanlama dersi.' },
+      desc: 'Rüzgârsız deneme günü. Tepe noktasında drogue, alçakta ana paraşüt - zamanlama dersi.' },
     { id: 'ruzgarli', startX: -225, name: 'Rüzgârlı Gün', difficulty: 'Başlangıç', drop: 550,
       layers: [[9999, 150, 7], [150, 0, 2.5]], turb: 0.4, noise: 1.6, blackouts: [], batt: 100,
       targetR: 85, coverageMin: 45, dur: 100,
-      desc: 'Sürekli rüzgâr kapsülü sürükler. Ana paraşütü ne kadar geç açarsan o kadar az sürüklenirsin — ama şok limitini unutma!' },
+      desc: 'Sürekli rüzgâr kapsülü sürükler. Ana paraşütü ne kadar geç açarsan o kadar az sürüklenirsin - ama şok limitini unutma!' },
     { id: 'yuksek', startX: -287, name: 'Yüksek Bırakma', difficulty: 'Orta', drop: 900,
       layers: [[9999, 400, 9], [400, 120, 5], [120, 0, 1.5]], turb: 0.5, noise: 2.2, blackouts: [], batt: 100,
       targetR: 90, coverageMin: 45, dur: 120,
-      desc: '900 metre! Serbest düşüş 55 m/s’ye ulaşır — drogue olmadan ana paraşüt YIRTILIR. Kademeli fren şart.' },
+      desc: '900 metre! Serbest düşüş 55 m/s’ye ulaşır - drogue olmadan ana paraşüt YIRTILIR. Kademeli fren şart.' },
     { id: 'tersruzgar', startX: 57, name: 'Ters Akıntı', difficulty: 'Orta', drop: 700,
       layers: [[9999, 350, 10], [350, 120, -6], [120, 0, -2]], turb: 0.6, noise: 2.4, blackouts: [], batt: 100,
       targetR: 75, coverageMin: 50, dur: 110,
@@ -112,7 +112,7 @@
     return {
       cfg, mission: m, t: 0, status: 'running', reason: null,
       phase: 'tasima',                 // tasima → ucus → indi
-      alt: 0, vy: 0, x: m.startX || 0, vx: 0,      // taşıyıcı hedefin RÜZGÂR ÜSTÜNE bırakır (görev planı) — hedef x=0
+      alt: 0, vy: 0, x: m.startX || 0, vx: 0,      // taşıyıcı hedefin RÜZGÂR ÜSTÜNE bırakır (görev planı) - hedef x=0
       maxAlt: 0, seed: (m.id.length * 7.3) % 6.28,
       act: { drogue: 0, ana: 0, beacon: 0 },
       chuteState: 'yok',               // yok | drogue | ana | parafoil | yirtik
@@ -138,7 +138,7 @@
   function deploy(sim, which) {
     // which: 'drogue' | 'ana' | 'parafoil'
     if (sim.phase === 'tasima') { sim.status = 'failed'; sim.reason = 'erken_ayrilma';
-      sim.events.push([+sim.t.toFixed(1), Math.round(sim.alt), '💥 Paraşüt taşıyıcı içinde açıldı — görev iptal!']); return; }
+      sim.events.push([+sim.t.toFixed(1), Math.round(sim.alt), '💥 Paraşüt taşıyıcı içinde açıldı - görev iptal!']); return; }
     const spd = Math.abs(sim.vy);
     if (which === 'drogue') {
       if (sim.chuteState !== 'yok') return;
@@ -150,7 +150,7 @@
     } else if (which === 'ana' || which === 'parafoil') {
       if (sim.chuteState === 'ana' || sim.chuteState === 'parafoil' || sim.chuteState === 'yirtik') return;
       if (spd > SHOCK_MAIN) { sim.chuteState = 'yirtik'; sim.tornAt = sim.t;
-        pushEvt(sim, 'torn', '💥 ANA PARAŞÜT YIRTILDI! Açılma hızı ' + spd.toFixed(0) + ' m/s (limit ' + SHOCK_MAIN + ') — önce drogue ile yavaşla!'); return; }
+        pushEvt(sim, 'torn', '💥 ANA PARAŞÜT YIRTILDI! Açılma hızı ' + spd.toFixed(0) + ' m/s (limit ' + SHOCK_MAIN + ') - önce drogue ile yavaşla!'); return; }
       sim.chuteState = which === 'ana' ? 'ana' : 'parafoil';
       sim.shockPeak = Math.max(sim.shockPeak, spd);
       pushEvt(sim, 'main', (which === 'ana' ? '🪂 ANA paraşüt açıldı (' : '🪁 Parafoil açıldı (') + spd.toFixed(0) + ' m/s, ' + Math.round(sim.alt) + ' m)');
@@ -168,15 +168,15 @@
       sim.vy = ASCENT_V;
       sim.alt += ASCENT_V * dt;
       if (sim.alt >= m.drop) { sim.phase = 'ucus'; sim.vy = 0;
-        pushEvt(sim, 'sep', '🚀 Kapsül taşıyıcıdan ayrıldı — ' + Math.round(sim.alt) + ' m'); }
+        pushEvt(sim, 'sep', '🚀 Kapsül taşıyıcıdan ayrıldı - ' + Math.round(sim.alt) + ' m'); }
     }
 
     // ---- RF / link ----
     sim.link = !inBlackout(m, sim.alt, sim.phase) && !sim.battOut;
-    if (!sim.link && sim.phase === 'ucus' && !sim.battOut) pushEvt(sim, 'rf', '📡 RF KARARTMASI — telemetri kesildi'); 
+    if (!sim.link && sim.phase === 'ucus' && !sim.battOut) pushEvt(sim, 'rf', '📡 RF KARARTMASI - telemetri kesildi'); 
     if (sim.link) clearEvt(sim, 'rf');
 
-    // ---- örnekleme (baro gürültüsü + Hz kilidi; kayıt CİHAZDA — karartma kaydı etkilemez) ----
+    // ---- örnekleme (baro gürültüsü + Hz kilidi; kayıt CİHAZDA - karartma kaydı etkilemez) ----
     const hz = Math.max(0.5, sim.cfg.sampleHz || 2);
     if (sim.t - sim.lastSample >= 1 / hz && !sim.battOut) {
       sim.lastSample = sim.t;
@@ -208,7 +208,7 @@
         if (sim.act.drogue && !before.drogue) deploy(sim, 'drogue');
         if (sim.act.ana && !before.ana) deploy(sim, 'ana');
         if (sim.act.drogue && sim.chuteState === 'yok') sim.act.drogue = sim.chuteState === 'drogue' ? 1 : sim.act.drogue;
-        if (sim.act.beacon && !before.beacon) pushEvt(sim, 'bea', '📢 Beacon aktif — kurtarma ekibi sinyali aldı');
+        if (sim.act.beacon && !before.beacon) pushEvt(sim, 'bea', '📢 Beacon aktif - kurtarma ekibi sinyali aldı');
       } else {
         // 📈 Parafoil otopilotu: drogue apogee'de (firmware), parafoil pid.acilis irtifasında
         if (sim.chuteState === 'yok' && bits[1]) deploy(sim, 'drogue');
@@ -277,7 +277,7 @@
       const drain = 0.10 + 0.24 * hz2 + (sim.act.beacon ? 0.35 : 0);
       sim.batt -= drain * dt;
       if (sim.batt <= 0) { sim.batt = 0; sim.battOut = true;
-        pushEvt(sim, 'batt', '🪫 Batarya bitti — kayıt VE kontrol durdu!'); }
+        pushEvt(sim, 'batt', '🪫 Batarya bitti - kayıt VE kontrol durdu!'); }
     }
 
     // ---- kayıt ----
@@ -299,9 +299,9 @@
     return Math.min(100, Math.round(sim.samples / (flightT * 2) * 100));
   }
 
-  // yer istasyonu uplink — yalnız link varken
+  // yer istasyonu uplink - yalnız link varken
   function sendCommand(sim, device, state) {
-    if (!sim.link) return { ok: false, msg: 'RF KARARTMASI — komut kapsüle ulaşmadı!' };
+    if (!sim.link) return { ok: false, msg: 'RF KARARTMASI - komut kapsüle ulaşmadı!' };
     if (sim.battOut) return { ok: false, msg: 'Kapsül sessiz (batarya).' };
     if (sim.phase !== 'ucus') return { ok: false, msg: 'Kapsül uçuşta değil.' };
     sim.manual[device] = state ? 1 : 0;
@@ -330,16 +330,16 @@
     if (r === 'cakilma') {
       if (sim.chuteState === 'yirtik') tips.push('Paraşüt YIRTILDI çünkü çok hızlıyken açtın. Sıralama: önce DROGUE (55 m/s’de bile dayanır), hız 18’e düşünce ANA. Şok limiti fiziktir, pazarlık olmaz.');
       else if (sim.chuteState === 'yok') tips.push('Paraşüt hiç açılmadı! DÜŞÜŞTE bitini yakalayıp DROGUE aç, sonra alçak irtifada ANA. Kuralların hangi bitlere baktığını kontrol et.');
-      else if (sim.chuteState === 'drogue') tips.push('Sadece drogue ile indin — 18 m/s çakılmadır. İRT<250 civarında ANA paraşütü açmayı unutma.');
-      else tips.push('Ana paraşüt çok GEÇ açıldı — yavaşlamaya vakit kalmadı. Açılma irtifasını yükselt.');
+      else if (sim.chuteState === 'drogue') tips.push('Sadece drogue ile indin - 18 m/s çakılmadır. İRT<250 civarında ANA paraşütü açmayı unutma.');
+      else tips.push('Ana paraşüt çok GEÇ açıldı - yavaşlamaya vakit kalmadı. Açılma irtifasını yükselt.');
     }
-    if (r === 'sert_inis') tips.push('İniş 9 m/s sınırının üstünde. Ana paraşüt daha erken açılmalı ki hız otursun — ama çok erken de sürüklenme demek. 120-250 m bandını dene.');
+    if (r === 'sert_inis') tips.push('İniş 9 m/s sınırının üstünde. Ana paraşüt daha erken açılmalı ki hız otursun - ama çok erken de sürüklenme demek. 120-250 m bandını dene.');
     if (r === 'hedef_disi') tips.push('Kapsül hedef bölge dışına indi: ' + Math.round(Math.abs(sim.landX || 0)) + ' m. Büyük paraşüt = yelken! Rüzgârlı katmanları drogue ile HIZLI geç, anayı alçakta aç.');
-    if (r === 'veri_yetersiz') tips.push('Jüri raporu reddetti: veri kapsama %' + coverageOf(sim) + ' < %' + sim.mission.coverageMin + '. Örnekleme hızını artır — ama batarya dengesini gözet.');
+    if (r === 'veri_yetersiz') tips.push('Jüri raporu reddetti: veri kapsama %' + coverageOf(sim) + ' < %' + sim.mission.coverageMin + '. Örnekleme hızını artır - ama batarya dengesini gözet.');
     if (r === 'erken_ayrilma') tips.push('Paraşüt TAŞIYICININ İÇİNDE açıldı! TIRMANIYOR biti EVET iken hiçbir paraşüt kuralı ateşlememeli. Kurallarına "TIRMANIYOR: HAYIR" çipi ekle.');
-    if (r === 'timeout') tips.push('Süre doldu — kapsül çok uzun süre havada kaldı. Drogue inişi daha hızlıdır; anayı gereksiz erken açma.');
+    if (r === 'timeout') tips.push('Süre doldu - kapsül çok uzun süre havada kaldı. Drogue inişi daha hızlıdır; anayı gereksiz erken açma.');
     if (sim.battOut) tips.push('Batarya uçuş bitmeden öldü: kayıt da kontrol de durdu. Örnekleme hızını düşür veya beacon’ı yerde aç.');
-    if (sim.status === 'success' && !sim.act.beacon) tips.push('İniş güzel ama beacon KAPALI — kurtarma ekibi kapsülü tarlada arayacak. YERDE → BEACON AÇ kuralı ekle.');
+    if (sim.status === 'success' && !sim.act.beacon) tips.push('İniş güzel ama beacon KAPALI - kurtarma ekibi kapsülü tarlada arayacak. YERDE → BEACON AÇ kuralı ekle.');
     if (!tips.length) tips.push('Rüzgâr katmanlarını raporda incele: drogue rüzgâra %55, ana %100 bağlanır. Zamanlama = yatay hedefleme aracıdır.');
     return tips;
   }

@@ -179,10 +179,10 @@
     <div class="hud">
       <div class="hudbox"><div class="l">SÜRE</div><div class="v mono" id="hudT">0.0s</div></div>
       <div class="hudbox"><div class="l">TUR</div><div class="v mono" id="hudA">1</div></div>
-      <div class="hudbox"><div class="l">KARARLAR</div><div class="v mono" id="hudE">—</div></div>
+      <div class="hudbox"><div class="l">KARARLAR</div><div class="v mono" id="hudE">-</div></div>
       <div class="hudbox"><div class="l">DURUM</div><div class="v" id="hudS">HAZIR</div></div>
     </div>
-    <div class="hint" id="hint">🌀 Çizgi labirenti: her kavşakta bir karar. <b>SOL-EL kuralı (L→S→R→B)</b> her ağaç labirenti çözer — ama döngülerde dikkat! Yarış modunda keşif dizin cebirle sadeleşir (LBR→B, LBS→R…), ikinci tur kestirmeden uçar.</div>
+    <div class="hint" id="hint">🌀 Çizgi labirenti: her kavşakta bir karar. <b>SOL-EL kuralı (L→S→R→B)</b> her ağaç labirenti çözer - ama döngülerde dikkat! Yarış modunda keşif dizin cebirle sadeleşir (LBR→B, LBS→R…), ikinci tur kestirmeden uçar.</div>
     <div class="rdock" id="resultDock" style="display:none"></div>
   </div>
   <div class="side">
@@ -198,20 +198,20 @@
       <div class="card">
         <h4 id="prioTitle">Kavşak Öncelik Sırası</h4>
         <p class="exp" id="prioExp">Robot her kavşakta bu listeyi YUKARIDAN AŞAĞI dener: ilk uygun yön kazanır.
-          Varsayılan <b>L-S-R-B</b> = sol-el kuralı. Sırayı değiştir, rotanın nasıl değiştiğini gör —
+          Varsayılan <b>L-S-R-B</b> = sol-el kuralı. Sırayı değiştir, rotanın nasıl değiştiğini gör -
           döngülü labirentte yanlış sıra SONSUZ TUR demek!</p>
         <div id="prioList"></div>
       </div>
       <div class="card" id="raceCard" style="display:none">
         <h4>Yarış Protokolü</h4>
-        <p class="exp">Tur 1 — KEŞİF: öncelik sırasıyla labirenti gez, her kararı kaydet.
+        <p class="exp">Tur 1 - KEŞİF: öncelik sırasıyla labirenti gez, her kararı kaydet.
           Kayıt cebirle sadeleşir: <b>LBR→B · LBS→R · SBS→B · LBL→S…</b> (B = geri dönüş yok edilir).
-          Tur 2 — YARIŞ: budanmış haritayla, karar duraksamasız, %20 hızlı!</p>
-        <p class="exp mono" id="raceInfo" style="font-size:.72rem">—</p>
+          Tur 2 - YARIŞ: budanmış haritayla, karar duraksamasız, %20 hızlı!</p>
+        <p class="exp mono" id="raceInfo" style="font-size:.72rem">-</p>
       </div>
       <div class="card">
         <h4>Karar Kaydı</h4>
-        <p class="exp mono" id="ledger" style="font-size:.8rem;letter-spacing:2px">—</p>
+        <p class="exp mono" id="ledger" style="font-size:.8rem;letter-spacing:2px">-</p>
       </div>
     </div>
     <div id="tab-robot" style="display:none">
@@ -306,14 +306,14 @@
   function updateHud(){
     const sim=LAB.sim;
     document.getElementById('hudT').textContent=(sim?sim.t:0).toFixed(1)+'s';
-    document.getElementById('hudA').textContent=sim?(sim.cfg.mode==='race'?sim.lap+'/2':'1'):'—';
-    document.getElementById('hudE').textContent=sim?sim.moves.length:'—';
+    document.getElementById('hudA').textContent=sim?(sim.cfg.mode==='race'?sim.lap+'/2':'1'):'-';
+    document.getElementById('hudE').textContent=sim?sim.moves.length:'-';
     const s=document.getElementById('hudS');
     if(!sim){ s.textContent='HAZIR'; s.className='v'; }
     else if(sim.status==='running'){ s.textContent=sim.lap===2?'YARIŞTA 🏁':'KEŞİFTE'; s.className='v '+(sim.lap===2?'hot':'ok'); }
     else if(sim.status==='success'){ s.textContent='VARDI ✓'; s.className='v ok'; }
     else { s.textContent='BAŞARISIZ'; s.className='v bad'; }
-    document.getElementById('ledger').textContent=sim&&sim.moves.length?sim.moves.join(' '):'—';
+    document.getElementById('ledger').textContent=sim&&sim.moves.length?sim.moves.join(' '):'-';
     if(sim&&sim.shortcut) document.getElementById('raceInfo').innerHTML=
       'keşif: <b>'+sim.moves.join('')+'</b><br>sadeleşmiş: <b style="color:var(--green)">'+sim.shortcut.join('')+'</b>'+
       (sim.lapTimes.length?'<br>tur süreleri: '+sim.lapTimes.map(x=>x.toFixed(1)+'s').join(' → '):'');
@@ -367,7 +367,7 @@
         '<div class="rd-stats">'+
           '<div class="rd-stat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
           '<div class="rd-stat"><div class="l">KARARLAR</div><div class="v mono">'+sim.moves.length+'</div></div>'+
-          '<div class="rd-stat"><div class="l">TURLAR</div><div class="v mono">'+(sim.lapTimes.length?sim.lapTimes.map(x=>x.toFixed(1)).join(' / '):'—')+'</div></div>'+
+          '<div class="rd-stat"><div class="l">TURLAR</div><div class="v mono">'+(sim.lapTimes.length?sim.lapTimes.map(x=>x.toFixed(1)).join(' / '):'-')+'</div></div>'+
           '<div class="rd-stat"><div class="l">DURUM</div><div class="v '+(win?'ok':'bad')+'">'+(win?'VARDI':'BAŞARISIZ')+'</div></div>'+
         '</div>'+
         (window.RFResult?RFResult.coachHTML(tips,{win:win,headWin:'🎓 Ne öğrendik?',headLose:'🔍 Ne oldu, neden?',reason:win?null:(REASONS[sim.reason]||'')}):(tips.length?'<div class="rd-tip">💡 '+tips[0]+'</div>':''))+
@@ -388,16 +388,16 @@
     const m=sim.mission;
     const box=document.getElementById('resultBox');
     box.innerHTML =
-      '<h3 class="'+(win?'win':'lose')+'">📄 Tur Raporu — '+m.name+'</h3>'+
+      '<h3 class="'+(win?'win':'lose')+'">📄 Tur Raporu - '+m.name+'</h3>'+
       '<div style="font-size:.76rem;color:var(--sky);margin:8px 0">'+
-        (LAB.mode==='prio'?'🧩 Öncelik: '+LAB.prio.join('-'):'🏁 Yarış modu — öncelik '+LAB.prio.join('-'))+'</div>'+
+        (LAB.mode==='prio'?'🧩 Öncelik: '+LAB.prio.join('-'):'🏁 Yarış modu - öncelik '+LAB.prio.join('-'))+'</div>'+
       '<div class="rstats">'+
         '<div class="rstat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
         '<div class="rstat"><div class="l">KARARLAR</div><div class="v mono">'+sim.moves.length+'</div></div>'+
         '<div class="rstat"><div class="l">GERİ DÖNÜŞ (B)</div><div class="v mono">'+sim.moves.filter(x=>x==='B').length+'</div></div>'+
-        '<div class="rstat"><div class="l">TURLAR</div><div class="v mono">'+(sim.lapTimes.length?sim.lapTimes.map(x=>x.toFixed(1)).join('/'):'—')+'</div></div>'+
+        '<div class="rstat"><div class="l">TURLAR</div><div class="v mono">'+(sim.lapTimes.length?sim.lapTimes.map(x=>x.toFixed(1)).join('/'):'-')+'</div></div>'+
       '</div>'+
-      '<div style="font-size:.78rem;color:var(--muted2);margin:8px 0" class="mono">keşif dizisi: <b>'+(sim.moves.join('')||'—')+'</b>'+
+      '<div style="font-size:.78rem;color:var(--muted2);margin:8px 0" class="mono">keşif dizisi: <b>'+(sim.moves.join('')||'-')+'</b>'+
         (sim.shortcut?'<br>sadeleşmiş: <b style="color:var(--green)">'+sim.shortcut.join('')+'</b>':'')+'</div>'+
       '<h4 style="margin:8px 0 6px;font-size:.66rem;letter-spacing:2px;color:var(--muted)">📓 TUR KAYDI</h4>'+
       '<div style="max-height:170px;overflow:auto">'+
@@ -473,7 +473,7 @@
     clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2400); }
   const TUT=[
     ['🌀 Kavşak Disiplini','Çizgi labirentinde robotun tek silahı tutarlılıktır: her kavşakta AYNI öncelik sırası. Varsayılan L-S-R-B = ünlü sol-el kuralı.'],
-    ['🌳 Ağaç Garantisi','Döngüsüz (ağaç) labirentte sol-el kuralı %100 çözer: duvara sürtünen el asla kaybolmaz. Döngü varsa garanti UÇAR — Büyük Döngü seviyesinde dene!'],
+    ['🌳 Ağaç Garantisi','Döngüsüz (ağaç) labirentte sol-el kuralı %100 çözer: duvara sürtünen el asla kaybolmaz. Döngü varsa garanti UÇAR - Büyük Döngü seviyesinde dene!'],
     ['📼 Karar Kaydı','Robot her kavşak kararını harfle kaydeder: L, S, R, B. B = çıkmaza girdin, geri döndün. Kayıt uzadıysa keşfin pahalı demektir.'],
     ['✂️ LSRB Cebiri','Sihir: kayıttaki her B, komşularıyla birleşip sadeleşir. LBR→B, LBS→R, SBS→B… Sonuç: çıkmazsız DOĞRUDAN rota. Kâğıtta dene, robotla kanıtla!'],
     ['🏁 Yarış Modu','Tur 1 keşfeder ve haritalar; tur 2 budanmış rotayla %20 hızlı, duraksamasız uçar. Gerçek çizgi labirent yarışmalarının formatı budur.'],

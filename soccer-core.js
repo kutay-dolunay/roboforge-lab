@@ -1,5 +1,5 @@
 /* =============================================================================
- * RoboForge — Robot Futbolu (1v1 Robot Soccer) :: Simulation Core
+ * RoboForge - Robot Futbolu (1v1 Robot Soccer) :: Simulation Core
  * -----------------------------------------------------------------------------
  * Pure, dependency-free. Browser (window.SoccerCore) + Node (module.exports).
  *
@@ -228,7 +228,7 @@
     if (B.y < -PITCH_H / 2 + BALL_R) { B.y = -PITCH_H / 2 + BALL_R; B.vy = Math.abs(B.vy) * WALL_REST; }
     if (B.x > PITCH_W / 2 - BALL_R && Math.abs(B.y) > gy) { B.x = PITCH_W / 2 - BALL_R; B.vx = -Math.abs(B.vx) * WALL_REST; }
     if (B.x < -PITCH_W / 2 + BALL_R && Math.abs(B.y) > gy) { B.x = -PITCH_W / 2 + BALL_R; B.vx = Math.abs(B.vx) * WALL_REST; }
-    // corner cuts (bumpers) — the ball can't be pinned in a corner
+    // corner cuts (bumpers) - the ball can't be pinned in a corner
     for (const [cxs, cys] of [[1,1],[1,-1],[-1,1],[-1,-1]]) {
       const ccx = cxs * PITCH_W / 2, ccy = cys * PITCH_H / 2;
       const dcx = B.x - ccx, dcy = B.y - ccy;
@@ -336,18 +336,18 @@
     const mode = sim.cfg.mode || 'pid';
     if (sim.reason === 'timeout') {
       if (mode === 'rules') {
-        tips.push('Kural modunda açık sahada top sürmek çok zordur — kesikli kararlar topu savurur. 📈 PID moduna geç: sürekli yönelme kontrolü top sürmeyi kararlı yapar (futbol robotlarının gerçek dersi budur).');
-        if (sim.score.e > 2) tips.push('Top ' + sim.score.e + ' kez kendi yarı sahanın dibine gitti. Kendi kalene doğru asla sürme — KENDİ-KALE çipli koruma kuralını en üstte tut.');
+        tips.push('Kural modunda açık sahada top sürmek çok zordur - kesikli kararlar topu savurur. 📈 PID moduna geç: sürekli yönelme kontrolü top sürmeyi kararlı yapar (futbol robotlarının gerçek dersi budur).');
+        if (sim.score.e > 2) tips.push('Top ' + sim.score.e + ' kez kendi yarı sahanın dibine gitti. Kendi kalene doğru asla sürme - KENDİ-KALE çipli koruma kuralını en üstte tut.');
       } else {
-        if (sim.score.p > 0) tips.push('Gol geldi ama hedefe yetmedi. Temel Hız\'ı artır — topa rakipten önce ulaşan kazanır.');
+        if (sim.score.p > 0) tips.push('Gol geldi ama hedefe yetmedi. Temel Hız\'ı artır - topa rakipten önce ulaşan kazanır.');
         else if (sim.touches < 5) tips.push('Robot topa neredeyse hiç ulaşamadı. Temel Hız\'ı ve Kp\'yi artır.');
-        else tips.push('Top kontrolü var ama bitiricilik yok. Kp\'yi biraz düşürüp Kd ekle — topa daha az zikzakla yaklaşırsın.');
+        else tips.push('Top kontrolü var ama bitiricilik yok. Kp\'yi biraz düşürüp Kd ekle - topa daha az zikzakla yaklaşırsın.');
       }
     }
     if (sim.status === 'success') {
       const T = sim.opp.time || 90;
       if (sim.t < T * 0.3) tips.push('Yıldırım gol! Daha güçlü rakiplerde de bu hızı koru.');
-      else tips.push('Gol! Daha erken gol için topa rakipten önce ulaşmak kritik — hızlı bir robot kur.');
+      else tips.push('Gol! Daha erken gol için topa rakipten önce ulaşmak kritik - hızlı bir robot kur.');
     }
     return tips;
   }
@@ -358,7 +358,7 @@
     if (t < T * 0.25) return { key: 'gol_makinesi', name: '🏆 Gol Makinesi', cmt: 'Rakip daha ne olduğunu anlamadan top ağlarda.' };
     if (t < T * 0.5) return { key: 'forvet', name: '🥇 Forvet', cmt: 'Temiz hücum, sağlam bitiriş.' };
     if (t < T * 0.75) return { key: 'orta_saha', name: '🧭 Orta Saha', cmt: 'Gol geldi! Daha erken bitirmek için top sürüşünü geliştir.' };
-    return { key: 'caylak_forvet', name: '🎓 Çaylak Forvet', cmt: 'Kazandın — şimdi daha hızlı gol atmayı dene.' };
+    return { key: 'caylak_forvet', name: '🎓 Çaylak Forvet', cmt: 'Kazandın - şimdi daha hızlı gol atmayı dene.' };
   }
 
   function runHeadless(cfg, maxTime, dt) {

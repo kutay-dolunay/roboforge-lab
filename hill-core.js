@@ -1,5 +1,5 @@
 /* =============================================================================
- * RoboForge — Tepe Tırmanışı (Hill Climb) :: Simulation Core
+ * RoboForge - Tepe Tırmanışı (Hill Climb) :: Simulation Core
  * -----------------------------------------------------------------------------
  * Pure, dependency-free. Browser (window.HillCore) + Node (module.exports).
  *
@@ -8,7 +8,7 @@
  * en dolaysız karşılığı bu senaryoda.
  *
  * Kural mode (DEFAULT): slope bands -> throttle. PID mode: cruise control
- * (hedef hızı yokuşta-inişte sabit tut — Ki'nin yokuş dersi).
+ * (hedef hızı yokuşta-inişte sabit tut - Ki'nin yokuş dersi).
  * Traction: |F| <= grip·m·g·cos(φ)·surface ; aşarsan PATİNAJ (kayma, %45 güç).
  * ========================================================================== */
 (function (global) {
@@ -192,12 +192,12 @@
     const mode = sim.cfg.mode || 'rules';
     const slipPct = sim.totalTicks ? Math.round(100 * sim.slipTime * 60 / sim.totalTicks) : 0;
     if (sim.reason === 'stuck' || sim.reason === 'rollback') {
-      if (slipPct > 20) tips.push('Tekerlekler boşa döndü (patinaj %' + slipPct + ')! Daha fazla gaz işe yaramaz — tutuş sınırını aşıyorsun. Ya yapışkan teker tak, ya da rampaya HIZLA gir: momentum, gücün yetmediği yerde seni taşır.');
+      if (slipPct > 20) tips.push('Tekerlekler boşa döndü (patinaj %' + slipPct + ')! Daha fazla gaz işe yaramaz - tutuş sınırını aşıyorsun. Ya yapışkan teker tak, ya da rampaya HIZLA gir: momentum, gücün yetmediği yerde seni taşır.');
       else tips.push('Yokuş robotu yendi. İki çare: daha torklu motor... ya da fizik hilesi: rampadan ÖNCE hızlan! Kinetik enerji kısa dik rampaları aşırtır. DÜZ bandında gazı artır.');
     }
-    if (sim.reason === 'timeout') tips.push('Süre doldu. İnişlerde ve düzlüklerde kaybedilen zamanı geri kazan — ama dik inişte fren yoksa kalkış yapabilirsin!');
+    if (sim.reason === 'timeout') tips.push('Süre doldu. İnişlerde ve düzlüklerde kaybedilen zamanı geri kazan - ama dik inişte fren yoksa kalkış yapabilirsin!');
     if (sim.status === 'success') {
-      if (slipPct < 4) tips.push('Zirve! Ve neredeyse hiç patinaj yok — tork/tutuş dengen mükemmel.');
+      if (slipPct < 4) tips.push('Zirve! Ve neredeyse hiç patinaj yok - tork/tutuş dengen mükemmel.');
       else tips.push('Zirveye vardın ama %' + slipPct + ' patinajla güç ziyan oldu. Dik bantlarda gazı tutuş sınırının hemen altında tut.');
     }
     return tips;
@@ -206,10 +206,10 @@
   function robotClass(sim) {
     if (sim.status !== 'success') return null;
     const T = sim.course.time || 45, t = sim.t;
-    if (t < T * 0.5) return { key: 'zirve_fatihi', name: '🏆 Zirve Fatihi', cmt: 'Dağ seni durduramadı — tork, tutuş ve momentum uyum içinde.' };
+    if (t < T * 0.5) return { key: 'zirve_fatihi', name: '🏆 Zirve Fatihi', cmt: 'Dağ seni durduramadı - tork, tutuş ve momentum uyum içinde.' };
     if (t < T * 0.68) return { key: 'dag_kecisi', name: '🥇 Dağ Keçisi', cmt: 'Sağlam tırmanış. Rampalara daha hızlı girerek süre kazan.' };
     if (t < T * 0.85) return { key: 'tirmanisci', name: '🧭 Tırmanışçı', cmt: 'Zirve senin! Patinajı azaltırsan daha da hızlanırsın.' };
-    return { key: 'caylak_dagci', name: '🎓 Çaylak Dağcı', cmt: 'Son anda ama vardın — momentum dersini unutma.' };
+    return { key: 'caylak_dagci', name: '🎓 Çaylak Dağcı', cmt: 'Son anda ama vardın - momentum dersini unutma.' };
   }
 
   function runHeadless(cfg, maxTime, dt) {

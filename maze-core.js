@@ -1,13 +1,13 @@
 /* =============================================================================
- * RoboForge — Labirent Çözen (Maze Solver) :: Simulation Core
+ * RoboForge - Labirent Çözen (Maze Solver) :: Simulation Core
  * -----------------------------------------------------------------------------
  * Pure, dependency-free. Runs in browser (window.MazeCore) and Node
  * (module.exports).
  *
- * MODEL — discrete "scan → decide → step":
+ * MODEL - discrete "scan → decide → step":
  *   The robot sits at a cell center, reads the walls around it (front / left /
  *   right, relative to its heading), the block-rules pick an action, and it
- *   glides one cell (optionally turning first). Deterministic and crisp — no
+ *   glides one cell (optionally turning first). Deterministic and crisp - no
  *   analog oscillation. Motor spec -> drive/turn speed (continuity); wheel spec
  *   -> turn agility.
  *
@@ -59,7 +59,7 @@
     },
     {
       id: 'corner', name: 'Köşeler', difficulty: 'Başlangıç',
-      blurb: 'Tek bir büyük dönüş — sağdan aşağı, soldan geri.',
+      blurb: 'Tek bir büyük dönüş - sağdan aşağı, soldan geri.',
       grid: [
         [1,1,1,1,1,1,1,1,1],
         [1,0,0,0,0,0,0,0,1],
@@ -299,8 +299,8 @@
     const tips = [];
     const pid = (sim.cfg.mode === 'pid');
     if (sim.reason === 'crash') {
-      if (pid) tips.push('Robot duvara sürttü. PID modunda Kp çok yüksekse zikzak yapıp duvara vurur, hız çok yüksekse dönemez — Kp\'yi ve taban hızı düşürmeyi dene. Hızlı bir robotta bu labirentte yavaşlaman gerekir.');
-      else tips.push('Robot bir duvara sürdü — kurallarından biri kapalı bir yöne "ileri" dedi. O kuralda önce yolun açık olduğundan emin ol.');
+      if (pid) tips.push('Robot duvara sürttü. PID modunda Kp çok yüksekse zikzak yapıp duvara vurur, hız çok yüksekse dönemez - Kp\'yi ve taban hızı düşürmeyi dene. Hızlı bir robotta bu labirentte yavaşlaman gerekir.');
+      else tips.push('Robot bir duvara sürdü - kurallarından biri kapalı bir yöne "ileri" dedi. O kuralda önce yolun açık olduğundan emin ol.');
     } else if (sim.reason === 'lost') {
       tips.push('Robot aynı yerlerde dönüp durdu (kayboldu). Bir "duvar takip" mantığı dene: solun açıksa sola dön, değilse düz git, o da kapalıysa sağa dön.');
     } else if (sim.reason === 'timeout') {

@@ -184,10 +184,10 @@
     <div class="hud">
       <div class="hudbox"><div class="l">SÜRE</div><div class="v mono" id="hudT">0.0s</div></div>
       <div class="hudbox"><div class="l">EĞİM</div><div class="v mono" id="hudA">0°</div></div>
-      <div class="hudbox"><div class="l">HEDEF</div><div class="v mono" id="hudH">—</div></div>
+      <div class="hudbox"><div class="l">HEDEF</div><div class="v mono" id="hudH">-</div></div>
       <div class="hudbox"><div class="l">DURUM</div><div class="v" id="hudS">HAZIR</div></div>
     </div>
-    <div class="hint" id="hint">🤸 Bu robot <b>kendi kendine duramaz</b> — hiçbir şey yapmazsan devrilir! Tekerlekleri eğime karşı sürerek onu ayakta tut. Kontrol mühendisliğinin en ünlü problemi.</div>
+    <div class="hint" id="hint">🤸 Bu robot <b>kendi kendine duramaz</b> - hiçbir şey yapmazsan devrilir! Tekerlekleri eğime karşı sürerek onu ayakta tut. Kontrol mühendisliğinin en ünlü problemi.</div>
     <div class="rdock" id="resultDock" style="display:none"></div>
   </div>
 
@@ -200,7 +200,7 @@
     <div id="tab-robot">
       <div class="card">
         <h4>Ters Sarkaç</h4>
-        <p class="exp">Eğim sensörü (IMU) devrilme açısını ve hızını ölçer. Kural: <b>devrildiğin yöne doğru sür</b> —
+        <p class="exp">Eğim sensörü (IMU) devrilme açısını ve hızını ölçer. Kural: <b>devrildiğin yöne doğru sür</b> -
           taban gövdenin altına kaçar ve robot doğrulur. Segway, hoverboard ve roketlerin iniş kontrolü hep bu prensiple çalışır.</p>
       </div>
       <div class="card">
@@ -221,7 +221,7 @@
         <div class="card">
           <h4>PID Denge Kontrolü</h4>
           <p class="exp">motor = Kp·eğim + Kd·devrilme hızı + Ki·birikmiş eğim. <b>Kd olmazsa olmaz:</b> sadece Kp ile robot
-            düzelirken hız kazanır ve öbür tarafa aşar — salınım büyür, devrilir. Kd erken frenler.
+            düzelirken hız kazanır ve öbür tarafa aşar - salınım büyür, devrilir. Kd erken frenler.
             <b>Ki</b> ise inatçı yamukluğu düzeltir: rüzgâr/dengesiz yük robotu hep bir yana yatırıyorsa, Ki o kalıcı hatayı biriktirip siler.</p>
           <div class="sliderRow"><label>Kp (eğim tepkisi) <b id="pKpV">2.6</b></label>
             <input type="range" id="pKp" min="0.5" max="5" step="0.1" value="2.6"></div>
@@ -236,7 +236,7 @@
       <div id="rulesPanel" style="display:none">
         <div class="card">
           <h4>Eğim Bandı Kuralları</h4>
-          <p class="exp">Kesikli bantlarla dengede kalmayı dene — kolay seviyelerde işe yarar ama
+          <p class="exp">Kesikli bantlarla dengede kalmayı dene - kolay seviyelerde işe yarar ama
             sürekli kontrolün (PID) neden şart olduğunu bizzat göreceksin. Bu, senaryonun asıl dersi!</p>
           <div id="rulesList"></div>
           <button class="addRule" id="addRule">+ Yeni Kural</button>
@@ -380,7 +380,7 @@
     A.className='v mono '+(Math.abs(th)>0.3?'bad':Math.abs(th)>0.13?'hot':'ok');
     const tgt=LAB.sim?BC.currentTarget(LAB.sim):null;
     const lvl=BC.LEVELS[LAB.levelIdx];
-    document.getElementById('hudH').textContent = tgt ? ('x='+tgt.x+' ('+((LAB.sim?LAB.sim.reached.length:0))+'/'+(lvl.targets||[]).length+')') : ((lvl.targets||[]).length?'✓ hepsi':'—');
+    document.getElementById('hudH').textContent = tgt ? ('x='+tgt.x+' ('+((LAB.sim?LAB.sim.reached.length:0))+'/'+(lvl.targets||[]).length+')') : ((lvl.targets||[]).length?'✓ hepsi':'-');
     const s=document.getElementById('hudS');
     if(!LAB.sim){ s.textContent='HAZIR'; s.className='v'; }
     else if(LAB.sim.status==='running'){ s.textContent='DENGEDE'; s.className='v ok'; }
@@ -440,7 +440,7 @@
     const tips=BC.coach(sim);
     var tiltGraph='';
     if(window.RFResult && LAB.tiltTrace && LAB.tiltTrace.length>3){
-      tiltGraph='<div class="rf-graphwrap"><div class="cap">📐 Eğim açısı — zamana karşı</div>'+
+      tiltGraph='<div class="rf-graphwrap"><div class="cap">📐 Eğim açısı - zamana karşı</div>'+
         '<canvas id="tiltGraph" class="rf-graph" style="height:140px"></canvas>'+
         '<div style="font-size:.72rem;color:var(--muted2);margin-top:2px">0° = dimdik. Kırmızı çizgiler = düşme sınırı (±34°). Salınım küçülüp 0’a oturuyorsa denge sağlam; büyüyorsa Kp/Kd’yi ayarla.</div></div>';
     }
@@ -489,10 +489,10 @@
     const lvl=BC.LEVELS[LAB.levelIdx];
     const box=document.getElementById('resultBox');
     box.innerHTML =
-      '<h3 class="'+(win?'win':'lose')+'">📄 Denge Raporu — '+lvl.name+'</h3>'+
+      '<h3 class="'+(win?'win':'lose')+'">📄 Denge Raporu - '+lvl.name+'</h3>'+
       '<div style="margin:8px 0;font-size:.8rem;color:var(--muted2)">'+chips+'</div>'+
       '<div style="font-size:.76rem;color:var(--sky);margin-bottom:8px">'+
-        (LAB.mode==='pid'?'📈 PID — Kp '+LAB.pid.kp.toFixed(1)+' · Kd '+LAB.pid.kd.toFixed(2)+' · Ki '+(LAB.pid.ki!=null?LAB.pid.ki:0.35).toFixed(2)+' · Çekim '+LAB.pid.kx.toFixed(1):'🧩 Bant Kuralları — '+LAB.rules.length+' kural')+'</div>'+
+        (LAB.mode==='pid'?'📈 PID - Kp '+LAB.pid.kp.toFixed(1)+' · Kd '+LAB.pid.kd.toFixed(2)+' · Ki '+(LAB.pid.ki!=null?LAB.pid.ki:0.35).toFixed(2)+' · Çekim '+LAB.pid.kx.toFixed(1):'🧩 Bant Kuralları - '+LAB.rules.length+' kural')+'</div>'+
       '<div class="rstats">'+
         '<div class="rstat"><div class="l">DENGE</div><div class="v mono">%'+BC.steadiness(sim)+'</div></div>'+
         '<div class="rstat"><div class="l">MAKS EĞİM</div><div class="v mono">'+(sim.maxTilt*57.3).toFixed(0)+'°</div></div>'+
@@ -500,9 +500,9 @@
         '<div class="rstat"><div class="l">DURUM</div><div class="v" style="color:'+(win?'var(--green)':'#fca5a5')+'">'+(win?'AYAKTA':'DÜŞTÜ')+'</div></div>'+
       '</div>'+
       '<canvas id="repMap" width="460" height="200" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#0a0d12"></canvas>'+
-      '<div style="font-size:.68rem;color:var(--muted);margin-top:4px">Eğim grafiği — düz çizgi = mükemmel denge, kırmızı sınırlar = devrilme</div>'+
+      '<div style="font-size:.68rem;color:var(--muted);margin-top:4px">Eğim grafiği - düz çizgi = mükemmel denge, kırmızı sınırlar = devrilme</div>'+
       '<canvas id="repPhase" width="460" height="220" style="width:100%;margin-top:10px;border:1px solid var(--line);border-radius:10px;background:#0a0d12"></canvas>'+
-      '<div style="font-size:.68rem;color:var(--muted);margin-top:4px">Faz portresi (eğim ↔ devrilme hızı) — kontrol mühendislerinin gizli silahı. İçe sarılan spiral = sönümlenen salınım = iyi ayar. Genişleyen halka = felakete gidiş.</div>'+
+      '<div style="font-size:.68rem;color:var(--muted);margin-top:4px">Faz portresi (eğim ↔ devrilme hızı) - kontrol mühendislerinin gizli silahı. İçe sarılan spiral = sönümlenen salınım = iyi ayar. Genişleyen halka = felakete gidiş.</div>'+
       '<div class="rbtns"><button class="btn ghost" id="repClose">Kapat</button></div>';
     document.getElementById('resultWrap').classList.add('show');
     document.getElementById('repClose').onclick=()=>document.getElementById('resultWrap').classList.remove('show');
@@ -707,12 +707,12 @@
     clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2400); }
 
   const TUT=[
-    ['🤸 Kararsız Sistem','Bu robot şimdiye kadarki her şeyden farklı: HİÇBİR ŞEY YAPMAZSAN DEVRİLİR. Çizgi izleyen robot dursa çizgi kaçmaz — bu robot bir an bile duramaz. Kontrol mühendisliğinin en ünlü problemi: ters sarkaç.'],
+    ['🤸 Kararsız Sistem','Bu robot şimdiye kadarki her şeyden farklı: HİÇBİR ŞEY YAPMAZSAN DEVRİLİR. Çizgi izleyen robot dursa çizgi kaçmaz - bu robot bir an bile duramaz. Kontrol mühendisliğinin en ünlü problemi: ters sarkaç.'],
     ['⚖️ Denge Sırrı','Devrilirken kurtulmanın tek yolu: devrildiğin YÖNE doğru sürmek! Taban gövdenin altına kaçar ve robot doğrulur. Segway ve hoverboard saniyede yüzlerce kez bunu yapar.'],
     ['📈 Kp ve Kd','Kp eğime tepki verir ama tek başına YETMEZ: robot düzelirken hız kazanır, öbür tarafa aşar, salınım büyür… Kd devrilme HIZINI görür ve erken fren yapar. İkisinin dansı = denge.'],
-    ['🧲 Ki — Gizli Kahraman','Rüzgârlı seviyede robot hep rüzgâr yönüne hafif yatık durur — Kp bunu asla sıfırlayamaz (dengede kalmak için o hata GEREKLİ sanır). Ki hatayı zamanla biriktirir ve yamukluğu siler. Raporda faz portresine bak: iyi ayar içe sarılan spiraldir!'],
-    ['🎯 Hedefe Gitmek','Denge robotu ileri gitmek için öne EĞİLMELİDİR — tıpkı yürürken yaptığın gibi! Hedef Çekimi kazancı robotu hedefe doğru hafifçe eğer.'],
-    ['🏁 Başla!','Önce sadece ayakta kal. Sonra dürtmeler, rüzgâr, yük ve fırtına… Denge grafiğini izle: düz çizgi = usta işi. Bant kuralları modunu da dene — PID neden şart, bizzat gör!'],
+    ['🧲 Ki - Gizli Kahraman','Rüzgârlı seviyede robot hep rüzgâr yönüne hafif yatık durur - Kp bunu asla sıfırlayamaz (dengede kalmak için o hata GEREKLİ sanır). Ki hatayı zamanla biriktirir ve yamukluğu siler. Raporda faz portresine bak: iyi ayar içe sarılan spiraldir!'],
+    ['🎯 Hedefe Gitmek','Denge robotu ileri gitmek için öne EĞİLMELİDİR - tıpkı yürürken yaptığın gibi! Hedef Çekimi kazancı robotu hedefe doğru hafifçe eğer.'],
+    ['🏁 Başla!','Önce sadece ayakta kal. Sonra dürtmeler, rüzgâr, yük ve fırtına… Denge grafiğini izle: düz çizgi = usta işi. Bant kuralları modunu da dene - PID neden şart, bizzat gör!'],
   ];
   let tutI=0;
   function showTut(i){

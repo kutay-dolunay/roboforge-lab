@@ -1,5 +1,5 @@
 /* =============================================================================
- * RoboForge — PID Çizgi Yarışı (PID Racing) :: Scenario config
+ * RoboForge - PID Çizgi Yarışı (PID Racing) :: Scenario config
  * -----------------------------------------------------------------------------
  * The RACING scenario reuses the line-follower physics engine (window.SimCore).
  * This module only supplies the racing content: 7 racing circuits, a dense
@@ -7,7 +7,7 @@
  * (pid.html) builds tracks with SimCore.buildTrack and runs SimCore.tickSim.
  *
  * Goal of the scenario: the FASTEST clean lap. Tune Kp/Kd + build a fast robot
- * to cut lap time — but push too hard on a technical corner and you fly off.
+ * to cut lap time - but push too hard on a technical corner and you fly off.
  * ========================================================================== */
 (function (global) {
   'use strict';
@@ -37,7 +37,7 @@
       points: [[-9, -6], [-9, 3], [-5, 7], [-5, 1], [-1, 1], [-1, 7], [3, 8], [7, 5], [4, 0], [8, -2], [9, -6], [2, -8], [-4, -7]], tension: 0.2, closed: true },
   ];
 
-  // dense 5-sensor analog array (racing setup) — order = [SOL2, SOL, ORTA, SAĞ, SAĞ2]
+  // dense 5-sensor analog array (racing setup) - order = [SOL2, SOL, ORTA, SAĞ, SAĞ2]
   function starterSensors() {
     return [
       { id: 's1', role: 'l2', label: 'SOL2', color: '#22c55e', fwd: 0.9, right: -0.6 },
@@ -47,7 +47,7 @@
       { id: 's5', role: 'r2', label: 'SAĞ2', color: '#ef4444', fwd: 0.9, right: 0.6 },
     ];
   }
-  // Kural (5-sensor) — center on => straight; sides steer proportionally
+  // Kural (5-sensor) - center on => straight; sides steer proportionally
   function starterRules() {
     return [
       { pattern: ['any', 'any', 'on', 'any', 'any'], left: { dir: 'fwd', speed: 80 }, right: { dir: 'fwd', speed: 80 } },

@@ -1,5 +1,5 @@
 /* =============================================================================
- * RoboForge — Kurtarma Hattı (Rescue Line) :: Simulation Core
+ * RoboForge - Kurtarma Hattı (Rescue Line) :: Simulation Core
  * -----------------------------------------------------------------------------
  * Pure, dependency-free. Browser (window.RescueCore) + Node (module.exports).
  * Open (point-to-point) line course with: gaps, green junction markers,
@@ -13,7 +13,7 @@
  *   4 YSOL  green marker under left  (boolean)
  *   5 YSAĞ  green marker under right (boolean)
  * Extra readable memory state (the one small memory a real robot has):
- *   lastSeen: 'L' | 'C' | 'R'  — which side the line was last seen on.
+ *   lastSeen: 'L' | 'C' | 'R'  - which side the line was last seen on.
  *   Rules may condition on it via pattern[6]: 'L'|'C'|'R'|'any'.
  * ========================================================================== */
 (function (global) {
@@ -85,9 +85,9 @@
   }
 
   // ---- Courses (7-level ladder) ----------------------------------------------
-  // junctions: {pt:[x,y], side:'L'|'R'}  — marker on the turn side; stub = straight-on dead end
-  // obstacles: {prog}                    — box centered on the line at that progress
-  // gaps:      [[startProg,endProg]]     — line absent
+  // junctions: {pt:[x,y], side:'L'|'R'}  - marker on the turn side; stub = straight-on dead end
+  // obstacles: {prog}                    - box centered on the line at that progress
+  // gaps:      [[startProg,endProg]]     - line absent
   const COURSES = [
     { id: 'patika', name: 'Sakin Patika', difficulty: 'Başlangıç', time: 50, tension: 0.45,
       points: [[-8, -6], [-3, -5], [2, -6], [6, -3], [4, 1], [-1, 2], [-5, 4], [-1, 6], [4, 6], [8, 6]] },
@@ -177,7 +177,7 @@
     return d;
   }
   function geoDistAt(course, x, y) {
-    // GEOMETRIC distance to the course (ignores gaps/cover) — for off-track checks
+    // GEOMETRIC distance to the course (ignores gaps/cover) - for off-track checks
     let d = nearestOnPath(course.path, x, y).dist;
     for (let i = 0; i < course.stubs.length; i++) {
       const ds = nearestOnPath(course.stubs[i], x, y).dist;
@@ -335,7 +335,7 @@
         else if (ad === 'R') sim.avoidDir = -1;
         else if (sim.avoidAt && Math.hypot(robot.x - sim.avoidAt[0], robot.y - sim.avoidAt[1]) < 3.0) {
           // same obstacle encounter: keep the earlier decision (no flip-flop)
-        } else { // AUTO: decide once per encounter — detour toward the course interior
+        } else { // AUTO: decide once per encounter - detour toward the course interior
           const c3 = Math.cos(robot.th), s3 = Math.sin(robot.th);
           const rightC = (course.centroid[0] - robot.x) * s3 - (course.centroid[1] - robot.y) * c3;
           sim.avoidDir = rightC < 0 ? 1 : -1;
@@ -421,7 +421,7 @@
     sim.timeOffLine = anyOn ? 0 : sim.timeOffLine + ((mode === 'pid' && sim.avoidPhase) ? 0 : dt);
     sim.timeStalled = Math.abs(v) < 0.05 ? sim.timeStalled + dt : 0;
 
-    // detours & stubs legitimately leave the main line — geometric distance to ANY line
+    // detours & stubs legitimately leave the main line - geometric distance to ANY line
     const geoDist = geoDistAt(course, robot.x, robot.y);
     if (sim.status === 'running') {
       if (geoDist > OFF_TRACK_DIST) { sim.status = 'failed'; sim.reason = 'off_track'; }
@@ -449,11 +449,11 @@
     const hasJ = sim.course.junctions.length, hasO = sim.course.obstacles.length, hasG = sim.course.gaps.length;
     if (sim.reason === 'crash') {
       tips.push(mode === 'pid'
-        ? 'Robot engele çarptı. Engel manevrası yönünü değiştirmeyi ve Temel Hız\'ı düşürmeyi dene — hızlı gelen robot manevraya vakit bulamaz.'
+        ? 'Robot engele çarptı. Engel manevrası yönünü değiştirmeyi ve Temel Hız\'ı düşürmeyi dene - hızlı gelen robot manevraya vakit bulamaz.'
         : 'Robot engele çarptı. ENGEL: VAR durumu için bir kaçınma kuralı ekle (örn. yerinde sağa dön), sonra kaybolan çizgiyi SON GÖRÜLEN yönünden geri bul.');
     }
     if (sim.reason === 'line_lost' || sim.reason === 'off_track') {
-      if (hasJ && sim.maxProg < 0.9) tips.push('Bir kavşakta yanlış yöne gitmiş olabilirsin. Yeşil işaret dönülecek yönü gösterir — "hepsi AÇIK + YEŞİL" durumuna keskin bir dönüş kuralı ekle.');
+      if (hasJ && sim.maxProg < 0.9) tips.push('Bir kavşakta yanlış yöne gitmiş olabilirsin. Yeşil işaret dönülecek yönü gösterir - "hepsi AÇIK + YEŞİL" durumuna keskin bir dönüş kuralı ekle.');
       if (hasG) tips.push('Kesik çizgide robot boşluğa iyi hizalanmış girmeli. Boşluktan önce hızını dengele; SON GÖRÜLEN: ORTA iken düz devam et.');
       if (hasO) tips.push('Engel manevrasından sonra çizgiyi geri bulmak için SON GÖRÜLEN yönüne doğru kavis çiz (örn. kayıpta SOL ise sola kavis).');
       if (!hasJ && !hasO && !hasG) tips.push('Robot çizgiden çıktı. Viraj kurallarındaki hız farkını artır ya da PID modunda Kp/Kd ayarla.');
@@ -471,10 +471,10 @@
   function robotClass(sim) {
     if (sim.status !== 'success') return null;
     const acc = accuracy(sim), t = sim.t, T = sim.course.meta.time || 60;
-    if (acc >= 90 && t < T * 0.55) return { key: 'kurtarma_kahramani', name: '🏆 Kurtarma Kahramanı', cmt: 'Kusursuz operasyon — hız ve hassasiyet bir arada.' };
+    if (acc >= 90 && t < T * 0.55) return { key: 'kurtarma_kahramani', name: '🏆 Kurtarma Kahramanı', cmt: 'Kusursuz operasyon - hız ve hassasiyet bir arada.' };
     if (t < T * 0.7) return { key: 'saha_uzmani', name: '🥇 Saha Uzmanı', cmt: 'Hızlı ve kararlı bir kurtarma. Rota biraz daha temizlenebilir.' };
     if (acc >= 80) return { key: 'gorev_eri', name: '🧭 Görev Eri', cmt: 'Görev tamam! Çizgide kalma oranını artırarak yükselebilirsin.' };
-    return { key: 'caylak_kurtarici', name: '🎓 Çaylak Kurtarıcı', cmt: 'Kazazedeye ulaştın — şimdi süreyi kısaltma zamanı.' };
+    return { key: 'caylak_kurtarici', name: '🎓 Çaylak Kurtarıcı', cmt: 'Kazazedeye ulaştın - şimdi süreyi kısaltma zamanı.' };
   }
 
   function runHeadless(cfg, maxTime, dt) {

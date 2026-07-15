@@ -1,11 +1,11 @@
 /* =============================================================================
- * RoboForge — Işık Takibi (Light Follower) :: Simulation Core
+ * RoboForge - Işık Takibi (Light Follower) :: Simulation Core
  * -----------------------------------------------------------------------------
  * Pure, dependency-free. Runs in browser (window.LightCore) and Node.
  *
  * Phototaxis with directional LDR sensors (front/left/right). TWO control modes:
- *   • KURAL  — block rules over a tunable brightness THRESHOLD (bright/dark).
- *   • PID    — proportional: steer ∝ (leftBright − rightBright); Kp/Kd/base.
+ *   • KURAL  - block rules over a tunable brightness THRESHOLD (bright/dark).
+ *   • PID    - proportional: steer ∝ (leftBright − rightBright); Kp/Kd/base.
  * Motor spec -> speed (continuity); wheel spec -> turn agility.
  *
  * 7-level ladder: Başlangıç ×2, Orta ×2, İleri ×2, Uzman ×1.
@@ -38,7 +38,7 @@
       blurb: 'Köşedeki uzak bir ışık. Zayıf sinyali kaybetmeden takip et.',
       start: [-8, -8, Math.PI / 2], lights: [{ x: 6, y: 7, power: 1.15 }], target: 0 },
     { id: 'two', name: 'İki Fener', difficulty: 'İleri',
-      blurb: 'İki ışık var — parlak olana git, sönük olan tuzak.',
+      blurb: 'İki ışık var - parlak olana git, sönük olan tuzak.',
       start: [0, -8, Math.PI / 2], lights: [{ x: 5.5, y: 6.5, power: 1.25 }, { x: -6, y: 3, power: 0.55 }], target: 0 },
     { id: 'flee', name: 'Kaçan Işık', difficulty: 'İleri',
       blurb: 'Hızlı gezinen bir ışık. Onu köşeye sıkıştır.',

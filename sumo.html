@@ -245,7 +245,7 @@
         </div>
         <div class="tr">
           <div class="sensbar" id="hudSensors"></div>
-          <div class="actionchip">HAREKET<b id="hudAction">—</b></div>
+          <div class="actionchip">HAREKET<b id="hudAction">-</b></div>
           <div class="motorbars">
             <div class="mrow"><span>SOL</span><div class="mtrack"><div class="mfill" id="mfL"></div></div></div>
             <div class="mrow"><span>SAĞ</span><div class="mtrack"><div class="mfill" id="mfR"></div></div></div>
@@ -256,7 +256,7 @@
     </div>
 
     <div class="result idle" id="result">
-      <div class="rhead" id="rhead">🥊 Robotunu kur, kodla ve <b style="color:var(--green);margin:0 4px">DÖVÜŞ</b> — rakibi ringden at.</div>
+      <div class="rhead" id="rhead">🥊 Robotunu kur, kodla ve <b style="color:var(--green);margin:0 4px">DÖVÜŞ</b> - rakibi ringden at.</div>
       <div class="rbody" id="rbody" style="display:none"></div>
     </div>
   </div>
@@ -315,19 +315,19 @@
           <div class="legend">
             <b>Motorlar → hareket:</b> iki motor tam <b>İleri</b> = saldır/it · bir motor daha hızlı = o yöne kır ·
             iki motor <b>Geri</b> = kenardan geri çekil. <br/>
-            <b>İpucu:</b> Önce güvenlik — <b>KENAR VAR</b> ise geri çekil, sonra <b>DÜŞMAN</b>'ı görünce tam güç saldır.
+            <b>İpucu:</b> Önce güvenlik - <b>KENAR VAR</b> ise geri çekil, sonra <b>DÜŞMAN</b>'ı görünce tam güç saldır.
           </div>
         </div>
 
         <div id="kod-pid" style="display:none">
           <div class="hintbox">
-            PID modunda robot rakibin <b>açısına</b> göre orantılı döner — sürekli düşmana nişan alıp üstüne
+            PID modunda robot rakibin <b>açısına</b> göre orantılı döner - sürekli düşmana nişan alıp üstüne
             sürer, kenara gelince geri çekilir. <b style="color:var(--sky)">Kp</b> nişanın sertliğini,
             <b style="color:var(--sky)">Kd</b> savrulmayı bastırmayı belirler.
           </div>
-          <div class="pidrow"><label>Kp — Nişan Sertliği <b id="pidKpV">2.4</b></label>
+          <div class="pidrow"><label>Kp - Nişan Sertliği <b id="pidKpV">2.4</b></label>
             <input type="range" id="pidKp" min="0" max="6" step="0.1" value="2.4" /></div>
-          <div class="pidrow"><label>Kd — Sönümleme (sakinlik) <b id="pidKdV">0.5</b></label>
+          <div class="pidrow"><label>Kd - Sönümleme (sakinlik) <b id="pidKdV">0.5</b></label>
             <input type="range" id="pidKd" min="0" max="3" step="0.1" value="0.5" /></div>
           <div class="pidrow"><label>Saldırı Hızı <b id="pidBaseV">100%</b></label>
             <input type="range" id="pidBase" min="40" max="120" step="5" value="100" /></div>
@@ -370,7 +370,7 @@
 
   const LAB = {
     oppIdx: 0,
-    sensors: [],            // empty on open — student builds from scratch
+    sensors: [],            // empty on open - student builds from scratch
     rules: [],              // empty on open
     defaultRule: M.starterDefault(),
     params: M.defaultParams(),
@@ -457,14 +457,14 @@
     dots.forEach((d,i)=>{ const on=states&&states[i]; d.classList.toggle('on',!!on); d.style.background=on?d.style.color:'#0b1220'; });
     if(LAB.mode==='pid'){
       const e = LAB.sim ? (LAB.sim.lastError||0) : 0;   // bearing to opponent (rad); >0 = left
-      document.getElementById('hudAction').textContent = LAB.sim ? (Math.abs(e)<0.12?'SALDIR':e>0?'◄ SOL':'SAĞ ►') : '—';
+      document.getElementById('hudAction').textContent = LAB.sim ? (Math.abs(e)<0.12?'SALDIR':e>0?'◄ SOL':'SAĞ ►') : '-';
       const turn=Math.max(-0.6,Math.min(0.6,e*(LAB.pid.kp||0)*0.25));
       setBar('mfL', 0.8-turn); setBar('mfR', 0.8+turn);
       const ef=document.getElementById('errFill'); if(ef){ const ee=Math.max(-1,Math.min(1,e/Math.PI)); ef.style.left=(50-ee*48)+'%'; }
     } else {
       let mL=0,mR=0;
       if(states){ const cmd=M.evalRules(LAB.rules,LAB.defaultRule,states); mL=cmd.mL; mR=cmd.mR; }
-      document.getElementById('hudAction').textContent = states ? moveLabel(mL,mR) : '—';
+      document.getElementById('hudAction').textContent = states ? moveLabel(mL,mR) : '-';
       setBar('mfL',mL); setBar('mfR',mR);
     }
   }
@@ -540,7 +540,7 @@
   function finishRun(){ stopRun(); showResult(); }
 
   // ---------- result ----------
-  const REASONS={fell_out:'Robotun ringden düştü',timeout:'Süre doldu — berabere',double:'İkiniz de çıktınız'};
+  const REASONS={fell_out:'Robotun ringden düştü',timeout:'Süre doldu - berabere',double:'İkiniz de çıktınız'};
   function setResultRunning(){
     const r=document.getElementById('result'); r.className='result idle';
     document.getElementById('rhead').innerHTML='🥊 Dövüş sürüyor… rakibi ringden atmaya çalış.';
@@ -548,7 +548,7 @@
   }
   function setResultReady(){
     const r=document.getElementById('result'); r.className='result idle';
-    document.getElementById('rhead').innerHTML='🥊 Robotunu kur, kodla ve <b style="color:var(--green);margin:0 4px">DÖVÜŞ</b> — rakibi ringden at.';
+    document.getElementById('rhead').innerHTML='🥊 Robotunu kur, kodla ve <b style="color:var(--green);margin:0 4px">DÖVÜŞ</b> - rakibi ringden at.';
     document.getElementById('rbody').style.display='none';
   }
   function medal(sim){
@@ -800,10 +800,10 @@
 
   // ---------- tutorial ----------
   const TUT=[
-    {tab:null,t:'Mini Sumo Lab’a hoş geldin! 🥊',p:'Robotun rakibi ringden atmaya çalışacak — ama kendisi düşmemeli. Onu sen kodlayacaksın.'},
+    {tab:null,t:'Mini Sumo Lab’a hoş geldin! 🥊',p:'Robotun rakibi ringden atmaya çalışacak - ama kendisi düşmemeli. Onu sen kodlayacaksın.'},
     {tab:'robot',t:'1) Sensörleri tanı',p:'🤖 Robot sekmesinde düşman sensörleri (ön/sol/sağ) ve kenar sensörü var. Kenar sensörü beyaz çizgiyi görür.'},
     {tab:'kod',t:'2) Dövüşü kodla',p:'🧩 Kod sekmesinde önce güvenliği (KENAR VAR → geri çekil), sonra saldırıyı (DÜŞMAN VAR → tam güç) yaz.'},
-    {tab:null,t:'3) Dövüştür ve öğren',p:'▶ DÖVÜŞ’e bas. Düşersen ya da berabere kalırsan ipuçları çıkar — robotunu güçlendir, kuralları düzelt, tekrar dene!'},
+    {tab:null,t:'3) Dövüştür ve öğren',p:'▶ DÖVÜŞ’e bas. Düşersen ya da berabere kalırsan ipuçları çıkar - robotunu güçlendir, kuralları düzelt, tekrar dene!'},
   ];
   let tutI=0;
   function switchTab(name){
@@ -845,7 +845,7 @@
     card.style.cssText='border-top:1px solid var(--line);padding:16px;background:#0c1526';
     if(build && RD){
       const chips=RD.ORDER.map(cat=>{ const o=RD.opt(cat,build[cat]);
-        return '<span style="border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:4px 8px;font-size:.68rem;color:var(--muted2)">'+RD.COMPONENTS[cat].icon+' <b style="color:var(--txt)">'+(o?o.name:'—')+'</b></span>'; }).join('');
+        return '<span style="border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:4px 8px;font-size:.68rem;color:var(--muted2)">'+RD.COMPONENTS[cat].icon+' <b style="color:var(--txt)">'+(o?o.name:'-')+'</b></span>'; }).join('');
       const r=RD.computeReport(build);
       const stat=(l,v,u)=>'<div style="background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:8px 6px;text-align:center"><div style="font-size:.52rem;letter-spacing:1px;color:var(--muted);text-transform:uppercase">'+l+'</div><div style="font-size:1.1rem;font-weight:800;margin-top:2px">'+v+'</div><div style="font-size:.55rem;color:var(--muted2)">'+u+'</div></div>';
       card.innerHTML='<div style="font-size:.62rem;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:10px">🔧 Robotun Künyesi</div>'+
@@ -855,7 +855,7 @@
         '<a href="build.html?sim=sumo" style="display:inline-block;border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:.74rem;font-weight:700;color:var(--muted2)">← Robotu yeniden kur</a>';
     } else {
       card.innerHTML='<div style="font-size:.62rem;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:8px">🤖 Kendi robotun</div>'+
-        '<div style="font-size:.8rem;color:var(--muted2);line-height:1.55;margin-bottom:12px">Parçaları seçip robotunu baştan kurarsan, seçtiğin güçlü motor ve tekerlekler bu ringde itiş gücünü belirler — şampiyonu yenmek için önemli!</div>'+
+        '<div style="font-size:.8rem;color:var(--muted2);line-height:1.55;margin-bottom:12px">Parçaları seçip robotunu baştan kurarsan, seçtiğin güçlü motor ve tekerlekler bu ringde itiş gücünü belirler - şampiyonu yenmek için önemli!</div>'+
         '<a href="build.html?sim=sumo" style="display:inline-block;background:linear-gradient(180deg,#0ea5e9,#0369a1);border:1px solid #38bdf8;border-radius:9px;padding:9px 14px;font-size:.8rem;font-weight:700;color:#eaf6ff">Robotunu kur →</a>';
     }
     side.appendChild(card);

@@ -1,5 +1,5 @@
 /* =============================================================================
- * RoboForge — Engelden Kaçış (Obstacle Avoidance) :: Simulation Core
+ * RoboForge - Engelden Kaçış (Obstacle Avoidance) :: Simulation Core
  * -----------------------------------------------------------------------------
  * Pure, dependency-free. Runs in browser (window.ObstacleCore) and Node.
  *
@@ -10,7 +10,7 @@
  *   - steer toward the more-open side  (avoid, "Kaçınma Gücü")
  *   - steer toward the goal / up        (goal, "Hedef Çekimi")
  *   - slow down + swerve hard when something is close within "safe" ("Güvenli
- *     Mesafe") — this is the speed↔safety balance the scenario is about.
+ *     Mesafe") - this is the speed↔safety balance the scenario is about.
  * Motor spec -> vMax (speed), wheel spec -> turnGain (agility)  => a fast but
  * sluggish robot clips corners; a balanced one weaves through.
  *
@@ -167,16 +167,16 @@
     const rules = (sim.cfg.mode === 'rules');
     if (sim.reason === 'crash') {
       if (rules) {
-        t.push('Robot bir engele sürdü. Kural (aç-kapa) kontrolü dar geçitlerde köşeyi sıyırır — bu yüzden gerçek robotlar orantılı (PID) kontrol kullanır. Dar pistlerde 📈 PID Modu\'na geç.');
+        t.push('Robot bir engele sürdü. Kural (aç-kapa) kontrolü dar geçitlerde köşeyi sıyırır - bu yüzden gerçek robotlar orantılı (PID) kontrol kullanır. Dar pistlerde 📈 PID Modu\'na geç.');
       } else {
-        t.push('Robot bir engele çarptı. "Güvenli Mesafe"yi artır (daha erken yavaşlar) ya da hızını düşür — hız-güvenlik dengesi tam da bu.');
+        t.push('Robot bir engele çarptı. "Güvenli Mesafe"yi artır (daha erken yavaşlar) ya da hızını düşür - hız-güvenlik dengesi tam da bu.');
         t.push('Hızlı ama hantal bir robot dar yerde dönemez; daha çevik tekerlek ya da daha düşük hız dene.');
       }
     } else if (sim.reason === 'timeout') {
-      t.push(rules ? 'Süre doldu. Kural modu dar pistlerde takılır — 📈 PID Modu daha akıcıdır.'
+      t.push(rules ? 'Süre doldu. Kural modu dar pistlerde takılır - 📈 PID Modu daha akıcıdır.'
         : 'Süre doldu. "Hedef Çekimi" çok düşükse robot yukarı ilerlemez; biraz artır. "Kaçınma Gücü" çok yüksekse yerinde savrulur, biraz azalt.');
     } else if (sim.status === 'success') {
-      t.push('Hedefe vardın! Daha hızlı bir motorla süreyi kısaltmayı dene — ama çarpmadan.');
+      t.push('Hedefe vardın! Daha hızlı bir motorla süreyi kısaltmayı dene - ama çarpmadan.');
     }
     return t;
   }

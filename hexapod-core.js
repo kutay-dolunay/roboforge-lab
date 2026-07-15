@@ -1,15 +1,15 @@
 /*
- * RoboForge — Altı Bacak (Hexapod Gait) Simülasyon Çekirdeği
+ * RoboForge - Altı Bacak (Hexapod Gait) Simülasyon Çekirdeği
  * Pure, dependency-free. Browser (window.HexapodCore) + Node (module.exports).
  *
  * Altı bacaklı robot bir hedefe yürür. Ders: YÜRÜMEK BİR RİTİMDİR. Bacaklar
  * gelişigüzel kalkarsa robot devrilir; doğru koordinasyonla (tripod yürüyüşü:
  * 3'erli iki grup sırayla) akıcı ve dengeli ilerler. Dersler:
  * (1) STATİK DENGE: her an yerde en az 3 bacak (ağırlık merkezini içeren üçgen)
- *     olmalı — yoksa gövde düşer,
+ *     olmalı - yoksa gövde düşer,
  * (2) TRIPOD GAIT: bacak 1-3-5 bir grup, 2-4-6 öbür grup; biri kalkarken öbürü basar,
  * (3) DUTY FACTOR (yerde kalma oranı): düşükse havada çok bacak olur → devrilme;
- *     yüksekse yavaş ama güvenli — hız↔denge ödünleşimi,
+ *     yüksekse yavaş ama güvenli - hız↔denge ödünleşimi,
  * (4) ADIM FREKANSI × ADIM BOYU = hız; ama zeminde patinaj ve engebe sınır koyar.
  */
 (function () {
@@ -38,7 +38,7 @@
     { id: 'yokus', name: 'Yokuş Yukarı', difficulty: 'Orta', dur: 46, dist: 14, terrain: 'slope', rough: 0.15, slope: 0.35, slip: 0.15,
       desc: 'Yokuş dengeyi öne kaydırır ve patinaj riskini artırır. Daha kısa, sık adımlar + yüksek duty = tutunarak tırman.' },
     { id: 'ucurum', name: 'Uçurum Kenarı', difficulty: 'İleri', dur: 52, dist: 16, terrain: 'rough', rough: 0.5, slope: 0.1, slip: 0.2,
-      desc: 'Çok engebeli ve kaygan. Havada 4 bacak olursa devrilirsin. Tripod grupları kusursuz sırayla — ritim disiplini.' },
+      desc: 'Çok engebeli ve kaygan. Havada 4 bacak olursa devrilirsin. Tripod grupları kusursuz sırayla - ritim disiplini.' },
     { id: 'hizli', name: 'Hız Denemesi', difficulty: 'İleri', dur: 40, dist: 22, terrain: 'rough', rough: 0.3, slope: 0.05, slip: 0.18,
       desc: 'Uzun mesafe, kısıtlı süre: hızlanmalısın ama fazla hız patinaj ve devrilme demek. Sınırı bul, ritmi koru.' },
     { id: 'kabus', name: 'Kâbus Patikası', difficulty: 'Uzman', dur: 60, dist: 24, terrain: 'nightmare', rough: 0.6, slope: 0.4, slip: 0.28,
@@ -144,7 +144,7 @@
     // devrildi mi?
     if (sim.stumble > 1.6 || Math.abs(sim.bodyTilt) > 0.9) {
       sim.status = 'failed'; sim.reason = 'devrildi'; sim.fell = true;
-      pushEvt(sim, 'fell', '💥 DEVRİLDİ! Havada çok bacak vardı — gövdeyi taşıyacak denge üçgeni kalmadı.');
+      pushEvt(sim, 'fell', '💥 DEVRİLDİ! Havada çok bacak vardı - gövdeyi taşıyacak denge üçgeni kalmadı.');
       return;
     }
 
@@ -164,7 +164,7 @@
     sim.x += sim.vx * dt;
 
     // patinaj olayı
-    if (traction < 0.6 && sim.vx < targetV * 0.5 && sim.t > 1) pushEvt(sim, 'slip' + Math.round(sim.x), '🧊 Patinaj! Zemin kaygan, adım frekansın çok yüksek — hız boşa gidiyor.');
+    if (traction < 0.6 && sim.vx < targetV * 0.5 && sim.t > 1) pushEvt(sim, 'slip' + Math.round(sim.x), '🧊 Patinaj! Zemin kaygan, adım frekansın çok yüksek - hız boşa gidiyor.');
 
     if (sim.totalTicks % 2 === 0) {
       sim.path.push([sim.x, sim.bodyTilt]);
@@ -192,19 +192,19 @@
     const total = tScore * 0.55 + stabScore * 0.45;
     if (total > 62) return { name: '🏆 Arazi Ustası', cmt: 'Kusursuz tripod ritmi: her an sağlam denge üçgeni, akıcı hız, engebeyi umursamadın. Mars gezgini ekibi seni istiyor!' };
     if (total > 40) return { name: '🥈 Yürüyüş Mühendisi', cmt: 'Hedefe vardın. Daha akıcı için: duty oranını dengede tut, en az 3 bacağı hep yerde bırak.' };
-    return { name: '🥉 Acemi Böcek', cmt: 'Sallana sallana da olsa vardın. Ritmin ara ara bozuldu — tripod gruplarını netleştir, dengeyi kaybetme.' };
+    return { name: '🥉 Acemi Böcek', cmt: 'Sallana sallana da olsa vardın. Ritmin ara ara bozuldu - tripod gruplarını netleştir, dengeyi kaybetme.' };
   }
   function coach(sim) {
     const tips = [];
     const r = sim.reason || '';
     if (r === 'devrildi') {
-      tips.push('Devrildin: bir an havada 4+ bacak kaldı, gövdeyi taşıyacak 3-bacaklı denge üçgeni kalmadı. TRIPOD kuralı: 1-3-5 bir grup, 2-4-6 öbür grup — biri kalkarken öbürü MUTLAKA yerde. Aynı taraftaki bacakları aynı anda kaldırma!');
+      tips.push('Devrildin: bir an havada 4+ bacak kaldı, gövdeyi taşıyacak 3-bacaklı denge üçgeni kalmadı. TRIPOD kuralı: 1-3-5 bir grup, 2-4-6 öbür grup - biri kalkarken öbürü MUTLAKA yerde. Aynı taraftaki bacakları aynı anda kaldırma!');
     }
     if (r === 'sure') {
-      if (sim.mission.slip > 0.15) tips.push('Süre doldu — muhtemelen patinaj. Kaygan/engebeli zeminde adım frekansını çok açarsan bacaklar kayar, hız boşa gider. Frekansı düşür, adım boyunu artır: yavaş ama tutunan adım kazanır.');
-      else tips.push('Süre doldu. Yeterince hızlı değildin: hız = adım boyu × frekans. İkisini de artır — ama her an 3 bacağı yerde tutacak dengeyi koru.');
+      if (sim.mission.slip > 0.15) tips.push('Süre doldu - muhtemelen patinaj. Kaygan/engebeli zeminde adım frekansını çok açarsan bacaklar kayar, hız boşa gider. Frekansı düşür, adım boyunu artır: yavaş ama tutunan adım kazanır.');
+      else tips.push('Süre doldu. Yeterince hızlı değildin: hız = adım boyu × frekans. İkisini de artır - ama her an 3 bacağı yerde tutacak dengeyi koru.');
     }
-    if (sim.status === 'success' && sim.worstDown < 3) tips.push('Vardın ama bir an sadece ' + sim.worstDown + ' bacağın yerdeydi — kıl payı devrilmedin. Duty oranını biraz artır, güven marjın büyüsün.');
+    if (sim.status === 'success' && sim.worstDown < 3) tips.push('Vardın ama bir an sadece ' + sim.worstDown + ' bacağın yerdeydi - kıl payı devrilmedin. Duty oranını biraz artır, güven marjın büyüsün.');
     if (!tips.length) tips.push('Tripod yürüyüşü doğanın çözümü: karıncalar, hamamböcekleri hep 3-3 yürür. İki üçgen sırayla basar, gövde hiç desteksiz kalmaz. Duty = bir bacağın yerde kaldığı süre oranı; %50 tripod için idealdir.');
     return tips;
   }

@@ -158,7 +158,7 @@
       <div class="hudbox"><div class="l">YERDE</div><div class="v mono" id="hudL">6</div></div>
       <div class="hudbox"><div class="l">DURUM</div><div class="v" id="hudS">HAZIR</div></div>
     </div>
-    <div class="hint" id="hint">🕷️ Yürümek bir <b>ritimdir</b>. Altı bacağı doğru sırayla kaldır: <b>tripod yürüyüşü</b> — çapraz üç bacak (sağ-ön, sol-orta, sağ-arka) bir grup, aynası öbür grup. Biri kalkarken öbürü basar, gövde hiç desteksiz kalmaz. Her an en az <b>3 bacak yerde</b> yoksa devrilirsin!</div>
+    <div class="hint" id="hint">🕷️ Yürümek bir <b>ritimdir</b>. Altı bacağı doğru sırayla kaldır: <b>tripod yürüyüşü</b> - çapraz üç bacak (sağ-ön, sol-orta, sağ-arka) bir grup, aynası öbür grup. Biri kalkarken öbürü basar, gövde hiç desteksiz kalmaz. Her an en az <b>3 bacak yerde</b> yoksa devrilirsin!</div>
     <div class="rdock" id="resultDock" style="display:none"></div>
   </div>
   <div class="side">
@@ -182,7 +182,7 @@
         <h4>Gait Üretici</h4>
         <p class="exp">İdeal tripod otomatik; sen ritmi ayarlarsın. <b>Adım boyu</b> × <b>frekans</b> = hız.
           <b>Duty</b> = bir bacağın yerde kaldığı süre oranı: düşükse havada çok bacak olur → devrilme;
-          yüksekse yavaş ama güvenli. Kaygan zeminde frekansı açma — patinaj!</p>
+          yüksekse yavaş ama güvenli. Kaygan zeminde frekansı açma - patinaj!</p>
         <div class="sliderRow"><label>Adım Boyu <b id="pStV">1.1</b></label>
           <input type="range" id="pSt" min="0.5" max="1.8" step="0.05" value="1.1"></div>
         <div class="sliderRow"><label>Adım Frekansı <b id="pFrV">1.9</b></label>
@@ -192,14 +192,14 @@
       </div>
       <div class="card">
         <h4>Ritim Paneli</h4>
-        <p class="exp mono" id="ledger" style="font-size:.72rem">—</p>
+        <p class="exp mono" id="ledger" style="font-size:.72rem">-</p>
       </div>
     </div>
     <div id="tab-robot" style="display:none">
       <div class="card">
         <h4>Neden Tripod?</h4>
         <p class="exp">Karıncalar, hamamböcekleri hep 3-3 yürür. İki çapraz üçgen sırayla basar; gövde
-          asla desteksiz kalmaz — <b>statik denge</b>. Robot dünyasında Boston Dynamics ve Mars gezginleri
+          asla desteksiz kalmaz - <b>statik denge</b>. Robot dünyasında Boston Dynamics ve Mars gezginleri
           bu ritmi kullanır. Hız için adımı açarsın, ama denge her zaman önce gelir.</p>
       </div>
       <div class="card kunye" id="kunye"></div>
@@ -268,7 +268,7 @@
     const by = groundAt(x) - 58;
     CTX.save(); CTX.translate(bx,by); CTX.rotate(-tilt*0.5);
     // bacaklar (6): gövdeden zemine
-    const legMountX=[26,26,0,0,-26,-26];   // ekran x (ön sağ/sol ...) — sağ/sol aynı ekran x, derinlikle ayrılır
+    const legMountX=[26,26,0,0,-26,-26];   // ekran x (ön sağ/sol ...) - sağ/sol aynı ekran x, derinlikle ayrılır
     const legMountY=[-6,6,-8,8,-6,6];
     const legColor=['#38bdf8','#38bdf8','#eab308','#eab308','#a855f7','#a855f7'];
     for(let i=0;i<6;i++){
@@ -364,7 +364,7 @@
     document.getElementById('hint').style.display='block';
     document.getElementById('resultWrap').classList.remove('show');
   }
-  const REASONS={ vardi:'Hedefe vardı!', devrildi:'Devrildi — denge kayboldu.', sure:'Süre doldu.' };
+  const REASONS={ vardi:'Hedefe vardı!', devrildi:'Devrildi - denge kayboldu.', sure:'Süre doldu.' };
   function showResult(){
     const sim=LAB.sim; if(!sim) return;
     const win=sim.status==='success';
@@ -401,9 +401,9 @@
     const m=sim.mission;
     const box=document.getElementById('resultBox');
     box.innerHTML =
-      '<h3 class="'+(win?'win':'lose')+'">📄 Yürüyüş Raporu — '+m.name+'</h3>'+
+      '<h3 class="'+(win?'win':'lose')+'">📄 Yürüyüş Raporu - '+m.name+'</h3>'+
       '<div style="font-size:.76rem;color:var(--sky);margin:8px 0">'+
-        (LAB.mode==='rules'?'🧩 Bacak grupları — '+LAB.groups.join(' '):'📈 Gait — adım '+LAB.pid.stride+' · frekans '+LAB.pid.freq+' · duty '+LAB.pid.duty)+'</div>'+
+        (LAB.mode==='rules'?'🧩 Bacak grupları - '+LAB.groups.join(' '):'📈 Gait - adım '+LAB.pid.stride+' · frekans '+LAB.pid.freq+' · duty '+LAB.pid.duty)+'</div>'+
       '<div class="rstats">'+
         '<div class="rstat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'</div></div>'+
         '<div class="rstat"><div class="l">MESAFE</div><div class="v mono">'+sim.x.toFixed(1)+'</div></div>'+
@@ -473,7 +473,7 @@
     document.getElementById('kunye').innerHTML='<h4>🕷️ Gövde Künyesi</h4>'+
       (bc?'<div class="chipsRow">'+bc+'</div>':'')+
       '<p class="exp" style="margin:0">Altı bacak, çapraz tripod. Motorun ne kadar güçlüyse adımın o kadar '+
-      'uzun olur (daha hızlı yürürsün). Ama ritim ve denge parçadan bağımsızdır — kod senin. '+
+      'uzun olur (daha hızlı yürürsün). Ama ritim ve denge parçadan bağımsızdır - kod senin. '+
       '<a style="color:var(--sky)" href="build.html?sim=hexapod">Robotunu kur →</a></p>';
   }
   function buildTrackTabs(){
@@ -510,12 +510,12 @@
   function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show');
     clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2400); }
   const TUT=[
-    ['🕷️ Altı Bacak Nedir','Altı bacaklı bir robotu hedefe yürüteceksin. Ama nasıl? Bacaklar gelişigüzel kalkarsa robot devrilir. Yürümek aslında bir KOORDİNASYON problemidir — bir ritim.'],
+    ['🕷️ Altı Bacak Nedir','Altı bacaklı bir robotu hedefe yürüteceksin. Ama nasıl? Bacaklar gelişigüzel kalkarsa robot devrilir. Yürümek aslında bir KOORDİNASYON problemidir - bir ritim.'],
     ['🔺 Tripod Yürüyüşü','Doğanın çözümü: 6 bacağı 3-3 böl. Bir grup (çapraz üçgen: sağ-ön + sol-orta + sağ-arka) yerde iterken öbür grup havada ileri taşınır. Sonra yer değiştirirler. Gövde hiç desteksiz kalmaz!'],
-    ['⚖️ Statik Denge','Her an yerdeki bacaklar bir üçgen oluşturmalı ve gövdeyi taşımalı: en az 3 bacak, iki tarafta da. Havada 4 bacak olursa devrilirsin. Bu yüzden tripod ÇAPRAZDIR — asla aynı tarafı birlikte kaldırma.'],
+    ['⚖️ Statik Denge','Her an yerdeki bacaklar bir üçgen oluşturmalı ve gövdeyi taşımalı: en az 3 bacak, iki tarafta da. Havada 4 bacak olursa devrilirsin. Bu yüzden tripod ÇAPRAZDIR - asla aynı tarafı birlikte kaldırma.'],
     ['🎚️ Duty ve Frekans','Gait üretici modunda: duty = bir bacağın yerde kaldığı süre oranı. Düşükse havada çok bacak olur (devrilme), yüksekse yavaş ama güvenli. Frekans × adım boyu = hız. Denge↔hız ödünleşimi.'],
-    ['🧊 Arazi Tuzakları','Engebeli zeminde duty\'yi artır (her an yeterli temas). Yokuşta kısa sık adım. Kaygan zeminde frekansı açma — patinaj hızı boşa harcar. Zorlaştıkça ritim disiplini artar.'],
-    ['🏁 Yürü!','İlk Adım\'dan Kâbus Patikası\'na 7 görev. Rapordaki yeşil çizgi yerdeki bacak sayısı — 3\'ün altına düşme! Arazi Ustası ol.'],
+    ['🧊 Arazi Tuzakları','Engebeli zeminde duty\'yi artır (her an yeterli temas). Yokuşta kısa sık adım. Kaygan zeminde frekansı açma - patinaj hızı boşa harcar. Zorlaştıkça ritim disiplini artar.'],
+    ['🏁 Yürü!','İlk Adım\'dan Kâbus Patikası\'na 7 görev. Rapordaki yeşil çizgi yerdeki bacak sayısı - 3\'ün altına düşme! Arazi Ustası ol.'],
   ];
   let tutI=0;
   function showTut(i){

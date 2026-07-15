@@ -1,11 +1,11 @@
 /*
- * RoboForge — Sualtı ROV Simülasyon Çekirdeği
+ * RoboForge - Sualtı ROV Simülasyon Çekirdeği
  * Pure, dependency-free. Browser (window.RovCore) + Node (module.exports).
  *
- * Dersler: (1) KALDIRMA KUVVETİ: balast tankı su alınca batar, boşalınca yüzer —
+ * Dersler: (1) KALDIRMA KUVVETİ: balast tankı su alınca batar, boşalınca yüzer -
  * itki değil DENGE ana silahtır, (2) bang-bang derinlik kontrolü salınır, PID oturur,
  * (3) akıntı katmanları yatayda sürükler, (4) tether (kablo) menzili aşılmaz,
- * (5) hızlı yüzeye çıkış YASAK (vurgun teması) — kontrollü çıkış planla,
+ * (5) hızlı yüzeye çıkış YASAK (vurgun teması) - kontrollü çıkış planla,
  * (6) derinlik = karanlık = far = enerji.
  */
 (function () {
@@ -21,19 +21,19 @@
   const MISSIONS = [
     { id: 'ilkdalis', name: 'İlk Dalış', difficulty: 'Başlangıç', dur: 75,
       wps: [{ x: 2, d: 5 }], currents: [[0, 12, 0]], tether: 14, energy: 100, dark: false, seabed: 11,
-      desc: 'Tek nokta: 5 metreye in, 1.5 saniye sabit dur, kontrollü yüzeye dön. Balast doldukça batarsın — itki değil DENGE.' },
+      desc: 'Tek nokta: 5 metreye in, 1.5 saniye sabit dur, kontrollü yüzeye dön. Balast doldukça batarsın - itki değil DENGE.' },
     { id: 'resif', name: 'Resif Turu', difficulty: 'Başlangıç', dur: 110,
       wps: [{ x: 1.5, d: 3.5 }, { x: 4, d: 6 }, { x: 6.5, d: 4 }], currents: [[0, 12, 0]], tether: 16, energy: 100, dark: false, seabed: 11,
-      desc: 'Üç inceleme noktası, farklı derinlikler. Her derinlik değişimi bir balast kararı — pompayı boşa çalıştırma.' },
+      desc: 'Üç inceleme noktası, farklı derinlikler. Her derinlik değişimi bir balast kararı - pompayı boşa çalıştırma.' },
     { id: 'batik', name: 'Batık Gemi', difficulty: 'Orta', dur: 120,
       wps: [{ x: 5, d: 9 }, { x: 7, d: 10 }], currents: [[0, 12, 0.12]], tether: 14.5, energy: 100, dark: true, seabed: 11,
       desc: 'Derin batık: 10 metre, karanlık (far yanar, enerji akar) ve kablo sınırda. Rotanı kabloya göre planla.' },
     { id: 'kanyon', name: 'Akıntı Kanyonu', difficulty: 'Orta', dur: 120,
       wps: [{ x: 4, d: 4 }, { x: 6, d: 8 }], currents: [[0, 5, 0.45], [5, 12, -0.3]], tether: 16, energy: 100, dark: false, seabed: 11,
-      desc: 'Üst katman sağa, alt katman SOLA akıyor. Derinliğin yatay rotanı değiştirir — katmanları oku.' },
+      desc: 'Üst katman sağa, alt katman SOLA akıyor. Derinliğin yatay rotanı değiştirir - katmanları oku.' },
     { id: 'karanlik', name: 'Karanlık Çukur', difficulty: 'İleri', dur: 130,
       wps: [{ x: 3, d: 10.5 }, { x: 5.5, d: 9.5 }, { x: 7, d: 10.5 }], currents: [[0, 12, 0.18]], tether: 17, energy: 80, dark: true, seabed: 11.5,
-      desc: 'Üç derin nokta + kısıtlı batarya. Far dipte şart ve enerji yer — dipte oyalanma, işini bitir çık.' },
+      desc: 'Üç derin nokta + kısıtlı batarya. Far dipte şart ve enerji yer - dipte oyalanma, işini bitir çık.' },
     { id: 'vurgun', name: 'Çıkış Protokolü', difficulty: 'İleri', dur: 130,
       wps: [{ x: 6, d: 10 }], currents: [[0, 6, 0.35], [6, 12, 0.1]], tether: 15, energy: 90, dark: true, seabed: 11,
       desc: 'Derine in, İKİ kademede çık: 4 metrede güvenlik molası ver (otomatik). Sığ suda hızlı çıkış = görev iptali. Balast boşaltıp roket gibi fırlamak yok!' },
@@ -99,7 +99,7 @@
     const m = sim.mission;
     if (sim.phase === 'gorev' && sim.wpIdx < m.wps.length) return m.wps[sim.wpIdx];
     if (sim.phase === 'cikis' || sim.phase === 'molada') {
-      const homeX = Math.min(sim.x, 2.2);           // kabloyu sar — içeri süzül
+      const homeX = Math.min(sim.x, 2.2);           // kabloyu sar - içeri süzül
       if (sim.safetyStop < 2 && sim.d > 1.2) return { x: homeX, d: 4 };
       return { x: homeX, d: 0.2 };
     }
@@ -168,7 +168,7 @@
     sim.tetherMax = Math.max(sim.tetherMax, tlen);
     if (tlen > m.tether + TETHER_TOL) {
       sim.status = 'failed'; sim.reason = 'tether';
-      pushEvt(sim, 'tet', '🪢 KABLO GERİLDİ! ' + tlen.toFixed(1) + ' m > ' + m.tether + ' m — ROV asılı kaldı.');
+      pushEvt(sim, 'tet', '🪢 KABLO GERİLDİ! ' + tlen.toFixed(1) + ' m > ' + m.tether + ' m - ROV asılı kaldı.');
       return;
     } else if (tlen > m.tether - 0.8) pushEvt(sim, 'tetw', '⚠️ Kablo sınıra yaklaşıyor: ' + tlen.toFixed(1) + '/' + m.tether + ' m');
     else clearEvt(sim, 'tetw');
@@ -183,7 +183,7 @@
     // ---- hızlı çıkış (vurgun protokolü) ----
     if (sim.d < ASCENT_ZONE && sim.d > 0.4 && -sim.vd > ASCENT_LIMIT) {
       sim.status = 'failed'; sim.reason = 'hizli_cikis';
-      pushEvt(sim, 'asc', '🫧 HIZLI ÇIKIŞ! ' + (-sim.vd).toFixed(1) + ' m/s (limit ' + ASCENT_LIMIT + ') — kontrollü çıkış protokolü ihlali.');
+      pushEvt(sim, 'asc', '🫧 HIZLI ÇIKIŞ! ' + (-sim.vd).toFixed(1) + ' m/s (limit ' + ASCENT_LIMIT + ') - kontrollü çıkış protokolü ihlali.');
       return;
     }
 
@@ -194,7 +194,7 @@
         + Math.abs(vxDes) * 0.25 + light;
       sim.energy -= drain * dt;
       if (sim.energy <= 0) { sim.energy = 0; sim.battOut = true;
-        pushEvt(sim, 'batt', '🪫 Enerji bitti — ROV kontrolsüz! Balast neredeyse orada kalır…'); }
+        pushEvt(sim, 'batt', '🪫 Enerji bitti - ROV kontrolsüz! Balast neredeyse orada kalır…'); }
     }
 
     // ---- görev akışı ----
@@ -206,20 +206,20 @@
           pushEvt(sim, 'wp' + sim.wpIdx, '📸 Nokta ' + (sim.wpIdx + 1) + ' incelendi (' + wp.d + ' m)');
           sim.wpIdx++; sim.hold = 0;
           if (sim.wpIdx >= m.wps.length) { sim.phase = 'cikis';
-            pushEvt(sim, 'up', '⬆️ Görev tamam — kontrollü yüzeye çıkış başladı'); }
+            pushEvt(sim, 'up', '⬆️ Görev tamam - kontrollü yüzeye çıkış başladı'); }
         }
       } else sim.hold = 0;
     } else if (sim.phase === 'cikis') {
       if (Math.abs(sim.d - 4) < 0.85 && sim.safetyStop < 2) {
         sim.safetyStop += dt;
-        if (sim.safetyStop >= 2) pushEvt(sim, 'stop', '🫧 Güvenlik molası tamam (4 m / 2 sn) — yüzeye devam');
+        if (sim.safetyStop >= 2) pushEvt(sim, 'stop', '🫧 Güvenlik molası tamam (4 m / 2 sn) - yüzeye devam');
       }
       if (sim.d < 0.45) {
         if (sim.safetyStop >= 2 || m.id !== 'vurgun') {
           sim.status = 'success'; sim.reason = 'tamam';
           pushEvt(sim, 'fin', '🎉 ROV güvenle yüzeyde!');
         } else { sim.status = 'failed'; sim.reason = 'molasiz';
-          pushEvt(sim, 'nostop', '🫧 Güvenlik molası ATLANDI — protokol ihlali!'); }
+          pushEvt(sim, 'nostop', '🫧 Güvenlik molası ATLANDI - protokol ihlali!'); }
       }
     }
 
@@ -246,18 +246,18 @@
     const total = en * 0.4 + tScore * 0.6;
     if (total > 55) return { name: '🏆 Derin Deniz Pilotu', cmt: 'Akıcı dalış profili, tutumlu enerji, kusursuz çıkış protokolü. Batıklar seni bekler!' };
     if (total > 35) return { name: '🥈 ROV Operatörü', cmt: 'Görev tamam. Madalya için: balastı bir kez ayarla, pompayı boşuna çalıştırma.' };
-    return { name: '🥉 Kursiyer Dalgıç', cmt: 'Yüzeye döndün ama profil dişli gibi tırtıklı. Derinlik grafiğine bak — salınımlar enerji yer.' };
+    return { name: '🥉 Kursiyer Dalgıç', cmt: 'Yüzeye döndün ama profil dişli gibi tırtıklı. Derinlik grafiğine bak - salınımlar enerji yer.' };
   }
   function coach(sim) {
     const tips = [];
     const r = sim.reason || '';
-    if (r === 'tether') tips.push('Kablo gerildi: √(x² + derinlik²) ≤ kablo boyu olmalı. Derine inerken yatayda geri çekil — rota bir üçgen problemi.');
-    if (r === 'carpma') tips.push('Tabana çarptın. DİBE YAKIN biti tam bunun için: o bantta itici yukarı + balast boşalt. Balast yavaştır — freni erken yap.');
-    if (r === 'hizli_cikis') tips.push('Sığ suda çıkış limiti 0.9 m/s! Balastı tamamen boşaltıp roket gibi fırlamak protokol ihlali. ÇIKIŞ HIZLI bitinde itici AŞAĞI ver — frenle.');
-    if (r === 'molasiz') tips.push('4 metrede 2 saniyelik güvenlik molasını atladın. Çıkışta 4 m bandında dur, sonra devam et — otopilot molayı kendisi sayar, senin işin orada YAVAŞ geçmek.');
+    if (r === 'tether') tips.push('Kablo gerildi: √(x² + derinlik²) ≤ kablo boyu olmalı. Derine inerken yatayda geri çekil - rota bir üçgen problemi.');
+    if (r === 'carpma') tips.push('Tabana çarptın. DİBE YAKIN biti tam bunun için: o bantta itici yukarı + balast boşalt. Balast yavaştır - freni erken yap.');
+    if (r === 'hizli_cikis') tips.push('Sığ suda çıkış limiti 0.9 m/s! Balastı tamamen boşaltıp roket gibi fırlamak protokol ihlali. ÇIKIŞ HIZLI bitinde itici AŞAĞI ver - frenle.');
+    if (r === 'molasiz') tips.push('4 metrede 2 saniyelik güvenlik molasını atladın. Çıkışta 4 m bandında dur, sonra devam et - otopilot molayı kendisi sayar, senin işin orada YAVAŞ geçmek.');
     if (r === 'enerji') tips.push('Enerji bitti, ROV suda asılı kaldı. En büyük gider salınımdır: bang-bang balast pompası sürekli çalışır. PID ile bir kez otur, bir kez çık.');
-    if (r === 'sure') tips.push('Süre doldu. Derinlik salınımların turu uzatıyor — hedef bandına girip KALAMAYAN kontrol zaman yer. Kd (fren) terimini artır.');
-    if (!tips.length && sim.maxAscent > 0.6) tips.push('Çıkışın ' + sim.maxAscent.toFixed(1) + ' m/s ile limitin dibindeydi — bir dahaki sefere balastı kademeli boşalt.');
+    if (r === 'sure') tips.push('Süre doldu. Derinlik salınımların turu uzatıyor - hedef bandına girip KALAMAYAN kontrol zaman yer. Kd (fren) terimini artır.');
+    if (!tips.length && sim.maxAscent > 0.6) tips.push('Çıkışın ' + sim.maxAscent.toFixed(1) + ' m/s ile limitin dibindeydi - bir dahaki sefere balastı kademeli boşalt.');
     if (!tips.length) tips.push('Balast pompası yavaş, itici hızlıdır. Usta pilot dengeyi balastla kurar, iticiyi sadece ince ayar ve fren için kullanır.');
     return tips;
   }

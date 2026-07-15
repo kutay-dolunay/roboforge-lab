@@ -1,15 +1,15 @@
 /* =============================================================================
- * RoboForge — Konvoy Takibi (Adaptive Cruise Control) :: Simulation Core
+ * RoboForge - Konvoy Takibi (Adaptive Cruise Control) :: Simulation Core
  * -----------------------------------------------------------------------------
  * Pure, dependency-free. Browser (window.ConvoyCore) + Node (module.exports).
  *
  * A leader truck drives a speed PROFILE along the road; the robot follows.
  * Keep the gap: too close = crash, too far = convoy lost. Steering is on
- * rails — this scenario is 100% about SPEED CONTROL (the real ACC lesson).
+ * rails - this scenario is 100% about SPEED CONTROL (the real ACC lesson).
  *
  * Sensors: front distance bands  ÇOK-YAKIN / YAKIN / İDEAL / UZAK
  * Rule pattern = [cok,yakin,ideal,uzak] with 'on'/'off'/'any' (bands are
- * mutually exclusive — one is always on).
+ * mutually exclusive - one is always on).
  * PID mode: e = mesafe - hedef ; motor = Kp·e + Kd·de/dt  (cruise controller)
  * ========================================================================== */
 (function (global) {
@@ -189,19 +189,19 @@
     const tips = [];
     if (sim.reason === 'crash') {
       tips.push((sim.cfg.mode === 'pid')
-        ? 'Öndekine çarptın! Kd\'yi artır — türev terimi kapanma HIZINI görür ve lider frene basar basmaz seni yavaşlatır. Kp tek başına ancak mesafe kısalınca tepki verir, o da geç kalabilir.'
+        ? 'Öndekine çarptın! Kd\'yi artır - türev terimi kapanma HIZINI görür ve lider frene basar basmaz seni yavaşlatır. Kp tek başına ancak mesafe kısalınca tepki verir, o da geç kalabilir.'
         : 'Öndekine çarptın! ÇOK-YAKIN bandında robotu tamamen DURDURAN bir kuralın var mı? Lider aniden durursa yavaşlamak yetmez.');
     }
     if (sim.reason === 'lost') {
       tips.push((sim.cfg.mode === 'pid')
-        ? 'Konvoyu kaybettin — Kp\'yi artır: mesafe açılınca daha kararlı hızlanmalısın.'
+        ? 'Konvoyu kaybettin - Kp\'yi artır: mesafe açılınca daha kararlı hızlanmalısın.'
         : 'Konvoyu kaybettin. UZAK bandında tam gaza yakın bir hızlanma kuralın olmalı.');
     }
     if (sim.status === 'success') {
       const acc = accuracy(sim);
       if (acc >= 85) tips.push('Kusursuz konvoy sürüşü! Gerçek araçlardaki adaptif hız sabitleyici tam olarak bu kontrolü yapar.');
-      else if (acc >= 60) tips.push('Vardın! Ama mesafe çok dalgalandı (%' + acc + ' idealde). ' + (sim.cfg.mode === 'pid' ? 'Kd ile salınımı yumuşat.' : 'Bantların hızlarını birbirine yaklaştır — sert geçişler salınım yapar.'));
-      else tips.push('Vardın ama takip çok savruktu. ' + (sim.cfg.mode === 'pid' ? 'Kp/Kd dengesini yeniden kur.' : 'PID modunu dene — oranlı kontrol bant zıplamalarını yok eder.'));
+      else if (acc >= 60) tips.push('Vardın! Ama mesafe çok dalgalandı (%' + acc + ' idealde). ' + (sim.cfg.mode === 'pid' ? 'Kd ile salınımı yumuşat.' : 'Bantların hızlarını birbirine yaklaştır - sert geçişler salınım yapar.'));
+      else tips.push('Vardın ama takip çok savruktu. ' + (sim.cfg.mode === 'pid' ? 'Kp/Kd dengesini yeniden kur.' : 'PID modunu dene - oranlı kontrol bant zıplamalarını yok eder.'));
     }
     return tips;
   }
@@ -209,10 +209,10 @@
   function robotClass(sim) {
     if (sim.status !== 'success') return null;
     const acc = accuracy(sim);
-    if (acc >= 88) return { key: 'konvoy_kaptani', name: '🏆 Konvoy Kaptanı', cmt: 'Mesafe iple çekilmiş gibi — gerçek ACC mühendisliği.' };
+    if (acc >= 88) return { key: 'konvoy_kaptani', name: '🏆 Konvoy Kaptanı', cmt: 'Mesafe iple çekilmiş gibi - gerçek ACC mühendisliği.' };
     if (acc >= 72) return { key: 'usta_surucu', name: '🥇 Usta Sürücü', cmt: 'Sağlam takip. Salınımı biraz daha yumuşatabilirsin.' };
     if (acc >= 55) return { key: 'trafik_surucusu', name: '🧭 Trafik Sürücüsü', cmt: 'Konvoy tamam! Mesafeyi daha sıkı tutmayı dene.' };
-    return { key: 'caylak_surucu', name: '🎓 Çaylak Sürücü', cmt: 'Vardın — şimdi mesafeyi dalgalandırmadan sürme zamanı.' };
+    return { key: 'caylak_surucu', name: '🎓 Çaylak Sürücü', cmt: 'Vardın - şimdi mesafeyi dalgalandırmadan sürme zamanı.' };
   }
 
   function runHeadless(cfg, maxTime, dt) {

@@ -163,11 +163,11 @@
     <canvas id="arena" width="920" height="560"></canvas>
     <div class="hud">
       <div class="hudbox"><div class="l">SÜRE</div><div class="v mono" id="hudT">0.0s</div></div>
-      <div class="hudbox"><div class="l">ADIM</div><div class="v mono" id="hudA">—</div></div>
-      <div class="hudbox"><div class="l">UÇ NOKTA</div><div class="v mono" id="hudE">—</div></div>
+      <div class="hudbox"><div class="l">ADIM</div><div class="v mono" id="hudA">-</div></div>
+      <div class="hudbox"><div class="l">UÇ NOKTA</div><div class="v mono" id="hudE">-</div></div>
       <div class="hudbox"><div class="l">DURUM</div><div class="v" id="hudS">HAZIR</div></div>
     </div>
-    <div class="hint" id="hint">🦾 İki eklemli kol: <b>omuz kaldırır, dirsek uzanır.</b> Kutuları hedef bölgelere taşı — ama açılar ışınlanmaz, servolar döner; ağır yük kolu <b>sarkıtır</b>; yüksekten bırakılan kutu <b>devrilir</b>. Soluk halkalar erişim sınırın!</div>
+    <div class="hint" id="hint">🦾 İki eklemli kol: <b>omuz kaldırır, dirsek uzanır.</b> Kutuları hedef bölgelere taşı - ama açılar ışınlanmaz, servolar döner; ağır yük kolu <b>sarkıtır</b>; yüksekten bırakılan kutu <b>devrilir</b>. Soluk halkalar erişim sınırın!</div>
     <div class="rdock" id="resultDock" style="display:none"></div>
   </div>
   <div class="side">
@@ -182,7 +182,7 @@
       </div>
       <div class="card">
         <h4 id="progTitle">Açı Programı (eklem uzayı)</h4>
-        <p class="exp" id="progExp">Her adımda omuz ve dirsek açısını SEN verirsin — ileri kinematik kafanda!
+        <p class="exp" id="progExp">Her adımda omuz ve dirsek açısını SEN verirsin - ileri kinematik kafanda!
           Mor hayalet çizgi adımların uç noktasını gösterir. İpucu: kutuya inerken iki aşama kullan (üstüne gel → dik in).</p>
         <div id="stepList"></div>
         <button class="addRule" id="addStep">+ Adım Ekle</button>
@@ -197,7 +197,7 @@
       <div class="card">
         <h4>Servo Gerçekliği (robotundan gelir)</h4>
         <p class="exp" style="margin:0">⚙️ Motor seçimin servo <b>hızını</b>, sürücü+motor gücün <b>sarkma direncini</b> belirler.
-          Ağır kutu + zayıf servo = uç nokta hedeflediğinden aşağı ve içeri kaçar — telafiyi programına gömmelisin.
+          Ağır kutu + zayıf servo = uç nokta hedeflediğinden aşağı ve içeri kaçar - telafiyi programına gömmelisin.
           <a style="color:var(--sky)" href="build.html?sim=kol">Robotunu kur →</a></p>
       </div>
       <div class="card kunye" id="kunye"></div>
@@ -360,9 +360,9 @@
     const sim=LAB.sim;
     document.getElementById('hudT').textContent=(sim?sim.t:0).toFixed(1)+'s';
     const P=sim?(sim.cfg.program||[]):prog();
-    document.getElementById('hudA').textContent=sim?Math.min(sim.stepIdx+1,P.length)+'/'+P.length:'—';
+    document.getElementById('hudA').textContent=sim?Math.min(sim.stepIdx+1,P.length)+'/'+P.length:'-';
     if(sim&&sim.eeNow) document.getElementById('hudE').textContent='('+sim.eeNow.x.toFixed(2)+', '+sim.eeNow.y.toFixed(2)+')';
-    else document.getElementById('hudE').textContent='—';
+    else document.getElementById('hudE').textContent='-';
     const s=document.getElementById('hudS');
     if(!sim){ s.textContent='HAZIR'; s.className='v'; }
     else if(sim.status==='running'){ s.textContent=sim.carrying>=0?'TAŞIYOR':'ÇALIŞIYOR'; s.className='v '+(sim.carrying>=0?'hot':'ok'); }
@@ -408,7 +408,7 @@
     document.getElementById('resultWrap').classList.remove('show');
   }
   const REASONS={ tamam:'Vardiya tamamlandı!', masa:'Kol masaya çarptı! 💥', engel:'Kol rafa çarptı! 💥',
-    erisim:'Hedef nokta erişim halkasının dışında! 🚫', devrildi:'Kutu devrildi — yüksekten bırakıldı. 🫨',
+    erisim:'Hedef nokta erişim halkasının dışında! 🚫', devrildi:'Kutu devrildi - yüksekten bırakıldı. 🫨',
     eksik:'Program bitti ama kutular hedefte değil.', istif:'Kutular üst üste değil.', sure:'Süre doldu.' };
   function showResult(){
     const sim=LAB.sim; if(!sim) return;
@@ -429,7 +429,7 @@
           '<div class="rd-stat"><div class="l">DEVRİLME</div><div class="v mono">'+sim.topples+'</div></div>'+
           '<div class="rd-stat"><div class="l">DURUM</div><div class="v '+(win?'ok':'bad')+'">'+(win?'TAMAM':'BAŞARISIZ')+'</div></div>'+
         '</div>'+
-        '<div class="rf-graphwrap"><div class="cap">🦾 Uç nokta hassasiyeti</div><canvas id="kolGauge" class="rf-graph" style="height:130px;border:none;background:transparent"></canvas><div style="font-size:.72rem;color:var(--muted2);margin-top:2px;text-align:center">Hedefe ne kadar yakın bıraktın. Yumuşak yaklaş, salınımı söndür — hassasiyet artar.</div></div>'+
+        '<div class="rf-graphwrap"><div class="cap">🦾 Uç nokta hassasiyeti</div><canvas id="kolGauge" class="rf-graph" style="height:130px;border:none;background:transparent"></canvas><div style="font-size:.72rem;color:var(--muted2);margin-top:2px;text-align:center">Hedefe ne kadar yakın bıraktın. Yumuşak yaklaş, salınımı söndür - hassasiyet artar.</div></div>'+
                 (window.RFResult?RFResult.coachHTML(tips,{win:win,headWin:'🎓 Ne öğrendik?',headLose:'🔍 Ne oldu, neden?',reason:win?null:(REASONS[sim.reason]||'')}):(tips.length?'<div class="rd-tip">💡 '+tips[0]+'</div>':''))+
         '<div class="rd-btns">'+
           '<button class="btn run" id="againBtn">⟲ Tekrar Dene</button>'+
@@ -456,10 +456,10 @@
     const m=sim.mission;
     const box=document.getElementById('resultBox');
     box.innerHTML =
-      '<h3 class="'+(win?'win':'lose')+'">📄 Vardiya Raporu — '+m.name+'</h3>'+
+      '<h3 class="'+(win?'win':'lose')+'">📄 Vardiya Raporu - '+m.name+'</h3>'+
       '<div style="margin:8px 0;font-size:.8rem;color:var(--muted2)">'+chips+'</div>'+
       '<div style="font-size:.76rem;color:var(--sky);margin-bottom:8px">'+
-        (LAB.mode==='joint'?'🧩 Açı Programı':'🎯 Hedef Programı')+' — '+(sim.cfg.program||[]).length+' adım</div>'+
+        (LAB.mode==='joint'?'🧩 Açı Programı':'🎯 Hedef Programı')+' - '+(sim.cfg.program||[]).length+' adım</div>'+
       '<div class="rstats">'+
         '<div class="rstat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
         '<div class="rstat"><div class="l">HASSASİYET</div><div class="v mono">%'+K.precision(sim)+'</div></div>'+
@@ -467,7 +467,7 @@
         '<div class="rstat"><div class="l">BIRAKMA</div><div class="v mono">'+sim.drops+'</div></div>'+
       '</div>'+
       '<canvas id="repMap" width="500" height="230" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#0a0d12"></canvas>'+
-      '<div style="font-size:.68rem;color:var(--muted);margin:4px 0 10px">Uç nokta izi — mavi boş, sarı yüklü. Akıcı yaylar hız, keskin köşeler zaman kaybıdır.</div>'+
+      '<div style="font-size:.68rem;color:var(--muted);margin:4px 0 10px">Uç nokta izi - mavi boş, sarı yüklü. Akıcı yaylar hız, keskin köşeler zaman kaybıdır.</div>'+
       '<h4 style="margin:0 0 6px;font-size:.66rem;letter-spacing:2px;color:var(--muted)">📓 VARDİYA KAYDI</h4>'+
       '<div style="max-height:150px;overflow:auto">'+
         (sim.events.length?sim.events.map(e=>'<div class="evline"><b>'+e[0]+'s</b> '+e[1]+'</div>').join(''):'<div class="evline">Olay kaydı boş.</div>')+
@@ -550,7 +550,7 @@
     document.getElementById('modeTask').classList.toggle('on',m==='task');
     document.getElementById('progTitle').textContent=m==='joint'?'Açı Programı (eklem uzayı)':'Hedef Programı (görev uzayı + IK)';
     document.getElementById('progExp').innerHTML=m==='joint'
-      ?'Her adımda omuz ve dirsek açısını SEN verirsin — ileri kinematik kafanda! Mor hayalet çizgi adımların uç noktasını gösterir. İpucu: kutuya inerken iki aşama kullan (üstüne gel → dik in).'
+      ?'Her adımda omuz ve dirsek açısını SEN verirsin - ileri kinematik kafanda! Mor hayalet çizgi adımların uç noktasını gösterir. İpucu: kutuya inerken iki aşama kullan (üstüne gel → dik in).'
       :'Hedef (x, y) verirsin, açıları <b>ters kinematik</b> çözer. Ama dikkat: her noktaya İKİ çözüm var (dirsek yukarı/aşağı) ve erişim halkası dışı <b>ÇÖZÜMSÜZ</b>. Raf altına yandan girerken config seçimi hayat kurtarır.';
     buildSteps();
   }
@@ -618,11 +618,11 @@
   function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show');
     clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2400); }
   const TUT=[
-    ['🦾 Fabrika Kolu','İki eklem: OMUZ ve DİRSEK. Uç noktadaki kıskaçla kutuları taşıyacaksın. Ama açılar ışınlanmaz — servolar döner, her hareket zaman alır.'],
+    ['🦾 Fabrika Kolu','İki eklem: OMUZ ve DİRSEK. Uç noktadaki kıskaçla kutuları taşıyacaksın. Ama açılar ışınlanmaz - servolar döner, her hareket zaman alır.'],
     ['📐 İleri Kinematik','Açı Programı modunda açıları sen verirsin: omuz 54°, dirsek -81° → uç nokta nerede? Mor hayalet noktalar sana gösterir. Kafanda kinematik kur!'],
-    ['🎯 Ters Kinematik','Hedef Programı modunda (x,y) verirsin, açıları makine çözer. Sürpriz: her noktaya İKİ çözüm var — dirsek yukarı/aşağı. Ve erişim halkası dışı ÇÖZÜMSÜZ.'],
+    ['🎯 Ters Kinematik','Hedef Programı modunda (x,y) verirsin, açıları makine çözer. Sürpriz: her noktaya İKİ çözüm var - dirsek yukarı/aşağı. Ve erişim halkası dışı ÇÖZÜMSÜZ.'],
     ['⚖️ Sarkma Gerçeği','Ağır kutu kolu esnetir: uç nokta hedeflediğinden AŞAĞI ve İÇERİ kaçar. Usta operatör telafiyi programa gömer: daha yukarıyı, daha dışarıyı hedefle.'],
-    ['🫨 Nazik Bırakış','Kutu 22 cm üstünden bırakılırsa DEVRİLİR. İstiflerken üst kutunun bırakma yüksekliğini yeniden hesapla. Raf altına girerken yukarıdan dalma — yandan süzül.'],
+    ['🫨 Nazik Bırakış','Kutu 22 cm üstünden bırakılırsa DEVRİLİR. İstiflerken üst kutunun bırakma yüksekliğini yeniden hesapla. Raf altına girerken yukarıdan dalma - yandan süzül.'],
     ['🏁 Vardiya Başlıyor!','İlk Dokunuştan Kâbus Vardiyasına 7 görev. Raporda uç nokta izini incele: akıcı yaylar ustalıktır. Usta Operatör madalyası seni bekliyor!'],
   ];
   let tutI=0;

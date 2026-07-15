@@ -1,9 +1,9 @@
 /* v1.0.1 */
 /*
- * RoboForge — Progress module (local, per-student)
+ * RoboForge - Progress module (local, per-student)
  * -----------------------------------------------------------------------------
  * Records per-sim / per-level results in localStorage, keyed by the logged-in
- * student (from rf-auth's rf_session.sub) or an anonymous device id. NO server —
+ * student (from rf-auth's rf_session.sub) or an anonymous device id. NO server -
  * this is a stepping stone; server sync (Supabase, keyed by Moodle `sub`) comes
  * later with the gamification DB.
  *
@@ -22,7 +22,7 @@
   'use strict';
 
   var KEY = 'rf_progress';
-  // medal ranking (higher = better) — used to keep the best medal per level
+  // medal ranking (higher = better) - used to keep the best medal per level
   var MEDAL_RANK = { '🥉': 1, '🥈': 2, '🏆': 3, '🥇': 3 };
 
   function userKey() {
@@ -52,7 +52,7 @@
     try { localStorage.setItem(KEY, JSON.stringify(all)); } catch (e) {}
   }
 
-  // Rank a medal string (medals may be like "🏆 Hoverslam Efsanesi" — take the first glyph).
+  // Rank a medal string (medals may be like "🏆 Hoverslam Efsanesi" - take the first glyph).
   function medalRank(medal) {
     if (!medal) return 0;
     var g = medal.trim().charAt(0);

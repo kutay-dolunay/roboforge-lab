@@ -1,9 +1,9 @@
 /*
- * RoboForge — Mikro Fare Simülasyon Çekirdeği (Katalog Kapanışı)
+ * RoboForge - Mikro Fare Simülasyon Çekirdeği (Katalog Kapanışı)
  * Pure, dependency-free. Browser (window.FareCore) + Node (module.exports).
  *
  * Klasik micromouse: duvarlı labirent, hedef MERKEZDE. Dersler:
- * (1) DUVAR TAKİBİ tuzağı: merkez, dış duvara bağlı olmayan bir "ada" olabilir —
+ * (1) DUVAR TAKİBİ tuzağı: merkez, dış duvara bağlı olmayan bir "ada" olabilir -
  * sol-el kuralı sonsuza dek dolanır, (2) FLOOD-FILL: her hücreye "hedefe kaç adım"
  * değeri yaz, hep küçüğe yürü; bilinmeyeni iyimser say, gördükçe güncelle,
  * (3) KEŞİF ↔ HIZ: önce haritala, sonra bilinen en kısa yoldan uç.
@@ -16,9 +16,9 @@
     { id: 'minik', name: 'Minik Kutu', difficulty: 'Başlangıç', dur: 60, n: 5, seed: 5, rings: 0,
       desc: '5×5 klasik labirent. Flood-fill ile tanış: her hücrede "hedefe kaç adım?" sorusu, cevabı sayılar verir.' },
     { id: 'yedi', name: 'Yedi Kat', difficulty: 'Başlangıç', dur: 90, n: 7, seed: 17, rings: 0,
-      desc: '7×7: keşif uzuyor. Fare bilmediği hücreyi İYİMSER sayar — gördükçe harita gerçekleşir.' },
+      desc: '7×7: keşif uzuyor. Fare bilmediği hücreyi İYİMSER sayar - gördükçe harita gerçekleşir.' },
     { id: 'dokuz', name: 'Dokuz Oda', difficulty: 'Orta', dur: 120, n: 9, seed: 29, rings: 0,
-      desc: '9×9 ağaç labirent. Duvar takibi de çözer — ama kaç adımda? Raporda iki stratejiyi kıyasla.' },
+      desc: '9×9 ağaç labirent. Duvar takibi de çözer - ama kaç adımda? Raporda iki stratejiyi kıyasla.' },
     { id: 'delikli', name: 'Delikli Peynir', difficulty: 'Orta', dur: 120, n: 9, seed: 43, rings: 0, holes: 6,
       desc: 'Duvarlarda delikler = DÖNGÜLER. Flood-fill umursamaz; duvar takipçisi turlamaya başlayabilir…' },
     { id: 'onbir', name: 'On Bir Salonu', difficulty: 'İleri', dur: 160, n: 11, seed: 61, rings: 0, holes: 4,
@@ -184,14 +184,14 @@
     const vk = cx + ',' + cy;
     sim.visits[vk] = (sim.visits[vk] || 0) + 1;
     if (sim.visits[vk] > 16) { sim.status = 'failed'; sim.reason = 'kayboldu';
-      pushEvt(sim, 'lost', '😵 Aynı hücreden 16. geçiş — fare DÖNGÜDE! (Sol-el merkez adasına giremez…)'); return; }
+      pushEvt(sim, 'lost', '😵 Aynı hücreden 16. geçiş - fare DÖNGÜDE! (Sol-el merkez adasına giremez…)'); return; }
 
     // hedef?
     if (cx === sim.mz.goal[0] && cy === sim.mz.goal[1]) {
       sim.lapTimes.push(sim.t - sim.lapStart);
       if (sim.phase === 'kesif') {
         const route = bfsKnown(sim);
-        pushEvt(sim, 'found', '🧀 MERKEZ! Keşif ' + (sim.t - sim.lapStart).toFixed(1) + ' sn · harita %' + Math.round(sim.cellsSeen / (n * n) * 100) + ' — hız turu başlıyor');
+        pushEvt(sim, 'found', '🧀 MERKEZ! Keşif ' + (sim.t - sim.lapStart).toFixed(1) + ' sn · harita %' + Math.round(sim.cellsSeen / (n * n) * 100) + ' - hız turu başlıyor');
         sim.phase = 'hiz'; sim.lap = 2; sim.lapStart = sim.t;
         sim.route = route; sim.routeIdx = 1;
         sim.px = sim.tx = 0; sim.py = sim.ty = 0;
@@ -201,7 +201,7 @@
         return;
       }
       sim.status = 'success'; sim.reason = 'peynir';
-      pushEvt(sim, 'fin', '🏁 HIZ TURU: ' + (sim.t - sim.lapStart).toFixed(1) + ' sn — peynir kapıldı!');
+      pushEvt(sim, 'fin', '🏁 HIZ TURU: ' + (sim.t - sim.lapStart).toFixed(1) + ' sn - peynir kapıldı!');
       return;
     }
 
@@ -250,20 +250,20 @@
     const explore = sim.lapTimes[0] || 1, race = sim.lapTimes[1] || sim.t;
     const cov = sim.cellsSeen / (sim.mz.n * sim.mz.n);
     const tScore = Math.max(0, 100 - sim.t / sim.mission.dur * 85);
-    if (tScore > 45 && race < explore * 0.75) return { name: '🏆 Peynir İmparatoru', cmt: 'Cerrah gibi keşif, jet gibi hız turu. Micromouse finali kazanıldı — katalog senin!' };
-    if (tScore > 20) return { name: '🥈 Usta Fare', cmt: 'Peynir kapıldı. Keşif turun ' + explore.toFixed(0) + ' sn — flood-fill her adımda yeniden hesaplıyor, güven ona.' };
-    return { name: '🥉 Yavru Fare', cmt: 'Ucu ucuna. Harita kapsaman %' + Math.round(cov * 100) + ' — bazen biraz daha keşif, çok daha kısa hız turu demek.' };
+    if (tScore > 45 && race < explore * 0.75) return { name: '🏆 Peynir İmparatoru', cmt: 'Cerrah gibi keşif, jet gibi hız turu. Micromouse finali kazanıldı - katalog senin!' };
+    if (tScore > 20) return { name: '🥈 Usta Fare', cmt: 'Peynir kapıldı. Keşif turun ' + explore.toFixed(0) + ' sn - flood-fill her adımda yeniden hesaplıyor, güven ona.' };
+    return { name: '🥉 Yavru Fare', cmt: 'Ucu ucuna. Harita kapsaman %' + Math.round(cov * 100) + ' - bazen biraz daha keşif, çok daha kısa hız turu demek.' };
   }
   function coach(sim) {
     const tips = [];
     const r = sim.reason || '';
     if (r === 'kayboldu') {
-      if ((sim.cfg.mode || 'flood') === 'duvar') tips.push('Duvar takibi merkez ADASINA giremez: elin dış duvarda, merkez dış duvara bağlı değil — sonsuza dek halkada dönersin. Bu matematiksel bir imkânsızlık. Flood-fill moduna geç!');
-      else tips.push('Fare döngüde kayboldu — bu olmamalıydı, haritayı raporda incele.');
+      if ((sim.cfg.mode || 'flood') === 'duvar') tips.push('Duvar takibi merkez ADASINA giremez: elin dış duvarda, merkez dış duvara bağlı değil - sonsuza dek halkada dönersin. Bu matematiksel bir imkânsızlık. Flood-fill moduna geç!');
+      else tips.push('Fare döngüde kayboldu - bu olmamalıydı, haritayı raporda incele.');
     }
-    if (r === 'sure') tips.push('Süre doldu. Keşif çok gezindi: flood-fill bilinmeyeni iyimser sayar, bu yüzden bazen çıkmaz umutlara dalar — normaldir, harita büyüdükçe düzelir.');
-    if (sim.status === 'success' && (sim.cfg.mode || 'flood') === 'duvar') tips.push('Duvar takibi bu labirentte işledi — çünkü merkez hâlâ dış duvara bağlıydı. Ada Merkez seviyesinde aynı stratejiyi dene ve farkı gör!');
-    if (!tips.length) tips.push('Flood-fill sırrı: sayılar hedeften dışa doğru dalga gibi yayılır. Fare her hücrede sadece "hangi komşu daha küçük?" diye sorar — küresel zekâ, yerel karar.');
+    if (r === 'sure') tips.push('Süre doldu. Keşif çok gezindi: flood-fill bilinmeyeni iyimser sayar, bu yüzden bazen çıkmaz umutlara dalar - normaldir, harita büyüdükçe düzelir.');
+    if (sim.status === 'success' && (sim.cfg.mode || 'flood') === 'duvar') tips.push('Duvar takibi bu labirentte işledi - çünkü merkez hâlâ dış duvara bağlıydı. Ada Merkez seviyesinde aynı stratejiyi dene ve farkı gör!');
+    if (!tips.length) tips.push('Flood-fill sırrı: sayılar hedeften dışa doğru dalga gibi yayılır. Fare her hücrede sadece "hangi komşu daha küçük?" diye sorar - küresel zekâ, yerel karar.');
     return tips;
   }
 

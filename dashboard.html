@@ -87,7 +87,7 @@
     }).then(function(r){ if(!r.ok) throw new Error(fn+' HTTP '+r.status); return r.json(); });
   }
   function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
-  function fmtDate(s){ if(!s) return '—'; try{ return new Date(s).toLocaleString('tr-TR',{dateStyle:'short',timeStyle:'short'}); }catch(e){ return s; } }
+  function fmtDate(s){ if(!s) return '-'; try{ return new Date(s).toLocaleString('tr-TR',{dateStyle:'short',timeStyle:'short'}); }catch(e){ return s; } }
 
   function showGate(msg){
     document.getElementById('gate').style.display='block';
@@ -101,7 +101,7 @@
 
   function registerSelf(){
     // Ensure the logged-in staff user exists in rf_students (with their role) so the
-    // role-guarded read RPCs will authorize them — even on their very first visit.
+    // role-guarded read RPCs will authorize them - even on their very first visit.
     return rpc('rf_ingest',{
       p_sub:USER.sub, p_name:USER.name||null, p_email:USER.email||null,
       p_role:USER.role||null, p_idnumber:USER.idnumber||null,
@@ -137,7 +137,7 @@
       {k:'Toplam deneme', v:s.total_runs||0},
       {k:'Geri bildirim', v:s.feedback_count||0},
       {k:'🐞 Hata', v:s.bug_count||0, cls:'warn'},
-      {k:'Ort. puan', v:(s.avg_rating!=null?s.avg_rating+' ★':'—')}
+      {k:'Ort. puan', v:(s.avg_rating!=null?s.avg_rating+' ★':'-')}
     ];
     document.getElementById('kpis').innerHTML=cards.map(function(c){
       return '<div class="kpi '+(c.cls||'')+'"><small>'+esc(c.k)+'</small><b>'+esc(c.v)+'</b></div>';
@@ -150,8 +150,8 @@
       var r=CACHE.roster;
       if(!r.length){ v.innerHTML='<div class="empty">Henüz öğrenci verisi yok.</div>'; return; }
       v.innerHTML='<table><thead><tr><th>Ad</th><th>Rol</th><th>No</th><th>Sınıf</th><th>Geçilen</th><th>Sim</th><th>Deneme</th><th>Son görülme</th></tr></thead><tbody>'+
-        r.map(function(x){ return '<tr><td>'+esc(x.name||x.sub)+'</td><td>'+esc(x.role||'')+'</td><td>'+esc(x.idnumber||'—')+
-          '</td><td>'+esc(x.school_class||'—')+'</td><td>'+esc(x.levels_cleared)+'</td><td>'+esc(x.sims_touched)+
+        r.map(function(x){ return '<tr><td>'+esc(x.name||x.sub)+'</td><td>'+esc(x.role||'')+'</td><td>'+esc(x.idnumber||'-')+
+          '</td><td>'+esc(x.school_class||'-')+'</td><td>'+esc(x.levels_cleared)+'</td><td>'+esc(x.sims_touched)+
           '</td><td>'+esc(x.total_attempts)+'</td><td class="muted">'+fmtDate(x.last_seen)+'</td></tr>'; }).join('')+
         '</tbody></table>';
     } else if(TAB==='progress'){
@@ -159,9 +159,9 @@
       if(!p.length){ v.innerHTML='<div class="empty">Henüz ilerleme verisi yok.</div>'; return; }
       v.innerHTML='<table><thead><tr><th>Öğrenci</th><th>Sim</th><th>Seviye</th><th>Durum</th><th>En iyi</th><th>Madalya</th><th>Deneme</th><th>Mod</th><th>Güncelleme</th></tr></thead><tbody>'+
         p.map(function(x){ return '<tr><td>'+esc(x.name||x.sub)+'</td><td>'+esc(x.sim)+'</td><td>'+esc(x.level)+
-          '</td><td>'+(x.cleared?'<span class="pill begendim">✓ geçti</span>':'<span class="pill def">—</span>')+
-          '</td><td>'+(x.best_time!=null?esc(x.best_time):'—')+'</td><td>'+esc(x.best_medal||'—')+
-          '</td><td>'+esc(x.attempts)+'</td><td>'+esc(x.last_mode||'—')+'</td><td class="muted">'+fmtDate(x.updated_at)+'</td></tr>'; }).join('')+
+          '</td><td>'+(x.cleared?'<span class="pill begendim">✓ geçti</span>':'<span class="pill def">-</span>')+
+          '</td><td>'+(x.best_time!=null?esc(x.best_time):'-')+'</td><td>'+esc(x.best_medal||'-')+
+          '</td><td>'+esc(x.attempts)+'</td><td>'+esc(x.last_mode||'-')+'</td><td class="muted">'+fmtDate(x.updated_at)+'</td></tr>'; }).join('')+
         '</tbody></table>';
     } else {
       var f=CACHE.feedback;
@@ -170,9 +170,9 @@
         f.map(function(x){
           var cls = x.category==='hata'?'hata':x.category==='rating'?'rating':x.category==='beğendim'?'begendim':'def';
           var txt = x.category==='rating' ? ('★ '+esc(x.text)) : esc(x.text||'');
-          return '<tr><td class="muted">'+fmtDate(x.created_at)+'</td><td>'+esc(x.name||x.sub||'—')+
-            '</td><td><span class="pill '+cls+'">'+esc(x.category||'—')+'</span></td><td>'+txt+
-            '</td><td class="muted">'+esc(x.sim||x.page||'—')+'</td></tr>'; }).join('')+
+          return '<tr><td class="muted">'+fmtDate(x.created_at)+'</td><td>'+esc(x.name||x.sub||'-')+
+            '</td><td><span class="pill '+cls+'">'+esc(x.category||'-')+'</span></td><td>'+txt+
+            '</td><td class="muted">'+esc(x.sim||x.page||'-')+'</td></tr>'; }).join('')+
         '</tbody></table>';
     }
   }

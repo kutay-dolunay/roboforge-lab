@@ -1,17 +1,17 @@
 /*
- * RoboForge — CNC Çizici Simülasyon Çekirdeği
+ * RoboForge - CNC Çizici Simülasyon Çekirdeği
  * Pure, dependency-free. Browser (window.CncCore) + Node (module.exports).
  *
- * 2 eksenli gantry + kalem. Dersler: (1) G-code mantığı — makine ADIM listesi
+ * 2 eksenli gantry + kalem. Dersler: (1) G-code mantığı - makine ADIM listesi
  * yürütür, (2) hız ↔ kalite: hızlı eksen köşeleri YUVARLAR (takip gecikmesi),
- * (3) BACKLASH: dişli boşluğu yön değişiminde ölü bant yaratır — telafi edilir,
+ * (3) BACKLASH: dişli boşluğu yön değişiminde ölü bant yaratır - telafi edilir,
  * (4) köşe yavaşlama: akıllı hız profili hem hızlı hem keskindir.
  */
 (function () {
   'use strict';
 
   const PAPER = { w: 10, h: 7 };
-  const BACKLASH = 0.15;          // dişli boşluğu (birim — yıpranmış makine!)
+  const BACKLASH = 0.15;          // dişli boşluğu (birim - yıpranmış makine!)
   const COV_TOL = 0.12;           // hedef örnekleri bu mesafede çizilmişse "kapsandı"
   const EXTRA_TOL = 0.28;         // hedeften bu kadar uzak mürekkep "fazlalık"
 
@@ -28,19 +28,19 @@
   const MISSIONS = [
     { id: 'kare', name: 'Kare', difficulty: 'Başlangıç', dur: 40, covMin: 86, extraMax: 12,
       shape: [[[3, 2], [7, 2], [7, 6], [3, 6], [3, 2]]],
-      desc: 'Dört çizgi, dört köşe. Ama köşeler KESKİN mi? Hız takip gecikmesi köşeleri yuvarlar — kaliteyle tanış.' },
+      desc: 'Dört çizgi, dört köşe. Ama köşeler KESKİN mi? Hız takip gecikmesi köşeleri yuvarlar - kaliteyle tanış.' },
     { id: 'ucgen', name: 'Üçgen', difficulty: 'Başlangıç', dur: 40, covMin: 86, extraMax: 12,
       shape: [[[5, 1.6], [8, 5.8], [2, 5.8], [5, 1.6]]],
       desc: 'Eğik çizgiler iki eksenin senkron dansıdır: X ve Y aynı anda, orantılı hızda. Gantry bunu sever.' },
     { id: 'merdiven', name: 'Merdiven', difficulty: 'Orta', dur: 55, covMin: 85, extraMax: 12,
       shape: [[[2, 6], [2, 5], [3.2, 5], [3.2, 4], [4.4, 4], [4.4, 3], [5.6, 3], [5.6, 2], [8, 2]]],
-      desc: 'Sekiz yön değişimi = sekiz BACKLASH tuzağı. Dişli boşluğu her dönüşte çizgini kaydırır — telafiyi keşfet.' },
+      desc: 'Sekiz yön değişimi = sekiz BACKLASH tuzağı. Dişli boşluğu her dönüşte çizgini kaydırır - telafiyi keşfet.' },
     { id: 'yildiz', name: 'Yıldız', difficulty: 'Orta', dur: 60, covMin: 82, extraMax: 14,
       shape: [star(5, 4, 2.6, 1.05, 5)],
       desc: 'On sivri köşe! Yüksek hızda yıldız pataese döner. Köşe yavaşlama burada altın değerinde.' },
     { id: 'ev', name: 'Ev Çizimi', difficulty: 'İleri', dur: 75, covMin: 84, extraMax: 12,
       shape: [ [[3, 2], [7, 2], [7, 4.6], [3, 4.6], [3, 2]], [[3, 4.6], [5, 6.2], [7, 4.6]], [[4.4, 2], [4.4, 3.6], [5.6, 3.6], [5.6, 2]] ],
-      desc: 'Üç ayrı parça: gövde, çatı, kapı. Kalem YUKARI seyahatler araya girer — kalem kontrolü program disiplinidir.' },
+      desc: 'Üç ayrı parça: gövde, çatı, kapı. Kalem YUKARI seyahatler araya girer - kalem kontrolü program disiplinidir.' },
     { id: 'simsek', name: 'Şimşek', difficulty: 'İleri', dur: 60, covMin: 82, extraMax: 14,
       shape: [[[5.8, 1.2], [4.2, 3.6], [5.4, 3.6], [3.9, 6.4], [6.4, 3.2], [5.1, 3.2], [6.6, 1.2]]],
       desc: 'Sivri, ters, çapraz: her segment farklı yön. Hız + backlash + köşe hepsi aynı şekilde sınanır.' },
@@ -213,8 +213,8 @@
     const tScore = Math.max(0, 100 - sim.t / sim.mission.dur * 85);
     const total = sc.cov * 0.55 + (100 - sc.extra * 3) * 0.15 + tScore * 0.30;
     if (total > 82) return { name: '🏆 Usta Gravürcü', cmt: 'Jilet gibi köşeler, tertemiz çizgi, akan makine. Bu çizim çerçevelenir!' };
-    if (total > 64) return { name: '🥈 CNC Operatörü', cmt: 'Şekil tamam. Madalya için: hızı artırıp köşe yavaşlamaya güven — süre puanı seni bekliyor.' };
-    return { name: '🥉 Çırak Çizer', cmt: 'Şekil tanınıyor ama titrek. Kalibrasyon sekmesindeki üç ayar senin atölyen — kurcala.' };
+    if (total > 64) return { name: '🥈 CNC Operatörü', cmt: 'Şekil tamam. Madalya için: hızı artırıp köşe yavaşlamaya güven - süre puanı seni bekliyor.' };
+    return { name: '🥉 Çırak Çizer', cmt: 'Şekil tanınıyor ama titrek. Kalibrasyon sekmesindeki üç ayar senin atölyen - kurcala.' };
   }
   function coach(sim) {
     const tips = [];
@@ -222,13 +222,13 @@
     const sc = score(sim);
     const cal = sim.cfg.cal || defaultCal();
     if (r === 'kapsama') {
-      if (!cal.koseYavas && cal.hiz > 2.6) tips.push('Kapsama %' + sc.cov + ' — köşeler yuvarlandı. Hız ' + cal.hiz.toFixed(1) + ' + köşe yavaşlama KAPALI = keskin şekil imkânsız. Ya yavaşla ya köşe yavaşlamayı aç.');
-      else if (!cal.blTelafi) tips.push('Kapsama düşük ve çizgiler kaymış: BACKLASH! Her yön değişiminde dişli boşluğu çizgini ' + (BACKLASH * 100).toFixed(0) + ' salise kaydırır. Telafiyi aç — firmware boşluğu önceden alır.');
+      if (!cal.koseYavas && cal.hiz > 2.6) tips.push('Kapsama %' + sc.cov + ' - köşeler yuvarlandı. Hız ' + cal.hiz.toFixed(1) + ' + köşe yavaşlama KAPALI = keskin şekil imkânsız. Ya yavaşla ya köşe yavaşlamayı aç.');
+      else if (!cal.blTelafi) tips.push('Kapsama düşük ve çizgiler kaymış: BACKLASH! Her yön değişiminde dişli boşluğu çizgini ' + (BACKLASH * 100).toFixed(0) + ' salise kaydırır. Telafiyi aç - firmware boşluğu önceden alır.');
       else tips.push('Kapsama %' + sc.cov + ' < %' + sim.mission.covMin + '. Program şeklin tüm köşelerinden geçiyor mu? Kalem doğru yerlerde aşağı mı?');
     }
     if (r === 'fazlalik') tips.push('Fazla mürekkep %' + sc.extra + ': kalem YUKARI olması gereken seyahatlerde AŞAĞI kalmış. Parçalar arasında KALEM yukarı adımını unutma.');
     if (r === 'kagit_disi') tips.push('Kağıt ' + PAPER.w + '×' + PAPER.h + ' birim. GIT koordinatların bu dikdörtgenin içinde kalmalı.');
-    if (r === 'sure') tips.push('Süre doldu. Hız kalibrasyonunu yükselt — köşe yavaşlama açıkken yüksek hız güvenlidir: düzlüklerde uçar, köşelerde kendisi frenler.');
+    if (r === 'sure') tips.push('Süre doldu. Hız kalibrasyonunu yükselt - köşe yavaşlama açıkken yüksek hız güvenlidir: düzlüklerde uçar, köşelerde kendisi frenler.');
     if (!tips.length) tips.push('Pro ipucu: köşe yavaşlama + backlash telafisi + yüksek hız = hem hızlı hem keskin. Üçlünün dengesi gerçek CNC kalibrasyonudur.');
     return tips;
   }

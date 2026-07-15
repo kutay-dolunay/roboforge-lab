@@ -1,13 +1,13 @@
 /*
- * RoboForge — Robot Kol Simülasyon Çekirdeği
+ * RoboForge - Robot Kol Simülasyon Çekirdeği
  * Pure, dependency-free. Browser (window.KolCore) + Node (module.exports).
  *
  * 2 eklemli düzlemsel kol (omuz + dirsek) + kıskaç. Yandan görünüm, masa üstü.
- * Dersler: (1) ileri kinematik — açılar uç noktayı NEREYE götürür,
- * (2) ters kinematik — hedefe giden İKİ çözüm var (dirsek yukarı/aşağı),
+ * Dersler: (1) ileri kinematik - açılar uç noktayı NEREYE götürür,
+ * (2) ters kinematik - hedefe giden İKİ çözüm var (dirsek yukarı/aşağı),
  * erişim sınırları (çok uzak / çok yakın nokta ÇÖZÜMSÜZ),
- * (3) servo gerçekliği — açılar ışınlanmaz, hızla döner; ağır yük SARKMA yapar,
- * (4) istifleme — yüksekten bırakılan kutu DEVRİLİR; nazik ol.
+ * (3) servo gerçekliği - açılar ışınlanmaz, hızla döner; ağır yük SARKMA yapar,
+ * (4) istifleme - yüksekten bırakılan kutu DEVRİLİR; nazik ol.
  */
 (function () {
   'use strict';
@@ -48,28 +48,28 @@
   }
 
   // ---- görevler ---------------------------------------------------------------
-  // obj: {x, w(eight kg)} — masada dururlar; zone: {x, tol} hedef bölge; stack: üst üste sıra
+  // obj: {x, w(eight kg)} - masada dururlar; zone: {x, tol} hedef bölge; stack: üst üste sıra
   // obstacles: [{x,y,w,h}] dikdörtgen engeller
   const MISSIONS = [
     { id: 'dokunus', name: 'İlk Dokunuş', difficulty: 'Başlangıç', dur: 40,
       objs: [{ x: 1.30, w: 0.2 }], zones: [{ x: -1.10, tol: 0.16 }], obstacles: [], stackGoal: null,
-      desc: 'Tek kutu: sağdan al, sola bırak. Açıların dansını öğren — omuz kaldırır, dirsek uzanır.' },
+      desc: 'Tek kutu: sağdan al, sola bırak. Açıların dansını öğren - omuz kaldırır, dirsek uzanır.' },
     { id: 'ikikutu', name: 'İki Kutu', difficulty: 'Başlangıç', dur: 60,
       objs: [{ x: 1.25, w: 0.2 }, { x: 1.52, w: 0.2 }], zones: [{ x: -1.00, tol: 0.15 }, { x: -1.40, tol: 0.15 }],
       obstacles: [], stackGoal: null,
-      desc: 'İki kutu, iki bölge, sıra sende. Program uzuyor — adımların ekonomisini düşün.' },
+      desc: 'İki kutu, iki bölge, sıra sende. Program uzuyor - adımların ekonomisini düşün.' },
     { id: 'istif', name: 'İstifleme', difficulty: 'Orta', dur: 60,
       objs: [{ x: 1.30, w: 0.2 }, { x: 1.60, w: 0.2 }], zones: [{ x: -1.10, tol: 0.15 }],
       obstacles: [], stackGoal: 2,
-      desc: 'İki kutuyu AYNI bölgeye üst üste koy. Yüksekten bırakırsan üsttteki DEVRİLİR — nazik bırakış sanatı.' },
+      desc: 'İki kutuyu AYNI bölgeye üst üste koy. Yüksekten bırakırsan üsttteki DEVRİLİR - nazik bırakış sanatı.' },
     { id: 'raf', name: 'Engelli Raf', difficulty: 'Orta', dur: 60,
       objs: [{ x: 1.45, w: 0.2 }], zones: [{ x: -1.15, tol: 0.15 }],
       obstacles: [{ x: 1.18, y: 0.80, w: 0.66, h: 0.10 }], stackGoal: null,
-      desc: 'Kutu bir rafın ALTINDA! Yukarıdan dalış rafa çarpar — yandan, alçaktan gir, nazikçe geri çek. Erişim sanatı.' },
+      desc: 'Kutu bir rafın ALTINDA! Yukarıdan dalış rafa çarpar - yandan, alçaktan gir, nazikçe geri çek. Erişim sanatı.' },
     { id: 'agir', name: 'Ağır Yük', difficulty: 'İleri', dur: 60,
       objs: [{ x: 1.35, w: 0.85 }], zones: [{ x: -1.05, tol: 0.15 }],
       obstacles: [], stackGoal: null,
-      desc: 'Kutu ağır: servo SARKAR, uç nokta hedeflediğinden aşağı düşer. Telafi et — daha yukarıyı hedefle!' },
+      desc: 'Kutu ağır: servo SARKAR, uç nokta hedeflediğinden aşağı düşer. Telafi et - daha yukarıyı hedefle!' },
     { id: 'dizilim', name: 'Hassas Dizilim', difficulty: 'İleri', dur: 90,
       objs: [{ x: 1.20, w: 0.2 }, { x: 1.42, w: 0.2 }, { x: 1.62, w: 0.2 }],
       zones: [{ x: -0.85, tol: 0.10 }, { x: -1.16, tol: 0.10 }, { x: -1.47, tol: 0.10 }],
@@ -163,7 +163,7 @@
             if (d < bd) { bd = d; best = i; }
           });
           if (best >= 0) { sim.carrying = best; pushEvt(sim, 'g' + best, '🤏 Kutu ' + (best + 1) + ' kavrandı'); }
-          else pushEvt(sim, 'gmiss' + sim.stepIdx, '🫳 Kıskaç BOŞ kapandı — kutu menzilde değil (' + GRAB_R.toFixed(2) + ' m)');
+          else pushEvt(sim, 'gmiss' + sim.stepIdx, '🫳 Kıskaç BOŞ kapandı - kutu menzilde değil (' + GRAB_R.toFixed(2) + ' m)');
         }
         sim.stepIdx++; sim.stepT = 0;
       } else if (op === 'BIRAK') {
@@ -190,7 +190,7 @@
     const load = sim.carrying >= 0 ? sim.objs[sim.carrying].w : 0;
     const sagT = load * 0.28 / (p.power || 1);
     sim.sag += (sagT - sim.sag) * Math.min(1, 5 * dt);
-    if (sagT > 0.12) pushEvt(sim, 'sag', '⚠️ Ağır yük — kol ' + Math.round(sim.sag * 100) + ' cm sarkıyor!');
+    if (sagT > 0.12) pushEvt(sim, 'sag', '⚠️ Ağır yük - kol ' + Math.round(sim.sag * 100) + ' cm sarkıyor!');
     else clearEvt(sim, 'sag');
 
     const kin = fk(sim.th1, sim.th2);
@@ -231,10 +231,10 @@
           if (o.stackOn >= 0 && dropH > DROP_SAFE) {
             o.toppled = true; o.x += 0.30; o.y = OBJ_H / 2; o.stackOn = -1;
             sim.topples++;
-            pushEvt(sim, 'top' + i, '🫨 Kutu ' + (i + 1) + ' DEVRİLDİ — ' + Math.round(dropH * 100) + ' cm yüksekten bırakıldı (güvenli: ' + Math.round(DROP_SAFE * 100) + ' cm)');
+            pushEvt(sim, 'top' + i, '🫨 Kutu ' + (i + 1) + ' DEVRİLDİ - ' + Math.round(dropH * 100) + ' cm yüksekten bırakıldı (güvenli: ' + Math.round(DROP_SAFE * 100) + ' cm)');
           } else if (dropH > DROP_SAFE * 1.8) {
             o.toppled = true; o.x += 0.24; sim.topples++;
-            pushEvt(sim, 'top' + i, '🫨 Kutu ' + (i + 1) + ' sekti ve DEVRİLDİ — çok yüksekten düştü!');
+            pushEvt(sim, 'top' + i, '🫨 Kutu ' + (i + 1) + ' sekti ve DEVRİLDİ - çok yüksekten düştü!');
           } else {
             pushEvt(sim, 'set' + i + '_' + Math.round(sim.t), '📦 Kutu ' + (i + 1) + ' yerleşti (x=' + o.x.toFixed(2) + ')');
           }
@@ -316,11 +316,11 @@
     if (r === 'engel') tips.push('Raf yolu kesiyor ama aynı noktaya İKİ dirsek çözümü var: dirsek YUKARI konfigürasyon rafın üstünden aşar. Hedef modunda her adımda config seçebilirsin.');
     if (r === 'erisim') tips.push('O nokta kolun erişim halkasının dışında! Maksimum uzanma = ' + (L1 + L2).toFixed(1) + ' m, minimum = ' + Math.abs(L1 - L2).toFixed(1) + ' m. Hedefi halkaya çek.');
     if (r === 'devrildi') tips.push('Kutu devrildi çünkü yüksekten bırakıldı. Güvenli bırakma: kutunun oturacağı yüzeyin ' + Math.round(DROP_SAFE * 100) + ' cm üstünden alçakta. İstifte üst kutu için bırakma yüksekliğini yeniden hesapla!');
-    if (r === 'eksik') tips.push('Program bitti ama kutular hedef bölgelerde değil. Kayıt defterinde her kutunun nereye yerleştiğini gör — sapma varsa SARKMAYI telafi et (ağır yükte daha yukarıyı hedefle).');
+    if (r === 'eksik') tips.push('Program bitti ama kutular hedef bölgelerde değil. Kayıt defterinde her kutunun nereye yerleştiğini gör - sapma varsa SARKMAYI telafi et (ağır yükte daha yukarıyı hedefle).');
     if (r === 'istif') tips.push('Kutular aynı bölgede ama üst üste değil. İkinci kutuyu ilkinin TAM üstüne bırak: aynı x, bir kutu boyu yukarıdan nazikçe.');
-    if (r === 'sure') tips.push('Süre doldu. Boş BEKLE adımlarını kırp, ara noktaları azalt — ama hassas bırakışlardan çalma!');
+    if (r === 'sure') tips.push('Süre doldu. Boş BEKLE adımlarını kırp, ara noktaları azalt - ama hassas bırakışlardan çalma!');
     if (sim.topples > 0 && !tips.length) tips.push('Devrilen kutu görevden puan götürür. Bırakma yüksekliğini düşür.');
-    if (!tips.length) tips.push('Uç nokta izini raporda incele: keskin köşeler zaman kaybıdır, akıcı yaylar hızlıdır. Ağır yükte sarkma izini gör — telafi sanattır.');
+    if (!tips.length) tips.push('Uç nokta izini raporda incele: keskin köşeler zaman kaybıdır, akıcı yaylar hızlıdır. Ağır yükte sarkma izini gör - telafi sanattır.');
     return tips;
   }
 

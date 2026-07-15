@@ -1,12 +1,12 @@
 /*
- * RoboForge — Ayıklama Bandı Simülasyon Çekirdeği
+ * RoboForge - Ayıklama Bandı Simülasyon Çekirdeği
  * Pure, dependency-free. Browser (window.BantCore) + Node (module.exports).
  *
  * Fabrika otomasyonu: konveyörde ürünler akar, sensör istasyonu okur
  * (renk / boyut / ağırlık), kurallar hangi kapaktan hangi kutuya gideceğine
- * karar verir. Dersler: (1) karar tablosu tasarımı — öncelik sırası her şeydir,
+ * karar verir. Dersler: (1) karar tablosu tasarımı - öncelik sırası her şeydir,
  * (2) hız ↔ doğruluk: bant hızlanınca sensör yanlış okur, (3) kapsam: hiçbir
- * kurala uymayan ürün SON kutuya düşer — "diğerleri" kutusunu unutan yanar,
+ * kurala uymayan ürün SON kutuya düşer - "diğerleri" kutusunu unutan yanar,
  * (4) iki düşünme modeli: ürün-merkezli kural zinciri vs kutu-merkezli filtre.
  */
 (function () {
@@ -40,13 +40,13 @@
   // hedef: her ürünün DOĞRU kutusu missionRule(item) ile tanımlı (kalite kontrol standardı)
   const MISSIONS = [
     { id: 'renkayrimi', name: 'Renk Ayrımı', difficulty: 'Başlangıç', dur: 75, count: 12, seed: 11, renkler: 2,
-      bins: ['KIRMIZI', 'MAVİ', '—', 'DİĞER'], maxWrong: 1,
+      bins: ['KIRMIZI', 'MAVİ', '-', 'DİĞER'], maxWrong: 1,
       want: it => it.renk === 'kirmizi' ? 0 : 1,
       desc: 'İki renk, iki kutu. Kırmızılar 1 numaraya, maviler 2 numaraya. Karar tablosunun ilk dersi.' },
     { id: 'ucrenk', name: 'Üç Renk Hattı', difficulty: 'Başlangıç', dur: 90, count: 15, seed: 23, renkler: 3,
       bins: ['KIRMIZI', 'YEŞİL', 'MAVİ', 'DİĞER'], maxWrong: 1,
       want: it => it.renk === 'kirmizi' ? 0 : it.renk === 'yesil' ? 1 : 2,
-      desc: 'Üç renk, üç kapak. Kural sayısı artıyor — sıralama hâlâ kolay, ama dikkat dağılmasın.' },
+      desc: 'Üç renk, üç kapak. Kural sayısı artıyor - sıralama hâlâ kolay, ama dikkat dağılmasın.' },
     { id: 'boyut', name: 'Boyut Kontrolü', difficulty: 'Orta', dur: 90, count: 15, seed: 37, renkler: 2,
       bins: ['BÜYÜK KIRMIZI', 'KÜÇÜK KIRMIZI', 'MAVİLER', 'DİĞER'], maxWrong: 1,
       want: it => it.renk === 'kirmizi' ? (it.buyuk ? 0 : 1) : 2,
@@ -56,13 +56,13 @@
       want: it => it.agir ? 0 : it.renk === 'kirmizi' ? 1 : 2,
       desc: 'ÖNCELİK dersi: ağır ürün rengine bakılmaksızın 1 numaraya! Ağırlık kuralı listenin TEPESİNDE olmalı.' },
     { id: 'hizlikota', name: 'Hızlı Kota', difficulty: 'İleri', dur: 55, count: 16, seed: 67, renkler: 2,
-      bins: ['KIRMIZI', 'MAVİ', '—', 'DİĞER'], maxWrong: 2,
+      bins: ['KIRMIZI', 'MAVİ', '-', 'DİĞER'], maxWrong: 2,
       want: it => it.renk === 'kirmizi' ? 0 : 1,
-      desc: 'Basit ayrım ama süre DAR: bant hızını artırmak zorundasın. Hızlı bant sensörü yanıltır — ödünleşimi yaşa.' },
+      desc: 'Basit ayrım ama süre DAR: bant hızını artırmak zorundasın. Hızlı bant sensörü yanıltır - ödünleşimi yaşa.' },
     { id: 'siparis', name: 'Karışık Sipariş', difficulty: 'İleri', dur: 110, count: 18, seed: 83, renkler: 3,
       bins: ['BÜYÜK AĞIR', 'KIRMIZI KÜÇÜK', 'MAVİ + YEŞİL BÜYÜK', 'DİĞER'], maxWrong: 1,
       want: it => (it.buyuk && it.agir) ? 0 : (it.renk === 'kirmizi' && !it.buyuk) ? 1 : (it.buyuk && (it.renk === 'mavi' || it.renk === 'yesil')) ? 2 : 3,
-      desc: 'Gerçek sipariş listesi: üç özellik, dört kutu, çakışan koşullar. SON kutusu artık meşru bir hedef — kapsama dikkat!' },
+      desc: 'Gerçek sipariş listesi: üç özellik, dört kutu, çakışan koşullar. SON kutusu artık meşru bir hedef - kapsama dikkat!' },
     { id: 'kabusvardiya', name: 'Kâbus Vardiyası', difficulty: 'Uzman', dur: 75, count: 20, seed: 97, renkler: 3,
       bins: ['AĞIR KIRMIZI', 'HAFİF BÜYÜK', 'MAVİ KÜÇÜK', 'DİĞER'], maxWrong: 1,
       want: it => (it.agir && it.renk === 'kirmizi') ? 0 : (!it.agir && it.buyuk) ? 1 : (it.renk === 'mavi' && !it.buyuk) ? 2 : 3,
@@ -145,7 +145,7 @@
           if (which === 0) { const pal2 = m.renkler === 2 ? ['kirmizi', 'mavi'] : RENK; sensed.renk = pal2[(pal2.indexOf(it.renk) + 1) % pal2.length]; }
           else if (which === 1) sensed.buyuk = !sensed.buyuk;
           else sensed.agir = !sensed.agir;
-          pushEvt(sim, 'mr' + i, '👁️ Sensör YANLIŞ okudu (#' + (i + 1) + ' ' + itemDesc(it) + ' → "' + itemDesc(sensed) + '") — bant çok hızlı!');
+          pushEvt(sim, 'mr' + i, '👁️ Sensör YANLIŞ okudu (#' + (i + 1) + ' ' + itemDesc(it) + ' → "' + itemDesc(sensed) + '") - bant çok hızlı!');
         }
         it.read = sensed;
         const bits = itemBits(sensed);
@@ -165,7 +165,7 @@
             sim.counts[it.bin][correct ? 0 : 1]++;
             if (!correct) {
               sim.wrong++;
-              pushEvt(sim, 'w' + i, '❌ #' + (i + 1) + ' (' + itemDesc(it) + ') YANLIŞ kutuda: ' + (m.bins[it.bin] || 'SON') + (it.misread ? ' — sensör hatası!' : ' — kural hatası!'));
+              pushEvt(sim, 'w' + i, '❌ #' + (i + 1) + ' (' + itemDesc(it) + ') YANLIŞ kutuda: ' + (m.bins[it.bin] || 'SON') + (it.misread ? ' - sensör hatası!' : ' - kural hatası!'));
               if (sim.wrong > m.maxWrong) {
                 sim.status = 'failed'; sim.reason = 'yanlis';
                 return;
@@ -194,19 +194,19 @@
     const tScore = Math.max(0, 100 - sim.t / sim.mission.dur * 88);
     const total = acc * 0.65 + tScore * 0.35;
     if (total > 85 && sim.wrong === 0) return { name: '🏆 Vardiya Şefi', cmt: 'Sıfır hata, akan hat, erken paydos. Kalite kontrol duvarına fotoğrafın asılır!' };
-    if (total > 68) return { name: '🥈 Hat Operatörü', cmt: 'Kota tamam. Madalya için: bant hızını sensörün sınırına kadar it — ama sınırı geçme.' };
-    return { name: '🥉 Stajyer', cmt: 'Ucu ucuna yetişti. Kural sıranı ve bant hızını gözden geçir — vardiya şefliği detayda gizli.' };
+    if (total > 68) return { name: '🥈 Hat Operatörü', cmt: 'Kota tamam. Madalya için: bant hızını sensörün sınırına kadar it - ama sınırı geçme.' };
+    return { name: '🥉 Stajyer', cmt: 'Ucu ucuna yetişti. Kural sıranı ve bant hızını gözden geçir - vardiya şefliği detayda gizli.' };
   }
   function coach(sim) {
     const tips = [];
     const r = sim.reason || '';
     const m = sim.mission;
     if (r === 'yanlis') {
-      if (sim.misreads > 0) tips.push('Yanlışların bir kısmı SENSÖR hatası: bant ' + sim.speed.toFixed(1) + ' hızında sensör %' + Math.round(misreadChance(sim.speed) * 100) + ' yanlış okur. 0.9 altı kusursuzdur — hız her zaman kâr değil.');
-      else tips.push('Yanlışlar kural hatası: kayıt defterinde hangi ürünün nereye gittiğine bak. Kural SIRASI kritik — üstteki kural kazanır. "Ağır → 1" kuralı en üstte mi?');
+      if (sim.misreads > 0) tips.push('Yanlışların bir kısmı SENSÖR hatası: bant ' + sim.speed.toFixed(1) + ' hızında sensör %' + Math.round(misreadChance(sim.speed) * 100) + ' yanlış okur. 0.9 altı kusursuzdur - hız her zaman kâr değil.');
+      else tips.push('Yanlışlar kural hatası: kayıt defterinde hangi ürünün nereye gittiğine bak. Kural SIRASI kritik - üstteki kural kazanır. "Ağır → 1" kuralı en üstte mi?');
     }
-    if (r === 'kota') tips.push('Süre doldu, hat yavaş kaldı. Bant hızını artır — ama sensör hata payını hesaba kat: 1.4 hızda %8 hata, ' + m.maxWrong + ' yanlış hakkınla çarpışabilir.');
-    if (!tips.length && sim.misreads > 0) tips.push('Bu vardiyada ' + sim.misreads + ' sensör hatası oldu ama kurtardın. Hız-doğruluk sınırında geziniyorsun — bilinçliysen sorun yok!');
+    if (r === 'kota') tips.push('Süre doldu, hat yavaş kaldı. Bant hızını artır - ama sensör hata payını hesaba kat: 1.4 hızda %8 hata, ' + m.maxWrong + ' yanlış hakkınla çarpışabilir.');
+    if (!tips.length && sim.misreads > 0) tips.push('Bu vardiyada ' + sim.misreads + ' sensör hatası oldu ama kurtardın. Hız-doğruluk sınırında geziniyorsun - bilinçliysen sorun yok!');
     if (!tips.length) tips.push('Kapsam kontrolü: hiçbir kurala uymayan ürün SON kutusuna düşer. SON kutusunun da doğru hedef olduğu görevlerde bu bir özellik, diğerlerinde sessiz bir hatadır.');
     return tips;
   }
@@ -242,7 +242,7 @@
         ];
       case 'agirlik':
         return [
-          { pattern: ['any', 'any', 'any', 'any', 'on'], bin: 0 },   // ÖNCE ağırlar — sıra bozulursa her şey bozulur
+          { pattern: ['any', 'any', 'any', 'any', 'on'], bin: 0 },   // ÖNCE ağırlar - sıra bozulursa her şey bozulur
           { pattern: ['on', 'any', 'any', 'any', 'any'], bin: 1 },   // kalan kırmızılar (öncelik korur!)
           { pattern: ['any', 'any', 'any', 'any', 'any'], bin: 2 },  // kalan herkes
         ];

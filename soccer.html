@@ -201,7 +201,7 @@
       <div class="card">
         <h4>Forvet Robotu</h4>
         <p class="exp">Robot topu ve kaleleri <b>yön sensörleriyle</b> görür: TOP (solda/önde/sağda),
-          KALE (hücum kalen), YAKIN (top yakın mı) ve KENDİ-KALE (kendi kalen önünde mi — sakın o yöne sürme!).
+          KALE (hücum kalen), YAKIN (top yakın mı) ve KENDİ-KALE (kendi kalen önünde mi - sakın o yöne sürme!).
           Analog PID forvet varsayılandır; Kural modu da denenebilir.</p>
       </div>
       <div class="card">
@@ -235,7 +235,7 @@
       <div id="rulesPanel" style="display:none">
         <div class="card">
           <h4>Kurallar (ilk eşleşen kazanır)</h4>
-          <p class="exp">Açık sahada kesikli kurallarla top sürmek zordur — bu da dersin kendisi!
+          <p class="exp">Açık sahada kesikli kurallarla top sürmek zordur - bu da dersin kendisi!
             Dene, gözle, PID ile karşılaştır.</p>
           <div id="rulesList"></div>
           <button class="addRule" id="addRule">+ Yeni Kural</button>
@@ -459,10 +459,10 @@
     const opp=SC.OPPONENTS[LAB.oppIdx];
     const box=document.getElementById('resultBox');
     box.innerHTML =
-      '<h3 class="'+(win?'win':'lose')+'">📄 Maç Raporu — vs '+opp.name+'</h3>'+
+      '<h3 class="'+(win?'win':'lose')+'">📄 Maç Raporu - vs '+opp.name+'</h3>'+
       '<div style="margin:8px 0;font-size:.8rem;color:var(--muted2)">'+chips+'</div>'+
       '<div style="font-size:.76rem;color:var(--sky);margin-bottom:8px">'+
-        (LAB.mode==='pid'?'📈 PID Forvet — Temel '+LAB.pid.base+' · Kp '+LAB.pid.kp.toFixed(2)+' · Kd '+LAB.pid.kd.toFixed(2):'🧩 Kural Modu — '+LAB.rules.length+' kural')+'</div>'+
+        (LAB.mode==='pid'?'📈 PID Forvet - Temel '+LAB.pid.base+' · Kp '+LAB.pid.kp.toFixed(2)+' · Kd '+LAB.pid.kd.toFixed(2):'🧩 Kural Modu - '+LAB.rules.length+' kural')+'</div>'+
       '<div class="rstats">'+
         '<div class="rstat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
         '<div class="rstat"><div class="l">GOL</div><div class="v mono">'+sim.score.p+'/'+(opp.goals||1)+'</div></div>'+
@@ -608,7 +608,7 @@
     const el=document.getElementById('kunye');
     let build=null; try{ build=JSON.parse(localStorage.getItem('rf_robot')); }catch(e){}
     if(!build||!build.motor||!window.RobotData){
-      el.innerHTML='<h4>🤖 Robotun Künyesi</h4><p class="exp">Henüz robot kurmadın. Hızlı robot topa önce ulaşır — katalogdan robotunu kur!</p><a class="btn ghost" href="build.html?sim=soccer">Robotunu kur →</a>';
+      el.innerHTML='<h4>🤖 Robotun Künyesi</h4><p class="exp">Henüz robot kurmadın. Hızlı robot topa önce ulaşır - katalogdan robotunu kur!</p><a class="btn ghost" href="build.html?sim=soccer">Robotunu kur →</a>';
       return;
     }
     const RD=window.RobotData, r=RD.computeReport(build);
@@ -659,11 +659,11 @@
 
   // ---- tutorial ----
   const TUT=[
-    ['⚽ Hücum Antrenmanı','Karşında bir savunma robotu var. Görev: topu kap, rakibi geç, SAĞDAKİ kaleye gol at! Her seviye daha iyi savunan bir rakip — ve daha çok gol ister.'],
-    ['🏁 Başlama Vuruşu','Top ortada, sen daha yakınsın — ilk hamle hep senin! Gol olursa ya da top kilitlenirse hakem topu ortaya koyar, yine önce sen davranırsın.'],
+    ['⚽ Hücum Antrenmanı','Karşında bir savunma robotu var. Görev: topu kap, rakibi geç, SAĞDAKİ kaleye gol at! Her seviye daha iyi savunan bir rakip - ve daha çok gol ister.'],
+    ['🏁 Başlama Vuruşu','Top ortada, sen daha yakınsın - ilk hamle hep senin! Gol olursa ya da top kilitlenirse hakem topu ortaya koyar, yine önce sen davranırsın.'],
     ['📈 PID Forvet','Varsayılan mod: robot topa arkadan dolaşarak yaklaşır, topu alınca kaleye sürer. Temel Hız / Kp / Kd ile forvet karakterini sen belirlersin: hızlı ama savruk mu, kontrollü mü?'],
     ['🧩 Kural Modu','Bir de kesikli kurallarla dene! TOP/KALE yön çipleriyle kendi taktiğini yaz. Açık sahada bunun ne kadar zor olduğunu görmek dersin ta kendisi. Önemli: KENDİ KALE çipli koruma kuralı topu kendi kalene sürmeni engeller.'],
-    ['🏆 Madalyalar','Ne kadar erken golü tamamlarsan madalyan o kadar parlak. Hızlı bir robot kur, taktiği ayarla — Gol Makinesi ol!'],
+    ['🏆 Madalyalar','Ne kadar erken golü tamamlarsan madalyan o kadar parlak. Hızlı bir robot kur, taktiği ayarla - Gol Makinesi ol!'],
   ];
   let tutI=0;
   function showTut(i){

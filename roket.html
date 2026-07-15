@@ -182,7 +182,7 @@
       <div class="hudbox"><div class="l">HIZ</div><div class="v mono" id="hudE">0.0</div></div>
       <div class="hudbox"><div class="l">DURUM</div><div class="v" id="hudS">HAZIR</div></div>
     </div>
-    <div class="hint" id="hint">🚀 Hoverslam: motoru TAM DOĞRU anda ateşle. Erken = havada asılı kal, yakıt bit, düş. Geç = çakıl. Sihirli formül: <b>h = v²/(2·a_net)</b> + pay. Ve unutma: yakıt yandıkça roket hafifler — yakmanın sonu başından güçlüdür!</div>
+    <div class="hint" id="hint">🚀 Hoverslam: motoru TAM DOĞRU anda ateşle. Erken = havada asılı kal, yakıt bit, düş. Geç = çakıl. Sihirli formül: <b>h = v²/(2·a_net)</b> + pay. Ve unutma: yakıt yandıkça roket hafifler - yakmanın sonu başından güçlüdür!</div>
     <div class="rdock" id="resultDock" style="display:none"></div>
   </div>
   <div class="side">
@@ -199,7 +199,7 @@
         <h4>Uçuş Bilgisayarı Kuralları</h4>
         <p class="exp">YAKMA NOKTASI biti formülü senin için hesaplar: h = v²/(2·a) + gecikme payı.
           Kalanı zamanlama disiplini: yüksekte SÜZÜL, noktada TAM GAZ, alçakta rölanti/gaz ile hız merdiveni.
-          <b>Rölanti alev söndürmez</b> — ateşleme gecikmeli motorlarda hayat kurtarır!</p>
+          <b>Rölanti alev söndürmez</b> - ateşleme gecikmeli motorlarda hayat kurtarır!</p>
         <div id="rulesList"></div>
         <button class="addRule" id="addRule">+ Yeni Kural</button>
           <button id="revealSolution" style="display:none;width:100%;margin-top:8px;padding:9px;border:1px dashed var(--amber);background:rgba(245,158,11,.08);color:var(--amber);font-weight:800;font-size:.78rem;border-radius:10px;cursor:pointer">🔑 En iyi çözümü göster (admin)</button>
@@ -220,7 +220,7 @@
       </div>
       <div class="card">
         <h4>Görev Kartı</h4>
-        <p class="exp mono" id="ledger" style="font-size:.74rem">—</p>
+        <p class="exp mono" id="ledger" style="font-size:.74rem">-</p>
       </div>
     </div>
     <div id="tab-robot" style="display:none">
@@ -331,7 +331,7 @@
       const hb=R.burnAlt(m,sim.v,1.15);
       document.getElementById('ledger').innerHTML=
         'giriş: '+m.alt+' m · '+Math.abs(m.v0)+' m/s<br>'+
-        'yakma formülü şu an: <b style="color:var(--amber)">'+(sim.v<-1?Math.round(hb)+' m':'—')+'</b><br>'+
+        'yakma formülü şu an: <b style="color:var(--amber)">'+(sim.v<-1?Math.round(hb)+' m':'-')+'</b><br>'+
         'ateşleme gecikmesi: <b>'+m.delay+' sn</b> · yakıt: <b>'+sim.fuel.toFixed(0)+'/'+m.fuel+'</b>';
     } else {
       document.getElementById('ledger').innerHTML='giriş: '+m.alt+' m · '+Math.abs(m.v0)+' m/s<br>ateşleme gecikmesi: <b>'+m.delay+' sn</b> · yakıt: <b>'+m.fuel+'</b><br>güvenli iniş: ≤ '+R.SAFE_V+' m/s';
@@ -379,8 +379,8 @@
     document.getElementById('hint').style.display='block';
     document.getElementById('resultWrap').classList.remove('show');
   }
-  const REASONS={ indi:'Yumuşak iniş — booster kurtarıldı!', sert:'Sert iniş — bacaklar kırıldı. 💢',
-    cakilma:'Çakılma! 💥', sure:'Süre doldu — muhtemelen havada asılı kaldın.' };
+  const REASONS={ indi:'Yumuşak iniş - booster kurtarıldı!', sert:'Sert iniş - bacaklar kırıldı. 💢',
+    cakilma:'Çakılma! 💥', sure:'Süre doldu - muhtemelen havada asılı kaldın.' };
   function showResult(){
     const sim=LAB.sim; if(!sim) return;
     const win=sim.status==='success';
@@ -390,7 +390,7 @@
     // --- descent-curve graph markup (drawn after DOM insert) ---
     var graphBlock='';
     if(window.RFResult && LAB.trace && LAB.trace.length>3){
-      graphBlock='<div class="rf-graphwrap"><div class="cap">🚀 İniş eğrisi — irtifa &amp; hız zamana karşı</div>'+
+      graphBlock='<div class="rf-graphwrap"><div class="cap">🚀 İniş eğrisi - irtifa &amp; hız zamana karşı</div>'+
         '<canvas id="roketGraph" class="rf-graph" style="height:160px"></canvas>'+
         '<div style="font-size:.72rem;color:var(--muted2);margin-top:2px">Nokta = motorun yandığı an. Erken yakarsan yakıt biter (hover→düşüş); geç yakarsan yavaşlayamadan çakılırsın. İdeali: geç ve sert.</div></div>';
     }
@@ -406,7 +406,7 @@
         (cls?'<div class="rd-medal">'+cls.name+'</div><div class="rd-cmt">'+(cls.cmt||'')+'</div>'
             :'<div class="rd-cmt">'+(REASONS[sim.reason]||'')+'</div>')+
         '<div class="rd-stats">'+
-          '<div class="rd-stat"><div class="l">TEMAS HIZI</div><div class="v mono">'+(sim.landV==null?'—':sim.landV.toFixed(1)+' m/s')+'</div></div>'+
+          '<div class="rd-stat"><div class="l">TEMAS HIZI</div><div class="v mono">'+(sim.landV==null?'-':sim.landV.toFixed(1)+' m/s')+'</div></div>'+
           '<div class="rd-stat"><div class="l">KALAN YAKIT</div><div class="v mono">%'+Math.round(sim.fuel/sim.mission.fuel*100)+'</div></div>'+
           '<div class="rd-stat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
           '<div class="rd-stat"><div class="l">DURUM</div><div class="v '+(win?'ok':'bad')+'">'+(win?'İNDİ':'BAŞARISIZ')+'</div></div>'+
@@ -437,11 +437,11 @@
     const m=sim.mission;
     const box=document.getElementById('resultBox');
     box.innerHTML =
-      '<h3 class="'+(win?'win':'lose')+'">📄 Uçuş Raporu — '+m.name+'</h3>'+
+      '<h3 class="'+(win?'win':'lose')+'">📄 Uçuş Raporu - '+m.name+'</h3>'+
       '<div style="font-size:.76rem;color:var(--sky);margin:8px 0">'+
-        (LAB.mode==='rules'?'🧩 '+LAB.rules.length+' irtifa kuralı':'📈 Otopilot — pay '+LAB.pid.marj+' · temas '+LAB.pid.sonHiz+' m/s')+'</div>'+
+        (LAB.mode==='rules'?'🧩 '+LAB.rules.length+' irtifa kuralı':'📈 Otopilot - pay '+LAB.pid.marj+' · temas '+LAB.pid.sonHiz+' m/s')+'</div>'+
       '<div class="rstats">'+
-        '<div class="rstat"><div class="l">TEMAS</div><div class="v mono">'+(sim.landV==null?'—':sim.landV.toFixed(1))+'</div></div>'+
+        '<div class="rstat"><div class="l">TEMAS</div><div class="v mono">'+(sim.landV==null?'-':sim.landV.toFixed(1))+'</div></div>'+
         '<div class="rstat"><div class="l">YAKIT</div><div class="v mono">%'+Math.round(sim.fuel/m.fuel*100)+'</div></div>'+
         '<div class="rstat"><div class="l">TEPE İVME</div><div class="v mono">'+sim.peakA.toFixed(0)+' m/s²</div></div>'+
         '<div class="rstat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
@@ -585,8 +585,8 @@
   const TUT=[
     ['🚀 Hoverslam Nedir','Falcon 9 boosterı gibi in: serbest düş, motoru SON anda ateşle, hız tam sıfırlanırken yere dokun. Erken = yakıt israfı, geç = çakılma. Zamanlama her şeydir.'],
     ['📐 Sihirli Formül','Fren mesafesi: h = v²/(2·a_net). Hız iki katına çıkarsa mesafe DÖRT katına çıkar! YAKMA NOKTASI biti bu formülü senin için sürekli hesaplar.'],
-    ['⚖️ Değişken Kütle','Yakıt yandıkça roket hafifler → aynı itki daha çok ivme verir. Yakmanın sonu başından güçlüdür — formüldeki kötümser hesap bu yüzden güvenlidir.'],
-    ['🔥 Alev Söndürme Riski','Motoru kapatırsan yeniden ateşleme GECİKMELİ olabilir (görevine bak!). RÖLANTİ %22 alevi canlı tutar — alçakta usta pilotun sigortasıdır.'],
+    ['⚖️ Değişken Kütle','Yakıt yandıkça roket hafifler → aynı itki daha çok ivme verir. Yakmanın sonu başından güçlüdür - formüldeki kötümser hesap bu yüzden güvenlidir.'],
+    ['🔥 Alev Söndürme Riski','Motoru kapatırsan yeniden ateşleme GECİKMELİ olabilir (görevine bak!). RÖLANTİ %22 alevi canlı tutar - alçakta usta pilotun sigortasıdır.'],
     ['🎚️ Güven Payı','Otopilot modunda tek ayar: pay. 1.0 = formülün dediği an (riskli!), 1.15 = sağlıklı, 2.0 = korkak (hover israfı). Kalan yakıt madalyadır.'],
     ['🏁 Bırak!','İlk İnişten Kâbus İnişine 7 görev. Rapordaki sarı bant motor yanma penceresi: ideal profil TEK keskin banttır. Hoverslam Efsanesi ol!'],
   ];

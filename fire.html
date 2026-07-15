@@ -184,10 +184,10 @@
     <div class="hud">
       <div class="hudbox"><div class="l">SÜRE</div><div class="v mono" id="hudT">0.0s</div></div>
       <div class="hudbox"><div class="l">ALEV</div><div class="v" id="hudF">ARANIYOR</div></div>
-      <div class="hudbox"><div class="l">FAN</div><div class="v" id="hudFan">—</div></div>
+      <div class="hudbox"><div class="l">FAN</div><div class="v" id="hudFan">-</div></div>
       <div class="hudbox"><div class="l">DURUM</div><div class="v" id="hudS">HAZIR</div></div>
     </div>
-    <div class="hint" id="hint">🔥 Evde bir mum yanıyor! Odaları <b>duvar takibiyle</b> keşfet, alevi ışık sensörleriyle bul, yaklaş — <b>fan otomatik üfler.</b> Alev sönene dek yönünü koru!</div>
+    <div class="hint" id="hint">🔥 Evde bir mum yanıyor! Odaları <b>duvar takibiyle</b> keşfet, alevi ışık sensörleriyle bul, yaklaş - <b>fan otomatik üfler.</b> Alev sönene dek yönünü koru!</div>
     <div class="rdock" id="resultDock" style="display:none"></div>
   </div>
 
@@ -201,7 +201,7 @@
       <div class="card">
         <h4>İtfaiyeci Robot</h4>
         <p class="exp">6 sensör: <b style="color:#fca5a5">3 duvar</b> (ÖN·SOL·SAĞ mesafe) ve
-          <b style="color:#fcd34d">3 ışık</b> (SOL·ÖN·SAĞ yönlü). Duvarlar ışığı <b>engeller</b> —
+          <b style="color:#fcd34d">3 ışık</b> (SOL·ÖN·SAĞ yönlü). Duvarlar ışığı <b>engeller</b> -
           alevi görmek için doğru odada olmalısın. Fan, alev yakın ve öndeyken kendiliğinden çalışır.</p>
       </div>
       <div class="card">
@@ -222,7 +222,7 @@
       <div id="rulesPanel">
         <div class="card">
           <h4>Kurallar (ilk eşleşen kazanır)</h4>
-          <p class="exp">İki davranış: <b>keşif</b> (duvar takibi — evi dolaş) ve <b>müdahale</b>
+          <p class="exp">İki davranış: <b>keşif</b> (duvar takibi - evi dolaş) ve <b>müdahale</b>
             (ışık görününce aleve yönel). Işık kuralları üstte olmalı ki alev görülünce keşfi bıraksın!</p>
           <div id="rulesList"></div>
           <button class="addRule" id="addRule">+ Yeni Kural</button>
@@ -361,12 +361,12 @@
   function updateHud(last){
     document.getElementById('hudT').textContent=(LAB.sim?LAB.sim.t:0).toFixed(1)+'s';
     const f=document.getElementById('hudF');
-    if(!LAB.sim){ f.textContent='—'; f.className='v'; }
+    if(!LAB.sim){ f.textContent='-'; f.className='v'; }
     else if(LAB.sim.flameHp<=0){ f.textContent='SÖNDÜ'; f.className='v ok'; }
     else if(last&&last.s&&(last.s.iOn||last.s.iSol||last.s.iSag)){ f.textContent='GÖRÜLDÜ'; f.className='v hot'; }
     else { f.textContent='ARANIYOR'; f.className='v'; }
     const fan=document.getElementById('hudFan');
-    fan.textContent = last&&last.fanOn ? 'ÜFLÜYOR' : '—';
+    fan.textContent = last&&last.fanOn ? 'ÜFLÜYOR' : '-';
     fan.className = last&&last.fanOn ? 'v ok' : 'v';
     const s=document.getElementById('hudS');
     if(!LAB.sim){ s.textContent='HAZIR'; s.className='v'; }
@@ -414,7 +414,7 @@
     document.getElementById('resultWrap').classList.remove('show');
   }
 
-  const REASONS={ extinguished:'Yangın söndürüldü!', timeout:'Süre doldu — alev hâlâ yanıyor.',
+  const REASONS={ extinguished:'Yangın söndürüldü!', timeout:'Süre doldu - alev hâlâ yanıyor.',
     stalled:'Robot sıkışıp kaldı.' };
   function showResult(){
     const sim=LAB.sim; if(!sim) return;
@@ -431,7 +431,7 @@
             :'<div class="rd-cmt">'+(REASONS[sim.reason]||'')+'</div>')+
         '<div class="rd-stats">'+
           '<div class="rd-stat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
-          '<div class="rd-stat"><div class="l">ALEV BULUNDU</div><div class="v mono">'+(sim.foundAt===null?'—':sim.foundAt.toFixed(1)+'s')+'</div></div>'+
+          '<div class="rd-stat"><div class="l">ALEV BULUNDU</div><div class="v mono">'+(sim.foundAt===null?'-':sim.foundAt.toFixed(1)+'s')+'</div></div>'+
           '<div class="rd-stat"><div class="l">DURUM</div><div class="v '+(win?'ok':'bad')+'">'+(win?'SÖNDÜRÜLDÜ':'BAŞARISIZ')+'</div></div>'+
         '</div>'+
         (window.RFResult?RFResult.coachHTML(tips,{win:win,headWin:'🎓 Ne öğrendik?',headLose:'🔍 Ne oldu, neden?',reason:win?null:(REASONS[sim.reason]||'')}):(tips.length?'<div class="rd-tip">💡 '+tips[0]+'</div>':''))+
@@ -482,13 +482,13 @@
     const house=FC.HOUSES[LAB.houseIdx];
     const box=document.getElementById('resultBox');
     box.innerHTML =
-      '<h3 class="'+(win?'win':'lose')+'">📄 Görev Raporu — '+house.name+'</h3>'+
+      '<h3 class="'+(win?'win':'lose')+'">📄 Görev Raporu - '+house.name+'</h3>'+
       '<div style="margin:8px 0;font-size:.8rem;color:var(--muted2)">'+chips+'</div>'+
       '<div style="font-size:.76rem;color:var(--sky);margin-bottom:8px">'+
-        (LAB.mode==='pid'?'📈 PID — Temel '+LAB.pid.base+' · Kp '+LAB.pid.kp.toFixed(2)+' · Kd '+LAB.pid.kd.toFixed(2):'🧩 Kural — '+LAB.rules.length+' kural')+'</div>'+
+        (LAB.mode==='pid'?'📈 PID - Temel '+LAB.pid.base+' · Kp '+LAB.pid.kp.toFixed(2)+' · Kd '+LAB.pid.kd.toFixed(2):'🧩 Kural - '+LAB.rules.length+' kural')+'</div>'+
       '<div class="rstats">'+
         '<div class="rstat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
-        '<div class="rstat"><div class="l">BULUNDU</div><div class="v mono">'+(sim.foundAt===null?'—':sim.foundAt.toFixed(1)+'s')+'</div></div>'+
+        '<div class="rstat"><div class="l">BULUNDU</div><div class="v mono">'+(sim.foundAt===null?'-':sim.foundAt.toFixed(1)+'s')+'</div></div>'+
         '<div class="rstat"><div class="l">DURUM</div><div class="v" style="color:'+(win?'var(--green)':'#fca5a5')+'">'+(win?'SÖNDÜRÜLDÜ':'BAŞARISIZ')+'</div></div>'+
       '</div>'+
       '<canvas id="repMap" width="460" height="316" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#0d0b09"></canvas>'+
@@ -683,8 +683,8 @@
   const TUT=[
     ['🔥 Yangın Alarmı!','Evin bir odasında mum devrildi! Robotun evi keşfedip alevi bulmalı ve fanıyla söndürmeli. Ama hangi odada olduğunu bilmiyorsun…'],
     ['🧭 Keşif: Duvar Takibi','Görünmeyen alevi aramak için duvar takibi kullan: sağında duvar yoksa sağa kavis, önünde duvar varsa sola dön. Bu basit ikili, kapalı bir evin BÜTÜN odalarını gezer!'],
-    ['💡 Işık Sensörleri','Duvarlar ışığı engeller — alev ancak aynı odadayken görünür. IŞIK çipleri parlaklığı görür görmez keşfi bırakıp aleve yönelmelisin. Işık kuralları listede üstte olmalı!'],
-    ['🌬️ Fan','Alev yakında ve tam öndeyken fan otomatik üfler. Alevi söndürmek biraz sürer — robotu alevin üstüne sürme, önünde tutmaya çalış.'],
+    ['💡 Işık Sensörleri','Duvarlar ışığı engeller - alev ancak aynı odadayken görünür. IŞIK çipleri parlaklığı görür görmez keşfi bırakıp aleve yönelmelisin. Işık kuralları listede üstte olmalı!'],
+    ['🌬️ Fan','Alev yakında ve tam öndeyken fan otomatik üfler. Alevi söndürmek biraz sürer - robotu alevin üstüne sürme, önünde tutmaya çalış.'],
     ['🏁 Başla!','Basit evden başla; her seviyede oda sayısı artar. Süreni kısalt, Alev Avcısı madalyasını kap!'],
   ];
   let tutI=0;

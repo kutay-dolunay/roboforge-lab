@@ -182,7 +182,7 @@
       <div class="hudbox"><div class="l">BEKLEME</div><div class="v mono" id="hudE">0s</div></div>
       <div class="hudbox"><div class="l">DURUM</div><div class="v" id="hudS">HAZIR</div></div>
     </div>
-    <div class="hint" id="hint">🤖 Filo yönetimi: robotlar rafa gider, kutuyu alır, istasyona taşır. Sorun tek robot değil — <b>TRAFİK</b>. Dar koridorda burun buruna gelen iki robottan biri yol vermezse: <b>KİLİTLENME</b> (deadlock). Sözleşmeni seç, akışı izle!</div>
+    <div class="hint" id="hint">🤖 Filo yönetimi: robotlar rafa gider, kutuyu alır, istasyona taşır. Sorun tek robot değil - <b>TRAFİK</b>. Dar koridorda burun buruna gelen iki robottan biri yol vermezse: <b>KİLİTLENME</b> (deadlock). Sözleşmeni seç, akışı izle!</div>
     <div class="rdock" id="resultDock" style="display:none"></div>
   </div>
   <div class="side">
@@ -198,7 +198,7 @@
       <div class="card" id="rulesCard">
         <h4>Trafik Sözleşmesi</h4>
         <p class="exp">Herkes AYNI kurala uyarsa akış olur. Kavşak önceliği kimde, dar koridorda ne yapılır?
-          "Bekle + bekle" kombinasyonu ders kitabı kilitlenmesidir — dene ve gör!</p>
+          "Bekle + bekle" kombinasyonu ders kitabı kilitlenmesidir - dene ve gör!</p>
         <div class="ract" style="margin:10px 0">
           <span style="font-size:.72rem;color:var(--muted2)">Kavşak önceliği</span>
           <select id="polOncelik" style="background:#0b1220;border:1px solid #26364e;color:var(--txt);border-radius:7px;font-size:.74rem;padding:5px 6px;margin-left:auto">
@@ -228,14 +228,14 @@
       </div>
       <div class="card">
         <h4>Vardiya Panosu</h4>
-        <p class="exp mono" id="ledger" style="font-size:.74rem">—</p>
+        <p class="exp mono" id="ledger" style="font-size:.74rem">-</p>
       </div>
     </div>
     <div id="tab-robot" style="display:none">
       <div class="card">
         <h4>Deadlock Nedir?</h4>
         <p class="exp">Dört koşul aynı anda sağlanırsa sistem kilitlenir: karşılıklı dışlama, tut-ve-bekle,
-          zorla alamama, <b>döngüsel bekleme</b>. Çözüm hep aynıdır: döngüyü KIR — biri yol versin.
+          zorla alamama, <b>döngüsel bekleme</b>. Çözüm hep aynıdır: döngüyü KIR - biri yol versin.
           1971'den beri işletim sistemlerinin baş belası, bugün depo robotlarının günlük gerçeği.</p>
       </div>
       <div class="card kunye" id="kunye"></div>
@@ -384,8 +384,8 @@
     document.getElementById('hint').style.display='block';
     document.getElementById('resultWrap').classList.remove('show');
   }
-  const REASONS={ vardiya:'Bütün siparişler teslim edildi!', kilitlenme:'KİLİTLENME — robotlar birbirini sonsuza dek bekliyor! 💀',
-    sure:'Süre doldu — vardiya kotası tutmadı.' };
+  const REASONS={ vardiya:'Bütün siparişler teslim edildi!', kilitlenme:'KİLİTLENME - robotlar birbirini sonsuza dek bekliyor! 💀',
+    sure:'Süre doldu - vardiya kotası tutmadı.' };
   function showResult(){
     const sim=LAB.sim; if(!sim) return;
     const win=sim.status==='success';
@@ -423,7 +423,7 @@
     const m=sim.mission;
     const box=document.getElementById('resultBox');
     box.innerHTML =
-      '<h3 class="'+(win?'win':'lose')+'">📄 Vardiya Raporu — '+m.name+'</h3>'+
+      '<h3 class="'+(win?'win':'lose')+'">📄 Vardiya Raporu - '+m.name+'</h3>'+
       '<div style="font-size:.76rem;color:var(--sky);margin:8px 0">'+
         (LAB.mode==='rules'?'🧩 Trafik: öncelik '+(LAB.policy.oncelik==='yuklu'?'yüklü':'numara')+' · dar koridor '+(LAB.policy.darKoridor==='bekle'?'BEKLE ⚠️':'yol ver')
         :'📈 Rezervasyon: pencere '+LAB.res.pencere+' · yeniden rota '+(LAB.res.yenidenRota?'açık':'kapalı'))+'</div>'+
@@ -506,9 +506,9 @@
   function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show');
     clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2400); }
   const TUT=[
-    ['🤖 Sorun Trafik','Tek robot kolaydır — dört robot aynı koridorlarda? Amazon depolarının gerçek problemi: rota değil TRAFİK. Filoyu sen yöneteceksin.'],
+    ['🤖 Sorun Trafik','Tek robot kolaydır - dört robot aynı koridorlarda? Amazon depolarının gerçek problemi: rota değil TRAFİK. Filoyu sen yöneteceksin.'],
     ['🤝 Sözleşme','Kavşakta kim önce geçer? Cevabın ne olduğu değil, HERKESİN AYNI cevabı bilmesi önemli. Trafik kuralı bir sözleşmedir.'],
-    ['💀 Kilitlenme','Dar koridorda burun buruna iki robot: ikisi de "beklerim" derse SONSUZA DEK beklerler. Deadlock — 1971\\u2019den beri bilgisayar biliminin baş belası. "Bekle" politikasını seç ve tanış!'],
+    ['💀 Kilitlenme','Dar koridorda burun buruna iki robot: ikisi de "beklerim" derse SONSUZA DEK beklerler. Deadlock - 1971\\u2019den beri bilgisayar biliminin baş belası. "Bekle" politikasını seç ve tanış!'],
     ['🔀 Döngüyü Kır','Çözüm hep aynı: biri yol vermeli. Yeniden rota (etrafından dolan) ya da geri çekilme. Kim yol verir? İşte öncelik kuralın orada devreye girer.'],
     ['📈 Rezervasyon','İkinci yaklaşım: her robot önündeki N hücreyi rezerve eder. Geniş pencere = güvenli ama tıkanık; dar = akıcı ama riskli. Güven ↔ verim ödünleşimi.'],
     ['🏁 Vardiyayı Aç','Isınmadan Kâbus Deposuna 7 vardiya. Bekleme sayacı puandır: akan filo kazanır. Lojistik Beyni ol!'],

@@ -254,7 +254,7 @@
       <div class="hud">
         <div class="tl">
           <div class="chip">SÜRE<b id="hudTime" class="mono">0.0s</b></div>
-          <div class="chip" id="hudAccChip">ÇİZGİDE<b id="hudAcc" class="mono">—</b></div>
+          <div class="chip" id="hudAccChip">ÇİZGİDE<b id="hudAcc" class="mono">-</b></div>
           <div class="chip" id="hudLockChip">DURUM<b id="hudLock">HAZIR</b></div>
         </div>
         <div class="tr">
@@ -269,7 +269,7 @@
     </div>
 
     <div class="result idle" id="result">
-      <div class="rhead" id="rhead">🧪 Robotunu kur, kodla ve <b style="color:var(--green);margin:0 4px">ÇALIŞTIR</b> — pisti tamamlamayı dene.</div>
+      <div class="rhead" id="rhead">🧪 Robotunu kur, kodla ve <b style="color:var(--green);margin:0 4px">ÇALIŞTIR</b> - pisti tamamlamayı dene.</div>
       <div class="rbody" id="rbody" style="display:none"></div>
     </div>
   </div>
@@ -301,7 +301,7 @@
             </div>
             <div class="param">
               <label>Teker Tutuşu <b id="gLabel">Normal</b></label>
-              <div style="font-size:.62rem;color:var(--muted2);line-height:1.4">Tutuş, seçtiğin <b>tekerleğin malzemesine</b> göre belirlenir — elle ayarlanmaz. Değiştirmek için “🔧 Robotu Kur” bölümünden tekerlek seç.</div>
+              <div style="font-size:.62rem;color:var(--muted2);line-height:1.4">Tutuş, seçtiğin <b>tekerleğin malzemesine</b> göre belirlenir - elle ayarlanmaz. Değiştirmek için “🔧 Robotu Kur” bölümünden tekerlek seç.</div>
             </div>
           </div>
         </div>
@@ -327,7 +327,7 @@
           <button id="revealSolution" style="display:none;width:100%;margin-top:8px;padding:9px;border:1px dashed var(--amber);background:rgba(245,158,11,.08);color:var(--amber);font-weight:800;font-size:.78rem;border-radius:10px;cursor:pointer">🔑 En iyi çözümü göster (admin)</button>
           <div class="rule def" id="defRuleBox" style="margin-top:12px"></div>
           <div class="legend">
-            <b>İpucu:</b> "Hiçbiri eşleşmezse" kuralı, hiçbir kural uymadığında çalışır — robot çizgiyi
+            <b>İpucu:</b> "Hiçbiri eşleşmezse" kuralı, hiçbir kural uymadığında çalışır - robot çizgiyi
             kaybettiğinde ne yapsın? (dur / ara / geri dön)
           </div>
         </div>
@@ -339,11 +339,11 @@
             <b style="color:var(--sky)">Kp</b> ne kadar sert düzelteceğini,
             <b style="color:var(--sky)">Kd</b> savrulmayı (zikzak) ne kadar bastıracağını belirler.
           </div>
-          <div class="pidrow"><label>Temel Hız <span class="infq" data-tip="Robotun düz giderken temel ilerleme hızı. PID bunun ÜSTÜNE sağ/sol düzeltme ekler. Gerçek hayat: otoyolda sabit gaz — yüksek hız daha çabuk tur attırır ama virajda savrulma riskini artırır.">?</span> <b id="pidBaseV">60%</b></label>
+          <div class="pidrow"><label>Temel Hız <span class="infq" data-tip="Robotun düz giderken temel ilerleme hızı. PID bunun ÜSTÜNE sağ/sol düzeltme ekler. Gerçek hayat: otoyolda sabit gaz - yüksek hız daha çabuk tur attırır ama virajda savrulma riskini artırır.">?</span> <b id="pidBaseV">60%</b></label>
             <input type="range" id="pidBase" min="20" max="100" step="5" value="60" /></div>
-          <div class="pidrow"><label>Kp — Orantı (sertlik) <span class="infq" data-tip="Kp = orantı katsayısı. Çizgiden ne kadar SAPARSA o oranda sert düzeltir. Gerçek hayat: direksiyonu ne kadar çevireceğin. Yüksek Kp = sert direksiyon (zikzak/savrulma riski); düşük Kp = yumuşak ama keskin virajı kaçırır.">?</span> <b id="pidKpV">1.4</b></label>
+          <div class="pidrow"><label>Kp - Orantı (sertlik) <span class="infq" data-tip="Kp = orantı katsayısı. Çizgiden ne kadar SAPARSA o oranda sert düzeltir. Gerçek hayat: direksiyonu ne kadar çevireceğin. Yüksek Kp = sert direksiyon (zikzak/savrulma riski); düşük Kp = yumuşak ama keskin virajı kaçırır.">?</span> <b id="pidKpV">1.4</b></label>
             <input type="range" id="pidKp" min="0" max="4" step="0.1" value="1.4" /></div>
-          <div class="pidrow"><label>Kd — Sönümleme (sakinlik) <span class="infq" data-tip="Kd = türev katsayısı. Sapmanın NE HIZLA değiştiğine bakıp erkenden frenler, savrulmayı azaltır. Gerçek hayat: viraja girmeden önce yavaşlamak. Yüksek Kd = daha sakin, kararlı; çok yüksek olursa robot tembelleşir.">?</span> <b id="pidKdV">0.5</b></label>
+          <div class="pidrow"><label>Kd - Sönümleme (sakinlik) <span class="infq" data-tip="Kd = türev katsayısı. Sapmanın NE HIZLA değiştiğine bakıp erkenden frenler, savrulmayı azaltır. Gerçek hayat: viraja girmeden önce yavaşlamak. Yüksek Kd = daha sakin, kararlı; çok yüksek olursa robot tembelleşir.">?</span> <b id="pidKdV">0.5</b></label>
             <input type="range" id="pidKd" min="0" max="2" step="0.1" value="0.5" /></div>
           <div class="piderr">
             <div class="lab">ÇİZGİ HATASI&nbsp;&nbsp;sol ◄ ─────── ► sağ</div>
@@ -389,7 +389,7 @@
   const LAB = {
     trackIdx: 0,
     track: null,
-    sensors: [],            // empty on open — student builds from scratch
+    sensors: [],            // empty on open - student builds from scratch
     rules: [],              // empty on open
     defaultRule: S.starterDefault(),
     params: S.defaultParams(),
@@ -460,7 +460,7 @@
     const tip=localToWorld(robot,HL+0.5,0), bl=localToWorld(robot,HL+0.05,-0.22), br=localToWorld(robot,HL+0.05,0.22);
     const [tx,ty]=w2s(...tip),[blx,bly]=w2s(...bl),[brx,bry]=w2s(...br);
     ctx.fillStyle='#22c55e'; ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(blx,bly); ctx.lineTo(brx,bry); ctx.closePath(); ctx.fill();
-    // sensors — analog intensity in PID mode, on/off otherwise
+    // sensors - analog intensity in PID mode, on/off otherwise
     const states = last ? last.states : null;
     const readings = last ? last.readings : null;
     LAB.sensors.forEach((sen,i)=>{
@@ -497,7 +497,7 @@
   function updateHud(last){
     document.getElementById('hudTime').textContent = (LAB.sim?LAB.sim.t:0).toFixed(1)+'s';
     const acc = LAB.sim ? S.accuracy(LAB.sim) : null;
-    document.getElementById('hudAcc').textContent = acc==null?'—':acc+'%';
+    document.getElementById('hudAcc').textContent = acc==null?'-':acc+'%';
     const lock = document.getElementById('hudLock');
     const lockChip=document.getElementById('hudLockChip');
     if(!LAB.sim){ lock.textContent='HAZIR'; lockChip.className='chip'; }
@@ -569,7 +569,7 @@
   function finishRun(){ stopRun(); showResult(); }
 
   // ---------- result ----------
-  const REASONS={off_track:'Pist dışına çıktı',line_lost:'Çizgiyi kaybetti',stalled:'Robot durdu / hareket etmedi',no_sensors:'Sensör yok — robot çizgiyi göremiyor'};
+  const REASONS={off_track:'Pist dışına çıktı',line_lost:'Çizgiyi kaybetti',stalled:'Robot durdu / hareket etmedi',no_sensors:'Sensör yok - robot çizgiyi göremiyor'};
   function setResultIdle(){
     const r=document.getElementById('result'); r.className='result idle';
     document.getElementById('rhead').innerHTML='🧪 Robot pistte… çizgiyi takip etmeye çalışıyor.';
@@ -599,7 +599,7 @@
       (window.RFResult
         ? RFResult.coachHTML(tips, { win:win, headWin:'🎓 Ne öğrendik?', headLose:'🔍 Ne oldu, neden?', reason: win?null:(REASONS[sim.reason]||'') })
         : tips.map(t=>`<div class="tip"><span class="ic">💡</span><span>${t}</span></div>`).join(''))+
-      `<div style="font-size:.6rem;letter-spacing:1px;color:var(--muted2);font-weight:700;margin:12px 0 6px">📈 ÇİZGİDEN SAPMA — ZAMAN <span style="color:var(--muted);font-weight:400;letter-spacing:0">(mavi çizgi = robotun sapması, ne kadar alçaksa o kadar iyi · yeşil kesikli = ideal, sıfır sapma · yeşil bant = çizgide sayılır · kırmızı kesikli = pist dışı eşiği)</span></div>
+      `<div style="font-size:.6rem;letter-spacing:1px;color:var(--muted2);font-weight:700;margin:12px 0 6px">📈 ÇİZGİDEN SAPMA - ZAMAN <span style="color:var(--muted);font-weight:400;letter-spacing:0">(mavi çizgi = robotun sapması, ne kadar alçaksa o kadar iyi · yeşil kesikli = ideal, sıfır sapma · yeşil bant = çizgide sayılır · kırmızı kesikli = pist dışı eşiği)</span></div>
        <canvas id="errChart" width="372" height="84" style="width:100%;border-radius:8px;border:1px solid var(--line);background:#0b1220;display:block"></canvas>
        <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
          <button class="btn run" id="retry">⟲ Tekrar Dene</button>
@@ -629,7 +629,7 @@
   function replayRun(){
     if(LAB.running) return;
     const btn=document.getElementById('replayBtn');
-    if(LAB.frames.length < 2){  // e.g. a run that stopped almost instantly — nothing to show
+    if(LAB.frames.length < 2){  // e.g. a run that stopped almost instantly - nothing to show
       if(btn){ const t=btn.textContent; btn.textContent='Kayıt bulunamadı'; setTimeout(function(){ btn.textContent=t; },1400); }
       return;
     }
@@ -656,7 +656,7 @@
     x.clearRect(0,0,W,H); x.fillStyle='#0b1220'; x.fillRect(0,0,W,H);
     const fr=LAB.frames; if(fr.length<2) return;
     const MAXD=1.6;
-    // on-line zone (green band) — brighter so it actually reads
+    // on-line zone (green band) - brighter so it actually reads
     const yBand=H-(S.ON_LINE_TIGHT/MAXD)*H;
     x.fillStyle='rgba(34,197,94,.16)'; x.fillRect(0,yBand,W,H-yBand);
     // IDEAL green line = zero deviation (robot perfectly centered on the line)
@@ -733,7 +733,7 @@
   }
   function setResultReady(){
     const r=document.getElementById('result'); r.className='result idle';
-    document.getElementById('rhead').innerHTML='🧪 Robotunu kur, kodla ve <b style="color:var(--green);margin:0 4px">ÇALIŞTIR</b> — pisti tamamlamayı dene.';
+    document.getElementById('rhead').innerHTML='🧪 Robotunu kur, kodla ve <b style="color:var(--green);margin:0 4px">ÇALIŞTIR</b> - pisti tamamlamayı dene.';
     document.getElementById('rbody').style.display='none';
   }
 
@@ -866,7 +866,7 @@
     const nameIn=document.createElement('input');
     nameIn.className='rulename'; nameIn.maxLength=24; nameIn.value=rule.name;
     nameIn.placeholder='kural adı';
-    nameIn.title='Bu kurala bir isim ver — hangi kuralın ne yaptığını karıştırmamak için (ör. "Sağa dön", "Düz git").';
+    nameIn.title='Bu kurala bir isim ver - hangi kuralın ne yaptığını karıştırmamak için (ör. "Sağa dön", "Düz git").';
     nameIn.style.cssText='flex:1;min-width:70px;max-width:170px;margin:0 8px;background:#0b1526;border:1px solid var(--line);color:var(--txt);border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700';
     nameIn.oninput=()=>{ rule.name=nameIn.value; };
     head.appendChild(nameIn);
@@ -876,7 +876,11 @@
     if(ri===0) up.style.visibility='hidden'; if(ri===LAB.rules.length-1) dn.style.visibility='hidden';
     ord.append(up,dn,rm); head.appendChild(ord); el.appendChild(head);
     const chips=document.createElement('div'); chips.className='chips';
-    LAB.sensors.forEach((sen,si)=>chips.appendChild(chipEl(rule,sen,si)));
+    if(LAB.sensors.length===0){
+      chips.innerHTML='<div style="font-size:.72rem;color:#fbbf24;background:#241f0d;border:1px solid #5c4a12;border-radius:8px;padding:8px 10px;line-height:1.5">Henüz sensör yok. <b>Robot</b> sekmesinden sensör ekle; koşullar (ALGILIYOR / ALGILAMIYOR / FARK ETMEZ) burada görünür.</div>';
+    } else {
+      LAB.sensors.forEach((sen,si)=>chips.appendChild(chipEl(rule,sen,si)));
+    }
     el.appendChild(chips);
     el.insertAdjacentHTML('beforeend','<div class="arrow">▼ O ZAMAN ▼</div>');
     const motors=document.createElement('div'); motors.className='motors';
@@ -955,9 +959,9 @@
     const link=location.origin+location.pathname+'#r='+code;
     history.replaceState(null,'','#r='+code);
     if(navigator.clipboard&&navigator.clipboard.writeText){
-      navigator.clipboard.writeText(link).then(()=>toast('🔗 Bağlantı kopyalandı — robotunu paylaşabilirsin!'),
-        ()=>toast('🔗 Bağlantı adres çubuğunda hazır — kopyalayabilirsin.'));
-    } else { toast('🔗 Bağlantı adres çubuğunda hazır — kopyalayabilirsin.'); }
+      navigator.clipboard.writeText(link).then(()=>toast('🔗 Bağlantı kopyalandı - robotunu paylaşabilirsin!'),
+        ()=>toast('🔗 Bağlantı adres çubuğunda hazır - kopyalayabilirsin.'));
+    } else { toast('🔗 Bağlantı adres çubuğunda hazır - kopyalayabilirsin.'); }
   }
   let toastT=null;
   function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show');
@@ -967,8 +971,8 @@
   const TUT=[
     {tab:null, t:'Çizgi Takip Lab’a hoş geldin! 🤖', p:'Kendi robotunu kuracak, kodlayacak ve çizgiyi takip ettireceksin. 4 adımda gösterelim.'},
     {tab:'robot', t:'1) Sensörleri yerleştir', p:'🤖 Robot sekmesinde sensörleri sürükleyerek şasiye koy. Önde ve geniş yerleştirmek virajları erken görmeni sağlar.'},
-    {tab:'kod', t:'2) Davranışı kodla', p:'🧩 Kod sekmesinde sensör→motor kurallarını ayarla — ya da 📈 PID moduna geçip Kp/Kd ile orantılı kontrol dene.'},
-    {tab:null, t:'3) Çalıştır ve öğren', p:'▶ ÇALIŞTIR’a bas, robotunu izle. Çizgiden çıkarsa ipuçları çıkar — düzelt ve tekrar dene. 🔗 Paylaş ile robotunu arkadaşına gönder!'},
+    {tab:'kod', t:'2) Davranışı kodla', p:'🧩 Kod sekmesinde sensör→motor kurallarını ayarla - ya da 📈 PID moduna geçip Kp/Kd ile orantılı kontrol dene.'},
+    {tab:null, t:'3) Çalıştır ve öğren', p:'▶ ÇALIŞTIR’a bas, robotunu izle. Çizgiden çıkarsa ipuçları çıkar - düzelt ve tekrar dene. 🔗 Paylaş ile robotunu arkadaşına gönder!'},
   ];
   let tutI=0;
   function switchTab(name){
@@ -995,7 +999,7 @@
 
   // ---------- guided spotlight tour (HubSpot/ClickUp style: highlights real elements) ----------
   const COACH=[
-    {tab:'robot', sel:'#addSensor', title:'1) Önce göz ekle 👀', text:'Robot çizgiyi görebilsin diye SENSÖR gerekir. Bu butona bas — sonra sensörü sürükleyip şasinin önüne koy.'},
+    {tab:'robot', sel:'#addSensor', title:'1) Önce göz ekle 👀', text:'Robot çizgiyi görebilsin diye SENSÖR gerekir. Bu butona bas - sonra sensörü sürükleyip şasinin önüne koy.'},
     {tab:'kod',   sel:'#addRule',   title:'2) Kural ekle 🧩', text:'“Sensör çizgiyi ALGILAYINCA ne yapsın?” Buradan kural ekle. Kurala bir isim ver (ör. “Sağa dön”) ki karışmasın.'},
     {tab:null,    sel:'#runbtn',    title:'3) Çalıştır & izle ▶', text:'Hazırsan ÇALIŞTIR’a bas, robotu izle. Çizgiden çıkarsa alttaki ipuçlarını oku, düzelt ve tekrar dene.'}
   ];
@@ -1043,10 +1047,10 @@
     ov.style.cssText='position:fixed;inset:0;z-index:9997;background:rgba(2,6,23,.7);display:flex;align-items:center;justify-content:center;padding:16px';
     ov.innerHTML='<div style="max-width:420px;background:var(--panel);border:1px solid var(--brand-lt);border-radius:16px;padding:22px 24px;box-shadow:0 16px 50px rgba(0,0,0,.6)">'+
       '<h3 style="margin:0 0 4px;color:var(--brand-lt);font-size:1.05rem">🛟 Takıldın mı? İşte 3 ipucu</h3>'+
-      '<p style="margin:0 0 12px;font-size:.72rem;color:var(--muted2)">Birkaç denemede geçemedin — sık yapılan hataları hızlıca gözden geçirelim.</p>'+
+      '<p style="margin:0 0 12px;font-size:.72rem;color:var(--muted2)">Birkaç denemede geçemedin - sık yapılan hataları hızlıca gözden geçirelim.</p>'+
       '<ol style="margin:0;padding-left:18px;font-size:.82rem;color:var(--txt);line-height:1.65">'+
         '<li><b>3 sensör kullan</b> (sol-orta-sağ). Tek sensör yönü ayırt edemez.</li>'+
-        '<li>Sensörleri <b>öne ve yana</b> yay — virajı erken görsün.</li>'+
+        '<li>Sensörleri <b>öne ve yana</b> yay - virajı erken görsün.</li>'+
         '<li><b>Viraj kuralları:</b> bir sensör çizgiyi görünce o tarafın motorunu yavaşlat, diğerini hızlandır → o yöne döner.</li>'+
       '</ol>'+
       '<button id="rfHelpClose" style="margin-top:16px;width:100%;background:var(--brand);color:#fff;border:none;border-radius:10px;padding:10px;font-weight:800;cursor:pointer">Anladım, tekrar deneyeceğim 💪</button>'+
@@ -1113,8 +1117,8 @@
     if(build && RD){
       const esc=(t)=>String(t||'').replace(/"/g,'&quot;');
       const chips=RD.ORDER.map(cat=>{ const o=RD.opt(cat,build[cat]);
-        const tip=esc((RD.COMPONENTS[cat].help||'')+((o&&o.desc)?' — '+o.desc:''));
-        return '<span class="rf-hoverable" style="border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:4px 8px;font-size:.68rem;color:var(--muted2)">'+RD.COMPONENTS[cat].icon+' <b style="color:var(--txt)">'+(o?o.name:'—')+'</b>'+(tip?' <span class="infq" data-tip="'+tip+'">?</span>':'')+'</span>'; }).join('');
+        const tip=esc((RD.COMPONENTS[cat].help||'')+((o&&o.desc)?' - '+o.desc:''));
+        return '<span class="rf-hoverable" style="border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:4px 8px;font-size:.68rem;color:var(--muted2)">'+RD.COMPONENTS[cat].icon+' <b style="color:var(--txt)">'+(o?o.name:'-')+'</b>'+(tip?' <span class="infq" data-tip="'+tip+'">?</span>':'')+'</span>'; }).join('');
       const r=RD.computeReport(build);
       const stat=(l,v,u,tip)=>'<div style="background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:8px 6px;text-align:center"><div style="font-size:.52rem;letter-spacing:1px;color:var(--muted);text-transform:uppercase">'+l+(tip?' <span class="infq" data-tip="'+esc(tip)+'">?</span>':'')+'</div><div style="font-size:1.1rem;font-weight:800;margin-top:2px">'+v+'</div><div style="font-size:.55rem;color:var(--muted2)">'+u+'</div></div>';
       card.innerHTML='<div style="font-size:.62rem;letter-spacing:2px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:10px">🔧 Robotun Künyesi <span class="infq" data-tip="Buradaki tüm değerler “Robotu Kur” bölümünde seçtiğin parçalardan otomatik hesaplanır. Parçaları değiştirince künye de, simülasyon davranışı da değişir. Her parçanın yanındaki ? ile teknik detayına bak.">?</span></div>'+

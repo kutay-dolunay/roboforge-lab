@@ -182,7 +182,7 @@
       <div class="hudbox"><div class="l">SAPMA</div><div class="v mono" id="hudE">0°</div></div>
       <div class="hudbox"><div class="l">DURUM</div><div class="v" id="hudS">HAZIR</div></div>
     </div>
-    <div class="hint" id="hint">☀️ Kosinüs yasası: panel güneşe dik değilse verim düşer. Ama MOTOR DA ENERJİ YER — titreyen takipçi kazandığından çok harcar. Bulutta ışık dağınıktır: parlak hayaletleri kovalamak katıksız israf. Hedef: gün sonunda NET enerji!</div>
+    <div class="hint" id="hint">☀️ Kosinüs yasası: panel güneşe dik değilse verim düşer. Ama MOTOR DA ENERJİ YER - titreyen takipçi kazandığından çok harcar. Bulutta ışık dağınıktır: parlak hayaletleri kovalamak katıksız israf. Hedef: gün sonunda NET enerji!</div>
     <div class="rdock" id="resultDock" style="display:none"></div>
   </div>
   <div class="side">
@@ -215,14 +215,14 @@
       </div>
       <div class="card">
         <h4>Enerji Muhasebesi</h4>
-        <p class="exp mono" id="ledger" style="font-size:.74rem">—</p>
+        <p class="exp mono" id="ledger" style="font-size:.74rem">-</p>
       </div>
     </div>
     <div id="tab-robot" style="display:none">
       <div class="card">
         <h4>Kosinüs Yasası</h4>
         <p class="exp">25° sapma ≈ %14 kayıp, 45° sapma ≈ %42 kayıp (cam yansıması dahil).
-          Küçük sapmayı kovalamak motor gideriyle başabaş — ölü bant tam bu dengedir.</p>
+          Küçük sapmayı kovalamak motor gideriyle başabaş - ölü bant tam bu dengedir.</p>
       </div>
       <div class="card kunye" id="kunye"></div>
     </div>
@@ -423,9 +423,9 @@
     const m=sim.mission;
     const box=document.getElementById('resultBox');
     box.innerHTML =
-      '<h3 class="'+(win?'win':'lose')+'">📄 Hasat Raporu — '+m.name+'</h3>'+
+      '<h3 class="'+(win?'win':'lose')+'">📄 Hasat Raporu - '+m.name+'</h3>'+
       '<div style="font-size:.76rem;color:var(--sky);margin:8px 0">'+
-        (LAB.mode==='rules'?'🧩 '+LAB.rules.length+' ışık kuralı':'📈 PID — Kp '+LAB.pid.kp+' · ölü bant '+LAB.pid.oluBant+'°')+'</div>'+
+        (LAB.mode==='rules'?'🧩 '+LAB.rules.length+' ışık kuralı':'📈 PID - Kp '+LAB.pid.kp+' · ölü bant '+LAB.pid.oluBant+'°')+'</div>'+
       '<div class="rstats">'+
         '<div class="rstat"><div class="l">NET</div><div class="v mono">'+sim.energy.toFixed(0)+'</div></div>'+
         '<div class="rstat"><div class="l">TOPLANAN</div><div class="v mono">'+sim.gathered.toFixed(0)+'</div></div>'+
@@ -433,7 +433,7 @@
         '<div class="rstat"><div class="l">VERİM ORANI</div><div class="v mono">%'+Math.round(sim.motorSpent/Math.max(1,sim.gathered)*100)+'</div></div>'+
       '</div>'+
       '<canvas id="repMap" width="500" height="210" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#0a0d12"></canvas>'+
-      '<div style="font-size:.68rem;color:var(--muted);margin:4px 0 10px">Sarı: güneş açısı · Mavi: panel açısı · Yeşil: net enerji. Panel çizgisi sarıya ne kadar yapışıksa hasat o kadar iyidir — ama basamaklar motor gideridir.</div>'+
+      '<div style="font-size:.68rem;color:var(--muted);margin:4px 0 10px">Sarı: güneş açısı · Mavi: panel açısı · Yeşil: net enerji. Panel çizgisi sarıya ne kadar yapışıksa hasat o kadar iyidir - ama basamaklar motor gideridir.</div>'+
       '<div class="rbtns"><button class="btn ghost" id="repClose">Kapat</button></div>';
     document.getElementById('resultWrap').classList.add('show');
     document.getElementById('repClose').onclick=()=>document.getElementById('resultWrap').classList.remove('show');
@@ -560,11 +560,11 @@
   function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show');
     clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2400); }
   const TUT=[
-    ['☀️ Kosinüs Yasası','Panel güneşe dik olduğunda tam güç üretir; her sapma derecesi verim yer. Takipçi güneşi izler — ama izlemek de bedava değil!'],
+    ['☀️ Kosinüs Yasası','Panel güneşe dik olduğunda tam güç üretir; her sapma derecesi verim yer. Takipçi güneşi izler - ama izlemek de bedava değil!'],
     ['⚙️ Motor Muhasebesi','Motor çalışırken enerji YER. Milimetrik takip için sürekli titreyen panel, kazandığından çok harcar. Net enerji = toplanan − motor gideri.'],
     ['🎯 Ölü Bant','PID modundaki sihirli ayar: sapma bu bandın içindeyse motor UYUMAZ... pardon, UYUR. Dar bant = titiz ve pahalı, geniş bant = tembel ve ucuz. Tatlı nokta ortada.'],
     ['☁️ Bulut Tuzağı','Bulutta ışık DAĞINIKTIR: parlak nokta gezinir ama takip etmek hiçbir şey kazandırmaz (%60 sabit verim). Hayalet kovalayan motor, hasadı yer. BULUTLU bitinde DUR!'],
-    ['🌙 Gece Disiplini','Karanlıkta üretim sıfır, motor gideri aynı. Gece motoru kapat. (Pro seviye: sabaha karşı panele doğuya park ettirmek — ilk ışıkta hazır olursun.)'],
+    ['🌙 Gece Disiplini','Karanlıkta üretim sıfır, motor gideri aynı. Gece motoru kapat. (Pro seviye: sabaha karşı panele doğuya park ettirmek - ilk ışıkta hazır olursun.)'],
     ['🏁 Hasat Zamanı','Açık günden Kâbus Gününe 7 vardiya. Rapordaki muhasebeyi oku: toplanan, gider, NET. Hasat Ustası %10 altı motor gideriyle kazanır!'],
   ];
   let tutI=0;

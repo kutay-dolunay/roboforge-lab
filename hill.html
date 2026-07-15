@@ -190,10 +190,10 @@
       <div class="hudbox"><div class="l">SÜRE</div><div class="v mono" id="hudT">0.0s</div></div>
       <div class="hudbox"><div class="l">HIZ</div><div class="v mono" id="hudV">0.0</div></div>
       <div class="hudbox"><div class="l">EĞİM</div><div class="v mono" id="hudE">0°</div></div>
-      <div class="hudbox"><div class="l">VİTES</div><div class="v mono" id="hudG">—</div></div>
+      <div class="hudbox"><div class="l">VİTES</div><div class="v mono" id="hudG">-</div></div>
       <div class="hudbox"><div class="l">DURUM</div><div class="v" id="hudS">HAZIR</div></div>
     </div>
-    <div class="hint" id="hint">⛰️ Zirveye ulaş! <b>Tork tırmandırır, tutuş patinajı önler, momentum kısa rampaları aşırtır.</b> Tekerlek boşa dönüyorsa daha çok gaz ÇARE DEĞİL — bu senaryo parça seçiminin + <b>vites</b> seçiminin sınavı.</div>
+    <div class="hint" id="hint">⛰️ Zirveye ulaş! <b>Tork tırmandırır, tutuş patinajı önler, momentum kısa rampaları aşırtır.</b> Tekerlek boşa dönüyorsa daha çok gaz ÇARE DEĞİL - bu senaryo parça seçiminin + <b>vites</b> seçiminin sınavı.</div>
     <div class="rdock" id="resultDock" style="display:none"></div>
   </div>
 
@@ -231,7 +231,7 @@
             Dik inişte Geri = motor freni!</p>
           <p class="exp" style="border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:var(--panel2)">
             ⚙️ <b>1. vites:</b> güç ×1.35 ama ~4.8 hızdan sonra motor nefessiz kalır.
-            <b>2. vites:</b> tavan 8.5 — düzlükte uçar, dikte zayıf. Gerçek arazi araçlarındaki şanzıman ikilemi!</p>
+            <b>2. vites:</b> tavan 8.5 - düzlükte uçar, dikte zayıf. Gerçek arazi araçlarındaki şanzıman ikilemi!</p>
           <div id="rulesList"></div>
           <button class="addRule" id="addRule">+ Yeni Kural</button>
           <button id="revealSolution" style="display:none;width:100%;margin-top:8px;padding:9px;border:1px dashed var(--amber);background:rgba(245,158,11,.08);color:var(--amber);font-weight:800;font-size:.78rem;border-radius:10px;cursor:pointer">🔑 En iyi çözümü göster (admin)</button>
@@ -244,7 +244,7 @@
       <div id="pidPanel" style="display:none">
         <div class="card">
           <h4>Hız Sabitleyici (Cruise)</h4>
-          <p class="exp">gaz = Kp·(hedef−hız) + Ki·∫hata. Yokuşta hız düşer, Ki birikir ve gazı kalıcı artırır —
+          <p class="exp">gaz = Kp·(hedef−hız) + Ki·∫hata. Yokuşta hız düşer, Ki birikir ve gazı kalıcı artırır -
             integralin yokuş dersi. Hedefi düşük tutarsan momentum kaybedersin!</p>
           <div class="sliderRow"><label>Hedef Hız <b id="pHedefV">5.0</b></label>
             <input type="range" id="pHedef" min="1.5" max="7" step="0.1" value="5.0"></div>
@@ -258,7 +258,7 @@
               <div class="gpo" data-g="1">1. vites</div>
               <div class="gpo" data-g="2">2. vites</div>
             </div></div>
-          <p class="exp" style="margin:8px 0 0">⚙️ <b>Oto</b>: dikte veya yavaşken 1. vitese iner — gerçek otomatik şanzıman mantığı. Elle seçersen ödünleşimi kendin yaşarsın.</p>
+          <p class="exp" style="margin:8px 0 0">⚙️ <b>Oto</b>: dikte veya yavaşken 1. vitese iner - gerçek otomatik şanzıman mantığı. Elle seçersen ödünleşimi kendin yaşarsın.</p>
         </div>
       </div>
     </div>
@@ -382,7 +382,7 @@
     E.textContent=(phi*57.3).toFixed(0)+'°';
     E.className='v mono '+(phi>0.3?'bad':phi>0.12?'hot':'ok');
     const G=document.getElementById('hudG');
-    G.textContent=LAB.sim?(LAB.sim.gear||1)+'. vites':'—';
+    G.textContent=LAB.sim?(LAB.sim.gear||1)+'. vites':'-';
     G.className='v mono '+(LAB.sim&&LAB.sim.gear===1?'hot':'');
     const s=document.getElementById('hudS');
     if(!LAB.sim){ s.textContent='HAZIR'; s.className='v'; }
@@ -440,7 +440,7 @@
     const tips=HC.coach(sim);
     var spdGraph='';
     if(window.RFResult && sim.log && sim.log.length>3){
-      spdGraph='<div class="rf-graphwrap"><div class="cap">⛰️ Hız — zamana karşı (kırmızı nokta = patinaj)</div>'+
+      spdGraph='<div class="rf-graphwrap"><div class="cap">⛰️ Hız - zamana karşı (kırmızı nokta = patinaj)</div>'+
         '<canvas id="hillGraph" class="rf-graph" style="height:140px"></canvas>'+
         '<div style="font-size:.72rem;color:var(--muted2);margin-top:2px">Hız 0’a düşüp kırmızı noktalar çoğaldıysa tekerlek boşa döndü (patinaj). Tutuş + doğru vites = düzgün tırmanış.</div></div>';
     }
@@ -488,7 +488,7 @@
     const course=HC.COURSES[LAB.courseIdx];
     const box=document.getElementById('resultBox');
     box.innerHTML =
-      '<h3 class="'+(win?'win':'lose')+'">📄 Tırmanış Raporu — '+course.name+'</h3>'+
+      '<h3 class="'+(win?'win':'lose')+'">📄 Tırmanış Raporu - '+course.name+'</h3>'+
       '<div style="margin:8px 0;font-size:.8rem;color:var(--muted2)">'+chips+'</div>'+
       '<div style="font-size:.76rem;color:var(--sky);margin-bottom:8px">Tork '+LAB.params.force.toFixed(1)+' · Tutuş '+LAB.params.grip.toFixed(2)+' · '+
         (LAB.mode==='pid'?'📈 Cruise (hedef '+LAB.pid.hedef.toFixed(1)+' · vites '+((LAB.pid.vites||'auto')==='auto'?'Oto':LAB.pid.vites)+')':'🧩 Eğim Kuralları + vites')+'</div>'+
@@ -658,7 +658,7 @@
       '<div class="kstat"><div class="l">Tutuş</div><div class="v">'+r.grip+'</div></div>'+
       '<div class="kstat"><div class="l">Ağırlık</div><div class="v">'+r.weightG+'<small>g</small></div></div>'+
       '</div>'+
-      '<p class="exp" style="margin-top:9px">Bu senaryoda tork ve tutuş her şeydir — hız değil!</p>';
+      '<p class="exp" style="margin-top:9px">Bu senaryoda tork ve tutuş her şeydir - hız değil!</p>';
   }
 
   function buildTrackTabs(){
@@ -695,7 +695,7 @@
 
   const TUT=[
     ['⛰️ Dağ Seni Bekliyor','Görev basit: zirvedeki bayrağa ulaş. Ama fizik basit değil: yokuş dikleştikçe yerçekimi seni geri çeker, gazı köklemek ise tekerleri boşa döndürebilir.'],
-    ['🌀 Tork ve Tutuş','TORK tırmanma kuvvetidir; TUTUŞ o kuvveti yola aktarır. Kuvvet tutuş sınırını aşarsa PATİNAJ olur — tekerlek döner ama robot ilerlemez. Daha çok gaz her zaman çare değil!'],
+    ['🌀 Tork ve Tutuş','TORK tırmanma kuvvetidir; TUTUŞ o kuvveti yola aktarır. Kuvvet tutuş sınırını aşarsa PATİNAJ olur - tekerlek döner ama robot ilerlemez. Daha çok gaz her zaman çare değil!'],
     ['🚀 Momentum Hilesi','Gücün yetmediği kısa dik rampalar için fizik hilesi: rampaya HIZLA gir! Kinetik enerji seni tepenin üstüne taşır. DÜZ bandında gazı yüksek tut.'],
     ['⚙️ Vites Kutusu','1. vites: bol güç, düşük hız tavanı. 2. vites: hız var, güç yok. Her kurala vites seç: dikte 1, düzlükte 2. Yanlış vites = patinaj ya da sünme!'],
     ['📈 Hız Sabitleyici','Cruise modunda Ki yokuş dersi verir: yokuşta hız düşer, integral birikir, gaz kalıcı artar. Vitesi Oto bırakabilir ya da elle sürebilirsin.'],

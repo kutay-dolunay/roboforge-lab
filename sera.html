@@ -202,7 +202,7 @@
       <div class="hudbox"><div class="l">BİTKİ</div><div class="v" id="hudP">%100</div></div>
       <div class="hudbox"><div class="l">DURUM</div><div class="v" id="hudS">HAZIR</div></div>
     </div>
-    <div class="hint" id="hint">🌱 Gerçek <b>telemetri kitinin</b> provası: ESP32 sensör verilerini telefonuna yollar, sen komut gönderirsin. Ama Wi-Fi koparsa telefon ÇARESİZ — bitkiyi <b>cihaz üstü kurallar</b> kurtarır. Kodu yaz, günü başlat!</div>
+    <div class="hint" id="hint">🌱 Gerçek <b>telemetri kitinin</b> provası: ESP32 sensör verilerini telefonuna yollar, sen komut gönderirsin. Ama Wi-Fi koparsa telefon ÇARESİZ - bitkiyi <b>cihaz üstü kurallar</b> kurtarır. Kodu yaz, günü başlat!</div>
     <div class="rdock" id="resultDock" style="display:none"></div>
   </div>
   <div class="side">
@@ -235,11 +235,11 @@
             <button class="cmdbtn" data-dev="pompa"><span>🚿</span>POMPA</button>
             <button class="cmdbtn" data-dev="led"><span>💡</span>LED</button>
           </div>
-          <div class="ph-feed"><div class="l">OLAY AKIŞI</div><div class="ev" id="phFeed">Sera uykuda — günü başlat.</div></div>
+          <div class="ph-feed"><div class="l">OLAY AKIŞI</div><div class="ev" id="phFeed">Sera uykuda - günü başlat.</div></div>
         </div>
       </div>
       <div class="card" style="margin-top:12px">
-        <p class="exp" style="margin:0">📱 Komutlar <b>6 saniyelik</b> manuel geçersiz kılmadır — sonra kontrol tekrar cihaz koduna döner.
+        <p class="exp" style="margin:0">📱 Komutlar <b>6 saniyelik</b> manuel geçersiz kılmadır - sonra kontrol tekrar cihaz koduna döner.
         Wi-Fi yokken buton işlemez; <b>kurallar cihazda çalışmaya devam eder.</b></p>
       </div>
     </div>
@@ -251,8 +251,8 @@
       <div id="rulesPanel">
         <div class="card">
           <h4>Cihaz Üstü Kurallar (ESP32 kodu)</h4>
-          <p class="exp">Kurallar <b>telefonda değil serada</b> yaşar — Wi-Fi kopsa da çalışırlar. Yukarıdan aşağı:
-            her cihaz için ilk eşleşen kural kazanır. Cihazlar son hallerinde <b>kilitli kalır</b> (latch) —
+          <p class="exp">Kurallar <b>telefonda değil serada</b> yaşar - Wi-Fi kopsa da çalışırlar. Yukarıdan aşağı:
+            her cihaz için ilk eşleşen kural kazanır. Cihazlar son hallerinde <b>kilitli kalır</b> (latch) -
             AÇ kuralının KAPAT kardeşi yoksa sonsuza dek açık kalır!</p>
           <div id="rulesList"></div>
           <button class="addRule" id="addRule">+ Yeni Kural</button>
@@ -287,7 +287,7 @@
       <div class="card">
         <h4>Telemetri Kiti</h4>
         <p class="exp">Bu simülasyon gelecek dönemdeki <b>gerçek kitin provası</b>: kutuya sensörleri + Arduino/ESP32 + bataryayı
-          sen yerleştireceksin, telefonunla konuşacak. Buradaki kurallar mantığı birebir kitte de kullanılacak —
+          sen yerleştireceksin, telefonunla konuşacak. Buradaki kurallar mantığı birebir kitte de kullanılacak -
           şimdiden ustalaş!</p>
       </div>
       <div class="card">
@@ -529,7 +529,7 @@
   }
   const REASONS={ hasat:'Gün tamamlandı, bitki sağlıklı!', bitki_sicak:'Bitki sıcaktan kavruldu! 🥵',
     bitki_soguk:'Bitki dondu! 🥶', bitki_kuru:'Toprak çöle döndü, bitki susuz kaldı. 🏜️',
-    bitki_sel:'Aşırı sulama — kökler boğuldu! 🌊', bitki_firtina:'Fırtına açık kapaktan girdi, bitkiyi hırpaladı. 🌪️',
+    bitki_sel:'Aşırı sulama - kökler boğuldu! 🌊', bitki_firtina:'Fırtına açık kapaktan girdi, bitkiyi hırpaladı. 🌪️',
     bitki_stres:'Bitki strese dayanamadı.', buyume:'Gün bitti ama bitki yeterince büyüyemedi.',
     sagliksiz:'Gün bitti ama bitki çok yıprandı.' };
   function showResult(){
@@ -582,10 +582,10 @@
     const level=sim.level;
     const box=document.getElementById('resultBox');
     box.innerHTML =
-      '<h3 class="'+(win?'win':'lose')+'">📄 Sera Günlüğü — '+level.name+'</h3>'+
+      '<h3 class="'+(win?'win':'lose')+'">📄 Sera Günlüğü - '+level.name+'</h3>'+
       '<div style="margin:8px 0;font-size:.8rem;color:var(--muted2)">'+chips+'</div>'+
       '<div style="font-size:.76rem;color:var(--sky);margin-bottom:8px">'+
-        (LAB.mode==='rules'?'🧩 '+LAB.rules.length+' cihaz-üstü kural':'📈 Termostat — hedef '+LAB.pid.hedefT+'° · Kp '+LAB.pid.kp+' · Ki '+LAB.pid.ki)+
+        (LAB.mode==='rules'?'🧩 '+LAB.rules.length+' cihaz-üstü kural':'📈 Termostat - hedef '+LAB.pid.hedefT+'° · Kp '+LAB.pid.kp+' · Ki '+LAB.pid.ki)+
         ' · örnekleme '+LAB.sampleHz+' Hz</div>'+
       '<div class="rstats">'+
         '<div class="rstat"><div class="l">BÜYÜME</div><div class="v mono">%'+Math.round(sim.growth)+'</div></div>'+
@@ -597,7 +597,7 @@
       '<div style="font-size:.68rem;color:var(--muted);margin:4px 0 10px">Mavi: iç sıcaklık (yeşil bant = konfor) · Sarı: toprak nemi · Yeşil: bitki sağlığı · Alt kırmızı: Wi-Fi kesik</div>'+
       '<h4 style="margin:0 0 6px;font-size:.66rem;letter-spacing:2px;color:var(--muted)">📓 KAYIT DEFTERİ (veri dedektifliği)</h4>'+
       '<div style="max-height:150px;overflow:auto">'+
-        (sim.events.length?sim.events.map(e=>'<div class="evline"><b>'+clockOf(e[0])+'</b> '+e[1]+'</div>').join(''):'<div class="evline">Olağan dışı olay yok — sakin bir gün.</div>')+
+        (sim.events.length?sim.events.map(e=>'<div class="evline"><b>'+clockOf(e[0])+'</b> '+e[1]+'</div>').join(''):'<div class="evline">Olağan dışı olay yok - sakin bir gün.</div>')+
       '</div>'+
       '<div class="rbtns"><button class="btn ghost" id="repClose">Kapat</button></div>';
     document.getElementById('resultWrap').classList.add('show');
@@ -763,11 +763,11 @@
     clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2400); }
   const TUT=[
     ['🌱 Telemetri Kiti Provası','Bu sera, gelecek dönemki GERÇEK kitin dijital ikizi: sensörler + ESP32 + batarya kutuda, veriler telefonunda. Burada ustalaşan kiti söküp takar!'],
-    ['📱 Telefon = Kumanda + Ekran','Sağdaki telefonda canlı grafikler ve komut butonları var. Komutlar 6 saniyelik geçersiz kılmadır — kalıcı davranışı CİHAZ KODU belirler.'],
-    ['🧩 Kod Cihazda Yaşar','Kurallar ESP32 üstünde çalışır: EĞER sıcak → kapağı aç. Dikkat: cihazlar son halinde KİLİTLİ kalır — her AÇ kuralının bir KAPAT kardeşi olmalı!'],
+    ['📱 Telefon = Kumanda + Ekran','Sağdaki telefonda canlı grafikler ve komut butonları var. Komutlar 6 saniyelik geçersiz kılmadır - kalıcı davranışı CİHAZ KODU belirler.'],
+    ['🧩 Kod Cihazda Yaşar','Kurallar ESP32 üstünde çalışır: EĞER sıcak → kapağı aç. Dikkat: cihazlar son halinde KİLİTLİ kalır - her AÇ kuralının bir KAPAT kardeşi olmalı!'],
     ['📵 Wi-Fi Kopunca…','Sinyal gidince telefon kör olur, butonlar ölür. Ama kurallar cihazda çalışmaya devam eder. Gerçek IoT dersi: otomasyonu telefona değil CİHAZA göm.'],
-    ['🔋 Her Ölçüm Enerji','Örnekleme hızı grafiği akıcı yapar ama bataryayı yer. Güneş paneli gündüz şarj eder — geceyi planla. 10 Hz açgözlülüğü Kâbus Serasında ölümdür!'],
-    ['🏁 Günü Başlat!','İlk Günden Kâbus Serasına 7 görev. Raporda KAYIT DEFTERİ var: ne, ne zaman ters gitti — veri dedektifi ol!'],
+    ['🔋 Her Ölçüm Enerji','Örnekleme hızı grafiği akıcı yapar ama bataryayı yer. Güneş paneli gündüz şarj eder - geceyi planla. 10 Hz açgözlülüğü Kâbus Serasında ölümdür!'],
+    ['🏁 Günü Başlat!','İlk Günden Kâbus Serasına 7 görev. Raporda KAYIT DEFTERİ var: ne, ne zaman ters gitti - veri dedektifi ol!'],
   ];
   let tutI=0;
   function showTut(i){

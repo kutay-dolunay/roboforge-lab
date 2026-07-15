@@ -259,7 +259,7 @@
       <div id="pidPanel" style="display:none">
         <div class="card">
           <h4>PID Kontrolcü</h4>
-          <p class="exp">Analog çizgi hatasına oranlı sürüş. Yeşil işaret dönüşleri ve engel manevrası otomatik —
+          <p class="exp">Analog çizgi hatasına oranlı sürüş. Yeşil işaret dönüşleri ve engel manevrası otomatik -
             ama <b>manevra yönünü ve hız/kazanç ayarını sen seçersin.</b></p>
           <div class="sliderRow"><label>Temel Hız <b id="pBaseV">55</b></label>
             <input type="range" id="pBase" min="20" max="90" step="1" value="55"></div>
@@ -324,7 +324,7 @@
     for(let gy=0; gy<CVS.height; gy+=46){ CTX.beginPath(); CTX.moveTo(0,gy); CTX.lineTo(CVS.width,gy); CTX.stroke(); }
 
     const c = LAB.course, lw = RC.LINE_HALF_WIDTH*2*LAB.view.scale;
-    // stubs (dead-end branches — same white line)
+    // stubs (dead-end branches - same white line)
     CTX.lineCap='round'; CTX.lineJoin='round';
     c.stubs.forEach(st=>{
       CTX.strokeStyle='#e8edf5'; CTX.lineWidth=lw; CTX.beginPath();
@@ -481,9 +481,9 @@
   }
 
   // ---- result (standard docked panel) ----
-  const REASONS={ rescued:'Kazazedeye ulaştın — görev tamam!', crash:'Robot engele çarptı! 💥',
-    line_lost:'Çizgi kaybedildi — robot yolu bulamadı.', off_track:'Robot parkurdan tamamen çıktı.',
-    stalled:'Robot durup kaldı.', timeout:'Süre doldu — görev tamamlanamadı.', wrong_way:'Robot ters yöne döndü! 🔄' };
+  const REASONS={ rescued:'Kazazedeye ulaştın - görev tamam!', crash:'Robot engele çarptı! 💥',
+    line_lost:'Çizgi kaybedildi - robot yolu bulamadı.', off_track:'Robot parkurdan tamamen çıktı.',
+    stalled:'Robot durup kaldı.', timeout:'Süre doldu - görev tamamlanamadı.', wrong_way:'Robot ters yöne döndü! 🔄' };
   function showResult(){
     const sim=LAB.sim; if(!sim) return;
     const win=sim.status==='success';
@@ -503,7 +503,7 @@
           '<div class="rd-stat"><div class="l">ÇİZGİDE</div><div class="v mono">%'+RC.accuracy(sim)+'</div></div>'+
           '<div class="rd-stat"><div class="l">DURUM</div><div class="v '+(win?'ok':'bad')+'">'+(win?'KURTARILDI':'BAŞARISIZ')+'</div></div>'+
         '</div>'+
-        '<div class="rf-graphwrap"><div class="cap">🚑 Çizgide kalma</div><canvas id="rescueGauge" class="rf-graph" style="height:130px;border:none;background:transparent"></canvas><div style="font-size:.72rem;color:var(--muted2);margin-top:2px;text-align:center">Rota üzerinde ne kadar kaldın. Kayıp arttıkça puan düşer — sensör + hız dengesi kur.</div></div>'+
+        '<div class="rf-graphwrap"><div class="cap">🚑 Çizgide kalma</div><canvas id="rescueGauge" class="rf-graph" style="height:130px;border:none;background:transparent"></canvas><div style="font-size:.72rem;color:var(--muted2);margin-top:2px;text-align:center">Rota üzerinde ne kadar kaldın. Kayıp arttıkça puan düşer - sensör + hız dengesi kur.</div></div>'+
                 (window.RFResult?RFResult.coachHTML(tips,{win:win,headWin:'🎓 Ne öğrendik?',headLose:'🔍 Ne oldu, neden?',reason:win?null:(REASONS[sim.reason]||'')}):(tips.length?'<div class="rd-tip">💡 '+tips[0]+'</div>':''))+
         '<div class="rd-btns">'+
           '<button class="btn run" id="againBtn">⟲ Tekrar Dene</button>'+
@@ -558,12 +558,12 @@
         return o?'<span class="bchipR">'+o.icon+' '+o.name+'</span>':''; }).join(' ');
     }
     const modeTxt = LAB.mode==='pid'
-      ? '📈 PID — Temel '+LAB.pid.base+' · Kp '+LAB.pid.kp.toFixed(2)+' · Kd '+LAB.pid.kd.toFixed(2)+' · Engel: '+(LAB.pid.avoidDir==='L'?'Soldan':LAB.pid.avoidDir==='R'?'Sağdan':'Otomatik')
-      : '🧩 Kural — '+LAB.rules.length+' kural + varsayılan';
+      ? '📈 PID - Temel '+LAB.pid.base+' · Kp '+LAB.pid.kp.toFixed(2)+' · Kd '+LAB.pid.kd.toFixed(2)+' · Engel: '+(LAB.pid.avoidDir==='L'?'Soldan':LAB.pid.avoidDir==='R'?'Sağdan':'Otomatik')
+      : '🧩 Kural - '+LAB.rules.length+' kural + varsayılan';
     const win=sim.status==='success';
     const box=document.getElementById('resultBox');
     box.innerHTML =
-      '<h3 class="'+(win?'win':'lose')+'">📄 Görev Raporu — '+RC.COURSES[LAB.courseIdx].name+'</h3>'+
+      '<h3 class="'+(win?'win':'lose')+'">📄 Görev Raporu - '+RC.COURSES[LAB.courseIdx].name+'</h3>'+
       '<div style="margin:8px 0;font-size:.8rem;color:var(--muted2)">'+chips+'</div>'+
       '<div style="font-size:.78rem;color:var(--sky);margin-bottom:8px">'+modeTxt+'</div>'+
       '<div class="rstats">'+
@@ -824,7 +824,7 @@
   // ---- tutorial ----
   const TUT=[
     ['🧑‍🚒 Kurtarma Görevi','Bir kazazede seni bekliyor! Robotun beyaz çizgiyi izleyerek parkurun sonuna ulaşmalı. Ama bu parkur sıradan değil: kesik çizgiler, kavşaklar ve yol kapatan engeller var.'],
-    ['🟩 Yeşil İşaretler','Kavşaklarda çizgi ikiye ayrılır — biri çıkmaz yol! Kavşaktan önce zemindeki YEŞİL kare doğru yönü gösterir. YSOL/YSAĞ sensörleri bunu görür; kurallarında kullan.'],
+    ['🟩 Yeşil İşaretler','Kavşaklarda çizgi ikiye ayrılır - biri çıkmaz yol! Kavşaktan önce zemindeki YEŞİL kare doğru yönü gösterir. YSOL/YSAĞ sensörleri bunu görür; kurallarında kullan.'],
     ['🚧 Engeller','Turuncu kutular çizgiyi kapatır. ENGEL sensörü öndeki engeli görür. Çarpmadan etrafından dolanıp çizgiyi geri bulmalısın. SON çipi (çizgi en son nerede görüldü) geri dönüş yönünü verir.'],
     ['🧩 Kural / 📈 PID','Kural modunda davranışı sen yazarsın. PID modunda sürüş analogdur; kavşak dönüşü ve engel manevrası otomatiktir ama yön ve ayarlar senindir. İkisini de dene!'],
     ['🏁 Başla!','Kolay parkurla başla, kurallarını her seviyede geliştir. Başarısız olursan koç sana nedenini söyler. Hazırsan: ÇALIŞTIR!'],

@@ -1,12 +1,12 @@
 /* =============================================================================
- * RoboForge — Ateş Söndürme (Firefighting Robot) :: Simulation Core
+ * RoboForge - Ateş Söndürme (Firefighting Robot) :: Simulation Core
  * -----------------------------------------------------------------------------
  * Pure, dependency-free. Browser (window.FireCore) + Node (module.exports).
  *
  * A house of rooms (wall segments). Somewhere a candle burns. The robot
  * explores (wall-follow), FINDS the flame (directional light sensors, walls
  * block light), approaches and extinguishes it with its fan (auto-fan when
- * the flame is close & ahead — hold it there!).
+ * the flame is close & ahead - hold it there!).
  *
  * Sensors (fixed roles):
  *   DUVAR-ÖN / DUVAR-SOL / DUVAR-SAĞ : raycast distance -> boolean "wall near"
@@ -267,13 +267,13 @@
     const tips = [];
     if (sim.reason === 'timeout') {
       if (sim.foundAt === null) tips.push('Robot alevi hiç göremedi. Keşif kuralların evi dolaşıyor mu? Sağ-duvar takibi (sağda duvar yoksa sağa kavis, önde duvar varsa sola dön) kapalı evlerde her odayı gezer.');
-      else tips.push('Alev görüldü (' + sim.foundAt.toFixed(0) + '. saniye) ama söndürülemedi. Işık kurallarının robotu aleve DOĞRU döndürdüğünden emin ol; alev önündeyken yavaş yaklaş — fan ancak yakında ve alev öndeyken çalışır.');
+      else tips.push('Alev görüldü (' + sim.foundAt.toFixed(0) + '. saniye) ama söndürülemedi. Işık kurallarının robotu aleve DOĞRU döndürdüğünden emin ol; alev önündeyken yavaş yaklaş - fan ancak yakında ve alev öndeyken çalışır.');
     }
-    if (sim.reason === 'stalled') tips.push('Robot sıkıştı. Önde duvar varken dönen bir kuralın olmalı — ve varsayılan kural robotu hep hareket ettirmeli.');
+    if (sim.reason === 'stalled') tips.push('Robot sıkıştı. Önde duvar varken dönen bir kuralın olmalı - ve varsayılan kural robotu hep hareket ettirmeli.');
     if (sim.status === 'success') {
       const T = sim.house.time || 90;
       if (sim.t < T * 0.4) tips.push('Hızlı müdahale! İtfaiyecilik böyle yapılır.');
-      else tips.push('Yangın söndü! Daha hızlısı için keşif hızını artırmayı dene — ama duvarlara takılma.');
+      else tips.push('Yangın söndü! Daha hızlısı için keşif hızını artırmayı dene - ama duvarlara takılma.');
     }
     return tips;
   }
@@ -284,7 +284,7 @@
     if (t < T * 0.35) return { key: 'alev_avcisi', name: '🏆 Alev Avcısı', cmt: 'Saniyeler içinde buldu, tereddütsüz söndürdü.' };
     if (t < T * 0.55) return { key: 'itfaiye_eri', name: '🥇 İtfaiye Eri', cmt: 'Sağlam keşif, temiz müdahale.' };
     if (t < T * 0.8) return { key: 'gonullu_itfaiyeci', name: '🧭 Gönüllü İtfaiyeci', cmt: 'Yangın söndü! Keşif rotası biraz daha kısalabilir.' };
-    return { key: 'caylak_itfaiyeci', name: '🎓 Çaylak İtfaiyeci', cmt: 'Son anda ama söndürdün — şimdi hız zamanı.' };
+    return { key: 'caylak_itfaiyeci', name: '🎓 Çaylak İtfaiyeci', cmt: 'Son anda ama söndürdün - şimdi hız zamanı.' };
   }
 
   function runHeadless(cfg, maxTime, dt) {

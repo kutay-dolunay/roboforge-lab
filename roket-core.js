@@ -1,10 +1,10 @@
 /*
- * RoboForge — Roket İniş (Hoverslam) Simülasyon Çekirdeği
+ * RoboForge - Roket İniş (Hoverslam) Simülasyon Çekirdeği
  * Pure, dependency-free. Browser (window.RoketCore) + Node (module.exports).
  *
  * Suicide burn / hoverslam: motoru TAM DOĞRU anda ateşle. Erken = havada asılı
  * kalır, yakıt biter, düşersin. Geç = çakılırsın. Dersler: (1) h_yakma =
- * v²/(2·a_net) — fizik formülü hayat kurtarır, (2) yakıt yandıkça roket HAFİFLER
+ * v²/(2·a_net) - fizik formülü hayat kurtarır, (2) yakıt yandıkça roket HAFİFLER
  * → itki ivmesi artar (değişken kütle!), (3) ateşleme gecikmesi varsa ERKEN başla,
  * (4) kısma (throttle) son metrelerde yumuşatır.
  */
@@ -18,22 +18,22 @@
   const MISSIONS = [
     { id: 'ilkinis', name: 'İlk İniş', difficulty: 'Başlangıç', alt: 130, v0: -22,
       dry: 1.0, fuel: 46, burnRate: 6.0, thrust: 65, delay: 0, dur: 30,
-      desc: 'Klasik hoverslam: 130 metreden 22 m/s ile düşüyorsun. Motoru doğru irtifada ateşle — ne erken ne geç.' },
+      desc: 'Klasik hoverslam: 130 metreden 22 m/s ile düşüyorsun. Motoru doğru irtifada ateşle - ne erken ne geç.' },
     { id: 'agirkargo', name: 'Ağır Kargo', difficulty: 'Başlangıç', alt: 140, v0: -20,
       dry: 1.7, fuel: 52, burnRate: 6.0, thrust: 76, delay: 0, dur: 32,
-      desc: 'Kargo ağır: itki ivmen düşük, yakma mesafen UZUN. Aynı formül, farklı sayılar — hesabı yeniden yap.' },
+      desc: 'Kargo ağır: itki ivmen düşük, yakma mesafen UZUN. Aynı formül, farklı sayılar - hesabı yeniden yap.' },
     { id: 'azyakit', name: 'Son Damla', difficulty: 'Orta', alt: 150, v0: -24,
       dry: 1.0, fuel: 26, burnRate: 6.0, thrust: 50, delay: 0, dur: 32,
       desc: 'Yakıt deposu neredeyse boş: hover lüksün YOK. Tek şansın kusursuz zamanlanmış tek yakma.' },
     { id: 'gecikme', name: 'Tembel Ateşleyici', difficulty: 'Orta', alt: 140, v0: -23,
       dry: 1.0, fuel: 44, burnRate: 6.0, thrust: 63, delay: 0.55, dur: 32,
-      desc: 'Motor ateşleme komutundan 0.55 saniye SONRA çalışır. O yarım saniyede 13 metre düşersin — erken komuta!' },
+      desc: 'Motor ateşleme komutundan 0.55 saniye SONRA çalışır. O yarım saniyede 13 metre düşersin - erken komuta!' },
     { id: 'hizligiris', name: 'Sıcak Giriş', difficulty: 'İleri', alt: 170, v0: -38,
       dry: 1.0, fuel: 50, burnRate: 6.5, thrust: 76, delay: 0.2, dur: 32,
-      desc: '38 m/s ile dalıyorsun — yakma mesafesi hızın KARESİYLE büyür. Gözünle değil, formülle karar ver.' },
+      desc: '38 m/s ile dalıyorsun - yakma mesafesi hızın KARESİYLE büyür. Gözünle değil, formülle karar ver.' },
     { id: 'zayifmotor', name: 'Zayıf Motor', difficulty: 'İleri', alt: 160, v0: -20,
       dry: 1.3, fuel: 60, burnRate: 5.0, thrust: 57, delay: 0.2, dur: 40,
-      desc: 'İtki/ağırlık oranı 1.3 — fren mesafen upuzun, hata payın sıfıra yakın. Sabırlı ve erken yakma.' },
+      desc: 'İtki/ağırlık oranı 1.3 - fren mesafen upuzun, hata payın sıfıra yakın. Sabırlı ve erken yakma.' },
     { id: 'kabusinis', name: 'Kâbus İnişi', difficulty: 'Uzman', alt: 180, v0: -34,
       dry: 1.4, fuel: 34, burnRate: 6.0, thrust: 55, delay: 0.5, dur: 36,
       desc: 'Hızlı giriş + ağır gövde + kıt yakıt + tembel ateşleyici. Gerçek roket mühendisliği: her şey aynı anda doğru olacak.' },
@@ -103,7 +103,7 @@
       const pid = sim.cfg.pid || defaultPID();
       const hb = burnAlt(m, sim.v, pid.marj || 1.15);
       if (sim.alt <= hb && sim.v < -1) thr = 1;
-      if (sim.alt > 14 && -sim.v < 4.5) thr = 0;          // yüksekte yavaşladıysan kes — tekrar süzül (hover yok!)
+      if (sim.alt > 14 && -sim.v < 4.5) thr = 0;          // yüksekte yavaşladıysan kes - tekrar süzül (hover yok!)
       if (sim.alt < 14 && sim.v < 0) {
         const vWant = -Math.max(pid.sonHiz || 2, sim.alt * 0.55);
         if (sim.v < vWant) thr = 1;
@@ -116,7 +116,7 @@
     // ---- ateşleme gecikmesi ----
     if (thr > 0 && !sim.burning) {
       if (sim.igniteT < 0) { sim.igniteT = sim.t;
-        if (m.delay > 0) pushEvt(sim, 'ign', '🔥 Ateşleme komutu — motor ' + m.delay + ' sn sonra çalışacak'); }
+        if (m.delay > 0) pushEvt(sim, 'ign', '🔥 Ateşleme komutu - motor ' + m.delay + ' sn sonra çalışacak'); }
       if (sim.t - sim.igniteT >= m.delay) { sim.burning = true;
         pushEvt(sim, 'burn', '🚀 MOTOR ÇALIŞTI (' + Math.round(sim.alt) + ' m, ' + Math.abs(sim.v).toFixed(0) + ' m/s)'); }
     }
@@ -127,7 +127,7 @@
     // ---- fizik ----
     if (sim.thrAct > 0) {
       sim.fuel = Math.max(0, sim.fuel - m.burnRate * sim.thrAct * dt);
-      if (sim.fuel <= 0) pushEvt(sim, 'dry', '🪫 YAKIT BİTTİ — serbest düşüş!');
+      if (sim.fuel <= 0) pushEvt(sim, 'dry', '🪫 YAKIT BİTTİ - serbest düşüş!');
     }
     sim.mass = m.dry + sim.fuel * 0.05;
     const a = (sim.thrAct > 0 && sim.fuel > 0 ? (m.thrust * sim.thrAct) / sim.mass : 0) - G;
@@ -135,7 +135,7 @@
     sim.v += a * dt;
     sim.alt += sim.v * dt;
     if (Math.abs(sim.v) < 1.2 && sim.alt > 8 && sim.thrAct > 0) sim.hoverT += dt; else sim.hoverT = Math.max(0, sim.hoverT - dt * 0.5);
-    if (sim.hoverT > 2.5) pushEvt(sim, 'hover', '⚠️ HAVADA ASILISIN — her saniye yakıt, aşağıda hâlâ ' + Math.round(sim.alt) + ' m var');
+    if (sim.hoverT > 2.5) pushEvt(sim, 'hover', '⚠️ HAVADA ASILISIN - her saniye yakıt, aşağıda hâlâ ' + Math.round(sim.alt) + ' m var');
 
     // ---- iniş ----
     if (sim.alt <= 0) {
@@ -143,7 +143,7 @@
       if (sim.landV <= SAFE_V) { sim.status = 'success'; sim.reason = 'indi';
         pushEvt(sim, 'land', '🎯 YUMUŞAK İNİŞ: ' + sim.landV.toFixed(1) + ' m/s' + (sim.fuel > 0 ? ' · kalan yakıt ' + sim.fuel.toFixed(0) : '')); }
       else if (sim.landV <= HARD_V) { sim.status = 'failed'; sim.reason = 'sert';
-        pushEvt(sim, 'land', '💢 Sert iniş: ' + sim.landV.toFixed(1) + ' m/s — bacaklar kırıldı'); }
+        pushEvt(sim, 'land', '💢 Sert iniş: ' + sim.landV.toFixed(1) + ' m/s - bacaklar kırıldı'); }
       else { sim.status = 'failed'; sim.reason = 'cakilma';
         pushEvt(sim, 'land', '💥 ÇAKILMA: ' + sim.landV.toFixed(1) + ' m/s'); }
     }
@@ -163,7 +163,7 @@
     const soft = Math.max(0, 100 - sim.landV / SAFE_V * 55);
     const total = fuelPct * 0.55 + soft * 0.45;
     if (total > 52) return { name: '🏆 Hoverslam Efsanesi', cmt: 'Tek yakma, tüy gibi iniş, depoda yakıt. Booster kurtarma ekibi seni işe alır!' };
-    if (total > 30) return { name: '🥈 Roket Pilotu', cmt: 'İndin! Madalya için: daha geç yak, daha az hover — yakıt marjı puandır.' };
+    if (total > 30) return { name: '🥈 Roket Pilotu', cmt: 'İndin! Madalya için: daha geç yak, daha az hover - yakıt marjı puandır.' };
     return { name: '🥉 Test Pilotu', cmt: 'Son damlayla indin. Yakma irtifanı formüle yaklaştır: h = v²/(2·a) + pay.' };
   }
   function coach(sim) {
@@ -171,12 +171,12 @@
     const r = sim.reason || '';
     const m = sim.mission;
     if (r === 'cakilma' || r === 'sert') {
-      if (sim.fuel <= 0.5) tips.push('Yakıt bitti: motoru ÇOK ERKEN yaktın, hover yaptın, düştün. Hoverslam sabır işidir — h_yakma = v²/(2·a_net)' + (m.delay ? ' + gecikme payı' : '') + '. Geç yak, sert yak.');
-      else tips.push('Çok GEÇ yaktın. Fren mesafesi hızın karesiyle büyür: ' + Math.abs(m.v0) + ' m/s girişte ~' + Math.round(burnAlt(m, m.v0, 1.0)) + ' m gerekir. Marjını artır' + (m.delay ? ' — ve ateşleme gecikmesini unutma: komut ' + m.delay + ' sn önce verilmeli!' : '.'));
+      if (sim.fuel <= 0.5) tips.push('Yakıt bitti: motoru ÇOK ERKEN yaktın, hover yaptın, düştün. Hoverslam sabır işidir - h_yakma = v²/(2·a_net)' + (m.delay ? ' + gecikme payı' : '') + '. Geç yak, sert yak.');
+      else tips.push('Çok GEÇ yaktın. Fren mesafesi hızın karesiyle büyür: ' + Math.abs(m.v0) + ' m/s girişte ~' + Math.round(burnAlt(m, m.v0, 1.0)) + ' m gerekir. Marjını artır' + (m.delay ? ' - ve ateşleme gecikmesini unutma: komut ' + m.delay + ' sn önce verilmeli!' : '.'));
     }
-    if (r === 'sure') tips.push('Süre doldu — muhtemelen havada asılı kaldın. Hover, hoverslam DEĞİLDİR: yavaşladıysan kes, tekrar hızlan, alçakta tekrar yak. En iyisi: hiç hover etme.');
+    if (r === 'sure') tips.push('Süre doldu - muhtemelen havada asılı kaldın. Hover, hoverslam DEĞİLDİR: yavaşladıysan kes, tekrar hızlan, alçakta tekrar yak. En iyisi: hiç hover etme.');
     if (sim.status === 'success' && sim.fuel < m.fuel * 0.1) tips.push('İndin ama depo bomboş. Erken yakma + hover = israf. Yakma irtifanı düşür, kalan yakıt madalya getirir.');
-    if (!tips.length) tips.push('Değişken kütle cilvesi: yakıt yandıkça roket hafifler, aynı itki daha çok ivme verir — yakmanın SONU başından güçlüdür. Formüldeki kötümser (dolu kütle) hesap bu yüzden güvenlidir.');
+    if (!tips.length) tips.push('Değişken kütle cilvesi: yakıt yandıkça roket hafifler, aynı itki daha çok ivme verir - yakmanın SONU başından güçlüdür. Formüldeki kötümser (dolu kütle) hesap bu yüzden güvenlidir.');
     return tips;
   }
 
@@ -192,9 +192,9 @@
   function starterRules() {
     return [
       // [ÜSTÜNDE, YAKLAŞIYOR, YAKMA NOKTASI, ALÇAK, ÇOK HIZLI, YAVAŞLADI, YAKIT AZ]
-      { pattern: ['any', 'any', 'any', 'on', 'any', 'on', 'any'],  thr: 0.22 },  // alçak + yavaş → rölanti (alev SÖNMEZ — ateşleme gecikmesi tuzağı yok)
+      { pattern: ['any', 'any', 'any', 'on', 'any', 'on', 'any'],  thr: 0.22 },  // alçak + yavaş → rölanti (alev SÖNMEZ - ateşleme gecikmesi tuzağı yok)
       { pattern: ['any', 'any', 'any', 'on', 'any', 'off', 'any'], thr: 1 },     // alçak ama hızlı → TAM GAZ
-      { pattern: ['any', 'any', 'any', 'off', 'any', 'on', 'any'], thr: 0 },     // yüksekte yavaşladıysan kes — süzül
+      { pattern: ['any', 'any', 'any', 'off', 'any', 'on', 'any'], thr: 0 },     // yüksekte yavaşladıysan kes - süzül
       { pattern: ['any', 'any', 'on', 'any', 'any', 'any', 'any'], thr: 1 },     // yakma noktası → TAM GAZ
       { pattern: ['on', 'any', 'any', 'any', 'any', 'any', 'any'], thr: 0 },     // hâlâ yüksekte → serbest düş
     ];

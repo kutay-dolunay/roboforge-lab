@@ -1,10 +1,10 @@
 /*
- * RoboForge — Güneş Takipçisi Simülasyon Çekirdeği
+ * RoboForge - Güneş Takipçisi Simülasyon Çekirdeği
  * Pure, dependency-free. Browser (window.SolarCore) + Node (module.exports).
  *
- * 1 eksenli güneş paneli takipçisi. Dersler: (1) kosinüs kaybı — panel güneşe
+ * 1 eksenli güneş paneli takipçisi. Dersler: (1) kosinüs kaybı - panel güneşe
  * dik değilse verim düşer, (2) MOTOR DA ENERJİ YER: sürekli titreyen takipçi
- * kazandığından çok harcar (ölü bant dersi!), (3) bulutta ışık DAĞINIKTIR —
+ * kazandığından çok harcar (ölü bant dersi!), (3) bulutta ışık DAĞINIKTIR -
  * takip etmek israftır, bekle, (4) gece motoru kapat, sabaha park et.
  */
 (function () {
@@ -19,19 +19,19 @@
   const MISSIONS = [
     { id: 'acikgun', name: 'Açık Gün', difficulty: 'Başlangıç', clouds: [], noise: 0,
       arc: 75, target: 93, dur: DAY,
-      desc: 'Bulutsuz gökyüzü: güneşi takip et, kosinüs kaybını yaşa. Sabit panel bile enerji toplar — takipçi ne kadar fazlasını toplar?' },
+      desc: 'Bulutsuz gökyüzü: güneşi takip et, kosinüs kaybını yaşa. Sabit panel bile enerji toplar - takipçi ne kadar fazlasını toplar?' },
     { id: 'parcali', name: 'Parçalı Bulut', difficulty: 'Başlangıç', clouds: [[14, 19], [28, 32]], noise: 0,
       arc: 75, target: 69, dur: DAY,
-      desc: 'İki bulut penceresi. Bulutta ışık dağınıktır — takip KAZANDIRMAZ, motor gideri kaybettirir. Beklemeyi öğren.' },
+      desc: 'İki bulut penceresi. Bulutta ışık dağınıktır - takip KAZANDIRMAZ, motor gideri kaybettirir. Beklemeyi öğren.' },
     { id: 'kiskisa', name: 'Kısa Kış Günü', difficulty: 'Orta', clouds: [[20, 24]], noise: 0,
       arc: 50, target: 70, dur: DAY * 0.8,
-      desc: 'Güneş alçak yaydan geçer, gün kısa. Her dakika değerli — sabah panelini DOĞUYA park etmiş olan kazanır.' },
+      desc: 'Güneş alçak yaydan geçer, gün kısa. Her dakika değerli - sabah panelini DOĞUYA park etmiş olan kazanır.' },
     { id: 'firtinali', name: 'Fırtınalı Gök', difficulty: 'Orta', clouds: [[8, 13], [17, 21], [30, 36]], noise: 0.05,
       arc: 70, target: 57, dur: DAY,
-      desc: 'Üç bulut + hafif sensör gürültüsü. Ölü bandın dar ise gürültü motoru titretir — gider kazancı yer.' },
+      desc: 'Üç bulut + hafif sensör gürültüsü. Ölü bandın dar ise gürültü motoru titretir - gider kazancı yer.' },
     { id: 'ruzgarli', name: 'Rüzgârlı Gün', difficulty: 'İleri', clouds: [[22, 26]], noise: 0.16,
       arc: 75, target: 82, dur: DAY,
-      desc: 'Rüzgâr paneli sarsar: sensörler zıplıyor. Geniş ölü bant + sabırlı takip — yoksa motor bütün hasadı yer.' },
+      desc: 'Rüzgâr paneli sarsar: sensörler zıplıyor. Geniş ölü bant + sabırlı takip - yoksa motor bütün hasadı yer.' },
     { id: 'cifttepe', name: 'Vadi Gölgesi', difficulty: 'İleri', clouds: [[0, 6], [39, 45]], noise: 0.06,
       arc: 75, target: 86, dur: DAY,
       desc: 'Sabah ve akşam vadi gölgede: gün ortası her şeydir. Gölgede motor kapalı, güneş çıkınca hızlı yakala.' },
@@ -130,7 +130,7 @@
     const gain = PANEL_MAX * sun.inten * eff * (p.panel || 1) * dt;
     sim.energy += gain; sim.gathered += gain;
 
-    if (sun.cloudy) pushEvt(sim, 'cl' + Math.floor(sim.t / 5), '☁️ Bulut geçiyor — ışık dağınık, takip kazandırmaz'); 
+    if (sun.cloudy) pushEvt(sim, 'cl' + Math.floor(sim.t / 5), '☁️ Bulut geçiyor - ışık dağınık, takip kazandırmaz'); 
 
     sim.totalTicks++;
     if (sim.totalTicks % 5 === 0) {
@@ -149,7 +149,7 @@
     const marj = sim.energy / sim.mission.target;
     const verim = sim.motorSpent / Math.max(1, sim.gathered);
     if (marj > 1.25 && verim < 0.10) return { name: '🏆 Hasat Ustası', cmt: 'Panel güneşe yapışık, motor fısıltıyla çalıştı. Şebekeye satacak kadar enerji!' };
-    if (marj > 1.05) return { name: '🥈 Enerji Teknisyeni', cmt: 'Hedef tamam. Motor gideri hasadın %' + Math.round(verim * 100) + 'ı — ölü bandı ayarla, israfı kıs.' };
+    if (marj > 1.05) return { name: '🥈 Enerji Teknisyeni', cmt: 'Hedef tamam. Motor gideri hasadın %' + Math.round(verim * 100) + 'ı - ölü bandı ayarla, israfı kıs.' };
     return { name: '🥉 Panel Bekçisi', cmt: 'Ucu ucuna. Grafikte panelin güneşi nerede kaçırdığına bak.' };
   }
   function coach(sim) {
@@ -157,11 +157,11 @@
     const verim = sim.motorSpent / Math.max(1, sim.gathered);
     if (sim.status === 'failed') {
       if (verim > 0.22) tips.push('Motor, hasadın %' + Math.round(verim * 100) + 'ını yedi! Sürekli titreyen takipçi kazandığından çok harcar. Ölü bandı genişlet ya da HİZALI bandında motoru DURDUR.');
-      else if (sim.moveTime < sim.mission.dur * 0.05) tips.push('Panel neredeyse hiç dönmemiş — güneş yayı boyunca kosinüs kaybına teslim oldun. GÜNEŞ İLERİDE bitinde motoru döndür.');
+      else if (sim.moveTime < sim.mission.dur * 0.05) tips.push('Panel neredeyse hiç dönmemiş - güneş yayı boyunca kosinüs kaybına teslim oldun. GÜNEŞ İLERİDE bitinde motoru döndür.');
       else tips.push('Enerji ' + sim.energy.toFixed(0) + ' / hedef ' + sim.mission.target + '. Grafiği incele: panel çizgisi güneş çizgisini ne kadar geriden izliyor?');
     }
-    if (!tips.length && sim.mission.clouds.length) tips.push('Bulutta ışık DAĞINIKTIR: açı fark etmez, %60 sabit verim. O pencerede motor çalıştırmak katıksız israf — beklemeyi bilen kazanır.');
-    if (!tips.length) tips.push('Kosinüs yasası: 25° sapma %10 kayıp, 45° sapma %30 kayıp. Küçük sapmaları kovalamak motor gideriyle başabaş — ölü bant tam bu dengedir.');
+    if (!tips.length && sim.mission.clouds.length) tips.push('Bulutta ışık DAĞINIKTIR: açı fark etmez, %60 sabit verim. O pencerede motor çalıştırmak katıksız israf - beklemeyi bilen kazanır.');
+    if (!tips.length) tips.push('Kosinüs yasası: 25° sapma %10 kayıp, 45° sapma %30 kayıp. Küçük sapmaları kovalamak motor gideriyle başabaş - ölü bant tam bu dengedir.');
     return tips;
   }
 

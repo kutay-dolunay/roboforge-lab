@@ -1,13 +1,13 @@
 /*
- * RoboForge — Depo Filosu Simülasyon Çekirdeği
+ * RoboForge - Depo Filosu Simülasyon Çekirdeği
  * Pure, dependency-free. Browser (window.DepoCore) + Node (module.exports).
  *
  * Amazon tarzı depo: raf blokları arasında koridorlar, 3-4 AGV, sipariş görevleri.
  * Dersler: (1) KİLİTLENME (deadlock): iki robot dar koridorda burun buruna, ikisi de
- * beklerse SONSUZA DEK beklerler — bilgisayar biliminin en zarif tuzağı,
+ * beklerse SONSUZA DEK beklerler - bilgisayar biliminin en zarif tuzağı,
  * (2) kavşak önceliği bir SÖZLEŞMEDİR: herkes aynı kurala uyarsa akış olur,
  * (3) rezervasyon penceresi: ileriyi çok tutarsan güvenli ama hat tıkanır,
- * az tutarsan hızlı ama çarpışma riski — güven ↔ verim ödünleşimi.
+ * az tutarsan hızlı ama çarpışma riski - güven ↔ verim ödünleşimi.
  */
 (function () {
   'use strict';
@@ -25,7 +25,7 @@
              '.##.##..',
              '.##.##..',
              '...S....'],
-      desc: 'Tek robot, dört sipariş: rafa git, kutuyu al, istasyona getir. Trafik yok — akışı tanı.' },
+      desc: 'Tek robot, dört sipariş: rafa git, kutuyu al, istasyona getir. Trafik yok - akışı tanı.' },
     { id: 'kesisme', name: 'Kesişme', difficulty: 'Başlangıç', dur: 75, tasks: 6, bots: 2,
       grid: ['0.......',
              '.##.##..',
@@ -50,7 +50,7 @@
              '.##..##...',
              '.##..##...',
              '....S.....'],
-      desc: 'Üç robot, on sipariş, dar süre. Verim artık kural setinin kalitesi — bekleyen robot para kaybettirir.' },
+      desc: 'Üç robot, on sipariş, dar süre. Verim artık kural setinin kalitesi - bekleyen robot para kaybettirir.' },
     { id: 'rafarasi', name: 'Raf Arası', difficulty: 'İleri', dur: 110, tasks: 8, bots: 2,
       grid: ['0.......1',
              '.##.####.',
@@ -68,7 +68,7 @@
              '.##..##..##.',
              '.##..##..##.',
              '.....S......'],
-      desc: 'Dört robot aynı anda sahada. Kavşaklar kaynıyor — sözleşmene güven, akışı izle.' },
+      desc: 'Dört robot aynı anda sahada. Kavşaklar kaynıyor - sözleşmene güven, akışı izle.' },
     { id: 'kabusdepo', name: 'Kâbus Deposu', difficulty: 'Uzman', dur: 155, tasks: 12, bots: 3,
       grid: ['0...1....2',
              '.######.#.',
@@ -199,7 +199,7 @@
           pushEvt(sim, 'a' + bot.id + '_' + sim.taskIdx, '📋 AGV-' + (bot.id + 1) + ' sipariş aldı (raf ' + bot.task.at[0] + ',' + bot.task.at[1] + ')');
         } else return;   // iş yok
       }
-      // hedefe vardı mı? (teslimat istasyona KOMŞU hücrede de sayılır — rampa ağzı)
+      // hedefe vardı mı? (teslimat istasyona KOMŞU hücrede de sayılır - rampa ağzı)
       const goal = bot.carrying ? sim.gr.station : bot.task.at;
       const atGoal = bot.carrying
         ? (Math.abs(bot.tx - goal[0]) + Math.abs(bot.ty - goal[1]) <= 1)
@@ -279,7 +279,7 @@
           return true;
         };
         if (blockerIdle) {
-          // boştaki robot kenara çekilecek (aşağıda) — çok beklersek etrafından dolan
+          // boştaki robot kenara çekilecek (aşağıda) - çok beklersek etrafından dolan
           if (bot.wait > 1.4 && bot.replanCd <= 0) { if (!tryReplan(new Set([nk]), 'ri')) backOff(); }
         } else if (headOn) {
           if (canResolve && yield_ && bot.replanCd <= 0) {
@@ -337,7 +337,7 @@
     sim.progressed = false;
     if (sim.deadT > 4) {
       sim.status = 'failed'; sim.reason = 'kilitlenme';
-      pushEvt(sim, 'dl', '💀 KİLİTLENME! Robotlar birbirini bekliyor — kimse kıpırdamıyor. Klasik deadlock.');
+      pushEvt(sim, 'dl', '💀 KİLİTLENME! Robotlar birbirini bekliyor - kimse kıpırdamıyor. Klasik deadlock.');
       return;
     }
 
@@ -353,14 +353,14 @@
     const waitPen = sim.waits / Math.max(1, sim.t) * 100;
     const total = tScore * 0.7 + Math.max(0, 100 - waitPen * 2) * 0.3;
     if (total > 62) return { name: '🏆 Lojistik Beyni', cmt: 'Filo saat gibi işledi: sıfır kilitlenme, akan kavşaklar, erken paydos. Depo müdürü seni arıyor!' };
-    if (total > 40) return { name: '🥈 Vardiya Amiri', cmt: 'Siparişler tamam. Bekleme süresi ' + sim.waits.toFixed(0) + ' sn — politikayı incelt, akış artar.' };
-    return { name: '🥉 Stajyer Sevkiyatçı', cmt: 'Ucu ucuna yetişti. Robotlar birbirine çok takıldı — kavşak sözleşmesini gözden geçir.' };
+    if (total > 40) return { name: '🥈 Vardiya Amiri', cmt: 'Siparişler tamam. Bekleme süresi ' + sim.waits.toFixed(0) + ' sn - politikayı incelt, akış artar.' };
+    return { name: '🥉 Stajyer Sevkiyatçı', cmt: 'Ucu ucuna yetişti. Robotlar birbirine çok takıldı - kavşak sözleşmesini gözden geçir.' };
   }
   function coach(sim) {
     const tips = [];
     const r = sim.reason || '';
-    if (r === 'kilitlenme') tips.push('Deadlock! Dar koridorda burun buruna gelen iki robot, ikisi de "bekle" politikasındaysa SONSUZA DEK bekler. Çözüm: biri yol vermeli — "yeniden rota" ya da "geri çekil" politikası seç. Bilgisayar bilimi bunu 60 yıldır öğretir: döngüsel bekleme kırılmalı.');
-    if (r === 'sure') tips.push('Süre doldu. Bekleme toplamı ' + sim.waits.toFixed(0) + ' sn — robotlar çok bekleşmiş. Rezervasyon penceresini küçült ya da öncelik kuralını netleştir: kararsızlık en pahalı politikadır.');
+    if (r === 'kilitlenme') tips.push('Deadlock! Dar koridorda burun buruna gelen iki robot, ikisi de "bekle" politikasındaysa SONSUZA DEK bekler. Çözüm: biri yol vermeli - "yeniden rota" ya da "geri çekil" politikası seç. Bilgisayar bilimi bunu 60 yıldır öğretir: döngüsel bekleme kırılmalı.');
+    if (r === 'sure') tips.push('Süre doldu. Bekleme toplamı ' + sim.waits.toFixed(0) + ' sn - robotlar çok bekleşmiş. Rezervasyon penceresini küçült ya da öncelik kuralını netleştir: kararsızlık en pahalı politikadır.');
     if (!tips.length && sim.waits > sim.t * 0.3) tips.push('Kazandın ama filo zamanının üçte birini bekleyerek geçirdi. Yüklü robot önceliği dene: teslimata gideni bekletmek çifte kayıptır.');
     if (!tips.length) tips.push('Rezervasyon penceresi ödünleşimi: geniş pencere çarpışmayı imkânsızlaştırır ama koridorları kilitler; dar pencere akıcıdır ama burun buruna riskini artırır. Güven ↔ verim.');
     return tips;

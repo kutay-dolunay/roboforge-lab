@@ -163,11 +163,11 @@
     <canvas id="arena" width="920" height="560"></canvas>
     <div class="hud">
       <div class="hudbox"><div class="l">SÜRE</div><div class="v mono" id="hudT">0.0s</div></div>
-      <div class="hudbox"><div class="l">ADIM</div><div class="v mono" id="hudA">—</div></div>
+      <div class="hudbox"><div class="l">ADIM</div><div class="v mono" id="hudA">-</div></div>
       <div class="hudbox"><div class="l">SALINIM</div><div class="v mono" id="hudE">0°</div></div>
       <div class="hudbox"><div class="l">DURUM</div><div class="v" id="hudS">HAZIR</div></div>
     </div>
-    <div class="hint" id="hint">🏗️ Halattaki yük bir <b>SARKAÇTIR</b>: hızlanınca sallanır, sallanırken kanca <b>takılamaz</b>, sallanırken bırakılan yük <b>kayar ve devrilir</b>. Kademeli hızlan, SONDUR ile salınımı öldür — ya da Anti-Sway otopilota geç. T = 2π√(L/g)!</div>
+    <div class="hint" id="hint">🏗️ Halattaki yük bir <b>SARKAÇTIR</b>: hızlanınca sallanır, sallanırken kanca <b>takılamaz</b>, sallanırken bırakılan yük <b>kayar ve devrilir</b>. Kademeli hızlan, SONDUR ile salınımı öldür - ya da Anti-Sway otopilota geç. T = 2π√(L/g)!</div>
     <div class="rdock" id="resultDock" style="display:none"></div>
   </div>
   <div class="side">
@@ -183,14 +183,14 @@
       <div class="card" id="progCard">
         <h4 id="progTitle">Hareket Programı (elle pilotaj)</h4>
         <p class="exp" id="progExp">Adım adım vinç sür: GİT (hedef x + hız%), HALAT (uzunluk), TAK, BIRAK, SONDUR
-          (salınımı aktif öldür). Sır: <b>yavaş hızlanan erken biter</b> — %100 gaz salınım demek, salınım beklemek demek.</p>
+          (salınımı aktif öldür). Sır: <b>yavaş hızlanan erken biter</b> - %100 gaz salınım demek, salınım beklemek demek.</p>
         <div id="stepList"></div>
         <button class="addRule" id="addStep">+ Adım Ekle</button>
       </div>
       <div class="card" id="pidCard" style="display:none">
         <h4>Anti-Sway Kazançları</h4>
         <p class="exp">Otopilot her an açık: ivme = −Kp·(x−hedef) − Kd·v + <b>Ks·φ + Kw·ω</b>.
-          Son iki terim sarkacı GERİ BESLER — vinç, yükün sallanma enerjisini kendi hareketiyle emer.
+          Son iki terim sarkacı GERİ BESLER - vinç, yükün sallanma enerjisini kendi hareketiyle emer.
           Ks=Kw=0 yaparak farkı gör: rüzgârlı limanda otopilotsuz hayat zordur.</p>
         <div class="sliderRow"><label>Kp (konum) <b id="pKpV">2.4</b></label>
           <input type="range" id="pKp" min="0.5" max="5" step="0.1" value="2.4"></div>
@@ -208,7 +208,7 @@
       <div class="card">
         <h4>Sarkaç Fiziği</h4>
         <p class="exp">Periyot <b>T = 2π√(L/g)</b>: uzun halat yavaş ve tembel, kısa halat hızlı ve sinirli sallanır.
-          İstifin tepesine inerken halat kısalır — sarkaç karakter değiştirir, eli alışanlar bilir.</p>
+          İstifin tepesine inerken halat kısalır - sarkaç karakter değiştirir, eli alışanlar bilir.</p>
       </div>
       <div class="card">
         <h4>Vinç Motoru (robotundan gelir)</h4>
@@ -338,7 +338,7 @@
     const sim=LAB.sim;
     document.getElementById('hudT').textContent=(sim?sim.t:0).toFixed(1)+'s';
     const P=sim?(sim.cfg.program||[]):LAB.prog;
-    document.getElementById('hudA').textContent=sim?Math.min(sim.stepIdx+1,P.length)+'/'+P.length:'—';
+    document.getElementById('hudA').textContent=sim?Math.min(sim.stepIdx+1,P.length)+'/'+P.length:'-';
     const E=document.getElementById('hudE');
     const sw=sim?Math.abs(sim.phi*57.3):0;
     E.textContent=sw.toFixed(0)+'°';
@@ -387,7 +387,7 @@
     document.getElementById('resultWrap').classList.remove('show');
   }
   const REASONS={ tamam:'Vardiya tamamlandı!', duvar:'Yük duvara çarptı! 💥', surtme:'Yük yerde sürüklendi! 💥',
-    devrildi:'Konteyner kaydı/devrildi — sallanırken ya da yüksekten bırakıldı. 🫨',
+    devrildi:'Konteyner kaydı/devrildi - sallanırken ya da yüksekten bırakıldı. 🫨',
     eksik:'Konteynerler hedefte değil.', istif:'Konteynerler üst üste oturmadı.', sure:'Vardiya süresi doldu.' };
   function showResult(){
     const sim=LAB.sim; if(!sim) return;
@@ -435,18 +435,18 @@
     const m=sim.mission;
     const box=document.getElementById('resultBox');
     box.innerHTML =
-      '<h3 class="'+(win?'win':'lose')+'">📄 Vardiya Raporu — '+m.name+'</h3>'+
+      '<h3 class="'+(win?'win':'lose')+'">📄 Vardiya Raporu - '+m.name+'</h3>'+
       '<div style="margin:8px 0;font-size:.8rem;color:var(--muted2)">'+chips+'</div>'+
       '<div style="font-size:.76rem;color:var(--sky);margin-bottom:8px">'+
-        (LAB.mode==='prog'?'🧩 Hareket Programı — '+LAB.prog.length+' adım':'📈 Anti-Sway — Ks '+LAB.pid.ks+' · Kw '+LAB.pid.kw)+'</div>'+
+        (LAB.mode==='prog'?'🧩 Hareket Programı - '+LAB.prog.length+' adım':'📈 Anti-Sway - Ks '+LAB.pid.ks+' · Kw '+LAB.pid.kw)+'</div>'+
       '<div class="rstats">'+
         '<div class="rstat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
         '<div class="rstat"><div class="l">TEPE SALINIM</div><div class="v mono">'+(sim.maxSwing*57.3).toFixed(0)+'°</div></div>'+
         '<div class="rstat"><div class="l">HASSASİYET</div><div class="v mono">%'+V.precision(sim)+'</div></div>'+
-        '<div class="rstat"><div class="l">BIRAKMA SALINIMI</div><div class="v mono">'+(sim.swingAtRelease.length?Math.round(Math.max(...sim.swingAtRelease)*57.3)+'°':'—')+'</div></div>'+
+        '<div class="rstat"><div class="l">BIRAKMA SALINIMI</div><div class="v mono">'+(sim.swingAtRelease.length?Math.round(Math.max(...sim.swingAtRelease)*57.3)+'°':'-')+'</div></div>'+
       '</div>'+
       '<canvas id="repMap" width="500" height="220" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#0a0d12"></canvas>'+
-      '<div style="font-size:.68rem;color:var(--muted);margin:4px 0 10px">Yük izi — mavi boş kanca, sarı yüklü. Sallanan iz = enerji israfı.</div>'+
+      '<div style="font-size:.68rem;color:var(--muted);margin:4px 0 10px">Yük izi - mavi boş kanca, sarı yüklü. Sallanan iz = enerji israfı.</div>'+
       '<h4 style="margin:0 0 6px;font-size:.66rem;letter-spacing:2px;color:var(--muted)">📓 VARDİYA KAYDI</h4>'+
       '<div style="max-height:150px;overflow:auto">'+
         (sim.events.length?sim.events.map(e=>'<div class="evline"><b>'+e[0]+'s</b> '+e[1]+'</div>').join(''):'<div class="evline">Olay kaydı boş.</div>')+
@@ -520,8 +520,8 @@
     document.getElementById('pidCard').style.display=m==='pid'?'block':'none';
     document.getElementById('progTitle').textContent=m==='prog'?'Hareket Programı (elle pilotaj)':'Görev Planı (otopilot sürer)';
     document.getElementById('progExp').innerHTML=m==='prog'
-      ?'Adım adım vinç sür: GİT (hedef x + hız%), HALAT (uzunluk), TAK, BIRAK, SONDUR (salınımı aktif öldür). Sır: <b>yavaş hızlanan erken biter</b> — %100 gaz salınım demek, salınım beklemek demek.'
-      :'Aynı adımlar — ama sürüşü <b>anti-sway otopilot</b> yapar: hedefe tutunur, salınımı geri beslemeyle emer, BIRAK yük hedefe oturunca otomatik tetiklenir. Kazançları aşağıdan ayarla.';
+      ?'Adım adım vinç sür: GİT (hedef x + hız%), HALAT (uzunluk), TAK, BIRAK, SONDUR (salınımı aktif öldür). Sır: <b>yavaş hızlanan erken biter</b> - %100 gaz salınım demek, salınım beklemek demek.'
+      :'Aynı adımlar - ama sürüşü <b>anti-sway otopilot</b> yapar: hedefe tutunur, salınımı geri beslemeyle emer, BIRAK yük hedefe oturunca otomatik tetiklenir. Kazançları aşağıdan ayarla.';
   }
   document.getElementById('modeProg').onclick=()=>setMode('prog');
   document.getElementById('modePid').onclick=()=>setMode('pid');
@@ -598,11 +598,11 @@
     clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2400); }
   const TUT=[
     ['🏗️ Yük Bir Sarkaçtır','Vinç hızlanınca halattaki yük geride kalır, yavaşlayınca öne fırlar: SARKAÇ. Liman operatörlüğünün tamamı bu sarkacı yönetme sanatıdır.'],
-    ['🪝 Kanca Kuralları','Sallanan yüke kanca TAKILMAZ (|açı| < 7° şart). Sallanırken BIRAKILAN yük yatay hızla uçar — kayar, devrilir. Önce SÖNDÜR, sonra dokun.'],
+    ['🪝 Kanca Kuralları','Sallanan yüke kanca TAKILMAZ (|açı| < 7° şart). Sallanırken BIRAKILAN yük yatay hızla uçar - kayar, devrilir. Önce SÖNDÜR, sonra dokun.'],
     ['🐢 Yavaş = Hızlı','Paradoks: %40 hızla akıcı giden vinç, %100 hızla dur-kalk yapandan ERKEN bitirir. Çünkü salınım söndürmek beklemek demektir. GİT hız yüzdesiyle oyna.'],
-    ['🧘 SÖNDÜR Adımı','SÖNDÜR vinci yerinde tutarak sarkaç enerjisini emer. Her TAK ve BIRAK öncesi bir SÖNDÜR — usta operatör alışkanlığı.'],
+    ['🧘 SÖNDÜR Adımı','SÖNDÜR vinci yerinde tutarak sarkaç enerjisini emer. Her TAK ve BIRAK öncesi bir SÖNDÜR - usta operatör alışkanlığı.'],
     ['📈 Anti-Sway Otopilot','İkinci mod: ivme = −Kp·hata − Kd·v + Ks·φ + Kw·ω. Son iki terim salınımı GERİ BESLER. Ks=Kw=0 yap, rüzgârlı limanda farkı yaşa!'],
-    ['⏱️ Halat = Karakter','T = 2π√(L/g): uzun halat tembel, kısa halat sinirli. İstif tepesine inerken sarkaç hızlanır. Vardiya seni bekliyor — Liman Kaptanı ol!'],
+    ['⏱️ Halat = Karakter','T = 2π√(L/g): uzun halat tembel, kısa halat sinirli. İstif tepesine inerken sarkaç hızlanır. Vardiya seni bekliyor - Liman Kaptanı ol!'],
   ];
   let tutI=0;
   function showTut(i){

@@ -189,8 +189,8 @@
       <div class="hudbox"><div class="l">PAKET</div><div class="v mono" id="hudP">0/0</div></div>
       <div class="hudbox"><div class="l">DURUM</div><div class="v" id="hudS">HAZIR</div></div>
     </div>
-    <div class="nextDir" id="nextDir">Sıradaki: —</div>
-    <div class="hint" id="hint">📦 Görev: rota planını yaz — robot çizgiyi kendisi izler, <b>her kavşakta planındaki yönü uygular.</b> Paketleri adreslere ulaştır!</div>
+    <div class="nextDir" id="nextDir">Sıradaki: -</div>
+    <div class="hint" id="hint">📦 Görev: rota planını yaz - robot çizgiyi kendisi izler, <b>her kavşakta planındaki yönü uygular.</b> Paketleri adreslere ulaştır!</div>
     <div class="rdock" id="resultDock" style="display:none"></div>
   </div>
 
@@ -203,7 +203,7 @@
     <div id="tab-robot">
       <div class="card">
         <h4>Kurye Robotu</h4>
-        <p class="exp">3 çizgi sensörü sokak çizgisini izler. Robot kavşakları <b>kendisi sayar</b> —
+        <p class="exp">3 çizgi sensörü sokak çizgisini izler. Robot kavşakları <b>kendisi sayar</b> -
           senin işin her kavşakta hangi yöne gideceğini <b>önceden planlamak</b>. Gerçek kurye robotları böyle çalışır!</p>
         <div class="minirobot" id="miniRobot"></div>
       </div>
@@ -225,14 +225,14 @@
       <div class="card">
         <h4>Rota Planı (her kavşakta bir adım)</h4>
         <p class="exp">Robot bir kavşağa gelince plandan <b>sıradaki adımı</b> uygular. Plan biterse
-          kavşaklardan <b>düz</b> geçer. Köşeleri (dönüşü zorunlu virajlar) kendisi döner — onlar sayılmaz.</p>
+          kavşaklardan <b>düz</b> geçer. Köşeleri (dönüşü zorunlu virajlar) kendisi döner - onlar sayılmaz.</p>
         <div id="planList"></div>
         <button class="addRule" id="addStep">+ Adım Ekle</button>
       </div>
       <div id="pidPanel" style="display:none">
         <div class="card">
           <h4>PID Sürüş Ayarı</h4>
-          <p class="exp">Analog çizgi takibi — daha akıcı viraj, daha hızlı teslimat. Kp/Kd dengesini bul.</p>
+          <p class="exp">Analog çizgi takibi - daha akıcı viraj, daha hızlı teslimat. Kp/Kd dengesini bul.</p>
           <div class="sliderRow"><label>Temel Hız <b id="pBaseV">62</b></label>
             <input type="range" id="pBase" min="20" max="90" step="1" value="62"></div>
           <div class="sliderRow"><label>Kp (dönüş tepkisi) <b id="pKpV">1.4</b></label>
@@ -413,7 +413,7 @@
   // ---- result ----
   const REASONS={ delivered:'Bütün paketler sahibinde!', crash:'Yol bariyerine çarptın! 💥',
     off_city:'Robot şehir dışına çıktı! 🏙️', line_lost:'Robot sokak çizgisini kaybetti.',
-    stalled:'Robot durup kaldı.', timeout:'Süre doldu — teslimat gecikti.' };
+    stalled:'Robot durup kaldı.', timeout:'Süre doldu - teslimat gecikti.' };
   function showResult(){
     const sim=LAB.sim; if(!sim) return;
     const win=sim.status==='success';
@@ -489,9 +489,9 @@
     const win=sim.status==='success';
     const box=document.getElementById('resultBox');
     box.innerHTML =
-      '<h3 class="'+(win?'win':'lose')+'">📄 Teslimat Raporu — '+DC.CITIES[LAB.cityIdx].name+'</h3>'+
+      '<h3 class="'+(win?'win':'lose')+'">📄 Teslimat Raporu - '+DC.CITIES[LAB.cityIdx].name+'</h3>'+
       '<div style="margin:8px 0;font-size:.8rem;color:var(--muted2)">'+chips+'</div>'+
-      '<div style="font-size:.76rem;color:var(--sky);margin-bottom:4px">'+(LAB.mode==='pid'?'📈 PID Sürüş — Temel '+LAB.pid.base+' · Kp '+LAB.pid.kp.toFixed(2)+' · Kd '+LAB.pid.kd.toFixed(2):'🧩 Kural Sürüş')+'</div>'+
+      '<div style="font-size:.76rem;color:var(--sky);margin-bottom:4px">'+(LAB.mode==='pid'?'📈 PID Sürüş - Temel '+LAB.pid.base+' · Kp '+LAB.pid.kp.toFixed(2)+' · Kd '+LAB.pid.kd.toFixed(2):'🧩 Kural Sürüş')+'</div>'+
       '<div style="font-size:.76rem;color:var(--muted2);margin-bottom:8px">🗺️ Rota: '+planTxt+'</div>'+
       '<div class="rstats">'+
         '<div class="rstat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
@@ -662,10 +662,10 @@
 
   // ---- tutorial ----
   const TUT=[
-    ['📦 Kurye Görevi','Paketleri adreslere ulaştırman gerekiyor! Robotun sokak çizgilerini kendi başına izler — ama hangi kavşakta nereye döneceğini bilemez. Rota planı senin işin.'],
+    ['📦 Kurye Görevi','Paketleri adreslere ulaştırman gerekiyor! Robotun sokak çizgilerini kendi başına izler - ama hangi kavşakta nereye döneceğini bilemez. Rota planı senin işin.'],
     ['🗺️ Rota Planı','Kod sekmesindeki plan, kavşak kavşak talimat listendir: "1. kavşakta SOL, 2. kavşakta DÜZ…" Robot her kavşakta plandan sıradaki adımı uygular. Plan biterse hep DÜZ gider!'],
-    ['🚧 Dikkat','Bazı sokaklar bariyerle kapalı — çarparsan görev biter. Haritaya bakıp rotayı kapalı yolun etrafından planla. Bazı görevlerde birden fazla paket var; sırayla en kısa rotayı kur.'],
-    ['🧩 / 📈 Sürüş','Kural sürüş sağlam ve basittir. PID sürüş daha akıcı ve hızlıdır — Temel Hız/Kp/Kd ayarlarıyla teslimat süresini kısalt. Madalyalar süreye göre verilir!'],
+    ['🚧 Dikkat','Bazı sokaklar bariyerle kapalı - çarparsan görev biter. Haritaya bakıp rotayı kapalı yolun etrafından planla. Bazı görevlerde birden fazla paket var; sırayla en kısa rotayı kur.'],
+    ['🧩 / 📈 Sürüş','Kural sürüş sağlam ve basittir. PID sürüş daha akıcı ve hızlıdır - Temel Hız/Kp/Kd ayarlarıyla teslimat süresini kısalt. Madalyalar süreye göre verilir!'],
     ['🏁 Başla!','Haritada 📦 depo, 🏠 adres demektir. Planı incele, ÇALIŞTIR ile izle, süreyi kısaltmak için rotayı ve sürüşü geliştir!'],
   ];
   let tutI=0;

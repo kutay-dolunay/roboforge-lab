@@ -1,5 +1,5 @@
 /* =============================================================================
- * RoboForge — Mini Sumo :: Simulation Core
+ * RoboForge - Mini Sumo :: Simulation Core
  * -----------------------------------------------------------------------------
  * Pure, dependency-free. Runs in browser (window.SumoCore) and Node.
  *
@@ -174,11 +174,11 @@
   function coach(sim) {
     const t = [];
     if (sim.reason === 'fell_out') {
-      t.push('Robotun ringden düştü. KENAR sensörü beyaz çizgiyi görünce hemen geri gelip dönmesini sağla — bu kuralı en üste koy.');
+      t.push('Robotun ringden düştü. KENAR sensörü beyaz çizgiyi görünce hemen geri gelip dönmesini sağla - bu kuralı en üste koy.');
     } else if (sim.reason === 'timeout') {
       t.push('Süre doldu, kimse çıkmadı. Rakibi bulunca daha kararlı saldır (iki motor tam ileri) ve onu kenara doğru it.');
     } else if (sim.reason === 'double') {
-      t.push('İkiniz de çıktınız. Saldırırken kendi kenarına dikkat et — hız yüksekse fren mesafen de artar.');
+      t.push('İkiniz de çıktınız. Saldırırken kendi kenarına dikkat et - hız yüksekse fren mesafen de artar.');
     } else if (sim.status === 'success') {
       t.push('Rakibi dışarı attın! Daha hızlı bir motorla ilk vuruşu sen yaparsan şampiyona karşı da şansın artar.');
     }

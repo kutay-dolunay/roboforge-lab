@@ -11,12 +11,12 @@
     --sky:#38bdf8; --sky2:#0ea5e9; --green:#22c55e; --amber:#f59e0b;
     --red:#ef4444; --purple:#a855f7; --txt:#e2e8f0; --muted:#64748b; --muted2:#94a3b8;
     /* 6 theme colors */
-    --c1:#22c55e; --c1s:rgba(34,197,94,.14);   /* Temel Sürüş — yeşil */
-    --c2:#38bdf8; --c2s:rgba(56,189,248,.14);  /* Görev & Strateji — mavi */
-    --c3:#a855f7; --c3s:rgba(168,85,247,.16);  /* Kontrol Mühendisliği — mor */
-    --c4:#f59e0b; --c4s:rgba(245,158,11,.15);  /* Fabrika & Otomasyon — amber */
-    --c5:#2dd4bf; --c5s:rgba(45,212,191,.15);  /* Uzay & Telemetri — teal */
-    --c6:#f472b6; --c6s:rgba(244,114,182,.15); /* Sürü & Lokomosyon — pembe */
+    --c1:#22c55e; --c1s:rgba(34,197,94,.14);   /* Temel Sürüş - yeşil */
+    --c2:#38bdf8; --c2s:rgba(56,189,248,.14);  /* Görev & Strateji - mavi */
+    --c3:#a855f7; --c3s:rgba(168,85,247,.16);  /* Kontrol Mühendisliği - mor */
+    --c4:#f59e0b; --c4s:rgba(245,158,11,.15);  /* Fabrika & Otomasyon - amber */
+    --c5:#2dd4bf; --c5s:rgba(45,212,191,.15);  /* Uzay & Telemetri - teal */
+    --c6:#f472b6; --c6s:rgba(244,114,182,.15); /* Sürü & Lokomosyon - pembe */
     /* difficulty band colors */
     --d1:#4ade80; --d2:#38bdf8; --d3:#fbbf24; --d4:#f87171;
   }
@@ -150,7 +150,7 @@
     </div>
     <p class="tagline">Bir simülasyon seç; <b>kendi robotunu kur, kodla ve test et.</b>
       30 senaryo, altı dünyada: temel sürüşten fabrika otomasyonuna, uzay görevlerinden sürü zekâsına.
-      Her kartın köşesindeki rozet o simülasyonun genel seviyesini gösterir — ama hepsinin içinde
+      Her kartın köşesindeki rozet o simülasyonun genel seviyesini gösterir - ama hepsinin içinde
       Başlangıç'tan Uzman'a 7 kademe var.</p>
   </header>
 
@@ -188,7 +188,7 @@
   <div id="cats"></div>
 
   <footer>
-    RoboForge · RoboFabrik Akademi — Lise Robotik Programı<br/>
+    RoboForge · RoboFabrik Akademi - Lise Robotik Programı<br/>
     Her senaryonun içinde 7 kademeli kendi zorluk merdiveni vardır: Başlangıç → Uzman.
   </footer>
 </div>
@@ -198,10 +198,10 @@
   const CATS = [
     { id:'temel', g:'g1', icon:'🚗',
       title:'Temel <em>Sürüş &amp; Sensörler</em>',
-      desc:'Hepsi aynı iki tekerlekli araç — fark eden şey SENSÖRLER. Çizgi, duvar, mesafe, ışık ve rakip algıla; kural yaz, PID ile tanış. Robotiğin alfabesi burada.',
+      desc:'Hepsi aynı iki tekerlekli araç - fark eden şey SENSÖRLER. Çizgi, duvar, mesafe, ışık ve rakip algıla; kural yaz, PID ile tanış. Robotiğin alfabesi burada.',
       sims:[
         { id:'line', icon:'🏁', title:'Çizgi Takip', en:'Line Follower', band:1,
-          desc:'Parçalarını seç, robotunu çiz, test et — sonra sensörleri yerleştirip blok kodlarla çizgiyi takip ettir. Baştan sona kendi robotun.',
+          desc:'Parçalarını seç, robotunu çiz, test et - sonra sensörleri yerleştirip blok kodlarla çizgiyi takip ettir. Baştan sona kendi robotun.',
           href:'build.html' },
         { id:'maze', icon:'🧩', title:'Labirent Çözücü', en:'Maze Solver', band:1,
           desc:'Duvarları algıla, çıkışı bul. Sol-el kuralı mı, en kısa yol mu? Kendi keşif stratejini kur.',
@@ -230,7 +230,7 @@
           desc:'Şehir sokaklarında kavşak kavşak rota planla, paketleri adreslere ulaştır. Kapalı yollara dikkat!',
           href:'build.html?sim=delivery' },
         { id:'soccer', icon:'⚽', title:'Robot Futbolu', en:'Robot Soccer', band:2,
-          desc:'Savunmacıyı geç, gol at! Topa yönelme, top sürme ve bitiricilik — PID forvetini ayarla, madalyayı kap.',
+          desc:'Savunmacıyı geç, gol at! Topa yönelme, top sürme ve bitiricilik - PID forvetini ayarla, madalyayı kap.',
           href:'build.html?sim=soccer' },
         { id:'fire', icon:'🧯', title:'Ateş Söndürme', en:'Firefighting', band:2,
           desc:'Evin odalarını duvar takibiyle keşfet, alevi ışık sensörleriyle bul, fanla söndür. Keşif + müdahale!',
@@ -247,7 +247,7 @@
       desc:'Kendi kendine duramayan, yerçekimiyle savaşan, sallanan sistemler: ters sarkaç, drone, roket, vinç, sualtı aracı, dağ tırmanışı. PID, momentum ve gerçek denge kontrolü.',
       sims:[
         { id:'balance', icon:'🤸', title:'Denge Robotu', en:'Self-Balancing', band:3,
-          desc:'Hiçbir şey yapmazsan devrilir! Ters sarkacı PID ile ayakta tut — dürtmelere, rüzgâra ve yüke rağmen.',
+          desc:'Hiçbir şey yapmazsan devrilir! Ters sarkacı PID ile ayakta tut - dürtmelere, rüzgâra ve yüke rağmen.',
           href:'build.html?sim=balance' },
         { id:'drone', icon:'🚁', title:'Drone Görevi', en:'Drone Flight', band:3,
           desc:'İtki yerçekimine karşı! İrtifa PID ile görev noktalarına uç, kargo taşı, fırtınada yumuşak in. Ki dersi burada.',
@@ -256,13 +256,13 @@
           desc:'Tork tırmandırır, tutuş patinajı önler, momentum rampaları aşırtır. Parça seçiminin gerçek sınavı!',
           href:'build.html?sim=hill' },
         { id:'roket', icon:'🚀', title:'Roket İniş', en:'Hoverslam', band:4,
-          desc:'Suicide burn: motoru tam doğru anda ateşle! h = v²/(2a) formülü, değişken kütle, ateşleme gecikmesi — Falcon 9 matematiği.',
+          desc:'Suicide burn: motoru tam doğru anda ateşle! h = v²/(2a) formülü, değişken kütle, ateşleme gecikmesi - Falcon 9 matematiği.',
           href:'build.html?sim=roket' },
         { id:'vinc', icon:'🏗️', title:'Kule Vinci', en:'Anti-Sway Crane', band:3,
-          desc:'Halattaki yük bir sarkaçtır! Sallanan yük tutulmaz, bırakılmaz. Kademeli hız + aktif söndürme — anti-sway kontrolün kalbi.',
+          desc:'Halattaki yük bir sarkaçtır! Sallanan yük tutulmaz, bırakılmaz. Kademeli hız + aktif söndürme - anti-sway kontrolün kalbi.',
           href:'build.html?sim=vinc' },
         { id:'rov', icon:'🤿', title:'Sualtı ROV', en:'Underwater ROV', band:3,
-          desc:'Arşimet pilotluğu: balast su alınca batarsın! Akıntı katmanları, kablo menzili, güvenlik molası — derin deniz görevleri.',
+          desc:'Arşimet pilotluğu: balast su alınca batarsın! Akıntı katmanları, kablo menzili, güvenlik molası - derin deniz görevleri.',
           href:'build.html?sim=rov' },
       ]},
     { id:'fabrika', g:'g4', icon:'🏭',
@@ -273,13 +273,13 @@
           desc:'Konveyör akar, sensör okur, kuralların karar verir. Öncelik sırası + kapsam + hız↔doğruluk: fabrika otomasyonunun kalbi.',
           href:'build.html?sim=bant' },
         { id:'cnc', icon:'✏️', title:'CNC Çizici', en:'CNC Plotter', band:3,
-          desc:'G-code mantığı: adım adım çiz! Hız köşeleri yuvarlar, dişli boşluğu çizgiyi kaydırır — kalibrasyon sanatıyla tanış.',
+          desc:'G-code mantığı: adım adım çiz! Hız köşeleri yuvarlar, dişli boşluğu çizgiyi kaydırır - kalibrasyon sanatıyla tanış.',
           href:'build.html?sim=cnc' },
         { id:'solar', icon:'☀️', title:'Güneş Takipçisi', en:'Solar Tracker', band:2,
           desc:'Kosinüs yasası + motor muhasebesi: titreyen takipçi kazandığından çok harcar! Ölü bant ve bulut tuzağı dersleri.',
           href:'build.html?sim=solar' },
         { id:'kol', icon:'🦾', title:'Robot Kol', en:'Robot Arm', band:4,
-          desc:'İki eklem, bir kıskaç: ileri ve ters kinematik! Kutuları taşı, istifle, raf altından al — ağır yük sarkması ve nazik bırakış sanatı.',
+          desc:'İki eklem, bir kıskaç: ileri ve ters kinematik! Kutuları taşı, istifle, raf altından al - ağır yük sarkması ve nazik bırakış sanatı.',
           href:'build.html?sim=kol' },
         { id:'depo', icon:'🤖', title:'Depo Filosu', en:'AGV Fleet', band:4,
           desc:'Dört robot, aynı koridorlar: sorun rota değil TRAFİK! Kavşak sözleşmesi, rezervasyon penceresi ve efsanevi deadlock dersi.',
@@ -287,16 +287,16 @@
       ]},
     { id:'uzay', g:'g5', icon:'🛰️',
       title:'Uzay <em>&amp; Telemetri</em>',
-      desc:'Uzaktan algılama ve uçuş bilgisayarları: model uydu görevi, IoT sera telemetrisi ve sinyal gücünden konum bulma. Gürültülü veri, RF, paraşüt zamanlaması — gerçek kitlere köprü.',
+      desc:'Uzaktan algılama ve uçuş bilgisayarları: model uydu görevi, IoT sera telemetrisi ve sinyal gücünden konum bulma. Gürültülü veri, RF, paraşüt zamanlaması - gerçek kitlere köprü.',
       sims:[
         { id:'cansat', icon:'🛰️', title:'CanSat Kapsülü', en:'Model Satellite', band:4,
           desc:'Model uydu görevi: çift paraşüt zamanlaması, açılma şoku, rüzgâr sürüklenmesi, RF karartması. Uçuş bilgisayarını sen yazıyorsun!',
           href:'build.html?sim=cansat' },
         { id:'sera', icon:'🌱', title:'Akıllı Sera', en:'IoT Telemetry', band:3,
-          desc:'Telemetri kitinin provası! ESP32 telefonuna veri yollar, sen komut gönderirsin — ama Wi-Fi kopunca bitkiyi cihaz üstü kurallar kurtarır.',
+          desc:'Telemetri kitinin provası! ESP32 telefonuna veri yollar, sen komut gönderirsin - ama Wi-Fi kopunca bitkiyi cihaz üstü kurallar kurtarır.',
           href:'build.html?sim=sera' },
         { id:'sinyal', icon:'📡', title:'Sinyal Avcısı', en:'RSSI Trilateration', band:3,
-          desc:'Gizli vericiyi göremezsin — sinyal gücünden bul! Üç antenle trilaterasyon, gürültü filtreleme, GPS mantığı. Telemetri kitine köprü.',
+          desc:'Gizli vericiyi göremezsin - sinyal gücünden bul! Üç antenle trilaterasyon, gürültü filtreleme, GPS mantığı. Telemetri kitine köprü.',
           href:'build.html?sim=sinyal' },
       ]},
     { id:'suru', g:'g6', icon:'🐝',
@@ -307,7 +307,7 @@
           desc:'6 robot, lider yok! Ayrılma-hizalanma-toplanma içgüdüleriyle sürü zekâsı doğsun. Emergence dersi.',
           href:'build.html?sim=swarm' },
         { id:'hexapod', icon:'🕷️', title:'Altı Bacak', en:'Hexapod Gait', band:3,
-          desc:'Altı bacak, tek ritim: tripod yürüyüşü! Hangi bacak ne zaman kalkar? Yürüme bir koordinasyon dansıdır — görsel şölen.',
+          desc:'Altı bacak, tek ritim: tripod yürüyüşü! Hangi bacak ne zaman kalkar? Yürüme bir koordinasyon dansıdır - görsel şölen.',
           href:'build.html?sim=hexapod' },
         { id:'linemaze', icon:'🌀', title:'Çizgi Labirenti', en:'Line Maze', band:3,
           desc:'Sol-el kuralı + LSRB cebiri: keşfet, kaydet, sadeleştir, yarış! Kavşak disiplininin ve kestirme haritalamanın dersi.',
@@ -406,7 +406,7 @@
       document.querySelectorAll('#diffFilter .dchip').forEach(function(b){b.classList.toggle('on', b.getAttribute('data-band')==='0');}); apply(); });
   })();
 
-  // ==== "BURADAN BAŞLA" — recommend next sim from progress ====
+  // ==== "BURADAN BAŞLA" - recommend next sim from progress ====
   window.renderStartHere=function(){
     var el=document.getElementById('startHere'); if(!el) return;
     var pick=null;
@@ -433,7 +433,7 @@
     var ov=document.createElement('div'); ov.className='rf-welcome';
     ov.innerHTML='<div class="card2" role="dialog" aria-modal="true" aria-label="Hoş geldin">'+
       '<h3>🤖 RoboForge’a hoş geldin!</h3>'+
-      '<p>Burada gerçek bir robot kurar, kodlar ve test edersin — hepsi tarayıcında, donanım olmadan.</p>'+
+      '<p>Burada gerçek bir robot kurar, kodlar ve test edersin - hepsi tarayıcında, donanım olmadan.</p>'+
       '<div class="steps">'+
         '<div class="stp"><span class="n">1</span><span>Bir simülasyon seç (aşağıdan ya da “Buradan başla” kartından).</span></div>'+
         '<div class="stp"><span class="n">2</span><span>Robotunun parçalarını seç ve şasesini tasarla.</span></div>'+

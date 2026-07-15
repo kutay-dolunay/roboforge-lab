@@ -182,7 +182,7 @@
       <div class="hudbox"><div class="l">YANLIŞ</div><div class="v mono" id="hudE">0</div></div>
       <div class="hudbox"><div class="l">DURUM</div><div class="v" id="hudS">HAZIR</div></div>
     </div>
-    <div class="hint" id="hint">🏭 Konveyörde ürünler akar, sensör okur, KURALLARIN karar verir. <b>Üstteki kural kazanır</b> — öncelik sırası her şeydir. Hiçbir kurala uymayan ürün SON kutusuna düşer. Bant hızlandıkça sensör yanılır: hız ↔ doğruluk senin ödünleşimin!</div>
+    <div class="hint" id="hint">🏭 Konveyörde ürünler akar, sensör okur, KURALLARIN karar verir. <b>Üstteki kural kazanır</b> - öncelik sırası her şeydir. Hiçbir kurala uymayan ürün SON kutusuna düşer. Bant hızlandıkça sensör yanılır: hız ↔ doğruluk senin ödünleşimin!</div>
     <div class="rdock" id="resultDock" style="display:none"></div>
   </div>
   <div class="side">
@@ -198,7 +198,7 @@
       <div class="card" id="rulesCard">
         <h4>Sınıflandırma Kuralları (öncelikli)</h4>
         <p class="exp" id="rulesExp">Ürün-merkezli düşün: sensör okur, <b>yukarıdan aşağı ilk eşleşen</b> kural kapağı seçer.
-          Eşleşmeyen ürün SON kutusuna gider. Görev standardı üstteki karttadır — kurallar onu birebir karşılamalı.</p>
+          Eşleşmeyen ürün SON kutusuna gider. Görev standardı üstteki karttadır - kurallar onu birebir karşılamalı.</p>
         <div id="rulesList"></div>
         <button class="addRule" id="addRule">+ Yeni Kural</button>
         <button id="revealSolution" style="display:none;width:100%;margin-top:8px;padding:9px;border:1px dashed var(--amber);background:rgba(245,158,11,.08);color:var(--amber);font-weight:800;font-size:.78rem;border-radius:10px;cursor:pointer">🔑 En iyi çözümü göster (admin)</button>
@@ -206,14 +206,14 @@
       <div class="card" id="filtersCard" style="display:none">
         <h4>Kapak Filtreleri (kutu-merkezli)</h4>
         <p class="exp">Aynı problem, ters bakış: her kapağın bir <b>kabul filtresi</b> var. Ürün bantta ilerlerken
-          SIRAYLA kapaklara sorulur — ilk kabul eden alır. Kapak 1 en öndedir: fiziksel sıra = öncelik!</p>
+          SIRAYLA kapaklara sorulur - ilk kabul eden alır. Kapak 1 en öndedir: fiziksel sıra = öncelik!</p>
         <div id="filtersList"></div>
       </div>
       <div class="card">
         <h4>Hat Ayarı</h4>
         <div class="sliderRow"><label>Bant Hızı <b id="spV">0.9</b></label>
           <input type="range" id="sp" min="0.5" max="2.0" step="0.05" value="0.9"></div>
-        <p class="exp" style="margin:6px 0 0">Sensör hata payı: <b id="mrV">%0</b> — 0.9 altı kusursuz,
+        <p class="exp" style="margin:6px 0 0">Sensör hata payı: <b id="mrV">%0</b> - 0.9 altı kusursuz,
           sonrası her tık başına risk. Dar süreli görevlerde hızlanmak ZORUNDASIN; sanat, sınırda gezinmektir.</p>
       </div>
       <div class="card" id="standardCard">
@@ -224,7 +224,7 @@
     <div id="tab-robot" style="display:none">
       <div class="card">
         <h4>Sensör İstasyonu</h4>
-        <p class="exp">Kamera rengi, lazer perde boyutu, yük hücresi ağırlığı okur — hepsi ürün sensör kemerinden
+        <p class="exp">Kamera rengi, lazer perde boyutu, yük hücresi ağırlığı okur - hepsi ürün sensör kemerinden
           geçerken, tek bakışta. Bant hızlıysa bakış bulanıklaşır: yanlış okuma kutuya yanlış ürün demektir.</p>
       </div>
       <div class="card kunye" id="kunye"></div>
@@ -305,7 +305,7 @@
       CTX.fillStyle='#94a3b8'; CTX.font='700 9px Segoe UI'; CTX.textAlign='center';
       CTX.fillText('KAPAK '+(i+1),px,BELT_Y+44);
       CTX.font='600 8px Segoe UI'; CTX.fillStyle='#7da3c8';
-      CTX.fillText((m.bins[i]||'—'),px,BELT_Y+66);
+      CTX.fillText((m.bins[i]||'-'),px,BELT_Y+66);
       if(sim){ const [d,w]=sim.counts[i];
         CTX.font='800 13px Segoe UI';
         CTX.fillStyle='#4ade80'; CTX.fillText(d,px-14,BELT_Y+88);
@@ -400,7 +400,7 @@
     document.getElementById('resultWrap').classList.remove('show');
   }
   const REASONS={ vardiya_tamam:'Kota doldu, hat temiz!', yanlis:'Yanlış kutulama limiti aşıldı! ❌',
-    kota:'Süre doldu — kota tamamlanamadı. ⏱️' };
+    kota:'Süre doldu - kota tamamlanamadı. ⏱️' };
   function showResult(){
     const sim=LAB.sim; if(!sim) return;
     const win=sim.status==='success';
@@ -409,7 +409,7 @@
     const tips=B.coach(sim);
     var sortGraph='';
     if(window.RFResult && RFResult.bars && sim.counts && sim.counts.length){
-      sortGraph='<div class="rf-graphwrap"><div class="cap">🏭 Kutulara ayrım — doğru vs yanlış</div>'+
+      sortGraph='<div class="rf-graphwrap"><div class="cap">🏭 Kutulara ayrım - doğru vs yanlış</div>'+
         '<canvas id="bantGraph" class="rf-graph" style="height:150px"></canvas>'+
         '<div style="font-size:.72rem;color:var(--muted2);margin-top:2px">Her sütun bir kutu. Yeşil = doğru yerleşen, kırmızı = yanlış. Yanlışlar çoğaldıysa kural sıran ya da bant hızın sorunlu.</div></div>';
     }
@@ -450,10 +450,10 @@
     const box=document.getElementById('resultBox');
     const binRows=m.bins.map((b,i)=>{
       const [d,w]=sim.counts[i];
-      return '<div class="evline"><b>'+(i<3?'KAPAK '+(i+1):'SON')+'</b> ('+b+') — ✅ '+d+' · ❌ '+w+'</div>';
+      return '<div class="evline"><b>'+(i<3?'KAPAK '+(i+1):'SON')+'</b> ('+b+') - ✅ '+d+' · ❌ '+w+'</div>';
     }).join('');
     box.innerHTML =
-      '<h3 class="'+(win?'win':'lose')+'">📄 Hat Raporu — '+m.name+'</h3>'+
+      '<h3 class="'+(win?'win':'lose')+'">📄 Hat Raporu - '+m.name+'</h3>'+
       '<div style="font-size:.76rem;color:var(--sky);margin:8px 0">'+
         (LAB.mode==='rules'?'🧩 '+LAB.rules.length+' kural':'🎯 kapak filtreleri')+
         ' · bant '+sim.speed.toFixed(2)+' · sensör hata payı %'+Math.round(B.misreadChance(sim.speed)*100)+'</div>'+
@@ -467,7 +467,7 @@
       binRows+
       '<h4 style="margin:12px 0 6px;font-size:.66rem;letter-spacing:2px;color:var(--muted)">📓 HAT KAYDI</h4>'+
       '<div style="max-height:150px;overflow:auto">'+
-        (sim.events.length?sim.events.map(e=>'<div class="evline"><b>'+e[0]+'s</b> '+e[1]+'</div>').join(''):'<div class="evline">Sorunsuz vardiya — olay yok.</div>')+
+        (sim.events.length?sim.events.map(e=>'<div class="evline"><b>'+e[0]+'s</b> '+e[1]+'</div>').join(''):'<div class="evline">Sorunsuz vardiya - olay yok.</div>')+
       '</div>'+
       '<div class="rbtns"><button class="btn ghost" id="repClose">Kapat</button></div>';
     document.getElementById('resultWrap').classList.add('show');
@@ -571,7 +571,7 @@
   function fillKunye(){
     const el=document.getElementById('kunye');
     el.innerHTML='<h4>🏭 Hat Künyesi</h4><p class="exp" style="margin:0">Sensör kemeri: renk + boyut + ağırlık, tek geçişte. '+
-      'Kapak pistonları bant hızına otomatik senkronize — senin işin KARAR ve HIZ. '+
+      'Kapak pistonları bant hızına otomatik senkronize - senin işin KARAR ve HIZ. '+
       '<a style="color:var(--sky)" href="build.html?sim=bant">Robotunu kur →</a></p>';
   }
   function buildTrackTabs(){
@@ -614,7 +614,7 @@
     ['🏭 Karar Tablosu Fabrikası','Konveyörde ürünler akar: renk, boyut, ağırlık. Sensör okur, SENİN kuralların karar verir, pistonlar iter. Fabrika otomasyonunun kalbi bir karar tablosudur.'],
     ['⬆️ Üstteki Kural Kazanır','Kurallar yukarıdan aşağı denenir, İLK eşleşen kapağı seçer. "Ağırlar 1 numaraya" kuralı listenin dibindeyse üstteki renk kuralları onu asla çalıştırmaz. ÖNCELİK her şeydir.'],
     ['📦 SON Kutusu','Hiçbir kurala uymayan ürün bandın sonundaki SON kutusuna düşer. Bazı görevlerde bu meşru bir hedef, bazılarında sessiz bir hata. Kapsamını bil!'],
-    ['⚡ Hız ↔ Doğruluk','Bant 0.9 hıza kadar sensör kusursuz. Sonrası her tıkta hata riski artar: 1.4 hızda %11! Dar süreli görevlerde hızlanmak zorundasın — sanat, sınırda gezinmektir.'],
+    ['⚡ Hız ↔ Doğruluk','Bant 0.9 hıza kadar sensör kusursuz. Sonrası her tıkta hata riski artar: 1.4 hızda %11! Dar süreli görevlerde hızlanmak zorundasın - sanat, sınırda gezinmektir.'],
     ['🎯 İki Bakış Açısı','Kural Zinciri ürün-merkezli düşünür; Kapak Filtreleri kutu-merkezli: her kapak "benim ürünüm bu" der, fiziksel sıra önceliği belirler. Aynı problem, iki zihin modeli.'],
     ['🏁 Vardiya Başlıyor','Renk ayrımından Kâbus Vardiyasına 7 görev. Raporda kutu dökümünü incele: hangi ürün nereye gitti? Vardiya Şefi madalyası sıfır hata ister!'],
   ];
@@ -647,7 +647,7 @@
   });
   const hadShared=loadFromHash();
   if(!hadShared) loadShipped();
-  LAB.rules=[]; // empty on open — student authors from scratch
+  LAB.rules=[]; // empty on open - student authors from scratch
   buildTrackTabs(); setMode(LAB.mode); buildRules(); buildFilters(); bindLine(); fillStandard(); fillKunye();
   setupRevealSolution();
   drawScene(); updateHud();

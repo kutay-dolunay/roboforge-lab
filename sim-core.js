@@ -1,5 +1,5 @@
 /* =============================================================================
- * RoboForge — Line Follower Lab :: Simulation Core
+ * RoboForge - Line Follower Lab :: Simulation Core
  * -----------------------------------------------------------------------------
  * Pure, dependency-free simulation logic. Runs in the browser (window.SimCore)
  * and in Node (module.exports) so it can be unit-tested headlessly.
@@ -282,7 +282,7 @@
 
     const prog = near.progress;
     // Lap detection only counts when the robot is actually ON the line and moving
-    // forward — a robot spinning in a circle OFF the line must not falsely "complete".
+    // forward - a robot spinning in a circle OFF the line must not falsely "complete".
     if (near.dist <= ON_LINE_TIGHT) {
       if (prog > 0.5) sim.passedHalf = true;
       if (sim.passedHalf && sim.prevProg > 0.75 && prog < 0.2 && v > 0.03 && sim.t > 2) { sim.laps++; sim.passedHalf = false; }
@@ -294,7 +294,7 @@
       if (sim.trail.length > 400) sim.trail.shift();
     }
 
-    // With NO sensors the robot is blind — never report "line lost" (it never had
+    // With NO sensors the robot is blind - never report "line lost" (it never had
     // a way to see the line). Report 'no_sensors' so the coaching says "add sensors".
     if (near.dist > OFF_TRACK_DIST) { sim.status = 'failed'; sim.reason = sensors.length ? 'off_track' : 'no_sensors'; }
     else if (sensors.length && sim.timeOffLine > LINE_LOST_GRACE) { sim.status = 'failed'; sim.reason = 'line_lost'; }
@@ -328,15 +328,15 @@
     const hasGaps = sim.cfg.track.gapRanges && sim.cfg.track.gapRanges.length;
 
     if (sim.reason === 'no_sensors') {
-      tips.push('Robotta hiç sensör yok — çizgiyi göremediği için takip edemez (bu yüzden durdu, çizgiyi "kaybetmedi"). Önce “＋ Sensör Ekle” ile sensör ekle; klasik başlangıç 3 sensördür (sol-orta-sağ) ve şasinin önüne yerleştirilir.');
+      tips.push('Robotta hiç sensör yok - çizgiyi göremediği için takip edemez (bu yüzden durdu, çizgiyi "kaybetmedi"). Önce “＋ Sensör Ekle” ile sensör ekle; klasik başlangıç 3 sensördür (sol-orta-sağ) ve şasinin önüne yerleştirilir.');
       return tips;
     }
     if (sim.reason === 'line_lost' || sim.reason === 'off_track') {
       if (hasGaps) {
-        tips.push('Bu pistte çizgide boşluklar/kesikler var. Robot boşlukta düz gitmeli — boşluk öncesi iyi hizalanmış olmalı. Hızı biraz düşürmek boşlukları aşmayı kolaylaştırır.');
+        tips.push('Bu pistte çizgide boşluklar/kesikler var. Robot boşlukta düz gitmeli - boşluk öncesi iyi hizalanmış olmalı. Hızı biraz düşürmek boşlukları aşmayı kolaylaştırır.');
       }
       if (mode === 'pid') {
-        tips.push('PID robotun çizgiden çıktı. Kp çok düşükse virajı dönemez, çok yüksekse zikzak yapıp savrulur — Kp ve Kd değerlerini ince ayarla.');
+        tips.push('PID robotun çizgiden çıktı. Kp çok düşükse virajı dönemez, çok yüksekse zikzak yapıp savrulur - Kp ve Kd değerlerini ince ayarla.');
         if (spread < 0.5 && cfg.sensors.length >= 2) tips.push('Sensörlerin birbirine çok yakın (' + spread.toFixed(2) + ' birim). Daha geniş diziye yayarsan hata ölçümü daha hassas olur.');
       } else {
         const covered = cfg.rules.some((r) => r.pattern.every((p) => p === 'off' || p === 'any') && r.pattern.some((p) => p === 'off'));
@@ -350,7 +350,7 @@
       else if (acc >= 85) tips.push(mode === 'pid' ? 'Temiz bir tur. Kd değerini biraz artırırsan zikzakları daha da yumuşatabilirsin.' : 'Temiz bir tur. Viraj kurallarında hızları biraz dengeleyerek daha da düzgün hale getirebilirsin.');
       else tips.push('Turu tamamladın ama robot zikzak yaptı. ' + (mode === 'pid' ? 'Kp\'yi biraz düşür, Kd\'yi artır.' : 'Sensör yerleşimini ve viraj hızlarını ince ayarla.'));
     }
-    if (cfg.sensors.length === 1) tips.push('Tek sensörle çizgi takibi çok zordur — yönü ayırt edemez. 3 sensör (sol-orta-sağ) klasik başlangıçtır.');
+    if (cfg.sensors.length === 1) tips.push('Tek sensörle çizgi takibi çok zordur - yönü ayırt edemez. 3 sensör (sol-orta-sağ) klasik başlangıçtır.');
     return tips;
   }
 

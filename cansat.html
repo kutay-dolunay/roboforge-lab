@@ -218,22 +218,22 @@
         <div class="gs-alt"><span class="big mono" id="gsAlt">0<small> m</small></span><span class="vario mono" id="gsVario">→ 0.0 m/s</span></div>
         <div class="gs-reads">
           <div class="gread"><div class="l">YATAY X</div><div class="v mono" id="grX">0 m</div></div>
-          <div class="gread"><div class="l">PARAŞÜT</div><div class="v" id="grChute">—</div></div>
+          <div class="gread"><div class="l">PARAŞÜT</div><div class="v" id="grChute">-</div></div>
           <div class="gread"><div class="l">KAPSAMA</div><div class="v mono" id="grCov">%0</div></div>
           <div class="gread"><div class="l">RÜZGÂR</div><div class="v mono" id="grWind">0.0</div></div>
         </div>
         <canvas class="gchart" id="chartAlt" width="330" height="96"></canvas>
         <canvas class="gchart" id="chartVy" width="330" height="70"></canvas>
         <div class="gs-cmds" id="cmdRow">
-          <div class="nolink" id="noLink">📡 KARARTMA — UPLINK ÖLÜ</div>
+          <div class="nolink" id="noLink">📡 KARARTMA - UPLINK ÖLÜ</div>
           <button class="cmdbtn" data-dev="drogue"><span>🪂</span>DROGUE</button>
           <button class="cmdbtn" data-dev="ana"><span>🎪</span>ANA</button>
           <button class="cmdbtn" data-dev="beacon"><span>📢</span>BEACON</button>
         </div>
-        <div class="gs-feed"><div class="l">GÖREV KAYDI</div><div class="ev" id="gsFeed">Kapsül rampada — fırlatmayı bekliyor.</div></div>
+        <div class="gs-feed"><div class="l">GÖREV KAYDI</div><div class="ev" id="gsFeed">Kapsül rampada - fırlatmayı bekliyor.</div></div>
       </div>
       <div class="card" style="margin-top:12px">
-        <p class="exp" style="margin:0">📡 Uplink komutları yalnız RF varken ulaşır — <b>karartma bantlarında kapsül tek başınadır.</b>
+        <p class="exp" style="margin:0">📡 Uplink komutları yalnız RF varken ulaşır - <b>karartma bantlarında kapsül tek başınadır.</b>
         Asıl pilot, cihazdaki kurallardır; uplink son çaredir. Paraşütler <b>tek yönlüdür</b>: açılan kapanmaz.</p>
       </div>
     </div>
@@ -245,7 +245,7 @@
       <div id="rulesPanel">
         <div class="card">
           <h4>Uçuş Bilgisayarı Kuralları</h4>
-          <p class="exp">Bilgisayar güç verildiği andan itibaren çalışır — <b>tırmanışta yanlışlıkla ateşleyen kural
+          <p class="exp">Bilgisayar güç verildiği andan itibaren çalışır - <b>tırmanışta yanlışlıkla ateşleyen kural
             görevi iptal ettirir!</b> Şok limitleri: drogue 70 m/s, ana <b>26 m/s</b>. Serbest düşüş 55 m/s
             olduğuna göre… sıralamayı sen bul.</p>
           <div id="rulesList"></div>
@@ -258,7 +258,7 @@
           <h4>Parafoil Otopilot (yönlendirilebilir kanat)</h4>
           <p class="exp">Drogue tepede otomatik açılır (firmware). Seçtiğin irtifada ana paraşüt yerine
             <b>parafoil</b> açılır ve otopilot hedefe süzülür: dümen = Kp·sapma + Ki·birikim.
-            <b>Ki rüzgâr dersi:</b> sadece Kp ile kapsül rüzgâr kadar açıkta iner — Ki o inatçı sapmayı siler.</p>
+            <b>Ki rüzgâr dersi:</b> sadece Kp ile kapsül rüzgâr kadar açıkta iner - Ki o inatçı sapmayı siler.</p>
           <div class="sliderRow"><label>Parafoil Açılış İrtifası <b id="pAcV">260 m</b></label>
             <input type="range" id="pAc" min="140" max="420" step="10" value="260"></div>
           <div class="sliderRow"><label>Kp (dümen tepkisi) <b id="pKpV">0.060</b></label>
@@ -271,7 +271,7 @@
         <h4>Telemetri Ayarı</h4>
         <div class="sliderRow"><label>Örnekleme Hızı <b id="hzV">2.0 Hz</b></label>
           <input type="range" id="hz" min="0.5" max="10" step="0.5" value="2"></div>
-        <p class="exp" style="margin:6px 0 0">Jüri <b>veri kapsama</b> ister (görev başına %40-65 şart) — düşük Hz raporu
+        <p class="exp" style="margin:6px 0 0">Jüri <b>veri kapsama</b> ister (görev başına %40-65 şart) - düşük Hz raporu
           çökertır. Ama her ölçüm enerji: 10 Hz açgözlülüğü bataryayı ana paraşütten ÖNCE bitirebilir!</p>
       </div>
     </div>
@@ -280,7 +280,7 @@
         <h4>CanSat Nedir?</h4>
         <p class="exp">Gerçek yarışmalarda (TEKNOFEST Model Uydu gibi) öğrenciler kola kutusu boyutunda bir
           "uydu" yapar: sensörler + uçuş bilgisayarı + paraşüt. Roket bırakır, kapsül telemetri yollayarak
-          iner. Bu simülasyon o görevin birebir provasıdır — telemetri kitinle aynı beyin!</p>
+          iner. Bu simülasyon o görevin birebir provasıdır - telemetri kitinle aynı beyin!</p>
       </div>
       <div class="card">
         <h4>Donanım (robotundan gelir)</h4>
@@ -316,7 +316,7 @@
     { key:6, name:'YERDE', sub:'&lt;3 m' },
   ];
   const DEV_LABEL = { drogue:'🪂 Drogue', ana:'🎪 Ana Paraşüt', beacon:'📢 Beacon' };
-  const CHUTE_TXT = { yok:'—', drogue:'🪂 DROGUE', ana:'🎪 ANA', parafoil:'🪁 PARAFOIL', yirtik:'💥 YIRTIK' };
+  const CHUTE_TXT = { yok:'-', drogue:'🪂 DROGUE', ana:'🎪 ANA', parafoil:'🪁 PARAFOIL', yirtik:'💥 YIRTIK' };
 
   // ---- görünüm: dikey kesit ----
   function view(){
@@ -566,10 +566,10 @@
     document.getElementById('hint').style.display='block';
     document.getElementById('resultWrap').classList.remove('show');
   }
-  const REASONS={ gorev_tamam:'Görev tamamlandı — jüri onayladı!',
-    cakilma:'Kapsül çakıldı! 💥', sert_inis:'İniş çok sert — kapsül hasarlı.',
-    hedef_disi:'Hedef bölgenin dışına indi.', veri_yetersiz:'Veri kapsama şartı sağlanamadı — jüri raporu reddetti.',
-    erken_ayrilma:'Paraşüt taşıyıcı içinde açıldı — görev iptal! 🚫', timeout:'Süre doldu.' };
+  const REASONS={ gorev_tamam:'Görev tamamlandı - jüri onayladı!',
+    cakilma:'Kapsül çakıldı! 💥', sert_inis:'İniş çok sert - kapsül hasarlı.',
+    hedef_disi:'Hedef bölgenin dışına indi.', veri_yetersiz:'Veri kapsama şartı sağlanamadı - jüri raporu reddetti.',
+    erken_ayrilma:'Paraşüt taşıyıcı içinde açıldı - görev iptal! 🚫', timeout:'Süre doldu.' };
   function showResult(){
     const sim=LAB.sim; if(!sim) return;
     const win=sim.status==='success';
@@ -579,7 +579,7 @@
     const sc=CS.score(sim);
     var telGraph='';
     if(window.RFResult && LAB.telemetry && LAB.telemetry.length>3){
-      telGraph='<div class="rf-graphwrap"><div class="cap">🛰️ İniş telemetrisi — irtifa &amp; iniş hızı</div>'+
+      telGraph='<div class="rf-graphwrap"><div class="cap">🛰️ İniş telemetrisi - irtifa &amp; iniş hızı</div>'+
         '<canvas id="cansatGraph" class="rf-graph" style="height:150px"></canvas>'+
         '<div style="font-size:.72rem;color:var(--muted2);margin-top:2px">Sağlıklı bir iniş: irtifa düzgün azalır, hız paraşüt açılınca sabit ve güvenli (&lt;10 m/s) kalır.</div></div>';
     }
@@ -591,8 +591,8 @@
         (cls?'<div class="rd-medal">'+cls.name+'</div><div class="rd-cmt">'+(cls.cmt||'')+'</div>'
             :'<div class="rd-cmt">'+(REASONS[sim.reason]||'')+'</div>')+
         '<div class="rd-stats">'+
-          '<div class="rd-stat"><div class="l">İNİŞ HIZI</div><div class="v mono">'+(sim.landVy==null?'—':sim.landVy.toFixed(1)+' m/s')+'</div></div>'+
-          '<div class="rd-stat"><div class="l">HEDEFE</div><div class="v mono">'+(sim.landX==null?'—':Math.abs(Math.round(sim.landX))+' m')+'</div></div>'+
+          '<div class="rd-stat"><div class="l">İNİŞ HIZI</div><div class="v mono">'+(sim.landVy==null?'-':sim.landVy.toFixed(1)+' m/s')+'</div></div>'+
+          '<div class="rd-stat"><div class="l">HEDEFE</div><div class="v mono">'+(sim.landX==null?'-':Math.abs(Math.round(sim.landX))+' m')+'</div></div>'+
           '<div class="rd-stat"><div class="l">VERİ KAPSAMA</div><div class="v mono">%'+sc.coverage+'</div></div>'+
           '<div class="rd-stat"><div class="l">DURUM</div><div class="v '+(win?'ok':'bad')+'">'+(win?'TAMAM':'BAŞARISIZ')+'</div></div>'+
         '</div>'+
@@ -628,14 +628,14 @@
     const sc=CS.score(sim);
     const box=document.getElementById('resultBox');
     box.innerHTML =
-      '<h3 class="'+(win?'win':'lose')+'">📄 Uçuş Raporu — '+m.name+'</h3>'+
+      '<h3 class="'+(win?'win':'lose')+'">📄 Uçuş Raporu - '+m.name+'</h3>'+
       '<div style="margin:8px 0;font-size:.8rem;color:var(--muted2)">'+chips+'</div>'+
       '<div style="font-size:.76rem;color:var(--sky);margin-bottom:8px">'+
-        (LAB.mode==='rules'?'🧩 '+LAB.rules.length+' uçuş kuralı':'🎯 Parafoil — açılış '+LAB.pid.acilis+' m · Kp '+LAB.pid.kp+' · Ki '+LAB.pid.ki)+
+        (LAB.mode==='rules'?'🧩 '+LAB.rules.length+' uçuş kuralı':'🎯 Parafoil - açılış '+LAB.pid.acilis+' m · Kp '+LAB.pid.kp+' · Ki '+LAB.pid.ki)+
         ' · örnekleme '+LAB.sampleHz+' Hz · şok tepe '+Math.round(sim.shockPeak)+' m/s</div>'+
       '<div class="rstats">'+
-        '<div class="rstat"><div class="l">İNİŞ HIZI</div><div class="v mono">'+(sim.landVy==null?'—':sim.landVy.toFixed(1))+'</div></div>'+
-        '<div class="rstat"><div class="l">HEDEFE</div><div class="v mono">'+(sim.landX==null?'—':Math.abs(Math.round(sim.landX))+' m')+'</div></div>'+
+        '<div class="rstat"><div class="l">İNİŞ HIZI</div><div class="v mono">'+(sim.landVy==null?'-':sim.landVy.toFixed(1))+'</div></div>'+
+        '<div class="rstat"><div class="l">HEDEFE</div><div class="v mono">'+(sim.landX==null?'-':Math.abs(Math.round(sim.landX))+' m')+'</div></div>'+
         '<div class="rstat"><div class="l">KAPSAMA</div><div class="v mono">%'+sc.coverage+'</div></div>'+
         '<div class="rstat"><div class="l">BATARYA</div><div class="v mono">%'+Math.max(0,Math.round(sim.batt/sim.battMax*100))+'</div></div>'+
       '</div>'+
@@ -811,11 +811,11 @@
   function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show');
     clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2400); }
   const TUT=[
-    ['🛰️ Model Uydu Görevi','Gerçek yarışma formatı: taşıyıcı kapsülünü yükseğe bırakır, kapsül paraşütle iner ve telemetri yollar. Pilot SEN değilsin — yazdığın UÇUŞ BİLGİSAYARI kodudur!'],
-    ['🪂 Çift Paraşüt Fiziği','Serbest düşüş 55 m/s. Ana paraşütün şok limiti 26 m/s — hızlıyken açarsan YIRTILIR. Sıralama: tepede küçük DROGUE (18 m/s kontrollü iniş), alçakta ANA (6.5 m/s yumuşak iniş).'],
+    ['🛰️ Model Uydu Görevi','Gerçek yarışma formatı: taşıyıcı kapsülünü yükseğe bırakır, kapsül paraşütle iner ve telemetri yollar. Pilot SEN değilsin - yazdığın UÇUŞ BİLGİSAYARI kodudur!'],
+    ['🪂 Çift Paraşüt Fiziği','Serbest düşüş 55 m/s. Ana paraşütün şok limiti 26 m/s - hızlıyken açarsan YIRTILIR. Sıralama: tepede küçük DROGUE (18 m/s kontrollü iniş), alçakta ANA (6.5 m/s yumuşak iniş).'],
     ['🌬️ Sürüklenme Ödünleşimi','Büyük paraşüt = yelken. Anayı ne kadar erken açarsan rüzgâr o kadar sürükler; ne kadar geç açarsan iniş o kadar serttir. Zamanlama = yatay hedefleme silahıdır. Rüzgâr katmanları solda görünür.'],
-    ['📡 RF Karartması','Bazı irtifa bantlarında telsiz kör: ekran donar, uplink butonları ölür. Kapsül o anlarda TEK BAŞINADIR — kuralların cihazda çalışması bu yüzden hayat kurtarır.'],
-    ['📊 Jüri Veri İster','Veri kapsama şartı görevin parçası: örnekleme hızı düşükse rapor reddedilir. Ama her ölçüm enerji — 10 Hz açgözlülüğü bataryayı ana paraşütten önce bitirebilir!'],
+    ['📡 RF Karartması','Bazı irtifa bantlarında telsiz kör: ekran donar, uplink butonları ölür. Kapsül o anlarda TEK BAŞINADIR - kuralların cihazda çalışması bu yüzden hayat kurtarır.'],
+    ['📊 Jüri Veri İster','Veri kapsama şartı görevin parçası: örnekleme hızı düşükse rapor reddedilir. Ama her ölçüm enerji - 10 Hz açgözlülüğü bataryayı ana paraşütten önce bitirebilir!'],
     ['🎯 Parafoil Modu','İkinci mod: ana paraşüt yerine yönlendirilebilir PARAFOIL + otopilot. Kp hedefe döndürür, Ki rüzgârın inatçı sapmasını siler. Fırlat ve iki modu karşılaştır!'],
   ];
   let tutI=0;

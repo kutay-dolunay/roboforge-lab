@@ -1,11 +1,11 @@
 /*
- * RoboForge — Çizgi Labirenti Simülasyon Çekirdeği
+ * RoboForge - Çizgi Labirenti Simülasyon Çekirdeği
  * Pure, dependency-free. Browser (window.LineMazeCore) + Node (module.exports).
  *
  * Dersler: (1) SOL-EL KURALI (LSRB önceliği) her ağaç labirenti çözer,
- * (2) kavşak kararları bir ÖNCELİK SIRASIDIR — sırayı değiştir, rota değişsin,
+ * (2) kavşak kararları bir ÖNCELİK SIRASIDIR - sırayı değiştir, rota değişsin,
  * (3) YOL KISALTMA: keşif turunda kaydettiğin L/S/R/B dizisini cebirle sadeleştir
- * (LBR→B, LBS→R, SBL→R...) — ikinci tur çıkmazsız ve HIZLI.
+ * (LBR→B, LBS→R, SBL→R...) - ikinci tur çıkmazsız ve HIZLI.
  */
 (function () {
   'use strict';
@@ -27,7 +27,7 @@
              'S#....#.',
              '.#....#G',
              '.######.'],
-      desc: 'DÖNGÜ var! Sol-el kuralı ağaçlarda garantidir, döngülerde değil — bu yerleşimde yine kazanır. Neden? Düşün.' },
+      desc: 'DÖNGÜ var! Sol-el kuralı ağaçlarda garantidir, döngülerde değil - bu yerleşimde yine kazanır. Neden? Düşün.' },
     { id: 'kabuslabirent', name: 'Kâbus Labirenti', difficulty: 'Uzman', dur: 150, seed: 101, gw: 13, gh: 9,
       desc: 'Dev ağaç: onlarca kavşak. Yarış modunda budanmış rotanın farkı çarpıcıdır.' },
   ];
@@ -180,7 +180,7 @@
     const key = cx + ',' + cy;
     sim.visits[key] = (sim.visits[key] || 0) + 1;
     if (sim.visits[key] > 14) { sim.status = 'failed'; sim.reason = 'kayboldu';
-      pushEvt(sim, 'lost', '😵 Aynı kavşaktan 14. geçiş — robot döngüde KAYBOLDU!'); return; }
+      pushEvt(sim, 'lost', '😵 Aynı kavşaktan 14. geçiş - robot döngüde KAYBOLDU!'); return; }
 
     // hedef?
     if (cx === sim.mz.goal[0] && cy === sim.mz.goal[1]) {
@@ -189,7 +189,7 @@
         sim.shortcut = reducePath(sim.moves);
         sim.route = bfsPath(sim.mz); sim.routeIdx = 1;
         pushEvt(sim, 'lap1', '🗺️ Keşif bitti: ' + sim.moves.length + ' karar kaydı → sadeleşti: ' + sim.shortcut.join('') + ' (' + sim.shortcut.length + ' karar). Harita hazır!');
-        // başa dön (ışınlan — pist sıfırlama)
+        // başa dön (ışınlan - pist sıfırlama)
         sim.lap = 2; sim.scIdx = 0; sim.lapStart = sim.t;
         sim.px = sim.tx = sim.mz.start[0]; sim.py = sim.ty = sim.mz.start[1];
         sim.heading = neighbors(sim.mz, sim.mz.start[0], sim.mz.start[1])[0];
@@ -246,12 +246,12 @@
     const tScore = Math.max(0, 100 - sim.t / m.dur * 90);
     if (sim.cfg.mode === 'race' && sim.lapTimes.length >= 1) {
       const imp = sim.lapTimes[0] > 0 ? (1 - (sim.t - sim.lapTimes[0]) / sim.lapTimes[0]) * 100 : 0;
-      if (imp > 30) return { name: '🏆 Labirent Kartografı', cmt: 'Yarış turu keşiften %' + Math.round(imp) + ' hızlı — harita cebirinin zaferi!' };
-      if (imp > 8) return { name: '🥈 İz Sürücü', cmt: 'Kestirme çalıştı. Daha fazla çıkmaz budanabilirdi — kayıt dizisine bak.' };
-      return { name: '🥉 Kâşif', cmt: 'İki tur tamam ama kestirme kazancı az — bu labirent zaten kısa olabilir.' };
+      if (imp > 30) return { name: '🏆 Labirent Kartografı', cmt: 'Yarış turu keşiften %' + Math.round(imp) + ' hızlı - harita cebirinin zaferi!' };
+      if (imp > 8) return { name: '🥈 İz Sürücü', cmt: 'Kestirme çalıştı. Daha fazla çıkmaz budanabilirdi - kayıt dizisine bak.' };
+      return { name: '🥉 Kâşif', cmt: 'İki tur tamam ama kestirme kazancı az - bu labirent zaten kısa olabilir.' };
     }
     if (tScore > 55) return { name: '🏆 Labirent Kartografı', cmt: 'Kararlı kavşak disiplini, akıcı tur. Sol-el kuralı elinde silah gibi!' };
-    if (tScore > 25) return { name: '🥈 İz Sürücü', cmt: 'Hedefe vardın. Süreyi kısaltmak için Yarış moduna geç — keşif + kestirme.' };
+    if (tScore > 25) return { name: '🥈 İz Sürücü', cmt: 'Hedefe vardın. Süreyi kısaltmak için Yarış moduna geç - keşif + kestirme.' };
     return { name: '🥉 Kâşif', cmt: 'Ucu ucuna. Çıkmazlarda kaybedilen zamanı yarış modu geri kazandırır.' };
   }
   function coach(sim) {
@@ -260,7 +260,7 @@
     if (r === 'kayboldu') tips.push('Robot döngüde kayboldu! Sol-el kuralı yalnız AĞAÇ labirentlerde garantidir; döngülerde öncelik sırası veya harita gerekir. Öncelik dizilimini değiştir ya da Yarış moduna geç.');
     if (r === 'sure') tips.push('Süre doldu. Keşif pahalıdır: her çıkmaz gidiş-dönüş iki kat zaman. Yarış modunda ilk tur yatırım, ikinci tur hasattır.');
     if (sim.status === 'success' && sim.moves.filter(x => x === 'B').length > 2 && sim.cfg.mode !== 'race')
-      tips.push('Kaydında ' + sim.moves.filter(x => x === 'B').length + ' tane B (geri dönüş) var — her biri budanabilir yol demek. Yarış modu bu diziyi cebirle sadeleştirir: LBR→B, LBS→R…');
+      tips.push('Kaydında ' + sim.moves.filter(x => x === 'B').length + ' tane B (geri dönüş) var - her biri budanabilir yol demek. Yarış modu bu diziyi cebirle sadeleştirir: LBR→B, LBS→R…');
     if (!tips.length) tips.push('LSRB cebiri: keşif dizisindeki her "B" komşularıyla birleşip sadeleşir. Kâğıtta dene: L S B L → L R? Kurallar tabloda, robot kanıtı sahada.');
     return tips;
   }

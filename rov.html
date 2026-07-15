@@ -178,7 +178,7 @@
       <div class="hudbox"><div class="l">BALAST</div><div class="v mono" id="hudE">%35</div></div>
       <div class="hudbox"><div class="l">DURUM</div><div class="v" id="hudS">HAZIR</div></div>
     </div>
-    <div class="hint" id="hint">🤿 Denizaltı fiziği: <b>balast tankı su alınca batarsın, boşaltınca yüzersin</b> — itki değil DENGE esastır. Pompa yavaştır, erken karar ver. Kablo menzilini aşma, dibe çarpma ve <b>sığ suda hızlı çıkma</b> (0.9 m/s limiti — dalgıç protokolü)!</div>
+    <div class="hint" id="hint">🤿 Denizaltı fiziği: <b>balast tankı su alınca batarsın, boşaltınca yüzersin</b> - itki değil DENGE esastır. Pompa yavaştır, erken karar ver. Kablo menzilini aşma, dibe çarpma ve <b>sığ suda hızlı çıkma</b> (0.9 m/s limiti - dalgıç protokolü)!</div>
     <div class="rdock" id="resultDock" style="display:none"></div>
   </div>
   <div class="side">
@@ -195,7 +195,7 @@
         <h4>Cihaz Üstü Derinlik Kuralları</h4>
         <p class="exp">Yedi sensör biti, iki cihaz: <b>BALAST</b> (doldur batar / boşalt yüzer / tut) ve
           <b>İTİCİ</b> (yukarı / kapalı / aşağı). Yukarıdan aşağı ilk eşleşen kural cihazı sürer; eşleşme yoksa cihaz
-          SON HALİNDE KALIR — fren bırakma kuralını unutan sonsuza dek fren yapar!</p>
+          SON HALİNDE KALIR - fren bırakma kuralını unutan sonsuza dek fren yapar!</p>
         <div id="rulesList"></div>
         <button class="addRule" id="addRule">+ Yeni Kural</button>
           <button id="revealSolution" style="display:none;width:100%;margin-top:8px;padding:9px;border:1px dashed var(--amber);background:rgba(245,158,11,.08);color:var(--amber);font-weight:800;font-size:.78rem;border-radius:10px;cursor:pointer">🔑 En iyi çözümü göster (admin)</button>
@@ -217,7 +217,7 @@
       <div class="card">
         <h4>Kaldırma Kuvveti</h4>
         <p class="exp">Arşimet: taşan suyun ağırlığı kadar yukarı itilirsin. Balast tankı su alınca ağırlaşır →
-          batarsın. Nötr denge ≈ %50 balast. <b>Pompa yavaştır</b> — usta pilot dengeyi bir kez kurar,
+          batarsın. Nötr denge ≈ %50 balast. <b>Pompa yavaştır</b> - usta pilot dengeyi bir kez kurar,
           iticiyi ince ayar ve fren için saklar.</p>
       </div>
       <div class="card">
@@ -317,7 +317,7 @@
       if(m.dark){ CTX.strokeStyle='rgba(148,116,86,.5)'; CTX.lineWidth=2;
         CTX.beginPath(); CTX.moveTo(px-22,py+16); CTX.lineTo(px+22,py+16); CTX.lineTo(px+14,py+8); CTX.stroke(); }
     });
-    // tether (kablo) — yüzey istasyonundan ROV'a
+    // tether (kablo) - yüzey istasyonundan ROV'a
     const rx=sim?sim.x:0.5, rd=sim?sim.d:0.3;
     const [bx,by]=W2S(0,0), [px,py]=W2S(rx,rd);
     const tlen=Math.hypot(rx,rd);
@@ -414,9 +414,9 @@
     document.getElementById('hint').style.display='block';
     document.getElementById('resultWrap').classList.remove('show');
   }
-  const REASONS={ tamam:'Görev tamam, ROV güvenle yüzeyde!', tether:'Kablo gerildi — ROV menzil dışına çıktı! 🪢',
-    carpma:'Deniz tabanına çarptın! 💥', hizli_cikis:'Sığ suda hızlı çıkış — dalgıç protokolü ihlali! 🫧',
-    molasiz:'4 metredeki güvenlik molası atlandı! 🫧', enerji:'Enerji bitti — ROV suda asılı kaldı. 🪫',
+  const REASONS={ tamam:'Görev tamam, ROV güvenle yüzeyde!', tether:'Kablo gerildi - ROV menzil dışına çıktı! 🪢',
+    carpma:'Deniz tabanına çarptın! 💥', hizli_cikis:'Sığ suda hızlı çıkış - dalgıç protokolü ihlali! 🫧',
+    molasiz:'4 metredeki güvenlik molası atlandı! 🫧', enerji:'Enerji bitti - ROV suda asılı kaldı. 🪫',
     sure:'Görev süresi doldu.' };
   function showResult(){
     const sim=LAB.sim; if(!sim) return;
@@ -426,7 +426,7 @@
     const tips=R.coach(sim);
     var depthGraph='';
     if(window.RFResult && sim.log && sim.log.length>3){
-      depthGraph='<div class="rf-graphwrap"><div class="cap">🤿 Derinlik &amp; enerji — zamana karşı</div>'+
+      depthGraph='<div class="rf-graphwrap"><div class="cap">🤿 Derinlik &amp; enerji - zamana karşı</div>'+
         '<canvas id="rovGraph" class="rf-graph" style="height:150px"></canvas>'+
         '<div style="font-size:.72rem;color:var(--muted2);margin-top:2px">Mavi = derinlik (m), yeşil = kalan enerji (%). Ani balast değişimi enerji yakar; sabit derinlik tutmak ustalıktır.</div></div>';
     }
@@ -474,10 +474,10 @@
     const m=sim.mission;
     const box=document.getElementById('resultBox');
     box.innerHTML =
-      '<h3 class="'+(win?'win':'lose')+'">📄 Dalış Raporu — '+m.name+'</h3>'+
+      '<h3 class="'+(win?'win':'lose')+'">📄 Dalış Raporu - '+m.name+'</h3>'+
       '<div style="margin:8px 0;font-size:.8rem;color:var(--muted2)">'+chips+'</div>'+
       '<div style="font-size:.76rem;color:var(--sky);margin-bottom:8px">'+
-        (LAB.mode==='rules'?'🧩 '+LAB.rules.length+' derinlik kuralı':'📈 PID — Kp '+LAB.pid.kp+' · Ki '+LAB.pid.ki+' · Kd '+LAB.pid.kd)+
+        (LAB.mode==='rules'?'🧩 '+LAB.rules.length+' derinlik kuralı':'📈 PID - Kp '+LAB.pid.kp+' · Ki '+LAB.pid.ki+' · Kd '+LAB.pid.kd)+
         ' · maks çıkış '+sim.maxAscent.toFixed(2)+' m/s · kablo tepe '+sim.tetherMax.toFixed(1)+'/'+m.tether+' m</div>'+
       '<div class="rstats">'+
         '<div class="rstat"><div class="l">SÜRE</div><div class="v mono">'+sim.t.toFixed(1)+'s</div></div>'+
@@ -644,10 +644,10 @@
     clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2400); }
   const TUT=[
     ['🤿 Arşimet Pilotu','Denizaltının sırrı itki değil DENGE: balast tankı su alınca batarsın, boşaltınca yüzersin. Nötr nokta ≈ %50. İticiyi ince ayar ve fren için sakla.'],
-    ['🐢 Pompa Yavaştır','Balast pompası saniyede %11 doldurur — kararlarını ERKEN ver. Dibe 1 metre kala boşaltmaya başlayan çoktan çarpmıştır.'],
-    ['🪢 Kablo Üçgeni','ROV kabloya bağlı: √(x² + derinlik²) ≤ kablo boyu. Derine inmek yatay menzili KISALTIR — rotan bir geometri problemi.'],
+    ['🐢 Pompa Yavaştır','Balast pompası saniyede %11 doldurur - kararlarını ERKEN ver. Dibe 1 metre kala boşaltmaya başlayan çoktan çarpmıştır.'],
+    ['🪢 Kablo Üçgeni','ROV kabloya bağlı: √(x² + derinlik²) ≤ kablo boyu. Derine inmek yatay menzili KISALTIR - rotan bir geometri problemi.'],
     ['🫧 Vurgun Protokolü','Sığ suda (4 m üstü) çıkış limiti 0.9 m/s. Balastı boşaltıp roket gibi fırlamak görevi iptal ettirir. Bazı görevlerde 4 metrede güvenlik molası da zorunlu!'],
-    ['🔦 Derinlik = Karanlık','Derin görevlerde far otomatik yanar ve enerji yer. Bang-bang balast salınımı da pompayı sürekli çalıştırır — enerji grafiğine dikkat.'],
+    ['🔦 Derinlik = Karanlık','Derin görevlerde far otomatik yanar ve enerji yer. Bang-bang balast salınımı da pompayı sürekli çalıştırır - enerji grafiğine dikkat.'],
     ['📈 Kural mı PID mi','Kurallar bant bant düşünür (salınır!), PID yumuşak oturur. İkisini de dene: derinlik profil grafiği farkı acımasızca gösterir. Derin Deniz Pilotu ol!'],
   ];
   let tutI=0;

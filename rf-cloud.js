@@ -1,5 +1,5 @@
 /* =============================================================================
- * RoboForge — Cloud sync (rf-cloud.js) v1.0.0
+ * RoboForge - Cloud sync (rf-cloud.js) v1.0.0
  * -----------------------------------------------------------------------------
  * Mirrors local progress + feedback to Supabase for logged-in Moodle students.
  *
@@ -134,7 +134,7 @@
     // register student + flush any queued items once we know who they are
     if (user()) { send({ p_event_type: 'session_open' }); }
     hookProgress(); hookFeedback(); flush();
-    // rf-feedback.js may load slightly later (async) — re-hook shortly after.
+    // rf-feedback.js may load slightly later (async) - re-hook shortly after.
     setTimeout(function () { hookProgress(); hookFeedback(); }, 1500);
     global.addEventListener('online', flush);
   }
@@ -147,7 +147,7 @@
     // manual test from console
     _ping: function () {
       return send({ p_event_type: 'ping' }).then(function (ok) {
-        console.log(ok ? 'rf_ingest ok' : 'rf_ingest failed/anon — check login + schema');
+        console.log(ok ? 'rf_ingest ok' : 'rf_ingest failed/anon - check login + schema');
         return ok;
       });
     }
