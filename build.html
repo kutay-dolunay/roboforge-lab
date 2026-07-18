@@ -226,13 +226,13 @@
 .opt .flip{position:absolute;inset:14px;transition:transform .5s cubic-bezier(.2,.7,.3,1);transform-style:preserve-3d}
 .opt:hover .flip{transform:rotateY(180deg)}
 .opt .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;display:flex;flex-direction:column}
-.opt .face.back{transform:rotateY(180deg);align-items:stretch;justify-content:center;text-align:center;gap:8px}
+.opt .face.bk{transform:rotateY(180deg);align-items:stretch;justify-content:center;text-align:center;gap:8px}
 .artbox{position:relative;width:100%;flex:1 1 auto;display:flex;align-items:center;justify-content:center;min-height:84px}
 .artimg{max-width:88%;max-height:146px;object-fit:contain}
 .artbox .artph{display:none;font-size:3.8rem;line-height:1;filter:drop-shadow(0 8px 20px rgba(0,0,0,.55))}
 .artbox.ph .artph,.artbox.noart .artph{display:flex}
 /* full width so the slogan WRAPS instead of overflowing a shrink-to-fit box */
-.slog{flex:0 0 auto;width:100%;align-self:stretch;box-sizing:border-box;font-size:.75rem;line-height:1.42;
+.slog{flex:0 0 auto;width:100%;align-self:stretch;box-sizing:border-box;white-space:normal;font-size:.75rem;line-height:1.42;
   color:var(--txt);font-weight:600;padding:0 2px 2px;overflow-wrap:anywhere;word-break:break-word}
 /* --- archetype hero + wider axis values --- */
 .rate .rv10{width:48px}
@@ -365,7 +365,7 @@
   function backFace(cat,sel,fallbackEmoji){
     const id=(RD.ident&&RD.ident(cat,sel))||{}; const emoji=id.emoji||fallbackEmoji||'🔧'; const slogan=id.slogan||'';
     const art=ART_READY?('<img class="artimg" src="art/'+artKey(cat,sel)+'.svg" alt="">'):'';
-    return '<div class="face back"><div class="artbox'+(ART_READY?'':' ph')+'">'+art+'<div class="artph">'+emoji+'</div></div>'+
+    return '<div class="face bk"><div class="artbox'+(ART_READY?'':' ph')+'">'+art+'<div class="artph">'+emoji+'</div></div>'+
            '<div class="slog">'+esc(slogan)+'</div></div>';
   }
   function gEmoji(cat,sel,fb){ const id=(RD.ident&&RD.ident(cat,sel))||{}; return id.emoji||fb||'🔧'; }
