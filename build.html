@@ -222,16 +222,18 @@
 @media(max-width:560px){.factgrid{grid-template-columns:repeat(2,1fr)}}
 
 /* --- card flip (front = specs, back = vector art + slogan) --- */
-.opt{perspective:1100px;min-height:278px}
+.opt{perspective:1100px;min-height:290px}
 .opt .flip{position:absolute;inset:14px;transition:transform .5s cubic-bezier(.2,.7,.3,1);transform-style:preserve-3d}
 .opt:hover .flip{transform:rotateY(180deg)}
 .opt .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;display:flex;flex-direction:column}
-.opt .face.back{transform:rotateY(180deg);align-items:center;justify-content:center;text-align:center;gap:10px}
-.artbox{position:relative;width:100%;flex:1;display:flex;align-items:center;justify-content:center;min-height:110px}
-.artimg{max-width:90%;max-height:158px;object-fit:contain}
-.artbox .artph{display:none;font-size:4.4rem;line-height:1;filter:drop-shadow(0 8px 20px rgba(0,0,0,.55))}
+.opt .face.back{transform:rotateY(180deg);align-items:stretch;justify-content:center;text-align:center;gap:8px}
+.artbox{position:relative;width:100%;flex:1 1 auto;display:flex;align-items:center;justify-content:center;min-height:84px}
+.artimg{max-width:88%;max-height:146px;object-fit:contain}
+.artbox .artph{display:none;font-size:3.8rem;line-height:1;filter:drop-shadow(0 8px 20px rgba(0,0,0,.55))}
 .artbox.ph .artph,.artbox.noart .artph{display:flex}
-.slog{font-size:.82rem;line-height:1.5;color:var(--txt);font-weight:600;padding:0 4px 2px}
+/* full width so the slogan WRAPS instead of overflowing a shrink-to-fit box */
+.slog{flex:0 0 auto;width:100%;align-self:stretch;box-sizing:border-box;font-size:.75rem;line-height:1.42;
+  color:var(--txt);font-weight:600;padding:0 2px 2px;overflow-wrap:anywhere;word-break:break-word}
 /* --- archetype hero + wider axis values --- */
 .rate .rv10{width:48px}
 .arch{display:flex;gap:14px;align-items:center;border:1px solid var(--brand-lt);border-radius:14px;padding:14px 16px;margin-bottom:14px;
