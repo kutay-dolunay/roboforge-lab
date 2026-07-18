@@ -220,6 +220,26 @@
 .rate .rv10{flex:none;width:26px;text-align:right;font-weight:800;font-size:.8rem;color:var(--brand-lt)}
 .factgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
 @media(max-width:560px){.factgrid{grid-template-columns:repeat(2,1fr)}}
+
+/* --- card flip (front = specs, back = vector art + slogan) --- */
+.opt{perspective:1100px;min-height:278px}
+.opt .flip{position:absolute;inset:14px;transition:transform .5s cubic-bezier(.2,.7,.3,1);transform-style:preserve-3d}
+.opt:hover .flip{transform:rotateY(180deg)}
+.opt .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;display:flex;flex-direction:column}
+.opt .face.back{transform:rotateY(180deg);align-items:center;justify-content:center;text-align:center;gap:10px}
+.artbox{position:relative;width:100%;flex:1;display:flex;align-items:center;justify-content:center;min-height:110px}
+.artimg{max-width:90%;max-height:158px;object-fit:contain}
+.artbox .artph{display:none;font-size:4.4rem;line-height:1;filter:drop-shadow(0 8px 20px rgba(0,0,0,.55))}
+.artbox.ph .artph,.artbox.noart .artph{display:flex}
+.slog{font-size:.82rem;line-height:1.5;color:var(--txt);font-weight:600;padding:0 4px 2px}
+/* --- archetype hero + wider axis values --- */
+.rate .rv10{width:48px}
+.arch{display:flex;gap:14px;align-items:center;border:1px solid var(--brand-lt);border-radius:14px;padding:14px 16px;margin-bottom:14px;
+  background:linear-gradient(120deg,rgba(0,102,162,.22),rgba(0,102,162,.05))}
+.arch-em{font-size:3rem;line-height:1;flex:none}
+.arch-k{font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:800}
+.arch-n{font-size:1.25rem;font-weight:800;color:var(--brand-lt);margin:2px 0 4px}
+.arch-d{font-size:.82rem;line-height:1.55;color:var(--muted2)}
 </style>
 </head>
 <body>
@@ -300,6 +320,7 @@
 <script src="rf-auth.js?v=2"></script>
 <script src="rf-progress.js?v=1"></script>
 <script src="robot-data.js"></script>
+<script src="rf-skills.js?v=1"></script>
 <script>
 (function(){
   const RD = window.RobotData;
@@ -337,6 +358,15 @@
     if(cat==='sensor')  return `${o.logicVmin}${(o.logicVmax&&o.logicVmax!==o.logicVmin)?('-'+o.logicVmax):''}V · ${o.drawMA}mA · ${o.weightG}g`;
     return '';
   }
+  const ART_READY=false;   // vektorel gorseller gelince true yap: art/<kategori>-<id>.svg
+  function artKey(cat,sel){ if(cat==='motor'){ const o=RD.opt('motor',sel); return o?('motor-'+o.typeId):'motor'; } return cat+'-'+((sel&&sel.id)||sel); }
+  function backFace(cat,sel,fallbackEmoji){
+    const id=(RD.ident&&RD.ident(cat,sel))||{}; const emoji=id.emoji||fallbackEmoji||'🔧'; const slogan=id.slogan||'';
+    const art=ART_READY?('<img class="artimg" src="art/'+artKey(cat,sel)+'.svg" alt="">'):'';
+    return '<div class="face back"><div class="artbox'+(ART_READY?'':' ph')+'">'+art+'<div class="artph">'+emoji+'</div></div>'+
+           '<div class="slog">'+esc(slogan)+'</div></div>';
+  }
+  function gEmoji(cat,sel,fb){ const id=(RD.ident&&RD.ident(cat,sel))||{}; return id.emoji||fb||'🔧'; }
   function proConHtml(o){ return (o.pros?`<div class="pc plus" title="${esc(o.pros)}">➕ ${esc(shortT(o.pros))}</div>`:'')+(o.cons?`<div class="pc minus" title="${esc(o.cons)}">➖ ${esc(shortT(o.cons))}</div>`:''); }
 
   // chassis shapes - many figures
@@ -406,8 +436,9 @@
       c.options.forEach(o=>{
         const card=document.createElement('div'); card.className='opt'+(B[cat]===o.id?' sel':'');
         const barHtml=bars(cat,o).map(([l,v])=>`<div class="bar"><span class="bl">${l}</span><span class="bt"><span class="bf" style="width:${Math.round(v*100)}%"></span></span></div>`).join('');
-        card.innerHTML=`<div class="oh"><span class="oi">${o.icon}</span><span class="on">${esc(o.name)}</span></div>
+        const front=`<div class="oh"><span class="oi">${gEmoji(cat,o.id,o.icon)}</span><span class="on">${esc(o.name)}</span></div>
           <div class="spec">${specLine(cat,o)}</div>${barHtml}${proConHtml(o)}`;
+        card.innerHTML=`<div class="flip"><div class="face front">${front}</div>${backFace(cat,o.id,o.icon)}</div>`;
         card.onclick=()=>{ B[cat]=o.id; save(); renderPhase(); renderProgress(); showConfirm(cat,o); updateNav(); };
         grid.appendChild(card);
       });
@@ -424,8 +455,10 @@
       const rpms=t.variants.map(v=>v.rpm), rng=rpms.length>1?(Math.min.apply(null,rpms)+'-'+Math.max.apply(null,rpms)):(''+rpms[0]);
       const card=document.createElement('div'); card.className='opt'+(sel.type===t.id?' sel':'');
       const barHtml=bars('motor',t.variants[0]).map(([l,v])=>`<div class="bar"><span class="bl">${l}</span><span class="bt"><span class="bf" style="width:${Math.round(v*100)}%"></span></span></div>`).join('');
-      card.innerHTML=`<div class="oh"><span class="oi">${t.icon}</span><span class="on">${esc(t.type)}</span></div>
+      const msel={type:t.id,rpm:t.variants[0].rpm};
+      const front=`<div class="oh"><span class="oi">${gEmoji('motor',msel,t.icon)}</span><span class="on">${esc(t.type)}</span></div>
         <div class="spec">${rng} RPM · ${t.variants.length} seçenek</div>${barHtml}`;
+      card.innerHTML=`<div class="flip"><div class="face front">${front}</div>${backFace('motor',msel,t.icon)}</div>`;
       card.onclick=()=>{ const one=t.variants.length===1?t.variants[0].rpm:null; B.motor={type:t.id,rpm:(sel.type===t.id?sel.rpm:one)}; save(); renderPhase(); renderProgress(); updateNav(); };
       grid.appendChild(card);
     });
@@ -527,13 +560,17 @@
     ORDER.forEach(cat=>{ const o=isChosen(cat)?RD.opt(cat,B[cat]):null;
       let nm=o?o.name:'- yok -'; if(cat==='motor'&&o) nm=o.typeName+' · '+o.rpm+' RPM';
       bl.innerHTML+=`<div class="bchip">${RD.COMPONENTS[cat].icon} ${RD.COMPONENTS[cat].label}: <b>${esc(nm)}</b></div>`; });
-    const r=RD.computeReport(bctx());
+    const ctx=bctx(); const r=RD.computeReport(ctx); const A=RD.archetype(ctx); const gs=A.g;
     const g=document.getElementById('reportGrid'); g.innerHTML='';
+    const hero=document.createElement('div'); hero.className='arch';
+    hero.innerHTML=`<div class="arch-em">${A.emoji}</div><div><div class="arch-k">Robot Kimliğin</div>
+      <div class="arch-n">${esc(A.name)}</div><div class="arch-d">${esc(A.desc)}</div></div>`;
+    g.appendChild(hero);
     const rw=document.createElement('div'); rw.className='ratewrap';
-    RD.RATING_KEYS.forEach(k=>{ const val=r.ratings[k];
-      rw.innerHTML+=`<div class="rate"><span class="rk">${RD.RATING_LABEL[k]}</span><span class="rtrack"><span class="rfill" style="width:${val*10}%"></span></span><span class="rv10">${val}</span></div>`; });
+    RD.G_AXES.forEach(k=>{ const raw=gs.raw[k], cap=RD.G_CAPS[k], pct=Math.max(0,Math.min(100,Math.round(raw/cap*100)));
+      rw.innerHTML+=`<div class="rate"><span class="rk">${RD.G_LABEL[k]}</span><span class="rtrack"><span class="rfill" style="width:${pct}%"></span></span><span class="rv10">${raw}/${cap}</span></div>`; });
     g.appendChild(rw);
-    const facts=[['Ağırlık',r.weightG,'g'],['Tepe Hız',r.topSpeedKmh,'km/s'],['Çalışma',r.batteryMin,'dk'],['Maliyet',r.cost,'/70']];
+    const facts=[['Ağırlık',r.weightG,'g'],['Tepe Hız',r.topSpeedKmh,'km/s'],['Çalışma',r.batteryMin,'dk'],['Tork Oranı',gs.torkRatio.toFixed(1),'']];
     const fg=document.createElement('div'); fg.className='factgrid';
     facts.forEach(([l,v,u])=>{ fg.innerHTML+=`<div class="rcard"><div class="rl">${l}</div><div class="rv">${v}</div><div class="ru">${u}</div></div>`; });
     g.appendChild(fg);
@@ -578,8 +615,19 @@
       testTimer=setTimeout(reveal,750);
     }; reveal();
   }
+  function gamiBadgeHtml(b){
+    if(!b) return '';
+    return '<div style="display:flex;gap:11px;align-items:flex-start;margin-top:12px;border:1px solid rgba(245,158,11,.45);background:rgba(245,158,11,.08);border-radius:12px;padding:11px 13px">'+
+      '<div style="font-size:1.8rem;line-height:1">'+b.icon+'</div><div><b style="color:#fde68a">Rozet kazanıldı: '+b.name+'</b>'+
+      '<div style="font-size:.76rem;color:var(--muted2);line-height:1.45;margin-top:2px">'+b.msg+'</div></div></div>';
+  }
   function showVerdict(res){
     const v=document.getElementById('verdict');
+    let gami='';
+    try{ if(window.RFSkills){
+      if(res.pass){ RFSkills.markBestRobot(SIM,true); }
+      else { RFSkills.markBestRobot(SIM,false); gami=gamiBadgeHtml(RFSkills.award(SIM,'ilk_hata')); }
+    } }catch(e){}
     setRig(res.pass?'pass':'fail', res.pass?'✓ Robot çalışıyor':'✕ Sorun var');
     if(res.pass){ v.className='verdict win';
       v.innerHTML=`<h3>✅ Robotun çalışıyor!</h3>`+(res.notes.length?res.notes.map(n=>`<p>💡 ${n}</p>`).join(''):`<p>Her şey yolunda. Şimdi ona çizgiyi takip etmeyi öğret.</p>`)+
@@ -588,7 +636,7 @@
     } else { const fail=res.steps.find(s=>!s.ok); v.className='verdict lose';
       v.innerHTML=`<h3>❌ Robot çalışmadı</h3><p>${fail?fail.msg:'Bir şeyler eksik.'}</p>
         <p style="color:var(--muted)">Sorun değil - mühendislik denemekle öğrenilir. Parçalarını düzelt ve tekrar dene.</p>
-        <button class="btn primary" id="fixIt" style="margin-top:12px">← Geri dön ve düzelt</button>`;
+        <button class="btn primary" id="fixIt" style="margin-top:12px">← Geri dön ve düzelt</button>`+gami;
       document.getElementById('fixIt').onclick=()=>{ step=1; phase=0; go(1); };
     }
   }

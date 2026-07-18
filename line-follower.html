@@ -378,6 +378,7 @@
 <script src="rf-feedback.js?v=1"></script>
 <script src="rf-result.js?v=1"></script>
 <script src="robot-data.js?v=2"></script>
+<script src="rf-skills.js?v=1"></script>
 <script src="sim-core.js?v=2"></script>
 <script>
 (function(){
@@ -528,6 +529,22 @@
       mode:LAB.mode, pid:LAB.pid,
     };
   }
+  function showGamiToast(earned,ev){
+    const row=(ic,t,m,c)=>'<div style="display:flex;gap:10px;align-items:flex-start;margin:7px 0"><div style="font-size:1.6rem;line-height:1">'+ic+'</div>'+
+      '<div><b style="color:'+c+'">'+t+'</b><div style="font-size:.74rem;color:var(--muted2);line-height:1.45">'+m+'</div></div></div>';
+    const items=[];
+    (earned||[]).forEach(function(b){ items.push(row(b.icon,b.name,b.msg,'#fde68a')); });
+    if(ev&&ev.unlocked&&!ev.already) items.push(row('🧭','Beceri açıldı: '+ev.skill.name,'Maker Pasaportuna kalıcı olarak işlendi. +'+ev.gained+' XP','#86efac'));
+    else if(ev&&ev.perfect) items.push(row('✨','Kusursuz Mühendislik','Hiç hata almadan bitirdin. Beceriyi açmak için sınırları zorlayan bir kombinasyon dene ve gerçek bir donanım hatası gör.','#fde68a'));
+    if(!items.length) return;
+    let t=document.getElementById('gamiToast');
+    if(!t){ t=document.createElement('div'); t.id='gamiToast';
+      t.style.cssText='position:fixed;right:18px;bottom:18px;z-index:9998;width:335px;max-width:calc(100vw - 28px);background:#101b2f;border:1px solid var(--brand-lt);border-radius:14px;padding:14px 16px;box-shadow:0 16px 48px rgba(0,0,0,.6)';
+      document.body.appendChild(t); }
+    t.innerHTML='<div style="font-size:.58rem;letter-spacing:2px;color:var(--muted);font-weight:800;text-transform:uppercase;margin-bottom:4px">Kazanıldı</div>'+items.join('')+
+      '<a href="passport.html" style="display:inline-block;margin-top:8px;font-size:.74rem;font-weight:700;color:#93c5fd">Maker Pasaportu →</a>';
+    t.style.display='block'; clearTimeout(LAB._gt); LAB._gt=setTimeout(function(){ if(t) t.style.display='none'; },9000);
+  }
   function showBuildFaultNote(){
     if(!LAB.buildFaultMsg) return; const m=String(LAB.buildFaultMsg).replace(/&/g,'&amp;').replace(/</g,'&lt;');
     let t=document.getElementById('buildFaultToast');
@@ -594,6 +611,8 @@
     const win = sim.status==='success';
       try{ if(window.RFProgress){ var __rfwin=(sim.status==='success'||sim.status==='win'); var __rfmedal=null; try{ var __core=window['SimCore']; if(__core&&__core.robotClass){var __c=__core.robotClass(sim); if(__c)__rfmedal=__c.name;} }catch(e){} RFProgress.record('line', LAB.trackIdx, {pass:__rfwin, time:(sim&&typeof sim.t==='number')?sim.t:null, medal:__rfmedal, mode:LAB.mode}); } }catch(e){}
     r.className='result '+(win?'win':'lose');
+    if(win){ try{ if(window.RFSkills){ const earned=RFSkills.checkLineBadges(LAB.trackIdx);
+      const ev=RFSkills.evaluateLine(); setTimeout(function(){ showGamiToast(earned,ev); },900); } }catch(e){} }
     // help popup after repeated failed attempts (once)
     if(!win){ LAB.fails=(LAB.fails||0)+1; try{ if(LAB.fails>=3 && !localStorage.getItem('rf_lf_help')) setTimeout(showHelpPopup,600); }catch(e){} }
     const cls = S.robotClass(sim);
@@ -1120,6 +1139,8 @@
         LAB.params.turnGain=+(sp.turnGain*(0.7+0.3*sq)).toFixed(2);   // sensor quality -> correction sharpness
         if(sp.wheelBase) LAB.params.wheelBase=sp.wheelBase; }
       LAB.buildFault=sp?sp.fault:null; LAB.buildFaultMsg=sp?sp.faultMsg:null; LAB.buildBaseVMax=LAB.params.vMax;
+      try{ if(window.RFSkills){ RFSkills.markBestRobot('line', !(sp&&sp.fault));
+        if(sp&&sp.fault) RFSkills.award('line','ilk_hata'); } }catch(e){}
       const m=window.RobotData.opt('motor',b.motor), w=window.RobotData.opt('wheel',b.wheel);
       const mName=m?(m.typeName+' '+m.rpm+' RPM'):'?';
       const small=document.querySelector('.brand small');

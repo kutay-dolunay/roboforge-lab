@@ -830,7 +830,84 @@
   }
   function starterBuild(){ return {}; }
 
-  const API={COMPONENTS,ORDER,RATING_KEYS,RATING_LABEL,opt,motorType,parts,ratings,computeReport,runPreTest,toSimParams,starterBuild};
+
+  // ---------- gamification layer (Line Follower gamification report) ----------
+  // coefficient order: [h, s, d, k, b, p] (+ [6]=tork for motors)
+  const GX = {
+    brain:{ uno:[1,2,3,4,3,3], nano:[1,2,2,3,4,4], esp32:[4,3,2,1,3,-2], stm32:[5,4,4,0,3,2] },
+    driver:{ l293d:[-3,-3,-2,5,5,-2], vnh5019:[3,4,5,1,-4,4], tb6612:[3,3,3,4,2,5], drv8833:[2,3,3,3,3,4] },
+    motor:{ 'tt@250':[-2,-2,-3,5,5,3,3], 'n20@3000':[3,3,2,3,2,2,2], 'n20@5000':[5,-2,-2,1,2,-3,1],
+            'm370@2000':[2,1,4,2,3,-1,8], 'm370@4000':[4,-1,3,1,2,-3,5], 'm370@5000':[4,-1,3,1,2,-3,5],
+            'coreless@2000':[4,2,-1,1,-3,-2,6] },
+    wheel:{ w20:[-2,5,4,1,1,2], w32:[1,4,3,2,2,3], w65:[3,-3,2,4,4,-2] },
+    caster:{ cmetal:[1,2,5,2,3,2], cplastik:[1,1,1,3,4,1] },
+    battery:{ aa4:[-2,-3,4,5,5,-3], lipo2s:[4,3,2,2,3,1], li18650:[1,1,5,3,3,5], lipo3s:[5,-1,-4,1,1,2] },
+    sensor:{ qtr8rc:[3,4,4,3,1,3], qtr8a:[3,3,4,2,1,2], tcrt5000:[-2,-2,3,4,4,1] }
+  };
+  const G_CAPS={h:25,s:25,d:31,k:30,b:31,p:25};
+  // Esikler: rapordaki degerler ulasilamazdi (max agirlik 395g, max tork orani 4.47).
+  // 8064 buildin tamami taranarak kalibre edildi: Tank %2.7, Guc Kulesi %2.7, APEX %0.4.
+  const G_TH={tankW:350, torkRatio:3.6, apexH:0.80, apexS:0.80};
+  const G_LABEL={h:'Hız',s:'Stabilite',d:'Dayanıklılık',k:'Kolaylık',b:'Bütçe',p:'Verim'};
+  const G_AXES=['h','s','d','k','b','p'];
+  const IDENT={
+    brain:{ uno:['👴','Yavaş ama kararlı, her fırtınaya göğüs gerer.'], nano:['🐜','Küçük gövde, standart güç.'],
+      esp32:['📡','Hızlı düşünür ama enerjiyi hunharca tüketir.'], stm32:['⚡','Ham işlem gücü ve hata toleransı neredeyse sıfır.'] },
+    driver:{ l293d:['🐌','Ucuz ve kolay ama gücü kısıtlı, ağır motorlarla anlaşamaz.'],
+      vnh5019:['🏋️','Profesyonel lig gücü pahalı ama sınır tanımaz.'],
+      tb6612:['🛣️','Hafif, verimli, ısınmaz, dengeli.'], drv8833:['🛡️','Düşük voltajda sessiz ve güvenilir.'] },
+    motor:{ tt:['👶','Eğitimin sadık dostu; hızı az ama asla yorulmaz.'],
+      n20:['🏎️',"3000 RPM'de dengeli, 5000 RPM'de kontrolsüz bir hız canavarı."],
+      m370:['💪','Devri arttıkça güçlenir ama akım iştahı da o kadar büyür.'],
+      coreless:['🌪️','Hafif ve çevik; narin gövdesi aşırı zorlanmayı affetmez.'] },
+    wheel:{ w20:['🩰','Hassas tutuş, düşük hız; cerrahi virajlar için.'], w32:['⚖️','Çoğu zaman doğru seçim: dengeli tutuş ve hız.'],
+      w65:['🪵','Şasiyi yükseltir ama sensörü köreltebilir.'] },
+    caster:{ cmetal:['🧭','Ağır ama yönü milimetrik korur.'], cplastik:['🪶','Hafif, ucuz, az sürtünme.'] },
+    battery:{ aa4:['🔋','Güvenli ama akım istendiği an nefesi kesilir.'], lipo2s:['⚡','Hız ve güvenlik arasında iyi bir denge.'],
+      li18650:['🏃','Bitmeyen kapasite ama ağır bir yük.'], lipo3s:['☠️','Maksimum güç; ama dikkat, yanlış sürücüyle eşleşirse felaket.'] },
+    sensor:{ qtr8rc:['👁️','Net okur ama hızlı işlemci ister.'], qtr8a:['🔍','Detaylı okur ama yavaş kartlarda işlemciyi zorlar.'],
+      tcrt5000:['🌫️','Ucuz ama yüksek hızda kör kalır.'] }
+  };
+  const ARCHETYPES={
+    tank:{name:'Tank Sürüşü',emoji:'🚜',desc:'Çok ağır ve sağlam parçalar seçtin. Robotun şasisi sarsılmaz bir kale gibi ancak bu kütleyi hareket ettirmek için motorların canı çıkacak!'},
+    apex:{name:'APEX: Rekabetin Zirvesi',emoji:'🐆',desc:'Yol tutuşu ve sensör kararlılığı mükemmel. Sarsıntısız, akıcı ve tutarlı bir sürüş dinamiği yakaladın.'},
+    power:{name:'Güç Kulesi',emoji:'🛡️',desc:'Muazzam bir çekiş gücü! Rampaları ve engelleri aşmak onun için çocuk oyuncağı. Düz yolda ise bu tork gücü biraz fazla kaçabilir.'},
+    bolt:{name:'Yıldırım Sürüşü',emoji:'🏎️',desc:'Yüksek hızlı ama ağırlığı düşük bir yapı kurdun. Düzlüklerde pistin tozunu yutturur ama keskin virajlara geldiğinde çizginin dışına savrulma riski taşır!'},
+    tiger:{name:'Kayan Kaplan',emoji:'🐅',desc:'Çizgiden bir milimetre sapmıyorsun ama hız düşük kaldığı için bu henüz rekabetin zirvesi değil; güvenilir ve kararlı bir sürüş.'},
+    master:{name:'Kontrol Ustası',emoji:'🧩',desc:'Manevra kabiliyeti kusursuz. Robot çizgiden bir milimetre bile sapmıyor ama bu hassasiyeti yakalamak için hızından feragat ettin.'},
+    marathon:{name:'Maratoncu Ruhu',emoji:'🔋',desc:'Enerji tasarrufu tavan yaptı! Bitmeyen bir batarya ömrün var ancak pillerin getirdiği ekstra ağırlık yüzünden hızlanman zor olacak.'},
+    economy:{name:'Ekonomik Kahraman',emoji:'💰',desc:'Az bütçeyle çok iş başardın. Şampiyonluğa adım adım giderken hesaplı mühendisliğin en iyi örneğisin.'}
+  };
+  function ident(cat,sel){
+    if(cat==='motor'){ const o=opt('motor',sel); const e=o&&IDENT.motor[o.typeId]; return e?{emoji:e[0],slogan:e[1]}:null; }
+    const id=(sel&&sel.id)||sel; const e=IDENT[cat]&&IDENT[cat][id];
+    return e?{emoji:e[0],slogan:e[1]}:null;
+  }
+  function gkey(cat,sel){ if(cat==='motor'){ const o=opt('motor',sel); return o?(o.typeId+'@'+o.rpm):null; } return (sel&&sel.id)||sel; }
+  function gscore(build){
+    build=build||{}; const sum={h:0,s:0,d:0,k:0,b:0,p:0}; let tork=0;
+    ORDER.forEach(cat=>{ const sel=build[cat]; if(!sel) return; const key=gkey(cat,sel);
+      const v=GX[cat]&&GX[cat][key]; if(!v) return;
+      sum.h+=v[0]; sum.s+=v[1]; sum.d+=v[2]; sum.k+=v[3]; sum.b+=v[4]; sum.p+=v[5];
+      if(cat==='motor'&&v.length>6) tork+=v[6];
+    });
+    const weightG=computeReport(build).weightG;
+    const n={h:sum.h/G_CAPS.h,s:sum.s/G_CAPS.s,d:sum.d/G_CAPS.d,k:sum.k/G_CAPS.k,b:sum.b/G_CAPS.b,p:sum.p/G_CAPS.p};
+    n.kd=(n.k+n.d)/2;
+    return {raw:sum,tork:tork,weightG:weightG,n:n,torkRatio:weightG?(tork/weightG)*100:0};
+  }
+  function archetype(build){
+    const g=gscore(build);
+    const wrap=(id)=>Object.assign({id:id},ARCHETYPES[id],{g:g});
+    if(g.weightG>=G_TH.tankW) return wrap('tank');
+    if(g.n.s>=G_TH.apexS && g.n.h>=G_TH.apexH) return wrap('apex');
+    if(g.torkRatio>=G_TH.torkRatio) return wrap('power');
+    const pool=[['bolt',g.n.h],['tiger',g.n.s],['master',g.n.kd],['marathon',g.n.p],['economy',g.n.b]];
+    let best=pool[0]; for(const c of pool) if(c[1]>best[1]+1e-9) best=c;
+    return wrap(best[0]);
+  }
+
+  const API={COMPONENTS,ORDER,RATING_KEYS,RATING_LABEL,G_CAPS,G_LABEL,G_AXES,G_TH,ARCHETYPES,IDENT,opt,motorType,parts,ratings,ident,gscore,archetype,computeReport,runPreTest,toSimParams,starterBuild};
   global.RobotData=API;
   if(typeof module!=='undefined'&&module.exports) module.exports=API;
 })(typeof window!=='undefined'?window:globalThis);

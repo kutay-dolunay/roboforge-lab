@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoboForge · Maker Pasaportu</title>
+<link rel="stylesheet" href="rf-theme.css">
+<style>
+  .wrap{max-width:1100px;margin:0 auto;padding:26px 20px 70px}
+  header.top{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);background:rgba(11,18,32,.85)}
+  .brand{font-size:1.05rem;font-weight:800;letter-spacing:.3px}
+  .brand span{color:var(--brand-lt)}
+  .grow{flex:1}
+  .backb{border:1px solid var(--line);border-radius:9px;padding:7px 12px;font-size:.78rem;font-weight:700;color:var(--muted2);background:var(--panel)}
+  .hero{display:flex;gap:18px;align-items:center;flex-wrap:wrap;border:1px solid var(--brand-lt);border-radius:16px;padding:18px 22px;margin:20px 0 6px;
+    background:linear-gradient(120deg,rgba(0,102,162,.22),rgba(0,102,162,.04))}
+  .hero .hic{font-size:2.8rem;line-height:1}
+  .hero h1{margin:0;font-size:1.4rem}
+  .hero p{margin:4px 0 0;color:var(--muted2);font-size:.85rem;line-height:1.55;max-width:640px}
+  .hstats{display:flex;gap:10px;margin-left:auto;flex-wrap:wrap}
+  .hstat{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:9px 14px;text-align:center;min-width:92px}
+  .hstat .l{font-size:.52rem;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);font-weight:800}
+  .hstat .v{font-size:1.4rem;font-weight:800;color:var(--brand-lt);margin-top:2px}
+  h2.sec{font-size:.66rem;letter-spacing:2.4px;text-transform:uppercase;color:var(--muted);font-weight:800;margin:30px 0 12px}
+  .cat{font-size:.78rem;font-weight:800;color:var(--muted2);margin:18px 0 8px}
+  .tree{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+  .skill{border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:linear-gradient(160deg,var(--panel),#0c1526);opacity:.62;transition:.16s}
+  .skill.on{opacity:1;border-color:var(--brand-lt);box-shadow:0 0 0 1px var(--brand-lt),0 10px 26px rgba(0,102,162,.18)}
+  .skill .sh{display:flex;align-items:center;gap:10px}
+  .skill .si{font-size:1.7rem}
+  .skill .sn{font-weight:800;font-size:.95rem}
+  .skill .sx{margin-left:auto;font-weight:800;color:var(--brand-lt);font-size:.9rem}
+  .skill .sd{font-size:.74rem;color:var(--muted2);line-height:1.5;margin:8px 0 10px}
+  .simrow{display:flex;flex-wrap:wrap;gap:5px}
+  .simchip{font-size:.6rem;font-weight:700;border:1px solid var(--line);border-radius:20px;padding:3px 9px;color:var(--muted)}
+  .simchip.done{border-color:var(--green);color:#86efac;background:rgba(34,197,94,.08)}
+  .badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+  .badge{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:13px;padding:13px 15px;background:var(--panel);opacity:.55}
+  .badge.on{opacity:1;border-color:var(--amber);background:rgba(245,158,11,.07)}
+  .badge .bi{font-size:1.9rem;line-height:1}
+  .badge .bn{font-weight:800;font-size:.86rem}
+  .badge .bm{font-size:.72rem;color:var(--muted2);line-height:1.45;margin-top:3px}
+  .note{border:1px solid var(--line);border-radius:12px;padding:13px 16px;font-size:.82rem;line-height:1.55;color:var(--muted2);margin-top:14px;background:var(--panel)}
+  .note.good{border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.07);color:#bbf7d0}
+  .note.warn{border-color:rgba(245,158,11,.45);background:rgba(245,158,11,.07);color:#fde68a}
+  .empty{color:var(--muted);font-size:.82rem}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="backb" href="index.html">← Katalog</a>
+  <div class="brand">Robo<span>Forge</span> · Maker Pasaportu</div>
+  <div class="grow"></div>
+  <div id="labAuth"></div>
+</header>
+<div class="wrap">
+  <div class="hero">
+    <div class="hic">🎓</div>
+    <div>
+      <h1>Maker Pasaportun</h1>
+      <p>Her simülasyonu bitirdiğinde kazandığın beceriler burada kalıcı olarak birikir. Aynı beceri birden çok simülasyondan XP toplar ve tavanı yoktur.</p>
+    </div>
+    <div class="hstats">
+      <div class="hstat"><div class="l">Toplam XP</div><div class="v" id="xpTotal">0</div></div>
+      <div class="hstat"><div class="l">Beceri</div><div class="v" id="skCount">0</div></div>
+      <div class="hstat"><div class="l">Rozet</div><div class="v" id="bgCount">0</div></div>
+    </div>
+  </div>
+
+  <h2 class="sec">Genel Beceri Ağacı</h2>
+  <div id="tree"></div>
+
+  <h2 class="sec">Çizgi Takip Laboratuvarı · Kendi Ağacı</h2>
+  <div class="badges" id="lfBadges"></div>
+  <div id="lfStatus"></div>
+</div>
+
+<script src="rf-auth.js"></script>
+<script src="rf-skills.js"></script>
+<script>
+(function(){
+  const S=window.RFSkills; if(!S) return;
+  const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+  const SIMNAME={line:'Çizgi Takip',linemaze:'Çizgi Labirent',maze:'Labirent',pid:'PID Yarış',fare:'Mikro Fare',
+    light:'Işık Takibi',obstacle:'Engelden Kaçış',sinyal:'Sinyal Avcısı',rov:'Su Altı ROV',
+    solar:'Güneş Takip',cansat:'CanSat',drone:'Drone',roket:'Roket',balance:'Denge Robotu',hill:'Tepe Tırmanış',
+    hexapod:'Hexapod',kol:'Robot Kol',vinc:'Vinç',depo:'Depo Filosu',delivery:'Teslimat',park:'Otopark',
+    rescue:'Arama Kurtarma',bant:'Bant Ayırma',cnc:'CNC',sera:'Akıllı Sera',swarm:'Sürü',convoy:'Konvoy',soccer:'Robot Futbol'};
+
+  // ---- global tree ----
+  const st=S.load();
+  const byCat={}; S.SKILLS.forEach(sk=>{ (byCat[sk.cat]=byCat[sk.cat]||[]).push(sk); });
+  const tree=document.getElementById('tree'); tree.innerHTML='';
+  Object.keys(byCat).forEach(cat=>{
+    const h=document.createElement('div'); h.className='cat'; h.textContent=cat; tree.appendChild(h);
+    const grid=document.createElement('div'); grid.className='tree';
+    byCat[cat].forEach(sk=>{
+      const xp=S.skillXp(sk.id), done=S.skillSims(sk.id);
+      const chips=sk.sims.map(s=>'<span class="simchip'+(done.indexOf(s)>=0?' done':'')+'">'+(done.indexOf(s)>=0?'✓ ':'')+esc(SIMNAME[s]||s)+'</span>').join('');
+      const el=document.createElement('div'); el.className='skill'+(xp>0?' on':'');
+      el.innerHTML='<div class="sh"><span class="si">'+sk.icon+'</span><span class="sn">'+esc(sk.name)+'</span><span class="sx">'+xp+' XP</span></div>'+
+        '<div class="sd">'+esc(sk.desc)+'</div><div class="simrow">'+chips+'</div>';
+      grid.appendChild(el);
+    });
+    tree.appendChild(grid);
+  });
+
+  // ---- line follower individual tree ----
+  const lfB=document.getElementById('lfBadges'); lfB.innerHTML='';
+  ['ilk_hata','pist1','pist2'].forEach(id=>{
+    const b=S.BADGES[id], has=S.hasBadge('line',id);
+    const el=document.createElement('div'); el.className='badge'+(has?' on':'');
+    el.innerHTML='<div class="bi">'+(has?b.icon:'🔒')+'</div><div><div class="bn">'+esc(b.name)+'</div><div class="bm">'+esc(b.msg)+'</div></div>';
+    lfB.appendChild(el);
+  });
+  const t=S.tracksOf('line'), sim=(st.sims&&st.sims.line)||{tracks:[],bestRobot:false,badges:{}};
+  const box=document.getElementById('lfStatus');
+  const unlocked=!!st.unlocked['dyk:line'];
+  let html='';
+  if(unlocked){
+    html='<div class="note good"><b>🧭 Dinamik Yön Kontrolü açıldı.</b> Bu simülasyondan +'+S.XP_PER_SIM+' XP kazandın. Aynı beceri Labirent ve PID Yarış simülasyonlarından da XP toplayacak.</div>';
+  } else if(sim.bestRobot && t.length>=S.LF.total && !sim.badges.ilk_hata){
+    html='<div class="note warn"><b>Kusursuz Mühendislik.</b> Hiç hata almadan bitirdin, bu etkileyici. Ama bu beceri ancak bir kez gerçekten tıkanıp o hatayı çözünce açılır. Sınırları zorlayan bir kombinasyon dene (mesela 3S LiPo + DRV8833) ve ne olduğunu gör.</div>';
+  } else {
+    const need=[];
+    if(!sim.bestRobot) need.push('kritik hata almayan, tüm parçaları uyumlu bir robot kur');
+    if(t.length<S.LF.total) need.push('tüm pistleri tamamla ('+t.length+'/'+S.LF.total+')');
+    if(!sim.badges.ilk_hata) need.push('en az bir kez gerçek bir donanım hatası al ve çöz');
+    html='<div class="note"><b>🧭 Dinamik Yön Kontrolü kilitli.</b> Açmak için: '+esc(need.join(' · '))+'.</div>';
+  }
+  box.innerHTML=html;
+  document.getElementById('xpTotal').textContent=S.totalXp();
+  document.getElementById('skCount').textContent=S.SKILLS.filter(s=>S.skillXp(s.id)>0).length;
+  document.getElementById('bgCount').textContent=Object.keys(st.badges||{}).length;
+})();
+</script>
+<script>/* rf-labauth-v1 */
+(function(){
+  function initials(name){ if(!name) return '\u{1F464}'; var p=name.trim().split(/\s+/); return (((p[0]||'')[0]||'')+((p[1]||'')[0]||'')).toUpperCase(); }
+  function box(){ return document.getElementById('labAuth'); }
+  function loggedOut(){ var b=box(); if(!b) return;
+    b.innerHTML='<button class="lloginbtn" id="rfLabLogin">\u{1F393} Giriş</button>';
+    var el=document.getElementById('rfLabLogin'); if(el) el.onclick=function(){ if(window.RFAuth) RFAuth.login(); }; }
+  function loggedIn(u){ var b=box(); if(!b) return;
+    var roleLabel={student:'Öğrenci',teacher:'Öğretmen',admin:'Yönetici'}[u.role]||'Öğrenci';
+    b.innerHTML='<div class="lchip"><div class="lav">'+initials(u.name)+'</div>'+
+      '<div class="lwho"><b>'+(u.name||'Öğrenci')+'</b><small>'+roleLabel+'</small></div>'+
+      '<button class="lout" id="rfLabLogout">Çıkış</button></div>';
+    var el=document.getElementById('rfLabLogout'); if(el) el.onclick=function(){ if(window.RFAuth){ RFAuth.logout(); loggedOut(); } }; }
+  if(window.RFAuth){ RFAuth.init().then(function(u){ u?loggedIn(u):loggedOut(); }).catch(function(){ loggedOut(); }); }
+  else { loggedOut(); }
+})();
+</script>
+</body>
+</html>
