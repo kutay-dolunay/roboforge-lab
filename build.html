@@ -260,6 +260,14 @@
 .tb:hover:not(:disabled){border-color:var(--brand-lt)}
 .tb.add{background:var(--brand);border-color:var(--brand-lt);color:#fff}
 .tb:disabled{opacity:.28;cursor:not-allowed}
+
+/* --- report layout: stack hero / axis bars / facts instead of grid cells --- */
+#reportGrid{display:block}
+#reportGrid .arch{margin-bottom:16px}
+#reportGrid .ratewrap{margin:0 0 16px}
+#reportGrid .factgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+#reportGrid .factgrid .rcard{min-height:0;padding:12px 10px;text-align:center}
+@media(max-width:640px){#reportGrid .factgrid{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
