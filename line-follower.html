@@ -866,14 +866,17 @@
     const units=(bd&&bd.chassis&&bd.chassis.units)||[];
     if(RD&&bd) units.forEach(u=>{ const o=RD.opt(u.cat,bd[u.cat]); if(!o) return;
       ny+=o.weightG*u.y; nx+=o.weightG*u.x; den+=o.weightG; });
+    // Sensor asla ciplak takilmaz: karta ek olarak braket, standoff ve kablo gelir.
+    // Dengede etkili olan bu "takili kutle"dir (kart + montaj ~12g).
+    const MOUNT_G=12;
     let sw=3.1; try{ if(RD&&bd&&bd.sensor){ const so=RD.opt('sensor',bd.sensor); if(so&&so.weightG) sw=so.weightG; } }catch(e){}
-    // sensor kolu uzun: sasi disina tasan sensor agirligi kucuk olsa da momenti buyuk
+    sw+=MOUNT_G;
     LAB.sensors.forEach(sen=>{
       const y=(HL-sen.fwd*ED.scale)/(2*HL), x=(HW+sen.right*ED.scale)/(2*HW);
       ny+=sw*y; nx+=sw*x; den+=sw; });
     if(!den){ fy.style.left='50%'; if(fx) fx.style.left='50%'; note.textContent='Parça yok - denge hesaplanamıyor.'; return; }
     const offY=(ny/den)-0.5, offX=(nx/den)-0.5;
-    const K=210;   // gosterge hassasiyeti: kucuk kaymalar da gorunsun
+    const K=140;   // gosterge hassasiyeti
     fy.style.left=Math.max(4,Math.min(96,50-offY*K))+'%';
     if(fx) fx.style.left=Math.max(4,Math.min(96,50+offX*K))+'%';
     const m=[];
