@@ -268,6 +268,32 @@
 #reportGrid .factgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 #reportGrid .factgrid .rcard{min-height:0;padding:12px 10px;text-align:center}
 @media(max-width:640px){#reportGrid .factgrid{grid-template-columns:repeat(2,1fr)}}
+
+/* --- kablolama tahtasi --- */
+.wirewrap{display:grid;grid-template-columns:1fr 250px;gap:14px;align-items:start}
+@media(max-width:900px){.wirewrap{grid-template-columns:1fr}}
+.wireboard{position:relative;border:1px solid var(--line);border-radius:14px;background:#0a1220;padding:14px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:14px;min-height:340px}
+.wireboard>svg{position:absolute;left:0;top:0;pointer-events:none;z-index:3;overflow:visible}
+.wbox{position:relative;z-index:1;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:9px 10px}
+.wbox .wh{display:flex;align-items:center;gap:7px;font-size:.76rem;font-weight:800;margin-bottom:7px;
+  padding-bottom:6px;border-bottom:1px solid rgba(30,58,95,.6)}
+.wbox .wh .we{font-size:1.05rem}
+.wbox .wh small{margin-left:auto;font-size:.52rem;color:var(--muted);font-weight:700;letter-spacing:.6px}
+.prow{display:flex;align-items:center;gap:7px;padding:3px 0;font-size:.66rem;color:var(--muted2)}
+.pdot{width:15px;height:15px;border-radius:50%;flex:none;cursor:pointer;border:2px solid #0a1220;
+  box-shadow:0 0 0 1px rgba(255,255,255,.16);transition:.13s}
+.pdot:hover{transform:scale(1.28)}
+.pdot.armed{box-shadow:0 0 0 2px #fff,0 0 12px var(--brand-glow);transform:scale(1.3)}
+.pdot.full{opacity:.38;cursor:not-allowed}
+.prow .pl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prow .pc{font-size:.6rem;font-weight:800;color:var(--brand-lt);flex:none}
+.wireside{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:12px 13px}
+.wirehint{font-size:.72rem;line-height:1.5;color:var(--muted2)}
+.wirehint b{color:var(--txt)}
+.wlegend{display:flex;gap:12px;flex-wrap:wrap;margin:9px 0 4px;font-size:.62rem;color:var(--muted2)}
+.wlegend span{display:flex;align-items:center;gap:5px}
+.wlegend i{width:11px;height:11px;border-radius:50%;display:inline-block}
 </style>
 </head>
 <body>
@@ -318,8 +344,21 @@
     </div>
   </section>
 
-  <!-- STEP 3: REPORT -->
+  <!-- STEP 3: WIRING -->
   <section id="step3" class="hidden">
+    <h2 class="step-title">🔌 Parçaları birbirine bağla</h2>
+    <div class="step-sub">Yeşil uçlar <b>çıkış</b> (kaynak), kırmızı uçlar <b>giriş</b>, gri uçlar <b>GND</b>. Bir uca tıkla, sonra bağlanacağı uca tıkla. Kabloya tıklayınca silinir. Yanlış bağlarsan engellenmezsin; sonucu testte görürsün.</div>
+    <div class="wirewrap">
+      <div class="wireboard" id="wireBoard"><svg id="wireSvg"></svg></div>
+      <div class="wireside">
+        <div class="wirehint" id="wireHint"></div>
+        <button class="btn ghost" id="wireClear" style="width:100%;margin-top:10px">Tüm kabloları sil</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 4: REPORT -->
+  <section id="step4" class="hidden">
     <h2 class="step-title">📋 Robot Raporu</h2>
     <div class="step-sub">İşte kurduğun robotun künyesi. Bir maker için önemli her bilgi burada.</div>
     <div class="buildlist" id="buildList"></div>
@@ -328,7 +367,7 @@
   </section>
 
   <!-- STEP 4: TEST -->
-  <section id="step4" class="hidden">
+  <section id="step5" class="hidden">
     <h2 class="step-title">🔧 Fonksiyon Testi</h2>
     <div class="step-sub">Robotun çalışıp çalışmadığını kontrol ediyoruz…</div>
     <div class="testcols">
@@ -354,7 +393,7 @@
 (function(){
   const RD = window.RobotData;
   const ORDER = RD.ORDER;                 // ['brain','driver','motor','wheel','battery']
-  const STEPS = ['Bileşenler','Çizim','Rapor','Test'];
+  const STEPS = ['Bileşenler','Çizim','Kablolama','Rapor','Test'];
 
   // educational intro per component (long + educative)
   const EDU = {
@@ -428,6 +467,7 @@
   let step=1, phase=0;
   // Always start a FRESH build when the page opens (do not resume the saved one).
   const B = { sim:SIM, brain:null,driver:null,motor:null,wheel:null,caster:null,battery:null,sensor:null,
+    wiring:[],
     chassis:{ shape:'rect', len:1, wid:1, place:{}, units:[] } };
   const DEFPOS={brain:{x:0.5,y:0.18},driver:{x:0.5,y:0.4},motor:{x:0.26,y:0.6},wheel:{x:0.74,y:0.6},caster:{x:0.5,y:0.9},battery:{x:0.5,y:0.76},sensor:{x:0.5,y:0.08}};
   function unitCounts(){ const c={}; ORDER.forEach(k=>c[k]=0); (B.chassis.units||[]).forEach(u=>{ if(c[u.cat]!=null) c[u.cat]++; }); return c; }
@@ -617,10 +657,93 @@
   }
 
   // ---- STEP 3: report ----
+  // ---- STEP 3: kablolama ----
+  let armed=null;
+  function wPorts(i){ const u=B.chassis.units[i]; if(!u) return [];
+    const o=isChosen(u.cat)?RD.opt(u.cat,B[u.cat]):null; return o?RD.portsOf(u.cat,o):[]; }
+  function wPort(ref){ return wPorts(ref.u).filter(p=>p.id===ref.port)[0]||null; }
+  function wUse(i,port){ let n=0; (B.wiring||[]).forEach(w=>{
+      if((w.a.u===i&&w.a.port===port)||(w.b.u===i&&w.b.port===port)) n++; }); return n; }
+  function wColor(p){ return p.dir==='out'?'#22c55e':(p.dir==='in'?'#ef4444':'#94a3b8'); }
+  function wCan(a,b){
+    if(!a||!b) return false;
+    if(a.u===b.u&&a.port===b.port) return false;
+    const pa=wPort(a), pb=wPort(b); if(!pa||!pb) return false;
+    if(wUse(a.u,a.port)>=pa.count||wUse(b.u,b.port)>=pb.count) return false;
+    return !(B.wiring||[]).some(w=>(w.a.u===a.u&&w.a.port===a.port&&w.b.u===b.u&&w.b.port===b.port)
+                                 ||(w.b.u===a.u&&w.b.port===a.port&&w.a.u===b.u&&w.a.port===b.port));
+  }
+  function wDot(i,port){ return document.querySelector('#wireBoard .pdot[data-u="'+i+'"][data-p="'+port+'"]'); }
+  function renderWiring(){
+    if(!B.wiring) B.wiring=[];
+    const board=document.getElementById('wireBoard'); if(!board) return;
+    board.querySelectorAll('.wbox').forEach(e=>e.remove());
+    const svg=document.getElementById('wireSvg');
+    (B.chassis.units||[]).forEach((u,i)=>{
+      const o=isChosen(u.cat)?RD.opt(u.cat,B[u.cat]):null; if(!o) return;
+      const ports=RD.portsOf(u.cat,o); if(!ports.length) return;   // tekerlek/sarhos: mekanik
+      const box=document.createElement('div'); box.className='wbox';
+      const nm=(u.cat==='motor')?(o.typeName+' '+o.rpm):o.name;
+      let html='<div class="wh"><span class="we">'+gEmoji(u.cat,B[u.cat],o.icon)+'</span>'+esc(nm)+
+               '<small>'+esc(RD.COMPONENTS[u.cat].label)+'</small></div>';
+      ports.forEach(pt=>{ const used=wUse(i,pt.id), full=used>=pt.count;
+        html+='<div class="prow"><span class="pdot'+(full?' full':'')+'" data-u="'+i+'" data-p="'+pt.id+'" '+
+              'style="background:'+wColor(pt)+'"></span><span class="pl">'+esc(pt.label)+'</span>'+
+              '<span class="pc">'+used+'/'+pt.count+'</span></div>'; });
+      box.innerHTML=html; board.insertBefore(box,svg);
+    });
+    board.querySelectorAll('.pdot').forEach(d=>{
+      d.onclick=()=>{
+        const ref={u:+d.dataset.u, port:d.dataset.p};
+        const pt=wPort(ref);
+        if(wUse(ref.u,ref.port)>=pt.count && !armed){ return; }
+        if(!armed){ armed=ref; paintArmed(); return; }
+        if(armed.u===ref.u&&armed.port===ref.port){ armed=null; paintArmed(); return; }
+        if(wCan(armed,ref)){ B.wiring.push({a:armed,b:ref}); armed=null; save(); renderWiring(); }
+        else { armed=ref; paintArmed(); }
+      };
+    });
+    paintArmed(); drawWires(); wireHint();
+  }
+  function paintArmed(){
+    document.querySelectorAll('#wireBoard .pdot').forEach(d=>d.classList.remove('armed'));
+    if(armed){ const d=wDot(armed.u,armed.port); if(d) d.classList.add('armed'); }
+  }
+  function drawWires(){
+    const board=document.getElementById('wireBoard'), svg=document.getElementById('wireSvg');
+    if(!board||!svg) return;
+    const br=board.getBoundingClientRect();
+    svg.setAttribute('width',board.scrollWidth); svg.setAttribute('height',board.scrollHeight);
+    while(svg.firstChild) svg.removeChild(svg.firstChild);
+    (B.wiring||[]).forEach((w,idx)=>{
+      const A=wDot(w.a.u,w.a.port), C=wDot(w.b.u,w.b.port); if(!A||!C) return;
+      const ra=A.getBoundingClientRect(), rc=C.getBoundingClientRect();
+      const x1=ra.left-br.left+ra.width/2, y1=ra.top-br.top+ra.height/2;
+      const x2=rc.left-br.left+rc.width/2, y2=rc.top-br.top+rc.height/2;
+      const mx=(x1+x2)/2;
+      const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d','M'+x1+','+y1+' C'+mx+','+y1+' '+mx+','+y2+' '+x2+','+y2);
+      path.setAttribute('stroke','#3aa0d8'); path.setAttribute('stroke-width','2.4');
+      path.setAttribute('fill','none'); path.setAttribute('stroke-linecap','round');
+      path.style.pointerEvents='stroke'; path.style.cursor='pointer';
+      path.onclick=()=>{ B.wiring.splice(idx,1); save(); renderWiring(); };
+      svg.appendChild(path);
+    });
+  }
+  function wireHint(){
+    const h=document.getElementById('wireHint'); if(!h) return;
+    const n=(B.wiring||[]).length;
+    h.innerHTML='<b>'+n+' kablo</b> bağladın.'+
+      '<div class="wlegend"><span><i style="background:#22c55e"></i>çıkış</span>'+
+      '<span><i style="background:#ef4444"></i>giriş</span>'+
+      '<span><i style="background:#94a3b8"></i>GND</span></div>'+
+      '<div style="margin-top:8px">Sıra önemli değil ama her parça hem <b>besleme</b> hem <b>GND</b> istiyor. '+
+      'Motorlar sürücünün <b>Motor Çıkışına</b>, sürücü de kartın <b>Sinyal Çıkışına</b> bağlanmalı.</div>';
+  }
   function bctx(){ const c=unitCounts();
     // model secildi ama sensor laboratuvarda takilir: puanlamada 1 adet sayilir
     if(isChosen('sensor')) c.sensor=Math.max(1,c.sensor||0);
-    return Object.assign({},B,{counts:c,chassis:{weightG:chassisWeight(),widthU:1+(B.chassis.wid-1)*0.4}}); }
+    return Object.assign({},B,{counts:c,wiring:B.wiring||[],chassis:{weightG:chassisWeight(),widthU:1+(B.chassis.wid-1)*0.4,units:B.chassis.units||[]}}); }
   function renderReport(){
     const bl=document.getElementById('buildList'); bl.innerHTML='';
     ORDER.forEach(cat=>{ const o=isChosen(cat)?RD.opt(cat,B[cat]):null;
@@ -719,20 +842,22 @@
       next.textContent = phase<ORDER.length-1 ? ('Devam → '+RD.COMPONENTS[ORDER[phase+1]].label) : 'Devam → Çizim';
     } else {
       prev.style.visibility='visible'; next.disabled=false;
-      if(step===2){ next.textContent='Devam → Rapor'; next.className='btn primary'; }
-      else if(step===3){ next.textContent='Testi Çalıştır →'; next.className='btn go'; }
+      if(step===2){ next.textContent='Devam → Kablolama'; next.className='btn primary'; }
+      else if(step===3){ next.textContent='Devam → Rapor'; next.className='btn primary'; }
+      else if(step===4){ next.textContent='Testi Çalıştır →'; next.className='btn go'; }
       else { next.classList.add('hidden'); }
     }
   }
   function go(n){
     step=n;
-    for(let i=1;i<=4;i++) document.getElementById('step'+i).classList.toggle('hidden', i!==step);
+    for(let i=1;i<=5;i++) document.getElementById('step'+i).classList.toggle('hidden', i!==step);
     document.getElementById('bp').style.display = step===1 ? 'block' : 'none';
     renderStepper();
     if(step===1) renderPhase();
     if(step===2) renderChassis();
-    if(step===3) renderReport();
-    if(step===4) runTest();
+    if(step===3) renderWiring();
+    if(step===4) renderReport();
+    if(step===5) runTest();
     updateNav();
     window.scrollTo(0,0);
   }
@@ -740,12 +865,15 @@
     if(step===1){ const cat=ORDER[phase]; if(!isChosen(cat)) return;
       if(phase<ORDER.length-1){ phase++; document.getElementById('confirm').classList.remove('show'); renderPhase(); updateNav(); window.scrollTo(0,0); }
       else go(2);
-    } else if(step<4) go(step+1);
+    } else if(step<5) go(step+1);
   };
   document.getElementById('prevBtn').onclick=()=>{
     if(step===1){ if(phase>0){ phase--; renderPhase(); updateNav(); window.scrollTo(0,0); } }
     else { if(step===2){ step=1; phase=ORDER.length-1; go(1); } else go(step-1); }
   };
+  (function(){ const c=document.getElementById('wireClear');
+    if(c) c.onclick=()=>{ B.wiring=[]; armed=null; save(); renderWiring(); }; })();
+  window.addEventListener('resize',()=>{ if(step===3) drawWires(); });
   document.getElementById('chLen').oninput=e=>{ B.chassis.len=+e.target.value; save(); renderChassis(); };
   document.getElementById('chWid').oninput=e=>{ B.chassis.wid=+e.target.value; save(); renderChassis(); };
 

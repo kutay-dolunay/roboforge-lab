@@ -802,6 +802,8 @@
     if(cont()&&p.wheel&&p.sensor&&p.wheel.diaMM>=60)
       add('Çizgiye bakılıyor...',false,p.wheel.diaMM+'mm tekerlek şasiyi yükseltti; '+p.sensor.name+' zemini bulanık görüp çizgiyi kaybediyor.');
     else if(cont()) add('Çizgiye bakılıyor...',true,'Sensör zemini net görüyor.');
+    if(cont()&&(build&&build.wiring)){ const wr=wiringReport(build);
+      wr.steps.forEach(function(w){ if(cont()) steps.push(w); }); }
     if(cont()){ const rep=computeReport(build); add('Hız ölçülüyor...',true,'Ölçülen tepe hız ~'+rep.topSpeedKmh+' km/s.'); }
     const pass=steps.every(s=>s.ok); const rep=computeReport(build); const notes=[];
     if(pass){ const cpu=p.brain?p.brain.cpu:5;
@@ -816,6 +818,125 @@
     return {pass:pass,steps:steps,report:pass?rep:null,fullReport:rep,notes:notes};
   }
 
+
+  // ---------- elektrik: uc (port) haritasi + kablolama denetimi ----------
+  // dir: 'out' = kaynak/cikis (yesil), 'in' = tuketici/giris (kirmizi), 'gnd' = ortak (notr)
+  // count: ayni uctan kac tane var (ornek: 5V cikis x3 -> "5V Cikis 1/3")
+  function portsOf(cat,o){
+    if(!o) return [];
+    if(cat==='brain'){
+      const lv=o.logicV||5;
+      return [
+        {id:'vin', label:'Güç Girişi (VIN)', kind:'power', dir:'in',  v:null, vmin:4.5, vmax:12, count:1},
+        {id:'vout',label:lv+'V Çıkış',       kind:'power', dir:'out', v:lv,   count:3},
+        {id:'gnd', label:'GND',              kind:'gnd',   dir:'gnd', v:0,    count:3},
+        {id:'sigout',label:'Sinyal Çıkışı',  kind:'signal',dir:'out', v:lv,   count:4},
+        {id:'sigin', label:'Sinyal Girişi',  kind:'signal',dir:'in',  v:lv,   count:8}
+      ];
+    }
+    if(cat==='driver'){
+      const slots=o.motorSlots||2;
+      return [
+        {id:'vm',  label:'Motor Gücü (VM)',  kind:'power', dir:'in', v:null, vmin:0, vmax:o.maxMotorV, count:1},
+        {id:'vcc', label:'Lojik Güç (VCC)',  kind:'power', dir:'in', v:null, vmin:o.logicVmin, vmax:o.logicVmax, count:1},
+        {id:'gnd', label:'GND',              kind:'gnd',   dir:'gnd',v:0,    count:2},
+        {id:'in',  label:'Kontrol Girişi',   kind:'signal',dir:'in', v:null, count:slots},
+        {id:'mout',label:'Motor Çıkışı',     kind:'motor', dir:'out',v:null, count:slots}
+      ];
+    }
+    if(cat==='motor') return [
+      {id:'m1', label:'Motor Ucu (+)', kind:'motor', dir:'in', v:null, count:1},
+      {id:'m2', label:'Motor Ucu (-)', kind:'motor', dir:'in', v:null, count:1}];
+    if(cat==='battery') return [
+      {id:'pos', label:'Artı Uç (+)', kind:'power', dir:'out', v:o.voltage, count:1},
+      {id:'neg', label:'Eksi Uç (-)', kind:'gnd',   dir:'gnd', v:0,         count:1}];
+    if(cat==='sensor') return [
+      {id:'vcc', label:'VCC', kind:'power', dir:'in', v:null, vmin:o.logicVmin, vmax:o.logicVmax, count:1},
+      {id:'gnd', label:'GND', kind:'gnd',   dir:'gnd',v:0, count:1},
+      {id:'out', label:'Sensör Çıkışı', kind:'signal', dir:'out', v:null, count:(o.digital1?1:8)}];
+    return [];  // tekerlek / sarhos tekerlek: mekanik, ucu yok
+  }
+  function unitsOf(build){ return (build&&build.chassis&&build.chassis.units)||[]; }
+  function unitPorts(build,i){ const u=unitsOf(build)[i]; if(!u) return [];
+    return portsOf(u.cat, opt(u.cat, build[u.cat])); }
+  function portUsage(build,i,portId){ const W=(build&&build.wiring)||[]; let n=0;
+    W.forEach(function(w){ if((w.a.u===i&&w.a.port===portId)||(w.b.u===i&&w.b.port===portId)) n++; }); return n; }
+
+  function nets(build){
+    const W=(build&&build.wiring)||[]; const parent={};
+    function find(k){ if(parent[k]===undefined) parent[k]=k; return parent[k]===k?k:(parent[k]=find(parent[k])); }
+    W.forEach(function(w){ const a=w.a.u+':'+w.a.port, b=w.b.u+':'+w.b.port;
+      const ra=find(a), rb=find(b); if(ra!==rb) parent[ra]=rb; });
+    return { has:function(k){ return parent[k]!==undefined; },
+             same:function(a,b){ return parent[a]!==undefined&&parent[b]!==undefined&&find(a)===find(b); } };
+  }
+
+  // Kablolama denetimi: yanlis baglanti engellenmez, testte ortaya cikar ve anlatilir.
+  function wiringReport(build){
+    const units=unitsOf(build), W=(build&&build.wiring)||[], N=nets(build);
+    const by={}; units.forEach(function(u,i){ (by[u.cat]=by[u.cat]||[]).push(i); });
+    const steps=[]; const add=function(l,ok,m){ steps.push({label:l,ok:ok,msg:m}); };
+    const anySame=function(list,port,tgtList,tgtPort){
+      for(var i=0;i<list.length;i++) for(var j=0;j<tgtList.length;j++)
+        if(N.same(list[i]+':'+port, tgtList[j]+':'+tgtPort)) return true;
+      return false; };
+    const bat=by.battery||[], br=by.brain||[], dr=by.driver||[], mo=by.motor||[], se=by.sensor||[];
+    if(!W.length){ add('Kablolar kontrol ediliyor...',false,'Hiç kablo bağlamadın. Parçalar şasinin üstünde duruyor ama aralarında elektrik yok.'); return {steps:steps,pass:false}; }
+    // 1 besleme
+    if(bat.length&&br.length&&!anySame(bat,'pos',br,'vin'))
+      add('Karta besleme...',false,'Bataryanın artı ucu kontrol kartının Güç Girişine (VIN) ulaşmıyor. Kart hiç açılmıyor.');
+    else add('Karta besleme...',true,'Kart besleniyor.');
+    // 2 ortak GND
+    if(steps[steps.length-1].ok&&bat.length&&br.length&&!anySame(bat,'neg',br,'gnd'))
+      add('Ortak GND...',false,'Batarya eksi ucu ile kartın GND ucu ortak değil. Ortak GND olmadan hiçbir sinyal karsilik bulmaz.');
+    else if(steps[steps.length-1].ok) add('Ortak GND...',true,'Ortak GND kurulu.');
+    // 3 surucu guc
+    if(steps[steps.length-1].ok&&dr.length&&bat.length&&!anySame(bat,'pos',dr,'vm'))
+      add('Sürücüye motor gücü...',false,'Sürücünün VM (motor gücü) ucuna batarya gelmiyor. Motorlar hiç dönmez.');
+    else if(steps[steps.length-1].ok) add('Sürücüye motor gücü...',true,'Sürücü motor gücü alıyor.');
+    // 4 surucu kontrol sinyali
+    if(steps[steps.length-1].ok&&dr.length&&br.length&&!anySame(br,'sigout',dr,'in'))
+      add('Sürücü kontrol sinyali...',false,'Kartın Sinyal Çıkışı sürücünün Kontrol Girişine bağlı değil. Sürücü ne yapacağını bilmiyor, motorlar dönmez.');
+    else if(steps[steps.length-1].ok) add('Sürücü kontrol sinyali...',true,'Sürücü komut alıyor.');
+    // 5 motorlar surucude
+    if(steps[steps.length-1].ok&&mo.length&&dr.length){
+      var bad=null;
+      for(var i=0;i<mo.length;i++){ var m=mo[i];
+        var ok1=false,ok2=false;
+        for(var j=0;j<dr.length;j++){ if(N.same(m+':m1', dr[j]+':mout')) ok1=true; if(N.same(m+':m2', dr[j]+':mout')) ok2=true; }
+        if(!(ok1&&ok2)){ bad=i+1; break; } }
+      if(bad) add('Motorlar sürücüde...',false,bad+'. motorun uçları sürücünün Motor Çıkışına bağlı değil. O motor dönmez.');
+      else add('Motorlar sürücüde...',true,'Motorlar sürücüye bağlı.');
+    }
+    // 6 sensor beslemesi + sinyali (sensor laboratuvarda takilir, burada varsa denetlenir)
+    if(steps[steps.length-1].ok&&se.length){
+      if(!anySame(bat,'pos',se,'vcc')&&!anySame(br,'vout',se,'vcc'))
+        add('Sensör beslemesi...',false,'Sensörün VCC ucuna besleme gelmiyor. Sensör hiç okumaz.');
+      else if(!anySame(se,'out',br,'sigin'))
+        add('Sensör sinyali...',false,'Sensör çıkışı kartın Sinyal Girişine bağlı değil. Kart çizgiyi göremez.');
+      else add('Sensör bağlantısı...',true,'Sensör okunuyor.');
+    }
+    // 7 yikici hatalar
+    if(steps[steps.length-1].ok&&bat.length&&br.length){
+      if(anySame(bat,'pos',br,'sigin')||anySame(bat,'pos',br,'sigout')){
+        var bv=(opt('battery',build.battery)||{}).voltage||0;
+        add('Sinyal pinleri...',false,'Batarya artı ucu doğrudan kartın sinyal pinine bağlanmış. '+bv+'V ham gerilim sinyal pinini yakar, kart ölür.');
+      } else add('Sinyal pinleri...',true,'Sinyal pinlerinde ham besleme yok.');
+    }
+    if(steps[steps.length-1].ok&&bat.length&&dr.length){
+      var b2=opt('battery',build.battery), d2=opt('driver',build.driver);
+      if(b2&&d2&&anySame(bat,'pos',dr,'vm')&&b2.voltage>d2.maxMotorV+0.2)
+        add('Sürücü gerilimi...',false,b2.name+' '+b2.voltage+'V, VM ucundan '+d2.name+' sürücüye giriyor ama sürücünün sınırı '+d2.maxMotorV+'V. Çip yanıyor.');
+      else add('Sürücü gerilimi...',true,'Sürücü gerilimi güvenli.');
+    }
+    if(steps[steps.length-1].ok&&se.length&&br.length){
+      var so=opt('sensor',build.sensor), bo=opt('brain',build.brain);
+      if(so&&bo&&so.logicVmin===5&&bo.logicV<5&&anySame(se,'out',br,'sigin'))
+        add('Mantık seviyesi...',false,so.name+' 5V sinyal üretir, '+bo.name+' pinleri '+bo.logicV+'V. Seviye uyumsuz, veri bozuk ve pin riskli.');
+      else add('Mantık seviyesi...',true,'Mantık seviyeleri uyumlu.');
+    }
+    return {steps:steps, pass:steps.every(function(x){return x.ok;})};
+  }
   function faultCode(steps){ const fi=steps.findIndex(s=>!s.ok); if(fi<0) return null; const l=steps[fi].label;
     if(/Sürücüye güç|akım|Kalkış/i.test(l)) return 'stall';
     if(/Sensör okunuyor|Çizgiye/i.test(l)) return 'blind';
@@ -940,7 +1061,7 @@
     return wrap(best[0]);
   }
 
-  const API={COMPONENTS,ORDER,RATING_KEYS,RATING_LABEL,G_CAPS,G_LABEL,G_AXES,G_TH,REF_COUNTS,ARCHETYPES,IDENT,SHAPES,shape,counts,opt,motorType,parts,ratings,ident,gscore,archetype,computeReport,runPreTest,toSimParams,starterBuild};
+  const API={COMPONENTS,ORDER,RATING_KEYS,RATING_LABEL,G_CAPS,G_LABEL,G_AXES,G_TH,REF_COUNTS,ARCHETYPES,IDENT,SHAPES,shape,counts,portsOf,unitPorts,portUsage,nets,wiringReport,opt,motorType,parts,ratings,ident,gscore,archetype,computeReport,runPreTest,toSimParams,starterBuild};
   global.RobotData=API;
   if(typeof module!=='undefined'&&module.exports) module.exports=API;
 })(typeof window!=='undefined'?window:globalThis);
