@@ -750,9 +750,8 @@
 
   function computeReport(build){
     const p=parts(build); const chassisW=(build&&build.chassis&&build.chassis.weightG)||55;
-    const weightG=chassisW+(p.brain?p.brain.weightG:0)+(p.driver?p.driver.weightG:0)
-      +(p.motor?p.motor.weightG*2:0)+(p.wheel?p.wheel.weightG*2:0)
-      +(p.caster?p.caster.weightG:0)+(p.battery?p.battery.weightG:0)+(p.sensor?p.sensor.weightG:0);
+    const q=counts(build);
+    const weightG=chassisW+ORDER.reduce(function(a,cat){ return a+((p[cat]?p[cat].weightG:0)*(q[cat]||0)); },0);
     let topSpeed=0,effRpm=0;
     if(p.motor&&p.wheel){
       const vfac=p.battery?Math.max(0.7,Math.min(1.55,p.battery.voltage/7.4)):1;
@@ -760,7 +759,7 @@
       topSpeed=(effRpm/60)*Math.PI*(p.wheel.diaMM/1000)*slip;
     }
     let batteryMin=0,drawMA=0;
-    if(p.battery){ drawMA=(p.brain?p.brain.drawMA:0)+(p.motor?p.motor.runMA*2:0)+(p.sensor?p.sensor.drawMA:0)+15;
+    if(p.battery){ drawMA=(p.brain?p.brain.drawMA*q.brain:0)+(p.motor?p.motor.runMA*q.motor:0)+(p.sensor?p.sensor.drawMA*q.sensor:0)+15;
       batteryMin=Math.round((p.battery.mAh/Math.max(60,drawMA))*60); }
     const cost=['brain','driver','wheel','caster','battery','sensor'].reduce((a,k)=>a+((p[k]&&p[k].cost)||0),0)+(p.motor?p.motor.cost:0);
     const powerRating=Math.max(0,Math.min(100,Math.round((p.motor?p.motor.torque*6:0)+effRpm/120+(p.battery?p.battery.voltage*2.2:0))));
@@ -770,7 +769,10 @@
   }
 
   function runPreTest(build){
-    const p=parts(build); const steps=[]; const add=(l,ok,m)=>steps.push({label:l,ok:ok,msg:m});
+    // Sifir adet yerlestirilen parca "yok" sayilir: serbest yerlestirme testte ortaya cikar.
+    const qc=counts(build); const p0=parts(build); const p={};
+    ORDER.forEach(function(k){ p[k]=((qc[k]||0)>0)?p0[k]:null; });
+    const steps=[]; const add=(l,ok,m)=>steps.push({label:l,ok:ok,msg:m});
     const cont=()=>steps.length===0||steps[steps.length-1].ok;
     if(!p.battery) add('Güç kaynağı bağlanıyor...',false,'Batarya yok - sisteme hiç güç gelmiyor.');
     else add('Güç kaynağı bağlanıyor...',true,p.battery.name+' ('+p.battery.voltage+'V) hazır.');
@@ -785,11 +787,14 @@
     if(cont()&&p.battery&&p.driver&&p.battery.voltage>p.driver.maxMotorV+0.2)
       add('Sürücüye güç veriliyor...',false,p.battery.name+' '+p.battery.voltage+'V veriyor; '+p.driver.name+' en fazla '+p.driver.maxMotorV+'V kaldırır. Çip aşırı gerilimden yanıyor.');
     else if(cont()) add('Sürücüye güç veriliyor...',true,'Sürücü voltajı güvenli.');
+    if(cont()&&p.driver&&p.motor&&qc.motor>p.driver.motorSlots)
+      add('Kanallar sayılıyor...',false,p.driver.name+' en fazla '+p.driver.motorSlots+' motor kanalı sürer; sen '+qc.motor+' motor taktın. Fazla motorlar dönmez.');
+    else if(cont()&&p.driver&&p.motor) add('Kanallar sayılıyor...',true,qc.motor+' motor / '+p.driver.motorSlots+' kanal uyumlu.');
     if(cont()&&p.driver&&p.motor&&p.driver.maxOutAperCh<p.motor.surgeA)
       add('Motorlara akım veriliyor...',false,p.driver.name+' kanal başına ~'+p.driver.maxOutAperCh+'A verebilir; '+p.motor.typeName+' kalkışta ~'+p.motor.surgeA+'A çekiyor. Sürücü kilitlenip ısınıyor.');
     else if(cont()) add('Motorlara akım veriliyor...',true,'Sürücü motor akımını karşılıyor.');
-    if(cont()&&p.battery&&p.motor&&(p.motor.surgeA*2)>p.battery.dischargeA+0.1)
-      add('Kalkış deneniyor...',false,p.battery.name+' anlık ~'+p.battery.dischargeA+'A verir; iki motor kalkışta ~'+(Math.round(p.motor.surgeA*2*10)/10)+'A ister. Voltaj çöküyor, robot resetliyor.');
+    if(cont()&&p.battery&&p.motor&&(p.motor.surgeA*qc.motor)>p.battery.dischargeA+0.1)
+      add('Kalkış deneniyor...',false,p.battery.name+' anlık ~'+p.battery.dischargeA+'A verir; '+qc.motor+' motor kalkışta ~'+(Math.round(p.motor.surgeA*qc.motor*10)/10)+'A ister. Voltaj çöküyor, robot resetliyor.');
     else if(cont()) add('Kalkış deneniyor...',true,'Batarya kalkış akımını veriyor.');
     if(cont()&&p.brain&&p.sensor){ const need5=(p.sensor.logicVmin===5);
       if(need5&&p.brain.logicV<5) add('Sensör okunuyor...',false,p.sensor.name+' 5V mantıkla çalışır; '+p.brain.name+' pinleri '+p.brain.logicV+'V. Seviye uyumsuz - veri bozuk, pin riskli.');
@@ -844,10 +849,22 @@
     battery:{ aa4:[-2,-3,4,5,5,-3], lipo2s:[4,3,2,2,3,1], li18650:[1,1,5,3,3,5], lipo3s:[5,-1,-4,1,1,2] },
     sensor:{ qtr8rc:[3,4,4,3,1,3], qtr8a:[3,3,4,2,1,2], tcrt5000:[-2,-2,3,4,4,1] }
   };
-  const G_CAPS={h:25,s:25,d:31,k:30,b:31,p:25};
+  const REF_COUNTS={brain:1,driver:1,motor:2,wheel:2,caster:1,battery:1,sensor:1};
+  // Yerlestirilen adet sayilari puanlara isler. Tavanlar bu yuzden teorik maksimumdan
+  // degil, "makul referans" kurulumdan hesaplanir (2 motor + 2 tekerlek dahil).
+  const G_CAPS=(function(){ const AX=['h','s','d','k','b','p'], caps={};
+    AX.forEach(function(ax,i){ let t=0;
+      ORDER.forEach(function(cat){ const ref=REF_COUNTS[cat]||0, tbl=GX[cat]; if(!ref||!tbl) return;
+        let best=-1e9; Object.keys(tbl).forEach(function(k){ if(tbl[k][i]>best) best=tbl[k][i]; });
+        t+=best*ref; });
+      caps[ax]=t; }); return caps; })();
+  function counts(build){ build=build||{}; const c=build.counts||{}, o={};
+    ORDER.forEach(function(k){ o[k]=(typeof c[k]==='number')?Math.max(0,Math.round(c[k])):(build[k]?(REF_COUNTS[k]||1):0); });
+    return o; }
   // Esikler: rapordaki degerler ulasilamazdi (max agirlik 395g, max tork orani 4.47).
-  // 8064 buildin tamami taranarak kalibre edildi: Tank %2.7, Guc Kulesi %2.7, APEX %0.4.
-  const G_TH={tankW:350, torkRatio:3.6, apexH:0.80, apexS:0.80};
+  // Adet sayilari puanlara islediginden yeniden kalibre edildi (referans kurulum, 8064 build):
+  // Tank %2.7, Guc Kulesi %2.7, APEX %0.35.
+  const G_TH={tankW:350, torkRatio:7.2, apexH:0.74, apexS:0.74};
   const G_LABEL={h:'Hız',s:'Stabilite',d:'Dayanıklılık',k:'Kolaylık',b:'Bütçe',p:'Verim'};
   const G_AXES=['h','s','d','k','b','p'];
   const IDENT={
@@ -886,13 +903,14 @@
   function gkey(cat,sel){ if(cat==='motor'){ const o=opt('motor',sel); return o?(o.typeId+'@'+o.rpm):null; } return (sel&&sel.id)||sel; }
   function gscore(build){
     build=build||{}; const sum={h:0,s:0,d:0,k:0,b:0,p:0}; let tork=0;
-    ORDER.forEach(cat=>{ const sel=build[cat]; if(!sel) return; const key=gkey(cat,sel);
-      const v=GX[cat]&&GX[cat][key]; if(!v) return;
-      sum.h+=v[0]; sum.s+=v[1]; sum.d+=v[2]; sum.k+=v[3]; sum.b+=v[4]; sum.p+=v[5];
-      if(cat==='motor'&&v.length>6) tork+=v[6];
+    const q=counts(build);
+    ORDER.forEach(cat=>{ const sel=build[cat]; if(!sel) return; const m=q[cat]||0; if(!m) return;
+      const key=gkey(cat,sel); const v=GX[cat]&&GX[cat][key]; if(!v) return;
+      sum.h+=v[0]*m; sum.s+=v[1]*m; sum.d+=v[2]*m; sum.k+=v[3]*m; sum.b+=v[4]*m; sum.p+=v[5]*m;
+      if(cat==='motor'&&v.length>6) tork+=v[6]*m;
     });
     const weightG=computeReport(build).weightG;
-    const n={h:sum.h/G_CAPS.h,s:sum.s/G_CAPS.s,d:sum.d/G_CAPS.d,k:sum.k/G_CAPS.k,b:sum.b/G_CAPS.b,p:sum.p/G_CAPS.p};
+    const n={}; ['h','s','d','k','b','p'].forEach(function(ax){ n[ax]=Math.min(1,sum[ax]/G_CAPS[ax]); });
     n.kd=(n.k+n.d)/2;
     return {raw:sum,tork:tork,weightG:weightG,n:n,torkRatio:weightG?(tork/weightG)*100:0};
   }
@@ -907,7 +925,7 @@
     return wrap(best[0]);
   }
 
-  const API={COMPONENTS,ORDER,RATING_KEYS,RATING_LABEL,G_CAPS,G_LABEL,G_AXES,G_TH,ARCHETYPES,IDENT,opt,motorType,parts,ratings,ident,gscore,archetype,computeReport,runPreTest,toSimParams,starterBuild};
+  const API={COMPONENTS,ORDER,RATING_KEYS,RATING_LABEL,G_CAPS,G_LABEL,G_AXES,G_TH,REF_COUNTS,ARCHETYPES,IDENT,counts,opt,motorType,parts,ratings,ident,gscore,archetype,computeReport,runPreTest,toSimParams,starterBuild};
   global.RobotData=API;
   if(typeof module!=='undefined'&&module.exports) module.exports=API;
 })(typeof window!=='undefined'?window:globalThis);

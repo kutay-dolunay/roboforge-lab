@@ -242,6 +242,24 @@
 .arch-k{font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:800}
 .arch-n{font-size:1.25rem;font-weight:800;color:var(--brand-lt);margin:2px 0 4px}
 .arch-d{font-size:.82rem;line-height:1.55;color:var(--muted2)}
+
+/* --- parca kutusu (add/remove tray) --- */
+.tray{margin-top:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:12px 13px}
+.trayh{font-size:.62rem;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);font-weight:800;margin-bottom:4px}
+.trayh small{letter-spacing:0;text-transform:none;font-weight:600;color:var(--muted2)}
+.trayhint{font-size:.66rem;color:var(--muted2);line-height:1.45;margin-bottom:8px}
+.trow{display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid rgba(30,58,95,.5)}
+.trow.off{opacity:.4}
+.trow .ti{font-size:1.15rem;width:22px;text-align:center;flex:none}
+.trow .tn{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.2}
+.trow .tn b{font-size:.74rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trow .tn small{font-size:.55rem;color:var(--muted)}
+.trow .tc{font-size:.72rem;font-weight:800;color:var(--brand-lt);min-width:32px;text-align:right;flex:none}
+.tb{width:26px;height:26px;border-radius:7px;border:1px solid var(--line);background:#0b1526;color:var(--txt);
+  font-size:1rem;font-weight:800;cursor:pointer;line-height:1;flex:none;font-family:inherit}
+.tb:hover:not(:disabled){border-color:var(--brand-lt)}
+.tb.add{background:var(--brand);border-color:var(--brand-lt);color:#fff}
+.tb:disabled{opacity:.28;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -287,6 +305,7 @@
           <div class="balbar"><div class="balmid"></div><div class="balfill" id="balFill"></div></div>
           <div id="balNote" style="font-size:.72rem;color:var(--muted2);margin-top:8px"></div>
         </div>
+        <div class="tray" id="partTray"></div>
       </div>
     </div>
   </section>
@@ -401,7 +420,41 @@
   let step=1, phase=0;
   // Always start a FRESH build when the page opens (do not resume the saved one).
   const B = { sim:SIM, brain:null,driver:null,motor:null,wheel:null,caster:null,battery:null,sensor:null,
-    chassis:{ shape:'rect', len:1, wid:1, place:{} } };
+    chassis:{ shape:'rect', len:1, wid:1, place:{}, units:[] } };
+  const DEFPOS={brain:{x:0.5,y:0.18},driver:{x:0.5,y:0.4},motor:{x:0.26,y:0.6},wheel:{x:0.74,y:0.6},caster:{x:0.5,y:0.9},battery:{x:0.5,y:0.76},sensor:{x:0.5,y:0.08}};
+  function unitCounts(){ const c={}; ORDER.forEach(k=>c[k]=0); (B.chassis.units||[]).forEach(u=>{ if(c[u.cat]!=null) c[u.cat]++; }); return c; }
+  function maxFor(cat){ const o=isChosen(cat)?RD.opt(cat,B[cat]):null; return (o&&o.max)?o.max:0; }
+  function addUnit(cat){
+    if(!isChosen(cat)) return; const c=unitCounts(); const mx=maxFor(cat); if(c[cat]>=mx) return;
+    const n=c[cat], base=DEFPOS[cat]||{x:0.5,y:0.5};
+    const dx=(n===0)?0:(((n%2)?1:-1)*(0.14+0.07*Math.floor((n-1)/2)));
+    const x=Math.max(0.07,Math.min(0.93,base.x+dx));
+    const y=Math.max(0.07,Math.min(0.93,base.y+((n>3)?0.08*Math.floor(n/4):0)));
+    B.chassis.units.push({cat:cat,x:+x.toFixed(3),y:+y.toFixed(3)}); save(); renderChassis();
+  }
+  function removeUnit(cat){
+    for(let i=B.chassis.units.length-1;i>=0;i--){ if(B.chassis.units[i].cat===cat){ B.chassis.units.splice(i,1); break; } }
+    save(); renderChassis();
+  }
+  function renderTray(){
+    const host=document.getElementById('partTray'); if(!host) return;
+    const c=unitCounts();
+    host.innerHTML='<div class="trayh">🧰 Parça Kutusu</div><div class="trayhint">Parçaları tek tek şasiye ekle. Her parçanın kataloğdaki kullanım limiti kadar ekleyebilirsin. Ekledikten sonra sürükleyerek yerini değiştir.</div>';
+    ORDER.forEach(cat=>{
+      const o=isChosen(cat)?RD.opt(cat,B[cat]):null;
+      const mx=maxFor(cat), n=c[cat]||0;
+      const nm=o?((cat==='motor')?(o.typeName+' '+o.rpm+' RPM'):o.name):'- seçilmedi -';
+      const row=document.createElement('div'); row.className='trow'+(o?'':' off');
+      row.innerHTML='<span class="ti">'+(o?gEmoji(cat,B[cat],o.icon):'⬚')+'</span>'+
+        '<span class="tn"><b>'+esc(nm)+'</b><small>'+esc(RD.COMPONENTS[cat].label)+'</small></span>'+
+        '<span class="tc">'+n+'/'+mx+'</span>';
+      const minus=document.createElement('button'); minus.className='tb'; minus.textContent='−';
+      minus.disabled=!o||n<=0; minus.onclick=()=>removeUnit(cat);
+      const plus=document.createElement('button'); plus.className='tb add'; plus.textContent='+';
+      plus.disabled=!o||n>=mx; plus.onclick=()=>addUnit(cat);
+      row.appendChild(minus); row.appendChild(plus); host.appendChild(row);
+    });
+  }
   function isChosen(cat){ const v=B[cat]; if(cat==='motor') return !!(v&&v.type&&v.rpm!=null); return !!v; }
   function esc(x){ return String(x==null?'':x).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
   function shortT(t){ t=t||''; return t.length>112?t.slice(0,110)+'…':t; }
@@ -519,18 +572,16 @@
     ft.style.top=(cy-h/2-16)+'px'; stage.appendChild(ft);
     [[-w/2-6],[w/2-6]].forEach(([wx])=>{ const wm=document.createElement('div'); wm.className='wheelmark';
       wm.style.left=(cx+wx)+'px'; wm.style.top=(cy-20)+'px'; stage.appendChild(wm); });
-    const DEFPOS={brain:{x:0.5,y:0.18},driver:{x:0.5,y:0.4},motor:{x:0.26,y:0.6},wheel:{x:0.74,y:0.6},caster:{x:0.5,y:0.9},battery:{x:0.5,y:0.76},sensor:{x:0.5,y:0.08}};
-    ORDER.forEach((cat,i)=>{ if(!B[cat])return; const o=RD.opt(cat,B[cat]);
-      if(!B.chassis.place[cat]) B.chassis.place[cat]=Object.assign({},DEFPOS[cat]||{x:0.5,y:0.5});
-      const p=B.chassis.place[cat];
+    (B.chassis.units||[]).forEach((u,i)=>{ const o=isChosen(u.cat)?RD.opt(u.cat,B[u.cat]):null; if(!o) return;
       const el=document.createElement('div'); el.className='pmark';
-      el.innerHTML=`<span class="plab">${RD.COMPONENTS[cat].label}</span>${o.icon}`;
-      el.style.left=(cx-w/2 + p.x*w)+'px'; el.style.top=(cy-h/2 + p.y*h)+'px';
-      makeDrag(el,cat); stage.appendChild(el);
+      el.innerHTML=`<span class="plab">${RD.COMPONENTS[u.cat].label}</span>${gEmoji(u.cat,B[u.cat],o.icon)}`;
+      el.style.left=(cx-w/2 + u.x*w)+'px'; el.style.top=(cy-h/2 + u.y*h)+'px';
+      makeDrag(el,i); stage.appendChild(el);
     });
+    renderTray();
     updateBalance();
   }
-  function makeDrag(el,cat){
+  function makeDrag(el,ui){
     let drag=false;
     el.addEventListener('pointerdown',e=>{ drag=true; el.setPointerCapture(e.pointerId); e.preventDefault(); });
     el.addEventListener('pointermove',e=>{ if(!drag)return;
@@ -538,7 +589,7 @@
       const cx=STAGE.w/2, cy=STAGE.h/2; const {w,h}=chassisPx();
       let x=(e.clientX-sr.left-(cx-w/2))/w, y=(e.clientY-sr.top-(cy-h/2))/h;
       x=Math.max(0,Math.min(1,x)); y=Math.max(0,Math.min(1,y));
-      B.chassis.place[cat]={x:+x.toFixed(3),y:+y.toFixed(3)};
+      if(B.chassis.units[ui]){ B.chassis.units[ui].x=+x.toFixed(3); B.chassis.units[ui].y=+y.toFixed(3); }
       el.style.left=(cx-w/2+x*w)+'px'; el.style.top=(cy-h/2+y*h)+'px'; updateBalance();
     });
     el.addEventListener('pointerup',()=>{ drag=false; save(); });
@@ -547,8 +598,8 @@
   function chassisWeight(){ const {w,h}=chassisPx(); return Math.round(30+(w*h)/900); }
   function updateBalance(){
     let num=0,den=0;
-    ORDER.forEach(cat=>{ if(!B[cat]||!B.chassis.place[cat])return; const o=RD.opt(cat,B[cat]);
-      const wt=(cat==='motor'||cat==='wheel')?o.weightG*2:o.weightG; num+=wt*B.chassis.place[cat].y; den+=wt; });
+    (B.chassis.units||[]).forEach(u=>{ const o=isChosen(u.cat)?RD.opt(u.cat,B[u.cat]):null; if(!o) return;
+      num+=o.weightG*u.y; den+=o.weightG; });
     const com=den?num/den:0.5, off=com-0.5;
     document.getElementById('balFill').style.left=(50-off*90)+'%';
     const bn=document.getElementById('balNote');
@@ -556,7 +607,7 @@
   }
 
   // ---- STEP 3: report ----
-  function bctx(){ return Object.assign({},B,{chassis:{weightG:chassisWeight(),widthU:1+(B.chassis.wid-1)*0.4}}); }
+  function bctx(){ return Object.assign({},B,{counts:unitCounts(),chassis:{weightG:chassisWeight(),widthU:1+(B.chassis.wid-1)*0.4}}); }
   function renderReport(){
     const bl=document.getElementById('buildList'); bl.innerHTML='';
     ORDER.forEach(cat=>{ const o=isChosen(cat)?RD.opt(cat,B[cat]):null;
