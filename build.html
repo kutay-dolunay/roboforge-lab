@@ -433,6 +433,7 @@
   function unitCounts(){ const c={}; ORDER.forEach(k=>c[k]=0); (B.chassis.units||[]).forEach(u=>{ if(c[u.cat]!=null) c[u.cat]++; }); return c; }
   function maxFor(cat){ const o=isChosen(cat)?RD.opt(cat,B[cat]):null; return (o&&o.max)?o.max:0; }
   function addUnit(cat){
+    if(cat==='sensor') return;
     if(!isChosen(cat)) return; const c=unitCounts(); const mx=maxFor(cat); if(c[cat]>=mx) return;
     const n=c[cat], base=DEFPOS[cat]||{x:0.5,y:0.5};
     const dx=(n===0)?0:(((n%2)?1:-1)*(0.14+0.07*Math.floor((n-1)/2)));
@@ -447,8 +448,9 @@
   function renderTray(){
     const host=document.getElementById('partTray'); if(!host) return;
     const c=unitCounts();
-    host.innerHTML='<div class="trayh">🧰 Parça Kutusu</div><div class="trayhint">Parçaları tek tek şasiye ekle. Her parçanın kataloğdaki kullanım limiti kadar ekleyebilirsin. Ekledikten sonra sürükleyerek yerini değiştir.</div>';
+    host.innerHTML='<div class="trayh">🧰 Parça Kutusu</div><div class="trayhint">Parçaları tek tek şasiye ekle. Her parçanın kataloğdaki kullanım limiti kadar ekleyebilirsin. Ekledikten sonra sürükleyerek yerini değiştir. Çizgi sensörünü laboratuvarda, robotun üstüne kendin yerleştireceksin.</div>';
     ORDER.forEach(cat=>{
+      if(cat==='sensor') return;   // cizgi sensoru laboratuvarda eklenir
       const o=isChosen(cat)?RD.opt(cat,B[cat]):null;
       const mx=maxFor(cat), n=c[cat]||0;
       const nm=o?((cat==='motor')?(o.typeName+' '+o.rpm+' RPM'):o.name):'- seçilmedi -';
@@ -615,7 +617,10 @@
   }
 
   // ---- STEP 3: report ----
-  function bctx(){ return Object.assign({},B,{counts:unitCounts(),chassis:{weightG:chassisWeight(),widthU:1+(B.chassis.wid-1)*0.4}}); }
+  function bctx(){ const c=unitCounts();
+    // model secildi ama sensor laboratuvarda takilir: puanlamada 1 adet sayilir
+    if(isChosen('sensor')) c.sensor=Math.max(1,c.sensor||0);
+    return Object.assign({},B,{counts:c,chassis:{weightG:chassisWeight(),widthU:1+(B.chassis.wid-1)*0.4}}); }
   function renderReport(){
     const bl=document.getElementById('buildList'); bl.innerHTML='';
     ORDER.forEach(cat=>{ const o=isChosen(cat)?RD.opt(cat,B[cat]):null;

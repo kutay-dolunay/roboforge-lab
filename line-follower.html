@@ -223,6 +223,17 @@
   .labauth .lchip .lout{border:1px solid var(--line);background:transparent;color:var(--muted2);border-radius:7px;
     font-size:.58rem;font-weight:700;padding:4px 7px;cursor:pointer}
   .labauth .lchip .lout:hover{border-color:var(--red);color:#fca5a5}
+
+/* --- tasarlanan robotun parcalari + denge olcer --- */
+.partmark{position:absolute;transform:translate(-50%,-50%);width:26px;height:26px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:.85rem;background:rgba(12,21,38,.92);
+  border:1px solid var(--line);pointer-events:none;z-index:2}
+.lfbal{margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+.lfbal .lb{font-size:.55rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);font-weight:800;margin-bottom:7px}
+.balbar{position:relative;height:9px;border-radius:5px;background:#0c1728;border:1px solid var(--line);overflow:hidden}
+.balmid{position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--muted);opacity:.55}
+.balfill{position:absolute;top:-3px;width:13px;height:13px;border-radius:50%;background:var(--brand-lt);
+  box-shadow:0 0 10px var(--brand-glow);transform:translateX(-50%);transition:left .18s}
 </style>
 </head>
 <body>
@@ -286,7 +297,7 @@
         <div class="sectlabel">Sensör Yerleşimi · sürükle-bırak</div>
         <div class="hintbox">
           Sensörleri <b>sürükleyerek</b> şasinin üstünde istediğin yere koy. Önde ve yana açık koyarsan
-          virajları daha erken görür. Bir sensöre tıklayıp <b>Sil</b> ile kaldırabilirsin. (en fazla 5)
+          virajları daha erken görür. Bir sensöre tıklayıp <b>Sil</b> ile kaldırabilirsin. (en fazla <b id="senMax">5</b>)
         </div>
         <div class="editorwrap">
           <div class="chassis" id="chassis"></div>
@@ -295,6 +306,11 @@
             <button class="minibtn danger" id="delSensor" disabled style="margin-top:8px">✕ Seçili Sensörü Sil</button>
             <input id="senName" maxlength="14" placeholder="Seçili sensörün adı" disabled style="width:100%;margin-top:8px;background:#0b1526;border:1px solid var(--line);color:var(--txt);border-radius:6px;padding:6px 8px;font-size:.72rem" />
             <div style="font-size:.6rem;color:var(--muted2);margin-top:6px;line-height:1.45">💡 <b>Örnek isim:</b> soldaki sensöre <b>Sol</b>, ortadakine <b>Orta</b>, sağdakine <b>Sağ</b> de. Sensörler <b>çizgiyi</b> algılamak içindir; sol/orta/sağ çizgiyi görünce farklı kurallar çalıştırırsın.</div>
+            <div class="lfbal">
+              <div class="lb">Denge (ağırlık merkezi) &nbsp; arka ◄ ─── ► ön</div>
+              <div class="balbar"><div class="balmid"></div><div class="balfill" id="lfBalFill" style="left:50%"></div></div>
+              <div id="lfBalNote" style="font-size:.66rem;color:var(--muted2);margin-top:6px;line-height:1.4"></div>
+            </div>
             <div class="param" style="margin-top:18px">
               <label>Motor Hızı <b id="vLabel">Orta</b></label>
               <input type="range" id="vmax" min="2.4" max="5.2" step="0.2" value="3.6" />
@@ -794,17 +810,38 @@
     fwd=Math.max(ED.fwdMin,Math.min(ED.fwdMax,fwd));
     return {right,fwd};
   }
+  function designedBuild(){ try{ return JSON.parse(localStorage.getItem('rf_robot')); }catch(e){ return null; } }
+  function senLimit(){ try{ const bd=designedBuild(), RD=window.RobotData;
+      if(bd&&RD&&bd.sensor){ const o=RD.opt('sensor',bd.sensor); if(o&&o.max) return o.max; } }catch(e){}
+    return 5; }
   function buildChassis(){
     const ch=document.getElementById('chassis'); ch.innerHTML='';
+    const RD=window.RobotData, bd=designedBuild();
+    const wid=(bd&&bd.chassis&&bd.chassis.wid)||1, len=(bd&&bd.chassis&&bd.chassis.len)||1;
     const body=document.createElement('div'); body.className='chbody';
-    const HL=0.95*ED.scale, HW=0.62*ED.scale; const cx=ED.w/2, cy=ED.h*0.62;
+    const HL=0.95*ED.scale*len, HW=0.62*ED.scale*wid; const cx=ED.w/2, cy=ED.h*0.62;
     body.style.left=(cx-HW)+'px'; body.style.top=(cy-HL)+'px';
     body.style.width=(HW*2)+'px'; body.style.height=(HL*2)+'px';
+    if(RD&&RD.shape&&bd&&bd.chassis&&bd.chassis.shape){ const sh=RD.shape(bd.chassis.shape);
+      if(sh.cp){ body.style.clipPath=sh.cp; body.style.borderRadius='0'; }
+      else if(sh.br){ body.style.borderRadius=sh.br; body.style.clipPath='none'; } }
     ch.appendChild(body);
     const fl=document.createElement('div'); fl.className='chfront'; fl.textContent='▲ ÖN';
     fl.style.left=(cx-16)+'px'; fl.style.top=(cy-HL-16)+'px'; ch.appendChild(fl);
-    [[-HW-6],[HW-6]].forEach(([wx])=>{ const w=document.createElement('div'); w.className='wheel';
-      w.style.left=(cx+wx)+'px'; w.style.top=(cy-17)+'px'; ch.appendChild(w); });
+    // robot tam da sihirbazda tasarlandigi gibi: yerlestirilen parcalar, konumlariyla
+    const units=(bd&&bd.chassis&&bd.chassis.units)||[];
+    if(units.length&&RD){
+      units.forEach(u=>{ const o=RD.opt(u.cat,bd[u.cat]); if(!o) return;
+        const el=document.createElement('div'); el.className='partmark';
+        const idn=RD.ident?RD.ident(u.cat,bd[u.cat]):null;
+        el.textContent=(idn&&idn.emoji)||o.icon||'⬚';
+        el.title=RD.COMPONENTS[u.cat].label+': '+((u.cat==='motor')?(o.typeName+' '+o.rpm+' RPM'):o.name);
+        el.style.left=(cx-HW+u.x*HW*2)+'px'; el.style.top=(cy-HL+u.y*HL*2)+'px';
+        ch.appendChild(el); });
+    } else {
+      [[-HW-6],[HW-6]].forEach(([wx])=>{ const w=document.createElement('div'); w.className='wheel';
+        w.style.left=(cx+wx)+'px'; w.style.top=(cy-17)+'px'; ch.appendChild(w); });
+    }
     LAB.sensors.forEach(sen=>{
       const el=document.createElement('div'); el.className='sensor rf-hoverable'+(LAB.selected===sen.id?' sel':'');
       el.style.background=sen.color; el.dataset.id=sen.id; el.textContent=sen.label.slice(0,1);
@@ -812,6 +849,24 @@
       const p=edPos(sen); el.style.left=p.x+'px'; el.style.top=p.y+'px';
       makeDraggable(el,sen); ch.appendChild(el);
     });
+    updateLfBalance(HL,cy);
+    const sm=document.getElementById('senMax'); if(sm) sm.textContent=senLimit();
+  }
+  function updateLfBalance(HL,cy){
+    const fill=document.getElementById('lfBalFill'), note=document.getElementById('lfBalNote');
+    if(!fill||!note) return;
+    const RD=window.RobotData, bd=designedBuild(); let num=0,den=0;
+    const units=(bd&&bd.chassis&&bd.chassis.units)||[];
+    if(RD&&bd) units.forEach(u=>{ const o=RD.opt(u.cat,bd[u.cat]); if(!o) return;
+      num+=o.weightG*u.y; den+=o.weightG; });
+    let sw=3.1; try{ if(RD&&bd&&bd.sensor){ const so=RD.opt('sensor',bd.sensor); if(so&&so.weightG) sw=so.weightG; } }catch(e){}
+    LAB.sensors.forEach(sen=>{ const y=(HL-sen.fwd*ED.scale)/(2*HL); num+=sw*y; den+=sw; });
+    if(!den){ fill.style.left='50%'; note.textContent='Parça yok - denge hesaplanamıyor.'; return; }
+    const com=num/den, off=com-0.5;
+    fill.style.left=Math.max(4,Math.min(96,50-off*90))+'%';
+    note.textContent=Math.abs(off)<0.12 ? 'Denge iyi görünüyor.'
+      : (off>0 ? 'Arkaya ağır - ön taraf hafif kalabilir, sensörler yerden kopabilir.'
+               : 'Öne ağır - sert virajda burun dalabilir.');
   }
   function makeDraggable(el,sen){
     let dragging=false, startX,startY;
@@ -842,7 +897,7 @@
     return {color, label:'S'+n, id:'s'+Date.now().toString(36)};
   }
   function addSensor(){
-    if(LAB.sensors.length>=5) return;
+    if(LAB.sensors.length>=senLimit()) return;
     if(LAB.running) stopRun();
     const m=nextSensorMeta();
     LAB.sensors.push({id:m.id,label:m.label,color:m.color,fwd:0.9,right:0});
@@ -1095,7 +1150,7 @@
   // ---------- refresh ----------
   function refreshAll(){ buildChassis(); buildRules(); buildSensorHud();
     document.getElementById('delSensor').disabled=(LAB.selected==null)||LAB.sensors.length<=1;
-    document.getElementById('addSensor').disabled=LAB.sensors.length>=5;
+    document.getElementById('addSensor').disabled=LAB.sensors.length>=senLimit();
     reflectSenName();
     if(!LAB.running) render(null); updateHud(LAB.sim?LAB.sim.last:null); }
   function reflectSenName(){

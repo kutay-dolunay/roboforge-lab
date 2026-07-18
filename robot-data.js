@@ -895,6 +895,21 @@
     marathon:{name:'Maratoncu Ruhu',emoji:'🔋',desc:'Enerji tasarrufu tavan yaptı! Bitmeyen bir batarya ömrün var ancak pillerin getirdiği ekstra ağırlık yüzünden hızlanman zor olacak.'},
     economy:{name:'Ekonomik Kahraman',emoji:'💰',desc:'Az bütçeyle çok iş başardın. Şampiyonluğa adım adım giderken hesaplı mühendisliğin en iyi örneğisin.'}
   };
+  // sasi bicimleri: hem sihirbaz hem laboratuvar ayni gorseli cizsin diye burada
+  const SHAPES=[
+    {id:'rect',br:'9%'},{id:'round',br:'50%'},{id:'capsule',br:'999px'},
+    {id:'bullet',br:'46% 46% 12% 12%'},{id:'teardrop',br:'50% 50% 50% 8%'},
+    {id:'hex',cp:'polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)'},
+    {id:'octagon',cp:'polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%)'},
+    {id:'pentagon',cp:'polygon(50% 0,100% 38%,82% 100%,18% 100%,0 38%)'},
+    {id:'arrow',cp:'polygon(50% 0,100% 30%,100% 100%,0 100%,0 30%)'},
+    {id:'diamond',cp:'polygon(50% 0,100% 50%,50% 100%,0 50%)'},
+    {id:'trapezoid',cp:'polygon(22% 0,78% 0,100% 100%,0 100%)'},
+    {id:'shield',cp:'polygon(0 0,100% 0,100% 68%,50% 100%,0 68%)'},
+    {id:'tshape',cp:'polygon(0 0,100% 0,100% 42%,68% 42%,68% 100%,32% 100%,32% 42%,0 42%)'},
+    {id:'cross',cp:'polygon(35% 0,65% 0,65% 35%,100% 35%,100% 65%,65% 65%,65% 100%,35% 100%,35% 65%,0 65%,0 35%,35% 35%)'}
+  ];
+  function shape(id){ return SHAPES.filter(function(x){return x.id===id;})[0]||SHAPES[0]; }
   function ident(cat,sel){
     if(cat==='motor'){ const o=opt('motor',sel); const e=o&&IDENT.motor[o.typeId]; return e?{emoji:e[0],slogan:e[1]}:null; }
     const id=(sel&&sel.id)||sel; const e=IDENT[cat]&&IDENT[cat][id];
@@ -925,7 +940,7 @@
     return wrap(best[0]);
   }
 
-  const API={COMPONENTS,ORDER,RATING_KEYS,RATING_LABEL,G_CAPS,G_LABEL,G_AXES,G_TH,REF_COUNTS,ARCHETYPES,IDENT,counts,opt,motorType,parts,ratings,ident,gscore,archetype,computeReport,runPreTest,toSimParams,starterBuild};
+  const API={COMPONENTS,ORDER,RATING_KEYS,RATING_LABEL,G_CAPS,G_LABEL,G_AXES,G_TH,REF_COUNTS,ARCHETYPES,IDENT,SHAPES,shape,counts,opt,motorType,parts,ratings,ident,gscore,archetype,computeReport,runPreTest,toSimParams,starterBuild};
   global.RobotData=API;
   if(typeof module!=='undefined'&&module.exports) module.exports=API;
 })(typeof window!=='undefined'?window:globalThis);
