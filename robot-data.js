@@ -912,11 +912,16 @@
     }
     // 6 sensor beslemesi + sinyali (sensor laboratuvarda takilir, burada varsa denetlenir)
     if(steps[steps.length-1].ok&&se.length){
-      if(!anySame(bat,'pos',se,'vcc')&&!anySame(br,'vout',se,'vcc'))
-        add('Sensör beslemesi...',false,'Sensörün VCC ucuna besleme gelmiyor. Sensör hiç okumaz.');
-      else if(!anySame(se,'out',br,'sigin'))
-        add('Sensör sinyali...',false,'Sensör çıkışı kartın Sinyal Girişine bağlı değil. Kart çizgiyi göremez.');
-      else add('Sensör bağlantısı...',true,'Sensör okunuyor.');
+      // her sensor tek tek denetlenir: birini baglamak digerini kurtarmaz
+      var sBad=null, sWhy='';
+      for(var si=0; si<se.length; si++){
+        var s1=[se[si]];
+        if(!anySame(bat,'pos',s1,'vcc')&&!anySame(br,'vout',s1,'vcc')){ sBad=si+1; sWhy='VCC ucuna besleme gelmiyor'; break; }
+        if(!anySame(bat,'neg',s1,'gnd')&&!anySame(br,'gnd',s1,'gnd')){ sBad=si+1; sWhy='GND ucu bağlı değil'; break; }
+        if(!anySame(s1,'out',br,'sigin')){ sBad=si+1; sWhy='çıkışı kartın Sinyal Girişine bağlı değil'; break; }
+      }
+      if(sBad) add('Sensörler okunuyor...',false,sBad+'. sensörün '+sWhy+'. O sensör hiç okumaz, robot çizgiyi eksik görür.');
+      else add('Sensörler okunuyor...',true,se.length+' sensör de bağlı ve okunuyor.');
     }
     // 7 yikici hatalar
     if(steps[steps.length-1].ok&&bat.length&&br.length){
