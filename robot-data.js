@@ -848,8 +848,9 @@
       {id:'m1', label:'Motor Ucu (+)', kind:'motor', dir:'in', v:null, count:1},
       {id:'m2', label:'Motor Ucu (-)', kind:'motor', dir:'in', v:null, count:1}];
     if(cat==='battery') return [
-      {id:'pos', label:'Artı Uç (+)', kind:'power', dir:'out', v:o.voltage, count:1},
-      {id:'neg', label:'Eksi Uç (-)', kind:'gnd',   dir:'gnd', v:0,         count:1}];
+      // batarya rayi birden fazla tuketiciyi besler (kart + surucu + sensor)
+      {id:'pos', label:'Artı Uç (+)', kind:'power', dir:'out', v:o.voltage, count:4},
+      {id:'neg', label:'Eksi Uç (-)', kind:'gnd',   dir:'gnd', v:0,         count:4}];
     if(cat==='sensor') return [
       {id:'vcc', label:'VCC', kind:'power', dir:'in', v:null, vmin:o.logicVmin, vmax:o.logicVmax, count:1},
       {id:'gnd', label:'GND', kind:'gnd',   dir:'gnd',v:0, count:1},
