@@ -235,6 +235,23 @@
 .balmid{position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--muted);opacity:.55}
 .balfill{position:absolute;top:-3px;width:13px;height:13px;border-radius:50%;background:var(--brand-lt);
   box-shadow:0 0 10px var(--brand-glow);transform:translateX(-50%);transition:left .18s}
+
+/* --- sensor kablolama paneli --- */
+.senwire{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.swh{font-size:.6rem;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);font-weight:800;margin-bottom:6px}
+.swnote{font-size:.68rem;color:var(--muted2);line-height:1.5;margin-bottom:10px}
+.swgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:9px}
+.swbox{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:8px 9px}
+.swb-h{display:flex;align-items:center;gap:6px;font-size:.7rem;font-weight:800;margin-bottom:6px;
+  padding-bottom:5px;border-bottom:1px solid rgba(30,58,95,.6)}
+.swrow{display:flex;align-items:center;gap:6px;padding:2px 0;font-size:.62rem;color:var(--muted2)}
+.swdot{width:13px;height:13px;border-radius:50%;flex:none;cursor:pointer;box-shadow:0 0 0 1px rgba(255,255,255,.18);transition:.12s}
+.swdot:hover{transform:scale(1.25)}
+.swdot.armed{box-shadow:0 0 0 2px #fff,0 0 10px var(--brand-glow);transform:scale(1.3)}
+.swdot.full{opacity:.35;cursor:not-allowed}
+.swl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.swc{font-size:.58rem;font-weight:800;color:var(--brand-lt);flex:none}
+.swcount{font-size:.66rem;color:var(--muted2);margin-top:9px}
 </style>
 </head>
 <body>
@@ -397,7 +414,7 @@
 <script src="rf-progress.js?v=1"></script>
 <script src="rf-feedback.js?v=1"></script>
 <script src="rf-result.js?v=1"></script>
-<script src="robot-data.js?v=3"></script>
+<script src="robot-data.js?v=4"></script>
 <script src="rf-skills.js?v=2"></script>
 <script src="sim-core.js?v=2"></script>
 <script>
@@ -576,6 +593,9 @@
   }
   function startRun(){
     if(LAB.running) return;
+    try{ if(window.RobotData){ const eb=effBuild();
+      if(eb){ const sp=window.RobotData.toSimParams(eb);
+        LAB.buildFault=sp.fault; LAB.buildFaultMsg=sp.faultMsg; } } }catch(e){}
     stopLoop();
     rebuildTrack();
     LAB.sim = S.createSim(buildConfig());
@@ -814,6 +834,82 @@
     fwd=Math.max(ED.fwdMin,Math.min(ED.fwdMax,fwd));
     return {right,fwd};
   }
+  // ---- sensor kablolama (laboratuvarda) ----
+  let senArmed=null;
+  function swEsc(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(m){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[m]; }); }
+  function saveSenWires(){ try{ const raw=localStorage.getItem('rf_robot'); if(!raw) return;
+    const bd=JSON.parse(raw); bd.senWires=LAB.senWires||[]; localStorage.setItem('rf_robot',JSON.stringify(bd)); }catch(e){} }
+  // sihirbazdaki kablolar + laboratuvarda kurulan sensor kablolari tek netliste birlesir
+  function effBuild(){
+    const bd=designedBuild(); if(!bd) return null;
+    const units=((bd.chassis&&bd.chassis.units)||[]).slice(); const base=units.length; const map={};
+    LAB.sensors.forEach(function(sn,i){ map[sn.id]=base+i; units.push({cat:'sensor',x:0.5,y:0.06}); });
+    const wires=((bd.wiring)||[]).slice();
+    (LAB.senWires||[]).forEach(function(w){ const su=map[w.sid]; if(su==null) return;
+      wires.push({a:{u:su,port:w.sport},b:{u:w.u,port:w.uport}}); });
+    const counts={brain:0,driver:0,motor:0,wheel:0,caster:0,battery:0,sensor:0};
+    units.forEach(function(u){ if(counts[u.cat]!=null) counts[u.cat]++; });
+    return Object.assign({},bd,{counts:counts,wiring:wires,
+      chassis:Object.assign({},bd.chassis||{},{units:units})});
+  }
+  function swUse(wires,u,port){ let n=0; wires.forEach(function(w){
+      if((w.a.u===u&&w.a.port===port)||(w.b.u===u&&w.b.port===port)) n++; }); return n; }
+  function ensureSenWirePanel(){
+    let p=document.getElementById('senWirePanel'); if(p) return p;
+    const host=document.getElementById('panel-robot'); if(!host) return null;
+    p=document.createElement('div'); p.id='senWirePanel'; p.className='senwire'; host.appendChild(p); return p;
+  }
+  function renderSenWiring(){
+    const p=ensureSenWirePanel(); if(!p) return;
+    const RD=window.RobotData, bd=designedBuild();
+    const head='<div class="swh">🔌 Sensör Kablolama</div>';
+    const units=(bd&&bd.chassis&&bd.chassis.units)||[];
+    if(!RD||!units.length){ p.innerHTML=head+'<div class="swnote">Önce <b>Robotu Kur</b> bölümünde robotunu kur; kontrol kartın burada görünür.</div>'; return; }
+    const bi=units.map(function(u){return u.cat;}).indexOf('brain');
+    if(bi<0){ p.innerHTML=head+'<div class="swnote">Robotunda kontrol kartı yok; sensörü bağlayacak bir kart gerekiyor.</div>'; return; }
+    if(!LAB.sensors.length){ p.innerHTML=head+'<div class="swnote">Henüz sensör yok. Yukarıdan <b>Sensör Ekle</b> ile ekle, sonra uçlarını karta bağla.</div>'; return; }
+    const eb=effBuild(), wires=eb.wiring, base=units.length;
+    const bo=RD.opt('brain',bd.brain), so=RD.opt('sensor',bd.sensor)||{};
+    const col=function(pt){ return pt.dir==='out'?'#22c55e':(pt.dir==='in'?'#ef4444':'#94a3b8'); };
+    const row=function(u,pt){ const used=swUse(wires,u,pt.id), full=used>=pt.count;
+      const arm=(senArmed&&senArmed.u===u&&senArmed.port===pt.id)?' armed':'';
+      return '<div class="swrow"><span class="swdot'+(full?' full':'')+arm+'" data-u="'+u+'" data-p="'+pt.id+'" style="background:'+col(pt)+'"></span>'+
+             '<span class="swl">'+swEsc(pt.label)+'</span><span class="swc">'+used+'/'+pt.count+'</span></div>'; };
+    let html=head+'<div class="swnote">Yeşil uç <b>çıkış</b>, kırmızı <b>giriş</b>, gri <b>GND</b>. Bir uca tıkla, sonra bağlanacağı uca tıkla. Aynı ikiliye tekrar tıklarsan kablo silinir.</div><div class="swgrid">';
+    html+='<div class="swbox"><div class="swb-h">'+(((RD.ident&&RD.ident('brain',bd.brain))||{}).emoji||'🧠')+' '+swEsc(bo?bo.name:'Kart')+'</div>';
+    RD.portsOf('brain',bo).forEach(function(pt){ if(pt.id==='vout'||pt.id==='gnd'||pt.id==='sigin') html+=row(bi,pt); });
+    html+='</div>';
+    LAB.sensors.forEach(function(sn,i){
+      html+='<div class="swbox"><div class="swb-h"><span style="width:11px;height:11px;border-radius:50%;display:inline-block;background:'+sn.color+'"></span> '+swEsc(sn.label)+'</div>';
+      RD.portsOf('sensor',so).forEach(function(pt){ html+=row(base+i,pt); });
+      html+='</div>';
+    });
+    html+='</div><div class="swcount"><b>'+(LAB.senWires||[]).length+'</b> sensör kablosu bağlı. Doğru olup olmadığını <b>ÇALIŞTIR</b> deyince göreceksin.</div>';
+    p.innerHTML=html;
+    p.querySelectorAll('.swdot').forEach(function(d){ d.onclick=function(){ onSenDot(+d.dataset.u, d.dataset.p); }; });
+  }
+  function onSenDot(u,port){
+    const bd=designedBuild(); if(!bd) return;
+    const RD=window.RobotData, units=(bd.chassis&&bd.chassis.units)||[], base=units.length;
+    if(!senArmed){ senArmed={u:u,port:port}; renderSenWiring(); return; }
+    if(senArmed.u===u&&senArmed.port===port){ senArmed=null; renderSenWiring(); return; }
+    const a=senArmed, b={u:u,port:port}; senArmed=null;
+    const aSen=a.u>=base, bSen=b.u>=base;
+    if(aSen===bSen){ renderSenWiring(); return; }         // sadece sensor <-> kart
+    const sen=aSen?a:b, brd=aSen?b:a;
+    const sobj=LAB.sensors[sen.u-base]; if(!sobj){ renderSenWiring(); return; }
+    LAB.senWires=LAB.senWires||[];
+    const k=LAB.senWires.findIndex(function(w){ return w.sid===sobj.id&&w.sport===sen.port&&w.u===brd.u&&w.uport===brd.port; });
+    if(k>=0){ LAB.senWires.splice(k,1); saveSenWires(); renderSenWiring(); return; }
+    const eb=effBuild(), wires=eb.wiring;
+    const sp=RD.portsOf('sensor',RD.opt('sensor',bd.sensor)).filter(function(x){return x.id===sen.port;})[0];
+    const bp=RD.portsOf('brain',RD.opt('brain',bd.brain)).filter(function(x){return x.id===brd.port;})[0];
+    if(!sp||!bp){ renderSenWiring(); return; }
+    if(swUse(wires,sen.u,sen.port)>=sp.count||swUse(wires,brd.u,brd.port)>=bp.count){ renderSenWiring(); return; }
+    LAB.senWires.push({sid:sobj.id,sport:sen.port,u:brd.u,uport:brd.port});
+    saveSenWires(); renderSenWiring();
+  }
   function designedBuild(){ try{ return JSON.parse(localStorage.getItem('rf_robot')); }catch(e){ return null; } }
   function senLimit(){ try{ const bd=designedBuild(), RD=window.RobotData;
       if(bd&&RD&&bd.sensor){ const o=RD.opt('sensor',bd.sensor); if(o&&o.max) return o.max; } }catch(e){}
@@ -927,6 +1023,7 @@
     const idx=LAB.sensors.findIndex(s=>s.id===id); if(idx<0) return;
     LAB.sensors.splice(idx,1);
     LAB.rules.forEach(r=>r.pattern.splice(idx,1));
+    LAB.senWires=(LAB.senWires||[]).filter(function(w){ return w.sid!==id; }); saveSenWires();
     LAB.selected=null; refreshAll();
   }
 
@@ -1165,7 +1262,7 @@
   }
 
   // ---------- refresh ----------
-  function refreshAll(){ buildChassis(); buildRules(); buildSensorHud();
+  function refreshAll(){ buildChassis(); buildRules(); buildSensorHud(); renderSenWiring();
     document.getElementById('delSensor').disabled=(LAB.selected==null)||LAB.sensors.length<=1;
     document.getElementById('addSensor').disabled=LAB.sensors.length>=senLimit();
     reflectSenName();
@@ -1246,6 +1343,7 @@
     side.appendChild(card);
   }
   function init(){
+    try{ const bd0=designedBuild(); LAB.senWires=(bd0&&bd0.senWires)||[]; }catch(e){ LAB.senWires=[]; }
     applyRobotBuild();
     fillRobotCard();
     loadFromHash();

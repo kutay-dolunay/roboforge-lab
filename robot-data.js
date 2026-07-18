@@ -828,8 +828,9 @@
       const lv=o.logicV||5;
       return [
         {id:'vin', label:'Güç Girişi (VIN)', kind:'power', dir:'in',  v:null, vmin:4.5, vmax:12, count:1},
-        {id:'vout',label:lv+'V Çıkış',       kind:'power', dir:'out', v:lv,   count:3},
-        {id:'gnd', label:'GND',              kind:'gnd',   dir:'gnd', v:0,    count:3},
+        // 5V ve GND raylari surucu + 5 sensore kadar besler
+        {id:'vout',label:lv+'V Çıkış',       kind:'power', dir:'out', v:lv,   count:6},
+        {id:'gnd', label:'GND',              kind:'gnd',   dir:'gnd', v:0,    count:6},
         {id:'sigout',label:'Sinyal Çıkışı',  kind:'signal',dir:'out', v:lv,   count:4},
         {id:'sigin', label:'Sinyal Girişi',  kind:'signal',dir:'in',  v:lv,   count:8}
       ];
