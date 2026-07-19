@@ -203,6 +203,10 @@
 .pc{font-size:.65rem;line-height:1.4;margin-top:5px;padding:5px 7px;border-radius:6px;border:1px solid var(--line)}
 .pc.plus{color:#8ff0b0;background:rgba(34,197,94,.07);border-color:rgba(34,197,94,.25)}
 .pc.minus{color:#ffc1c1;background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.22)}
+/* on the flip-card front, clamp long pros/cons to 3 tidy lines (no mid-word cut); full text lives in the confirm bar + RPM board */
+.opt .face.front .pc{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+#confirm{align-items:flex-start}
+#confirm>div{line-height:1.5}
 .rpmboard{margin:14px 0 4px;padding:12px 14px;border:1px solid var(--brand-lt);border-radius:12px;background:rgba(0,102,162,.08)}
 .rpmh{font-size:.72rem;font-weight:800;color:var(--brand-lt);letter-spacing:.3px;margin-bottom:9px}
 .rpmrow{display:flex;gap:9px;flex-wrap:wrap}
@@ -222,7 +226,7 @@
 @media(max-width:560px){.factgrid{grid-template-columns:repeat(2,1fr)}}
 
 /* --- card flip (front = specs, back = vector art + slogan) --- */
-.opt{perspective:1100px;min-height:290px}
+.opt{perspective:1100px;min-height:318px}
 .opt .flip{position:absolute;inset:14px;transition:transform .5s cubic-bezier(.2,.7,.3,1);transform-style:preserve-3d}
 .opt:hover .flip{transform:rotateY(180deg)}
 .opt .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;display:flex;flex-direction:column}
@@ -435,7 +439,7 @@
            '<div class="slog">'+esc(slogan)+'</div></div>';
   }
   function gEmoji(cat,sel,fb){ const id=(RD.ident&&RD.ident(cat,sel))||{}; return id.emoji||fb||'🔧'; }
-  function proConHtml(o){ return (o.pros?`<div class="pc plus" title="${esc(o.pros)}">➕ ${esc(shortT(o.pros))}</div>`:'')+(o.cons?`<div class="pc minus" title="${esc(o.cons)}">➖ ${esc(shortT(o.cons))}</div>`:''); }
+  function proConHtml(o){ return (o.pros?`<div class="pc plus" title="${esc(o.pros)}">➕ ${esc(o.pros)}</div>`:'')+(o.cons?`<div class="pc minus" title="${esc(o.cons)}">➖ ${esc(o.cons)}</div>`:''); }
 
   // chassis shapes - many figures
   const SHAPES=[
@@ -588,7 +592,9 @@
   function showConfirm(cat,o){
     const el=document.getElementById('confirm');
     const nm=(cat==='motor')?(o.typeName+' · '+o.rpm+' RPM'):o.name;
-    el.innerHTML=`<span style="font-size:1.2rem">${o.icon}</span><div><b>${esc(nm)}</b> seçildi. <span style="color:var(--muted2)">${esc(shortT(o.pros||''))}</span></div>`;
+    el.innerHTML=`<span style="font-size:1.2rem;flex:none">${o.icon}</span><div><b>${esc(nm)}</b> seçildi.`+
+      (o.pros?` <span style="color:#8ff0b0">➕ ${esc(o.pros)}</span>`:'')+
+      (o.cons?`<span style="color:#ffc1c1;display:block;margin-top:3px">➖ ${esc(o.cons)}</span>`:'')+`</div>`;
     el.classList.add('show');
   }
 
