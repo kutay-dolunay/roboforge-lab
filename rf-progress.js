@@ -165,7 +165,7 @@
     if (typeof document !== 'undefined' && !global.RFCloud && !global.__rfCloudLoading) {
       global.__rfCloudLoading = true;
       var cl = document.createElement('script');
-      cl.src = 'rf-cloud.js?v=2'; cl.async = true;
+      cl.src = 'rf-cloud.js?v=3'; cl.async = true;
       (document.head || document.documentElement).appendChild(cl);
     }
   } catch (e) {}

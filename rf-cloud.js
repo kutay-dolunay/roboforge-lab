@@ -182,6 +182,10 @@
     queued: function () { return qLoad().length; },
     flush: flush,
     push: push,
+    event: function(type, payload, sim, level){
+      return send({ p_event_type:(type||'event'), p_sim:(sim||simFromPage()),
+        p_level:(level!=null?level:null), p_payload:(payload||{}) });
+    },
     pushSkills: function(st){ return pushSkillsNow(st); },
     pullSkills: pullSkills,
     // manual test from console

@@ -756,6 +756,18 @@
       let nm=o?o.name:'- yok -'; if(cat==='motor'&&o) nm=o.typeName+' · '+o.rpm+' RPM';
       bl.innerHTML+=`<div class="bchip">${RD.COMPONENTS[cat].icon} ${RD.COMPONENTS[cat].label}: <b>${esc(nm)}</b></div>`; });
     const ctx=bctx(); const r=RD.computeReport(ctx); const A=RD.archetype(ctx); const gs=A.g;
+    try{ if(window.RFCloud && RFCloud.event){
+      const mo=RD.opt('motor',B.motor);
+      const sig=JSON.stringify([B.brain,B.driver,B.motor,B.wheel,B.caster,B.battery,B.sensor,unitCounts(),A.id]);
+      if(sig!==window.__rfBuildSig){ window.__rfBuildSig=sig;
+        RFCloud.event('build_design', {
+          build:{brain:B.brain,driver:B.driver,motor:(mo?(mo.typeId+'@'+mo.rpm):null),
+            wheel:B.wheel,caster:B.caster,battery:B.battery,sensor:B.sensor},
+          counts:unitCounts(), arch:{id:A.id,name:A.name,emoji:A.emoji},
+          scores:gs.raw, weightG:r.weightG, torkRatio:+gs.torkRatio.toFixed(1),
+          wired:((B.wiring||[]).length>0)
+        }, SIM); }
+    } }catch(e){}
     const g=document.getElementById('reportGrid'); g.innerHTML='';
     const hero=document.createElement('div'); hero.className='arch';
     hero.innerHTML=`<div class="arch-em">${A.emoji}</div><div><div class="arch-k">Robot Kimliğin</div>

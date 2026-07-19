@@ -68,6 +68,7 @@
     <div class="tab" data-tab="progress">📊 İlerleme</div>
     <div class="tab" data-tab="feedback">💬 Geri bildirim</div>
     <div class="tab" data-tab="skills">🎓 Beceriler</div>
+    <div class="tab" data-tab="builds">🤖 Robotlar</div>
   </div>
   <div class="panel"><div id="view"></div></div>
 </div>
@@ -118,9 +119,10 @@
       rpc('rf_dash_roster',{p_sub:USER.sub}),
       rpc('rf_dash_progress',{p_sub:USER.sub}),
       rpc('rf_dash_feedback',{p_sub:USER.sub}),
-      rpc('rf_dash_skills',{p_sub:USER.sub})
+      rpc('rf_dash_skills',{p_sub:USER.sub}),
+      rpc('rf_dash_builds',{p_sub:USER.sub})
     ]); }).then(function(res){
-      CACHE={stats:(res[0]&&res[0][0])||null, roster:res[1]||[], progress:res[2]||[], feedback:res[3]||[], skills:res[4]||[]};
+      CACHE={stats:(res[0]&&res[0][0])||null, roster:res[1]||[], progress:res[2]||[], feedback:res[3]||[], skills:res[4]||[], builds:res[5]||{}};
       // staff check: if roster query returns nothing AND stats null, likely not staff
       if(!CACHE.stats && !CACHE.roster.length){
         showGate('Bu hesap öğretmen/yönetici değil ya da henüz veri yok.');
@@ -176,7 +178,7 @@
             '</td><td><span class="pill '+cls+'">'+esc(x.category||'-')+'</span></td><td>'+txt+
             '</td><td class="muted">'+esc(x.sim||x.page||'-')+'</td></tr>'; }).join('')+
         '</tbody></table>';
-    } else {
+    } else if(TAB==='skills'){
       var sk=CACHE.skills||[];
       if(!sk.length){ v.innerHTML='<div class="empty">Henüz beceri verisi yok. (rf_skills.sql kurulu mu?)</div>'; return; }
       var SN={dyk:'Dinamik Yön Kontrolü',sensor:'Sensör ve Algı',power:'Güç ve Enerji Yönetimi',
@@ -190,6 +192,27 @@
           return '<tr><td>'+esc(x.name||x.sub)+'</td><td><b>'+esc(x.xp_total||0)+'</b></td><td>'+chips+
             '</td><td>'+esc(x.badges_count||0)+'</td><td class="muted">'+fmtDate(x.updated_at)+'</td></tr>'; }).join('')+
         '</tbody></table>';
+    } else if(TAB==='builds'){
+      var bd=CACHE.builds||{};
+      if(!bd.total_designs){ v.innerHTML='<div class="empty">Henüz robot tasarımı verisi yok. (rf_builds_dash.sql kurulu mu?)</div>'; return; }
+      var FN={dead:'Ölü kurulum (kablo/parça eksik)',stall:'Motor/güç yetersiz kaldı',blind:'Sensör göremedi'};
+      var pct=bd.total_runs?Math.round(100*(bd.runs_passed||0)/bd.total_runs):0;
+      var entries=function(o){ o=o||{}; return Object.keys(o).map(function(k){return [k,o[k]];}).sort(function(a,b){return b[1]-a[1];}); };
+      var maxc=function(arr){ return arr.reduce(function(m,x){return Math.max(m,x[1]);},1); };
+      var html='<div class="empty" style="margin-bottom:14px">Tasarım: <b>'+esc(bd.total_designs)+'</b> · Test: <b>'+esc(bd.total_runs||0)+'</b> · Geçen: <b>'+esc(bd.runs_passed||0)+'</b> (%'+pct+')</div>';
+      var arch=entries(bd.archetypes), am=maxc(arch);
+      html+='<h3 style="font-size:.9rem;margin:6px 0 8px">Robot kimliği dağılımı</h3><table><tbody>'+
+        arch.map(function(x){ return '<tr><td style="width:220px">'+esc(x[0])+'</td><td><div style="background:#0c1a30;border-radius:5px;overflow:hidden;height:16px;width:100%"><div style="background:#0066a2;height:100%;width:'+Math.round(100*x[1]/am)+'%"></div></div></td><td style="width:50px;text-align:right"><b>'+esc(x[1])+'</b></td></tr>'; }).join('')+'</table>';
+      var flt=entries(bd.faults);
+      if(flt.length){ html+='<h3 style="font-size:.9rem;margin:18px 0 8px">Testte çıkan hatalar (öğrenmenin olduğu yer)</h3><table><tbody>'+
+        flt.map(function(x){ return '<tr><td>'+esc(FN[x[0]]||x[0])+'</td><td style="width:50px;text-align:right"><b>'+esc(x[1])+'</b></td></tr>'; }).join('')+'</table>'; }
+      var prt=entries(bd.parts).slice(0,14);
+      if(prt.length){ html+='<h3 style="font-size:.9rem;margin:18px 0 8px">En çok seçilen parçalar</h3><div>'+
+        prt.map(function(x){ return '<span class="pill def" style="margin:2px">'+esc(x[0])+' · '+esc(x[1])+'</span>'; }).join(' ')+'</div>'; }
+      var rec=bd.recent||[];
+      if(rec.length){ html+='<h3 style="font-size:.9rem;margin:18px 0 8px">Son tasarımlar</h3><table><thead><tr><th>Öğrenci</th><th>Robot kimliği</th><th>Zaman</th></tr></thead><tbody>'+
+        rec.map(function(x){ return '<tr><td>'+esc(x.name)+'</td><td>'+esc((x.emoji?x.emoji+' ':'')+(x.arch||'-'))+'</td><td class="muted">'+fmtDate(x.at)+'</td></tr>'; }).join('')+'</tbody></table>'; }
+      v.innerHTML=html;
     }
   }
 

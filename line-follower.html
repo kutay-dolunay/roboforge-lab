@@ -649,6 +649,11 @@
   function showResult(){
     const sim=LAB.sim, r=document.getElementById('result');
     const win = sim.status==='success';
+    try{ if(window.RFCloud && RFCloud.event && window.RobotData){ const eb=effBuild();
+      if(eb){ const A=window.RobotData.archetype(eb);
+        RFCloud.event('build_run', { archId:A.id, archName:A.name, emoji:A.emoji,
+          pass:win, fault:(LAB.buildFault||null), time:(sim&&typeof sim.t==='number'?+sim.t.toFixed(2):null) },
+          'line', LAB.trackIdx); } } }catch(e){}
       try{ if(window.RFProgress){ var __rfwin=(sim.status==='success'||sim.status==='win'); var __rfmedal=null; try{ var __core=window['SimCore']; if(__core&&__core.robotClass){var __c=__core.robotClass(sim); if(__c)__rfmedal=__c.name;} }catch(e){} RFProgress.record('line', LAB.trackIdx, {pass:__rfwin, time:(sim&&typeof sim.t==='number')?sim.t:null, medal:__rfmedal, mode:LAB.mode}); } }catch(e){}
     r.className='result '+(win?'win':'lose');
     if(win){ try{ if(window.RFSkills){ const earned=RFSkills.checkLineBadges(LAB.trackIdx);
