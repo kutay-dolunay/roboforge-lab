@@ -69,6 +69,7 @@
     <div class="tab" data-tab="feedback">💬 Geri bildirim</div>
     <div class="tab" data-tab="skills">🎓 Beceriler</div>
     <div class="tab" data-tab="builds">🤖 Robotlar</div>
+    <div class="tab" data-tab="learning">📈 Öğrenme</div>
   </div>
   <div class="panel"><div id="view"></div></div>
 </div>
@@ -120,9 +121,10 @@
       rpc('rf_dash_progress',{p_sub:USER.sub}),
       rpc('rf_dash_feedback',{p_sub:USER.sub}),
       rpc('rf_dash_skills',{p_sub:USER.sub}),
-      rpc('rf_dash_builds',{p_sub:USER.sub})
+      rpc('rf_dash_builds',{p_sub:USER.sub}),
+      rpc('rf_dash_learning',{p_sub:USER.sub})
     ]); }).then(function(res){
-      CACHE={stats:(res[0]&&res[0][0])||null, roster:res[1]||[], progress:res[2]||[], feedback:res[3]||[], skills:res[4]||[], builds:res[5]||{}};
+      CACHE={stats:(res[0]&&res[0][0])||null, roster:res[1]||[], progress:res[2]||[], feedback:res[3]||[], skills:res[4]||[], builds:res[5]||{}, learning:res[6]||{}};
       // staff check: if roster query returns nothing AND stats null, likely not staff
       if(!CACHE.stats && !CACHE.roster.length){
         showGate('Bu hesap öğretmen/yönetici değil ya da henüz veri yok.');
@@ -213,6 +215,32 @@
       if(rec.length){ html+='<h3 style="font-size:.9rem;margin:18px 0 8px">Son tasarımlar</h3><table><thead><tr><th>Öğrenci</th><th>Robot kimliği</th><th>Zaman</th></tr></thead><tbody>'+
         rec.map(function(x){ return '<tr><td>'+esc(x.name)+'</td><td>'+esc((x.emoji?x.emoji+' ':'')+(x.arch||'-'))+'</td><td class="muted">'+fmtDate(x.at)+'</td></tr>'; }).join('')+'</tbody></table>'; }
       v.innerHTML=html;
+    } else if(TAB==='learning'){
+      var L=CACHE.learning||{};
+      if(!L.logic && !(L.stuck&&L.stuck.length)){ v.innerHTML='<div class="empty">Henüz öğrenme verisi yok. (rf_learning_dash.sql kurulu mu?)</div>'; return; }
+      var h='';
+      // 1) stuck students
+      var stk=L.stuck||[];
+      h+='<h3 style="font-size:.9rem;margin:6px 0 8px">🚧 Takılan öğrenciler <span style="font-weight:400;color:var(--muted2,#94a3b8);font-size:.75rem">(4+ deneme, hâlâ geçmedi)</span></h3>';
+      if(!stk.length){ h+='<div class="empty">Şu an takılan öğrenci yok.</div>'; }
+      else { h+='<table><thead><tr><th>Öğrenci</th><th>Sim</th><th>Seviye</th><th>Deneme</th><th>Mod</th><th>Son</th></tr></thead><tbody>'+
+        stk.map(function(x){ return '<tr><td>'+esc(x.name)+'</td><td>'+esc(x.sim)+'</td><td>'+esc(x.level)+
+          '</td><td><b style="color:#f59e0b">'+esc(x.attempts)+'</b></td><td>'+esc(x.mode||'-')+'</td><td class="muted">'+fmtDate(x.at)+'</td></tr>'; }).join('')+'</tbody></table>'; }
+      // 2) mistake -> recovery
+      var R=L.recovery||{}; var er=R.erred||0, rc=R.recovered||0; var rrate=er?Math.round(100*rc/er):0;
+      h+='<h3 style="font-size:.9rem;margin:20px 0 8px">💥→✅ Hatadan toparlanma</h3>';
+      h+='<div class="empty" style="margin-bottom:8px"><b>'+er+'</b> öğrenci donanım hatası aldı, <b>'+rc+'</b> tanesi sonra çalışan bir robot kurdu (%'+rrate+' toparlanma).</div>';
+      var bs=R.by_student||[];
+      if(bs.length){ h+='<table><thead><tr><th>Öğrenci</th><th>Hata</th><th>Başarılı</th><th>Toparlandı</th></tr></thead><tbody>'+
+        bs.map(function(x){ return '<tr><td>'+esc(x.name)+'</td><td>'+esc(x.faults)+'</td><td>'+esc(x.passes)+
+          '</td><td>'+(x.recovered?'<span class="pill begendim">✓ evet</span>':'<span class="pill hata">✕ henüz</span>')+'</td></tr>'; }).join('')+'</tbody></table>'; }
+      // 3) control-logic depth
+      var lg=L.logic||{};
+      h+='<h3 style="font-size:.9rem;margin:20px 0 8px">🎛️ Kod derinliği</h3>';
+      h+='<div class="empty">Ortalama <b>'+esc(lg.avg_rules!=null?lg.avg_rules:'-')+'</b> kural/çalıştırma · Kural modu: <b>'+esc(lg.mode_rules||0)+'</b> · PID modu: <b>'+esc(lg.mode_pid||0)+'</b> · Toplam çalıştırma: <b>'+esc(lg.runs||0)+'</b></div>';
+      var ps=lg.pid_samples||[];
+      if(ps.length){ h+='<div style="margin-top:8px">'+ps.slice(0,12).map(function(x){ x=x||{}; return '<span class="pill def" style="margin:2px">Kp '+esc(x.kp)+' · Kd '+esc(x.kd)+' · Ki '+esc(x.ki)+'</span>'; }).join(' ')+'</div>'; }
+      v.innerHTML=h;
     }
   }
 
