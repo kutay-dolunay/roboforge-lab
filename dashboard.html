@@ -67,6 +67,7 @@
     <div class="tab on" data-tab="roster">👥 Öğrenciler</div>
     <div class="tab" data-tab="progress">📊 İlerleme</div>
     <div class="tab" data-tab="feedback">💬 Geri bildirim</div>
+    <div class="tab" data-tab="skills">🎓 Beceriler</div>
   </div>
   <div class="panel"><div id="view"></div></div>
 </div>
@@ -116,9 +117,10 @@
       rpc('rf_dash_stats',{p_sub:USER.sub}),
       rpc('rf_dash_roster',{p_sub:USER.sub}),
       rpc('rf_dash_progress',{p_sub:USER.sub}),
-      rpc('rf_dash_feedback',{p_sub:USER.sub})
+      rpc('rf_dash_feedback',{p_sub:USER.sub}),
+      rpc('rf_dash_skills',{p_sub:USER.sub})
     ]); }).then(function(res){
-      CACHE={stats:(res[0]&&res[0][0])||null, roster:res[1]||[], progress:res[2]||[], feedback:res[3]||[]};
+      CACHE={stats:(res[0]&&res[0][0])||null, roster:res[1]||[], progress:res[2]||[], feedback:res[3]||[], skills:res[4]||[]};
       // staff check: if roster query returns nothing AND stats null, likely not staff
       if(!CACHE.stats && !CACHE.roster.length){
         showGate('Bu hesap öğretmen/yönetici değil ya da henüz veri yok.');
@@ -163,7 +165,7 @@
           '</td><td>'+(x.best_time!=null?esc(x.best_time):'-')+'</td><td>'+esc(x.best_medal||'-')+
           '</td><td>'+esc(x.attempts)+'</td><td>'+esc(x.last_mode||'-')+'</td><td class="muted">'+fmtDate(x.updated_at)+'</td></tr>'; }).join('')+
         '</tbody></table>';
-    } else {
+    } else if(TAB==='feedback'){
       var f=CACHE.feedback;
       if(!f.length){ v.innerHTML='<div class="empty">Henüz geri bildirim yok.</div>'; return; }
       v.innerHTML='<table><thead><tr><th>Tarih</th><th>Öğrenci</th><th>Tür</th><th>Mesaj</th><th>Sim/Sayfa</th></tr></thead><tbody>'+
@@ -173,6 +175,20 @@
           return '<tr><td class="muted">'+fmtDate(x.created_at)+'</td><td>'+esc(x.name||x.sub||'-')+
             '</td><td><span class="pill '+cls+'">'+esc(x.category||'-')+'</span></td><td>'+txt+
             '</td><td class="muted">'+esc(x.sim||x.page||'-')+'</td></tr>'; }).join('')+
+        '</tbody></table>';
+    } else {
+      var sk=CACHE.skills||[];
+      if(!sk.length){ v.innerHTML='<div class="empty">Henüz beceri verisi yok. (rf_skills.sql kurulu mu?)</div>'; return; }
+      var SN={dyk:'Dinamik Yön Kontrolü',sensor:'Sensör ve Algı',power:'Güç ve Enerji Yönetimi',
+        control:'Kontrol Teorisi (PID)',mech:'Mekanik Tasarım ve Denge',nav:'Görev Planlama ve Navigasyon',
+        auto:'Fabrika ve Otomasyon',swarm:'Sürü ve İş Birliği'};
+      v.innerHTML='<table><thead><tr><th>Öğrenci</th><th>Toplam XP</th><th>Açılan Beceriler</th><th>Rozet</th><th>Güncelleme</th></tr></thead><tbody>'+
+        sk.map(function(x){
+          var xp=(x.state&&x.state.xp)||{};
+          var chips=Object.keys(xp).filter(function(k){return (+xp[k]||0)>0;})
+            .map(function(k){return '<span class="pill begendim">'+esc(SN[k]||k)+' '+esc(xp[k])+'xp</span>';}).join(' ')||'-';
+          return '<tr><td>'+esc(x.name||x.sub)+'</td><td><b>'+esc(x.xp_total||0)+'</b></td><td>'+chips+
+            '</td><td>'+esc(x.badges_count||0)+'</td><td class="muted">'+fmtDate(x.updated_at)+'</td></tr>'; }).join('')+
         '</tbody></table>';
     }
   }

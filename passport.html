@@ -76,7 +76,8 @@
 </div>
 
 <script src="rf-auth.js"></script>
-<script src="rf-skills.js?v=2"></script>
+<script src="rf-skills.js?v=3"></script>
+<script src="rf-cloud.js?v=2"></script>
 <script>
 (function(){
   const S=window.RFSkills; if(!S) return;
@@ -87,7 +88,7 @@
     hexapod:'Hexapod',kol:'Robot Kol',vinc:'Vinç',depo:'Depo Filosu',delivery:'Teslimat',park:'Otopark',
     rescue:'Arama Kurtarma',bant:'Bant Ayırma',cnc:'CNC',sera:'Akıllı Sera',swarm:'Sürü',convoy:'Konvoy',soccer:'Robot Futbol'};
 
-  // ---- global tree ----
+  function draw(){
   const st=S.load();
   const byCat={}; S.SKILLS.forEach(sk=>{ (byCat[sk.cat]=byCat[sk.cat]||[]).push(sk); });
   const tree=document.getElementById('tree'); tree.innerHTML='';
@@ -132,6 +133,9 @@
   document.getElementById('xpTotal').textContent=S.totalXp();
   document.getElementById('skCount').textContent=S.SKILLS.filter(s=>S.skillXp(s.id)>0).length;
   document.getElementById('bgCount').textContent=Object.keys(st.badges||{}).length;
+  }
+  draw();
+  if(S.hydrate) S.hydrate(draw);   // refresh once the cloud snapshot merges in
 })();
 </script>
 <script>/* rf-labauth-v1 */

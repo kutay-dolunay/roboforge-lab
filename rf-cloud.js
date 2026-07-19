@@ -1,5 +1,5 @@
 /* =============================================================================
- * RoboForge - Cloud sync (rf-cloud.js) v1.0.0
+ * RoboForge - Cloud sync (rf-cloud.js) v1.1.0 (+skills/XP sync)
  * -----------------------------------------------------------------------------
  * Mirrors local progress + feedback to Supabase for logged-in Moodle students.
  *
@@ -20,6 +20,8 @@
   var SUPA_URL  = 'https://qogjywlwbqsxoomjchpd.supabase.co';
   var SUPA_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFvZ2p5d2x3YnFzeG9vbWpjaHBkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxNjg5MzMsImV4cCI6MjA4OTc0NDkzM30._kE54hfMix_8GAkXiyNhAI57G3x29TPLOUGD2yW69Hw';
   var RPC       = SUPA_URL + '/rest/v1/rpc/rf_ingest';
+  var RPCBASE   = SUPA_URL + '/rest/v1/rpc/';
+  var SKPEND    = 'rf_skills_pending';   // latest-wins pending snapshot (offline)
   var QKEY      = 'rf_cloud_queue';   // offline queue
 
   function user() {
@@ -62,6 +64,41 @@
     return postRaw(body).then(function () { flush(); return true; })
       .catch(function () { enqueue(body); return false; });
   }
+
+  // ---- skills / badges / XP sync (separate RPCs, same anon boundary) ----
+  function rpcCall(name, body){
+    return fetch(RPCBASE + name, {
+      method:'POST',
+      headers:{ 'apikey':SUPA_ANON, 'Authorization':'Bearer '+SUPA_ANON, 'Content-Type':'application/json' },
+      body:JSON.stringify(body), keepalive:true
+    }).then(function(r){ if(!r.ok) throw new Error(name+' HTTP '+r.status); return r; });
+  }
+  function xpSum(st){ try{ var x=st.xp||{}, t=0,k; for(k in x) t+=(+x[k]||0); return t; }catch(e){ return 0; } }
+  function nSkills(st){ try{ var x=st.xp||{}; return Object.keys(x).filter(function(k){return (+x[k]||0)>0;}).length; }catch(e){ return 0; } }
+  function nBadges(st){ try{ return Object.keys(st.badges||{}).length; }catch(e){ return 0; } }
+  function pushSkillsNow(st){
+    var u = user(); if(!u || !u.sub) return Promise.resolve(false);
+    return rpcCall('rf_skills_upsert', {
+      p_sub:u.sub, p_name:u.name||null, p_email:u.email||null, p_class:(u.school_class||null),
+      p_state:st, p_xp:xpSum(st), p_skills:nSkills(st), p_badges:nBadges(st)
+    }).then(function(){ try{ localStorage.removeItem(SKPEND); }catch(e){} return true; })
+      .catch(function(){ try{ localStorage.setItem(SKPEND, JSON.stringify(st)); }catch(e){} return false; });
+  }
+  var skTimer=null;
+  function push(kind, payload){
+    if(kind!=='skills' || !user()) return Promise.resolve(false);
+    clearTimeout(skTimer);
+    skTimer=setTimeout(function(){ pushSkillsNow(payload); }, 800);  // debounce rapid saves
+    return Promise.resolve(true);
+  }
+  function pullSkills(){
+    var u=user(); if(!u || !u.sub) return Promise.resolve(null);
+    return rpcCall('rf_get_skills', { p_sub:u.sub })
+      .then(function(r){ return r.json(); })
+      .then(function(j){ return (j && typeof j==='object') ? j : null; })
+      .catch(function(){ return null; });
+  }
+  function flushSkills(){ try{ var p=localStorage.getItem(SKPEND); if(p) pushSkillsNow(JSON.parse(p)); }catch(e){} }
 
   var flushing = false;
   function flush() {
@@ -133,10 +170,10 @@
   function boot() {
     // register student + flush any queued items once we know who they are
     if (user()) { send({ p_event_type: 'session_open' }); }
-    hookProgress(); hookFeedback(); flush();
+    hookProgress(); hookFeedback(); flush(); flushSkills();
     // rf-feedback.js may load slightly later (async) - re-hook shortly after.
     setTimeout(function () { hookProgress(); hookFeedback(); }, 1500);
-    global.addEventListener('online', flush);
+    global.addEventListener('online', function(){ flush(); flushSkills(); });
   }
 
   var RFCloud = {
@@ -144,6 +181,9 @@
     isEnabled: function () { return !!user(); },
     queued: function () { return qLoad().length; },
     flush: flush,
+    push: push,
+    pushSkills: function(st){ return pushSkillsNow(st); },
+    pullSkills: pullSkills,
     // manual test from console
     _ping: function () {
       return send({ p_event_type: 'ping' }).then(function (ok) {

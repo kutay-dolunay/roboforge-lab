@@ -55,9 +55,39 @@
   const LF = { easy:[0,1], mid:[2,3], star2:[3,5,6], total:7 };
 
   function blank(){ return { xp:{}, unlocked:{}, badges:{}, sims:{} }; }
+  let hydrated=false, hydrating=false;
+  function mergeState(a,b){
+    a=a||blank(); b=b||blank(); const o=blank();
+    const xk={}; Object.keys(a.xp||{}).concat(Object.keys(b.xp||{})).forEach(k=>xk[k]=1);
+    Object.keys(xk).forEach(k=>o.xp[k]=Math.max((a.xp&&a.xp[k])||0,(b.xp&&b.xp[k])||0));
+    Object.assign(o.unlocked, a.unlocked||{}, b.unlocked||{});
+    Object.assign(o.badges,   a.badges||{},   b.badges||{});
+    const sk={}; Object.keys(a.sims||{}).concat(Object.keys(b.sims||{})).forEach(k=>sk[k]=1);
+    Object.keys(sk).forEach(k=>{ const sa=(a.sims||{})[k]||{}, sb=(b.sims||{})[k]||{};
+      const tr={}; (sa.tracks||[]).concat(sb.tracks||[]).forEach(t=>tr[t]=1);
+      o.sims[k]={ tracks:Object.keys(tr).map(Number), bestRobot:!!(sa.bestRobot||sb.bestRobot),
+        badges:Object.assign({}, sa.badges||{}, sb.badges||{}) }; });
+    return o;
+  }
+  // pull cloud snapshot once, union it into local, then allow pushes (prevents
+  // a fresh/empty device from overwriting the cloud before it has read).
+  function hydrate(cb){
+    if(hydrated){ if(cb) cb(load()); return; }
+    if(hydrating){ if(cb) setTimeout(function(){ cb(load()); },600); return; }
+    hydrating=true;
+    if(!(global.RFCloud && global.RFCloud.pullSkills)){ hydrated=true; hydrating=false; if(cb) cb(load()); return; }
+    global.RFCloud.pullSkills().then(function(cloud){
+      let local=load();
+      if(cloud && Object.keys(cloud).length){ local=mergeState(local,cloud);
+        try{ localStorage.setItem(LS, JSON.stringify(local)); }catch(e){} }
+      hydrated=true; hydrating=false;
+      try{ if(global.RFCloud && global.RFCloud.push) global.RFCloud.push('skills', local); }catch(e){}
+      if(cb) cb(local);
+    }).catch(function(){ hydrated=true; hydrating=false; if(cb) cb(load()); });
+  }
   function load(){ try{ return Object.assign(blank(), JSON.parse(localStorage.getItem(LS))||{}); }catch(e){ return blank(); } }
   function save(st){ try{ localStorage.setItem(LS, JSON.stringify(st)); }catch(e){}
-    try{ if(global.RFCloud && global.RFCloud.push) global.RFCloud.push('skills', st); }catch(e){} return st; }
+    try{ if(hydrated && global.RFCloud && global.RFCloud.push) global.RFCloud.push('skills', st); }catch(e){} return st; }
   function simState(st, sim){ if(!st.sims[sim]) st.sims[sim]={ tracks:[], badges:{}, bestRobot:false }; return st.sims[sim]; }
 
   // ---- badges -------------------------------------------------------------
@@ -120,7 +150,9 @@
 
   const API={ SKILLS, BADGES, LF, XP_PER_SIM, load, save, hasBadge, award, badgesOf,
     markTrack, markBestRobot, tracksOf, checkLineBadges, evaluateLine, addSkillXp,
-    skillById, skillXp, skillSims, totalXp, reset };
+    skillById, skillXp, skillSims, totalXp, reset, hydrate, mergeState };
   global.RFSkills=API;
   if(typeof module!=='undefined'&&module.exports) module.exports=API;
+  // self-hydrate shortly after load on any page that also has rf-cloud.js
+  if(typeof document!=='undefined') setTimeout(function(){ try{ hydrate(); }catch(e){} }, 500);
 })(typeof window!=='undefined'?window:globalThis);
